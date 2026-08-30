@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* Tailwind 4 uses the operating-system media query by default. Ceroa's theme
+   is user-controlled, so dark variants follow the class on <html>. */
+@custom-variant dark (&:where(.dark, .dark *));
+
 @layer base {
   :root {
     --ceroa-primary: #008FA6;
@@ -10,6 +14,13 @@
     --ceroa-bg: #F4F8FA;
     --ceroa-card: #FFFFFF;
     --ceroa-dark: #0F172A;
+    color-scheme: light;
+  }
+
+  :root.dark {
+    --ceroa-bg: #0B132B;
+    --ceroa-card: #0F172A;
+    color-scheme: dark;
   }
 }
 
@@ -17,11 +28,18 @@ body {
   font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   background-color: #F4F8FA;
   color: #0F172A;
+  transition: background-color 180ms ease, color 180ms ease;
 }
 
 .dark body {
   background-color: #0B132B;
   color: #F8FAFC;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body {
+    transition: none;
+  }
 }
 
 .safe-area-pb {

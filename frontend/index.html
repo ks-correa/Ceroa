@@ -8,6 +8,18 @@
     <meta property="og:title" content="Ceroa - Gestión de Deudas" />
     <meta property="og:description" content="Optimiza tus finanzas personales y sal de deudas en tiempo récord con Ceroa." />
     <meta property="og:type" content="website" />
+    <meta name="color-scheme" content="light dark" />
+    <script>
+      try {
+        const preferences = JSON.parse(localStorage.getItem('ceroa_preferences') || '{}');
+        if (preferences.darkMode === true) {
+          document.documentElement.classList.add('dark');
+          document.documentElement.style.colorScheme = 'dark';
+        }
+      } catch (_) {
+        // Invalid or unavailable storage falls back to the light theme.
+      }
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -22,4 +34,3 @@
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
-

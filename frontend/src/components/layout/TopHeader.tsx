@@ -183,6 +183,8 @@ export const TopHeader: React.FC = () => {
         <button
           id="theme-quick-toggle"
           onClick={() => handleUpdatePreferences({ darkMode: !preferences.darkMode })}
+          aria-label={preferences.darkMode ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
+          aria-pressed={preferences.darkMode}
           className="p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
           title={preferences.darkMode ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'}
         >

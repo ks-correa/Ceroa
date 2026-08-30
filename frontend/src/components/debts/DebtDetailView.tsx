@@ -282,7 +282,7 @@ export const DebtDetailView: React.FC = () => {
           <div className="space-y-2 pt-3">
             <button
               id="debt-detail-register-payment-btn"
-              onClick={() => openEditDebtModal(debt.id)}
+              onClick={() => openRecordPaymentModal(debt.id)}
               className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-[var(--ceroa-primary)] hover:bg-[var(--ceroa-primary-hover)] text-white rounded-xl font-bold text-xs shadow-xs hover:shadow-sm transition-all cursor-pointer"
             >
               <PlusCircle className="w-4 h-4" />
@@ -291,7 +291,7 @@ export const DebtDetailView: React.FC = () => {
 
             <button
               id="debt-detail-edit-btn"
-              onClick={() => openRecordPaymentModal(debt.id)}
+              onClick={() => openEditDebtModal(debt.id)}
               className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 text-slate-700 dark:text-slate-200 rounded-xl font-semibold text-xs transition-colors cursor-pointer"
             >
               <Edit3 className="w-3.5 h-3.5" />

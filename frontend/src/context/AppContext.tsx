@@ -29,6 +29,8 @@ import { useLayoutState } from './useLayoutState';
 import { useOverlayState } from './useOverlayState';
 import { useToast } from '../hooks/useToast';
 import { SESSION_EXPIRED_EVENT } from '../services/api';
+import { LocalStorageManager } from '../services/storage';
+import { applyColorTheme } from '../utils/theme';
 
 interface AppContextType {
   // Navigation & Screen
@@ -155,7 +157,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [payments, setPayments] = useState<PaymentRecord[]>([]);
   const [userProfile, setUserProfile] = useState<UserProfile>(DEFAULT_USER_PROFILE);
   const [financialProfile, setFinancialProfile] = useState<FinancialProfile>(DEFAULT_FINANCIAL_PROFILE);
-  const [preferences, setPreferences] = useState<UserPreferences>(DEFAULT_PREFERENCES);
+  const [preferences, setPreferences] = useState<UserPreferences>(() => {
+    LocalStorageManager.initInterfaceData();
+    return LocalStorageManager.get<UserPreferences>('preferences', DEFAULT_PREFERENCES);
+  });
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
 
   // Strategy
@@ -265,11 +270,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   // Handle dark mode class on html root
   useEffect(() => {
-    if (preferences.darkMode) {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
+    applyColorTheme(preferences.darkMode);
   }, [preferences.darkMode]);
 
   // Navigation helper
@@ -280,6 +281,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const openRecordPaymentModal = (debtId?: string, payment?: PaymentRecord, suggestedAmount?: number) => {
+    setIsAddDebtOpen(false);
+    setEditingDebtId(null);
     setEditingPayment(payment || null);
     setSuggestedPaymentAmount(suggestedAmount ?? null);
     if (debtId) {
@@ -291,6 +294,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const openEditDebtModal = (debtId: string) => {
+    setIsRecordPaymentOpen(false);
+    setEditingPayment(null);
+    setSuggestedPaymentAmount(null);
     setEditingDebtId(debtId);
     setIsAddDebtOpen(true);
   };
@@ -301,6 +307,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setCurrentScreen('subscription');
       return;
     }
+    setIsRecordPaymentOpen(false);
+    setEditingPayment(null);
+    setSuggestedPaymentAmount(null);
     setEditingDebtId(null);
     setIsAddDebtOpen(true);
   };
