@@ -88,6 +88,7 @@ export const simulationService = {
     let currentSim = simRemaining;
 
     for (let m = 1; m <= Math.max(baseMonths, 12); m++) {
+      const simBeforeStep = currentSim;
       // Step actual
       if (currentActual > 0) {
         const intA = currentActual * monthlyRate;
@@ -109,7 +110,7 @@ export const simulationService = {
       }
 
       // Record key milestones for graph (every 6 months or key points)
-      if (m % 6 === 0 || currentSim === 0 || m === 12 || m === 24 || m === 36) {
+      if (m % 6 === 0 || (simBeforeStep > 0 && currentSim === 0)) {
         const dateObj = new Date();
         dateObj.setMonth(dateObj.getMonth() + m);
         const label = dateObj.toLocaleDateString('es-ES', { month: 'short', year: '2-digit' });
@@ -142,6 +143,12 @@ export const simulationService = {
     newDate.setMonth(today.getMonth() + simMonths);
     const newPayoffDate = newDate.toLocaleDateString('es-ES', { month: 'short', year: 'numeric' });
 
+    const timeline = timelinePoints.length <= 7
+      ? timelinePoints
+      : Array.from({ length: 7 }, (_, index) => timelinePoints[
+          Math.round(index * (timelinePoints.length - 1) / 6)
+        ]);
+
     return {
       savedInterest,
       savedMonths,
@@ -150,7 +157,7 @@ export const simulationService = {
       originalTotalCost: originalCost,
       simulatedTotalCost: simulatedCost,
       reductionPercentage,
-      timeline: timelinePoints.slice(0, 7)
+      timeline
     };
   }
 };

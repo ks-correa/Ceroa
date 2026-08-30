@@ -6,6 +6,7 @@ export const useOverlayState = () => {
   const [isRecordPaymentOpen, setIsRecordPaymentOpen] = useState(false);
   const [targetPaymentDebtId, setTargetPaymentDebtId] = useState<string | null>(null);
   const [editingPayment, setEditingPayment] = useState<PaymentRecord | null>(null);
+  const [suggestedPaymentAmount, setSuggestedPaymentAmount] = useState<number | null>(null);
   const [editingDebtId, setEditingDebtId] = useState<string | null>(null);
   const [isEditFinancialOpen, setIsEditFinancialOpen] = useState(false);
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
@@ -18,6 +19,7 @@ export const useOverlayState = () => {
     isRecordPaymentOpen, setIsRecordPaymentOpen,
     targetPaymentDebtId, setTargetPaymentDebtId,
     editingPayment, setEditingPayment,
+    suggestedPaymentAmount, setSuggestedPaymentAmount,
     editingDebtId, setEditingDebtId,
     isEditFinancialOpen, setIsEditFinancialOpen,
     isEditProfileOpen, setIsEditProfileOpen,

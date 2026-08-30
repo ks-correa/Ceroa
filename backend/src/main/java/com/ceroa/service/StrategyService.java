@@ -43,8 +43,9 @@ public class StrategyService {
         FinancialProfile profile = profileRepository.findByUserId(currentUser.id())
                 .orElseThrow(() -> new ResourceNotFoundException("Perfil financiero no encontrado"));
 
-        Projection snowball = project(debts, StrategyType.SNOWBALL);
-        Projection avalanche = project(debts, StrategyType.AVALANCHE);
+        BigDecimal configuredBudget = profile.getAvailableForDebts();
+        Projection snowball = project(debts, StrategyType.SNOWBALL, configuredBudget);
+        Projection avalanche = project(debts, StrategyType.AVALANCHE, configuredBudget);
         BigDecimal savings = snowball.interest.subtract(avalanche.interest).max(BigDecimal.ZERO);
         StrategyType effectiveStrategy = requestedStrategy == null ? profile.getActiveStrategy() : requestedStrategy;
         List<UUID> ordered = ordered(debts, effectiveStrategy).stream().map(Debt::getId).toList();
@@ -56,10 +57,13 @@ public class StrategyService {
                 ordered);
     }
 
-    private Projection project(List<Debt> source, StrategyType strategy) {
+    private Projection project(List<Debt> source, StrategyType strategy, BigDecimal configuredBudget) {
         if (source.isEmpty()) return new Projection(BigDecimal.ZERO, 0);
         List<DebtBalance> debts = source.stream().map(DebtBalance::new).toList();
-        BigDecimal budget = source.stream().map(this::monthlyCommitment).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal minimumBudget = source.stream().map(this::monthlyCommitment).reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal budget = configuredBudget != null && configuredBudget.signum() > 0
+                ? configuredBudget
+                : minimumBudget;
         if (budget.signum() == 0) return new Projection(BigDecimal.ZERO, MAX_MONTHS);
         BigDecimal totalInterest = BigDecimal.ZERO;
         int month = 0;
@@ -133,7 +137,11 @@ public class StrategyService {
             balance = debt.getCurrentBalance();
             annualRate = debt.getInterestRate() == null ? BigDecimal.ZERO : debt.getInterestRate();
             monthlyRate = annualRate.divide(new BigDecimal("1200"), 12, RoundingMode.HALF_UP);
-            minimum = debt.getMinimumPayment() == null ? BigDecimal.ZERO : debt.getMinimumPayment();
+            if (debt.getMonthlyPayment() != null && debt.getMonthlyPayment().signum() > 0) {
+                minimum = debt.getMonthlyPayment();
+            } else {
+                minimum = debt.getMinimumPayment() == null ? BigDecimal.ZERO : debt.getMinimumPayment();
+            }
         }
 
         private boolean active() { return balance.compareTo(new BigDecimal("0.01")) > 0; }

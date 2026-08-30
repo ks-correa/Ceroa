@@ -35,7 +35,7 @@ Se revisaron el frontend React/TypeScript/Tailwind, el cliente REST, el backend 
 | Cálculos y formato monetario repetidos | `utils/financial.ts` y `utils/formatters.ts` centralizan valores calculados y su representación |
 | Fechas creadas con UTC o supuestos fijos | Utilidades de fecha local, meses reales, años bisiestos, cambio de año y ajuste del día seleccionado |
 | Filtro/orden de deudas y agregados del dashboard dentro de JSX | Hooks memoizados de feature (`useDebtFilters`, `useDashboardOverview`) |
-| Carga inicial y modales aumentaban el bundle principal | Router declarativo y modales cargados de forma diferida; el chunk principal quedó en 390.60 kB (100.94 kB gzip) |
+| Carga inicial y modales aumentaban el bundle principal | Router declarativo y modales cargados de forma diferida; el chunk principal quedó en 391.31 kB (101.17 kB gzip) |
 | Consulta N+1 al contar pagos de la lista de deudas | Agregación única por IDs en `PaymentRepository` e índice compuesto |
 | `documentId` aparecía editable pero no se persistía | Campo incorporado a entidad, DTOs, mapeo frontend y migración con índice único parcial |
 | Clases Tailwind inexistentes y colores de marca repetidos | Clases inválidas eliminadas; colores oficiales centralizados como variables CSS |
@@ -61,7 +61,7 @@ Se revisaron el frontend React/TypeScript/Tailwind, el cliente REST, el backend 
 
 - Frontend: `npm run lint` (TypeScript estricto) aprobado.
 - Frontend: `npm run build` aprobado, 1,727 módulos transformados.
-- Backend: `mvnw clean test` aprobado, 8 pruebas, 0 fallos y 0 errores.
+- Backend: `mvnw clean test` aprobado, 9 pruebas, 0 fallos y 0 errores.
 - Revisión de whitespace: `git diff --check` aprobada.
 - Dependencias añadidas: solo `@types/react` y `@types/react-dom`, necesarias para tipado estricto.
 

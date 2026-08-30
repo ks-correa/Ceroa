@@ -10,6 +10,7 @@ import {
   Lock
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { formatCopPrice, PLUS_ANNUAL_PRICE_COP, PLUS_MONTHLY_PRICE_COP } from '../../constants/subscription';
 
 export const SubscriptionView: React.FC = () => {
   const { 
@@ -71,9 +72,6 @@ export const SubscriptionView: React.FC = () => {
               }`}
             >
               <span>Anual</span>
-              <span className="px-1.5 py-0.5 rounded-full text-[10px] font-extrabold bg-[#00E5FF] text-teal-950">
-                -20%
-              </span>
             </button>
           </div>
         </div>
@@ -193,10 +191,10 @@ export const SubscriptionView: React.FC = () => {
 
             <div className="pt-2 border-t border-slate-100 dark:border-slate-800">
               <div className="text-3xl sm:text-4xl font-extrabold text-[var(--ceroa-primary)] dark:text-cyan-300">
-                {billingCycle === 'annual' ? '$14.900' : '$19.900'} <span className="text-xs font-medium text-slate-400">COP / mes</span>
+                {formatCopPrice(billingCycle === 'annual' ? PLUS_ANNUAL_PRICE_COP : PLUS_MONTHLY_PRICE_COP)} <span className="text-xs font-medium text-slate-400">COP / {billingCycle === 'annual' ? 'año' : 'mes'}</span>
               </div>
               <span className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 block">
-                {billingCycle === 'annual' ? 'Facturado anualmente ($178.800 COP)' : 'Facturado mes a mes'}
+                {billingCycle === 'annual' ? 'Facturado una vez al año' : 'Facturado mes a mes'}
               </span>
             </div>
 

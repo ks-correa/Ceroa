@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { simulationService } from '../../services/simulationService';
-import { Debt, StrategyType } from '../../types';
+import { Debt, PaymentRecord, StrategyType } from '../../types';
 import { maskFinancialValue } from '../../utils/formatters';
 import { formatRelativeDueDate, getCalendarDayDifference, getDaysInMonth } from '../../utils/date';
 
@@ -23,11 +23,11 @@ const resolveDueDate = (debt: Debt, referenceDate: Date): Date => {
   return fallback;
 };
 
-export const useDashboardOverview = (debts: Debt[], strategy: StrategyType) => {
+export const useDashboardOverview = (debts: Debt[], payments: PaymentRecord[], strategy: StrategyType) => {
   const [hideBalances, setHideBalances] = useState(false);
   const [today] = useState(() => new Date());
   const upcomingDebts = useMemo(
-    () => debts.map((debt) => {
+    () => debts.filter((debt) => debt.currentBalance > 0).map((debt) => {
       const dueDate = resolveDueDate(debt, today);
       const daysUntilDue = getCalendarDayDifference(dueDate, today);
       const relativeLabel = formatRelativeDueDate(daysUntilDue);
@@ -39,11 +39,29 @@ export const useDashboardOverview = (debts: Debt[], strategy: StrategyType) => {
     () => simulationService.sortDebtsByStrategy(debts, strategy),
     [debts, strategy]
   );
+  const monthlyPaymentActivity = useMemo(() => {
+    const months = Array.from({ length: 6 }, (_, offset) => {
+      const date = new Date(today.getFullYear(), today.getMonth() - (5 - offset), 1);
+      return {
+        key: `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`,
+        label: date.toLocaleDateString('es-CO', { month: 'short' }).replace('.', ''),
+        amount: 0
+      };
+    });
+    const byKey = new Map(months.map((month) => [month.key, month]));
+    payments.filter((payment) => payment.status === 'completed').forEach((payment) => {
+      const month = byKey.get(payment.date.slice(0, 7));
+      if (month) month.amount += payment.amount;
+    });
+    const maxAmount = Math.max(...months.map((month) => month.amount), 1);
+    return months.map((month) => ({ ...month, percentage: (month.amount / maxAmount) * 100 }));
+  }, [payments, today]);
 
   return {
     hideBalances,
     setHideBalances,
     upcomingDebts,
+    monthlyPaymentActivity,
     topPriorityDebt: prioritizedDebts[0],
     maskValue: (value: string) => maskFinancialValue(value, hideBalances)
   };

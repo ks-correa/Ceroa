@@ -17,6 +17,7 @@ export const RecordPaymentModal: React.FC = () => {
     setIsRecordPaymentOpen,
     targetPaymentDebtId,
     editingPayment,
+    suggestedPaymentAmount,
     debts,
     handleRecordPayment,
     handleUpdatePayment,
@@ -42,13 +43,13 @@ export const RecordPaymentModal: React.FC = () => {
       const debtId = targetPaymentDebtId || debts[0]?.id || '';
       const debt = debts.find((item) => item.id === debtId);
       setSelectedDebtId(debtId);
-      setAmount(debt?.monthlyPayment || debt?.minimumPayment || 0);
+      setAmount(suggestedPaymentAmount ?? debt?.monthlyPayment ?? debt?.minimumPayment ?? 0);
       setPaymentType('monthly_fee');
       setDate(getTodayIsoDate());
       setNotes('');
     }
     setError(null);
-  }, [isRecordPaymentOpen, editingPayment, targetPaymentDebtId, debts]);
+  }, [isRecordPaymentOpen, editingPayment, targetPaymentDebtId, suggestedPaymentAmount, debts]);
 
   if (!isRecordPaymentOpen) return null;
   const currentDebt = debts.find((debt) => debt.id === selectedDebtId);

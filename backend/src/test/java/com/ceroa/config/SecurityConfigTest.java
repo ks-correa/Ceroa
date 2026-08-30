@@ -45,4 +45,10 @@ class SecurityConfigTest {
                                 """))
                 .andExpect(status().isUnauthorized());
     }
+
+    @Test
+    void allowsLogoutWithCsrfWhenTheSessionIsAlreadyExpired() throws Exception {
+        mockMvc.perform(post("/api/v1/auth/logout").with(csrf()))
+                .andExpect(status().isNoContent());
+    }
 }

@@ -13,6 +13,19 @@ interface BackendUser {
   plan: 'CERO' | 'PLUS';
 }
 
+type FinancialProfileUpdate = Pick<
+  FinancialProfile,
+  'monthlyIncome' | 'fixedExpenses' | 'availableMoney' | 'totalDeclaredDebts' | 'activeStrategy'
+>;
+
+const normalizeFinancialProfile = (profile: FinancialProfile): FinancialProfile => ({
+  ...profile,
+  monthlyIncome: Number(profile.monthlyIncome),
+  fixedExpenses: Number(profile.fixedExpenses),
+  availableMoney: Number(profile.availableMoney),
+  paymentCapacity: Number(profile.paymentCapacity)
+});
+
 export const userService = {
   async getUserProfile(): Promise<UserProfile> {
     return normalizeUser(await apiRequest<BackendUser>('/users/me'));
@@ -32,28 +45,21 @@ export const userService = {
   },
 
   async getFinancialProfile(): Promise<FinancialProfile> {
-    const profile = await apiRequest<FinancialProfile>('/financial-profile');
-    return {
-      ...profile,
-      monthlyIncome: Number(profile.monthlyIncome),
-      fixedExpenses: Number(profile.fixedExpenses),
-      availableMoney: Number(profile.availableMoney),
-      paymentCapacity: Number(profile.paymentCapacity)
-    };
+    return normalizeFinancialProfile(await apiRequest<FinancialProfile>('/financial-profile'));
   },
 
-  async updateFinancialProfile(financial: Partial<FinancialProfile>): Promise<FinancialProfile> {
-    const current = await this.getFinancialProfile();
-    return apiRequest<FinancialProfile>('/financial-profile', {
+  async updateFinancialProfile(financial: FinancialProfileUpdate): Promise<FinancialProfile> {
+    const updated = await apiRequest<FinancialProfile>('/financial-profile', {
       method: 'PUT',
       body: JSON.stringify({
-        monthlyIncome: financial.monthlyIncome ?? current.monthlyIncome,
-        fixedExpenses: financial.fixedExpenses ?? current.fixedExpenses,
-        availableMoney: financial.availableMoney ?? current.availableMoney,
-        totalDeclaredDebts: financial.totalDeclaredDebts ?? current.totalDeclaredDebts,
-        activeStrategy: financial.activeStrategy ?? current.activeStrategy
+        monthlyIncome: financial.monthlyIncome,
+        fixedExpenses: financial.fixedExpenses,
+        availableMoney: financial.availableMoney,
+        totalDeclaredDebts: financial.totalDeclaredDebts,
+        activeStrategy: financial.activeStrategy
       })
     });
+    return normalizeFinancialProfile(updated);
   },
 
   async getPreferences(): Promise<UserPreferences> {

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Sparkles, Lock } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { formatCopPrice, PLUS_ANNUAL_PRICE_COP, PLUS_MONTHLY_PRICE_COP } from '../../constants/subscription';
 
 export const SubscriptionCheckoutModal: React.FC = () => {
   const { 
@@ -75,12 +76,11 @@ export const SubscriptionCheckoutModal: React.FC = () => {
             >
               <div className="flex justify-between items-center">
                 <span className="text-xs font-bold text-slate-900 dark:text-white">Anual</span>
-                <span className="text-[10px] font-extrabold bg-cyan-400 text-teal-950 px-1.5 py-0.5 rounded-md">-20%</span>
               </div>
               <div className="text-sm font-extrabold text-teal-900 dark:text-cyan-300 mt-1">
-                $14.900 <span className="text-[10px] font-normal text-slate-400">/mes</span>
+                {formatCopPrice(PLUS_ANNUAL_PRICE_COP)} <span className="text-[10px] font-normal text-slate-400">/año</span>
               </div>
-              <span className="text-[10px] text-slate-400 block">$178.800 COP / año</span>
+              <span className="text-[10px] text-slate-400 block">Facturación anual</span>
             </div>
 
             <div
@@ -99,7 +99,7 @@ export const SubscriptionCheckoutModal: React.FC = () => {
             >
               <span className="text-xs font-bold text-slate-900 dark:text-white block">Mensual</span>
               <div className="text-sm font-extrabold text-slate-900 dark:text-white mt-1">
-                $19.900 <span className="text-[10px] font-normal text-slate-400">/mes</span>
+                {formatCopPrice(PLUS_MONTHLY_PRICE_COP)} <span className="text-[10px] font-normal text-slate-400">/mes</span>
               </div>
               <span className="text-[10px] text-slate-400 block">Facturación mensual</span>
             </div>
@@ -108,7 +108,7 @@ export const SubscriptionCheckoutModal: React.FC = () => {
           <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-800 text-[11px] text-slate-500 space-y-1">
             <div className="flex justify-between">
               <span>Subtotal:</span>
-              <span className="font-bold text-slate-800 dark:text-slate-200">{cycle === 'annual' ? '$178.800 COP' : '$19.900 COP'}</span>
+              <span className="font-bold text-slate-800 dark:text-slate-200">{formatCopPrice(cycle === 'annual' ? PLUS_ANNUAL_PRICE_COP : PLUS_MONTHLY_PRICE_COP)} COP</span>
             </div>
             <p className="pt-1 text-amber-700 dark:text-amber-300">
               El proveedor de pagos aún no está conectado. Esta solicitud no realizará cargos ni cambiará tu plan.

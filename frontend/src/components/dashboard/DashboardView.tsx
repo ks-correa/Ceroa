@@ -14,16 +14,22 @@ import {
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { useDashboardOverview } from './useDashboardOverview';
+import { calculateStrategyAllocation } from '../../utils/strategyAllocation';
+import { getMonthlyCommitment } from '../../utils/financial';
 
 export const DashboardView: React.FC = () => {
   const { 
     userProfile, 
     financialProfile, 
     debts, 
+    payments,
     totalDebt, 
     totalPaidSoFar, 
+    totalRecordedPayments,
     totalOriginalDebt, 
     overallProgressPercentage, 
+    activeAccountsCount,
+    nextTotalMonthlyPayment,
     formatCurrency, 
     formatNumber,
     setCurrentScreen, 
@@ -34,8 +40,12 @@ export const DashboardView: React.FC = () => {
     activeStrategy
   } = useApp();
 
-  const { hideBalances, setHideBalances, upcomingDebts, topPriorityDebt, maskValue } =
-    useDashboardOverview(debts, activeStrategy);
+  const { hideBalances, setHideBalances, upcomingDebts, monthlyPaymentActivity, topPriorityDebt, maskValue } =
+    useDashboardOverview(debts, payments, activeStrategy);
+  const strategyBudget = financialProfile.paymentCapacity > 0
+    ? financialProfile.paymentCapacity
+    : debts.reduce((sum, debt) => sum + getMonthlyCommitment(debt), 0);
+  const topPriorityAllocation = calculateStrategyAllocation(debts, activeStrategy, strategyBudget)[0];
 
   if (debts.length === 0) {
     return (
@@ -115,7 +125,7 @@ export const DashboardView: React.FC = () => {
         <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold tracking-wider text-slate-400 dark:text-slate-500 uppercase">
-              Total Pagado
+              Pagos registrados
             </span>
             <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
               <CheckCircle2 className="w-4 h-4" />
@@ -124,19 +134,19 @@ export const DashboardView: React.FC = () => {
 
           <div className="mt-3">
             <div className="text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 tracking-tight">
-              {maskValue(formatCurrency(totalPaidSoFar))}
+              {maskValue(formatCurrency(totalRecordedPayments))}
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
-              De ${formatNumber(totalOriginalDebt)} valor original acumulado
+              Capital reducido en saldos: {maskValue(formatCurrency(totalPaidSoFar))}
             </p>
           </div>
         </div>
 
-        {/* Saldo Pendiente */}
+        {/* Monthly commitments */}
         <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-2xl p-5 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold tracking-wider text-slate-400 dark:text-slate-500 uppercase">
-              Saldo Pendiente
+              Compromiso mensual
             </span>
             <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 flex items-center justify-center">
               <CreditCard className="w-4 h-4" />
@@ -145,10 +155,10 @@ export const DashboardView: React.FC = () => {
 
           <div className="mt-3">
             <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-              {maskValue(formatCurrency(totalDebt))}
+              {maskValue(formatCurrency(nextTotalMonthlyPayment))}
             </div>
             <p className="text-xs text-slate-500 dark:text-slate-400 mt-2">
-              Distribuido en {debts.length} compromisos activos
+              Suma de cuotas de {activeAccountsCount} compromisos activos
             </p>
           </div>
         </div>
@@ -213,7 +223,7 @@ export const DashboardView: React.FC = () => {
               </div>
               <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
                 {topPriorityDebt
-                  ? 'Un abono adicional reduce el saldo y los intereses futuros. Usa el simulador para estimar el impacto con un monto que se ajuste a tu capacidad.'
+                  ? `Tu estrategia asigna ${formatCurrency(topPriorityAllocation?.recommendedPayment ?? 0)} a esta deuda este mes, después de cubrir las demás cuotas base.`
                   : 'Agrega tus obligaciones para construir una estrategia basada en tus saldos y tasas reales.'}
               </p>
             </div>
@@ -222,10 +232,10 @@ export const DashboardView: React.FC = () => {
           <div className="mt-4 pt-2">
             <button
               id="dashboard-pago-extra-btn"
-              onClick={() => openRecordPaymentModal(topPriorityDebt?.id)}
+              onClick={() => openRecordPaymentModal(topPriorityDebt?.id, undefined, topPriorityAllocation?.recommendedPayment)}
               className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-[var(--ceroa-primary)] hover:bg-[var(--ceroa-primary-hover)] text-white rounded-xl font-bold text-xs shadow-xs hover:shadow-sm transition-all cursor-pointer"
             >
-              <span>Registrar Pago Extra</span>
+              <span>Registrar pago recomendado</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
@@ -243,8 +253,8 @@ export const DashboardView: React.FC = () => {
               </p>
             </div>
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 self-start sm:self-auto">
-              <span>Meta estimada:</span>
-              <strong className="text-teal-700 dark:text-cyan-400">Pendiente de cálculo del backend</strong>
+              <span>Fuente:</span>
+              <strong className="text-teal-700 dark:text-cyan-400">saldos y pagos registrados</strong>
             </div>
           </div>
 
@@ -267,7 +277,7 @@ export const DashboardView: React.FC = () => {
           <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-800/80">
             <div className="flex items-center justify-between mb-2">
               <span className="text-xs font-bold text-slate-700 dark:text-slate-300">
-                Tendencia de reducción proyectada
+                Pagos registrados por mes
               </span>
               <button
                 onClick={() => setCurrentScreen('simulation')}
@@ -277,35 +287,20 @@ export const DashboardView: React.FC = () => {
               </button>
             </div>
 
-            {/* Visual Amortization Wave Simulation */}
+            {/* Real payment activity from recorded payments */}
             <div className="h-20 w-full rounded-xl bg-slate-50 dark:bg-slate-800/60 p-2 flex items-end justify-between gap-2 overflow-hidden relative">
               <div className="absolute inset-x-0 bottom-3 h-[1px] bg-slate-200 dark:bg-slate-700" />
-              
-              {/* Simulated timeline bars */}
-              {[
-                { m: 'Hoy', actual: 100, sim: 90 },
-                { m: 'Mes 3', actual: 88, sim: 70 },
-                { m: 'Mes 6', actual: 75, sim: 52 },
-                { m: 'Mes 9', actual: 64, sim: 35 },
-                { m: 'Mes 12', actual: 52, sim: 18 },
-                { m: 'Mes 18', actual: 30, sim: 0 },
-                { m: 'Mes 24', actual: 12, sim: 0 },
-              ].map((item, idx) => (
-                <div key={idx} className="flex-1 flex flex-col items-center gap-1 z-10">
+              {monthlyPaymentActivity.map((item) => (
+                <div key={item.key} className="flex-1 flex flex-col items-center gap-1 z-10">
                   <div className="w-full flex items-end justify-center gap-1 h-12">
                     <div 
-                      className="w-2 sm:w-3 bg-slate-300 dark:bg-slate-600 rounded-t-sm transition-all"
-                      style={{ height: `${item.actual}%` }}
-                      title={`Actual: ${item.actual}%`}
-                    />
-                    <div 
-                      className="w-2 sm:w-3 bg-cyan-600 rounded-t-sm transition-all shadow-xs"
-                      style={{ height: `${item.sim}%` }}
-                      title={`Con Acelerador: ${item.sim}%`}
+                      className="w-5 sm:w-8 bg-cyan-600 rounded-t-sm transition-all shadow-xs min-h-0.5"
+                      style={{ height: `${Math.max(item.amount > 0 ? 8 : 1, item.percentage)}%` }}
+                      title={`${item.label}: ${formatCurrency(item.amount)}`}
                     />
                   </div>
                   <span className="text-[9px] text-slate-400 font-medium truncate">
-                    {item.m}
+                    {item.label}
                   </span>
                 </div>
               ))}

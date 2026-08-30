@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { useSimulation } from './useSimulation';
+import { SimulationChart } from './SimulationChart';
 
 export const SimulationView: React.FC = () => {
   const { 
@@ -65,6 +66,24 @@ export const SimulationView: React.FC = () => {
       monthlyIncrease: Math.max(0, prev.monthlyIncrease + delta)
     }));
   };
+
+  const setNumericParam = (key: 'lumpSumExtra' | 'monthlyIncrease', value: string) => {
+    const parsed = Number(value);
+    setSimulationParams((prev) => ({
+      ...prev,
+      [key]: Number.isFinite(parsed) ? Math.max(0, parsed) : 0
+    }));
+  };
+
+  const selectedBalance = simulationParams.selectedDebtId === 'all'
+    ? debts.reduce((sum, debt) => sum + debt.currentBalance, 0)
+    : debts.find((debt) => debt.id === simulationParams.selectedDebtId)?.currentBalance ?? 0;
+  const originalCapitalPct = simulationResult.originalTotalCost > 0
+    ? Math.min(100, (selectedBalance / simulationResult.originalTotalCost) * 100)
+    : 100;
+  const simulatedCapitalPct = simulationResult.simulatedTotalCost > 0
+    ? Math.min(100, (selectedBalance / simulationResult.simulatedTotalCost) * 100)
+    : 100;
 
   const handleRecalculate = async () => {
     const succeeded = await runSimulationCalculation();
@@ -127,7 +146,7 @@ export const SimulationView: React.FC = () => {
 
           {/* Stepper 1: Abono adicional único */}
           <div className="space-y-2">
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+            <label htmlFor="simulation-lump-sum-input" className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
               Abono adicional (Única vez hoy)
             </label>
             <div className="flex items-center gap-2">
@@ -140,10 +159,11 @@ export const SimulationView: React.FC = () => {
                 <Minus className="w-4 h-4" />
               </button>
               
-              <div className="flex-1 px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-center">
-                <span className="text-base font-extrabold text-slate-900 dark:text-white">
-                  ${formatNumber(simulationParams.lumpSumExtra)}
-                </span>
+              <div className="flex-1 px-3 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-center focus-within:ring-2 focus-within:ring-teal-500">
+                <div className="flex items-center justify-center text-base font-extrabold text-slate-900 dark:text-white">
+                  <span>$</span>
+                  <input id="simulation-lump-sum-input" type="number" min="0" step="1000" inputMode="numeric" value={simulationParams.lumpSumExtra} onChange={(event) => setNumericParam('lumpSumExtra', event.target.value)} onFocus={(event) => event.currentTarget.select()} className="w-full min-w-0 bg-transparent text-center outline-none" />
+                </div>
                 <span className="text-[10px] text-slate-400 block -mt-0.5">COP único</span>
               </div>
 
@@ -160,7 +180,7 @@ export const SimulationView: React.FC = () => {
 
           {/* Stepper 2: Aumento del pago mensual */}
           <div className="space-y-2">
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+            <label htmlFor="simulation-monthly-increase-input" className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
               Aumento del pago mensual continuo
             </label>
             <div className="flex items-center gap-2">
@@ -173,10 +193,11 @@ export const SimulationView: React.FC = () => {
                 <Minus className="w-4 h-4" />
               </button>
               
-              <div className="flex-1 px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-center">
-                <span className="text-base font-extrabold text-[var(--ceroa-primary)] dark:text-cyan-300">
-                  +${formatNumber(simulationParams.monthlyIncrease)}
-                </span>
+              <div className="flex-1 px-3 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-center focus-within:ring-2 focus-within:ring-teal-500">
+                <div className="flex items-center justify-center text-base font-extrabold text-[var(--ceroa-primary)] dark:text-cyan-300">
+                  <span>+$</span>
+                  <input id="simulation-monthly-increase-input" type="number" min="0" step="1000" inputMode="numeric" value={simulationParams.monthlyIncrease} onChange={(event) => setNumericParam('monthlyIncrease', event.target.value)} onFocus={(event) => event.currentTarget.select()} className="w-full min-w-0 bg-transparent text-center outline-none" />
+                </div>
                 <span className="text-[10px] text-slate-400 block -mt-0.5">COP / mes</span>
               </div>
 
@@ -286,10 +307,10 @@ export const SimulationView: React.FC = () => {
                 <strong className="text-slate-900 dark:text-white">${formatNumber(simulationResult.originalTotalCost)} Total</strong>
               </div>
               <div className="w-full bg-slate-100 dark:bg-slate-800 h-6 rounded-xl flex overflow-hidden p-0.5">
-                <div className="bg-slate-400 dark:bg-slate-600 h-full rounded-l-lg flex items-center px-2 text-[10px] text-white font-bold" style={{ width: '75%' }}>
+                <div className="bg-slate-400 dark:bg-slate-600 h-full rounded-l-lg flex items-center px-2 text-[10px] text-white font-bold" style={{ width: `${originalCapitalPct}%` }}>
                   Capital
                 </div>
-                <div className="bg-rose-400 h-full rounded-r-lg flex items-center px-2 text-[10px] text-white font-bold" style={{ width: '25%' }}>
+                <div className="bg-rose-400 h-full rounded-r-lg flex items-center px-2 text-[10px] text-white font-bold" style={{ width: `${100 - originalCapitalPct}%` }}>
                   Interés
                 </div>
               </div>
@@ -302,10 +323,10 @@ export const SimulationView: React.FC = () => {
                 <strong className="text-teal-900 dark:text-cyan-300 font-extrabold">${formatNumber(simulationResult.simulatedTotalCost)} Total</strong>
               </div>
               <div className="w-full bg-teal-50 dark:bg-slate-800 h-6 rounded-xl flex overflow-hidden p-0.5 border border-teal-200 dark:border-teal-900">
-                <div className="bg-cyan-600 h-full rounded-l-lg flex items-center px-2 text-[10px] text-white font-bold" style={{ width: '88%' }}>
+                <div className="bg-cyan-600 h-full rounded-l-lg flex items-center px-2 text-[10px] text-white font-bold" style={{ width: `${simulatedCapitalPct}%` }}>
                   Capital
                 </div>
-                <div className="bg-emerald-400 h-full rounded-r-lg flex items-center px-2 text-[10px] text-slate-900 font-bold" style={{ width: '12%' }}>
+                <div className="bg-emerald-400 h-full rounded-r-lg flex items-center px-2 text-[10px] text-slate-900 font-bold" style={{ width: `${100 - simulatedCapitalPct}%` }}>
                   Menos Interés
                 </div>
               </div>
@@ -330,56 +351,7 @@ export const SimulationView: React.FC = () => {
               </div>
             </div>
 
-            {/* Custom SVG Curve Graph */}
-            <div className="relative h-44 w-full pt-4">
-              <svg className="w-full h-full" viewBox="0 0 500 160" preserveAspectRatio="none">
-                <defs>
-                  <linearGradient id="simGradient" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#088395" stopOpacity="0.2" />
-                    <stop offset="100%" stopColor="#088395" stopOpacity="0.0" />
-                  </linearGradient>
-                </defs>
-
-                {/* Grid Lines */}
-                <line x1="0" y1="140" x2="500" y2="140" stroke="currentColor" className="text-slate-200 dark:text-slate-800" strokeWidth="1" />
-                <line x1="0" y1="70" x2="500" y2="70" stroke="currentColor" className="text-slate-100 dark:text-slate-800" strokeWidth="1" strokeDasharray="3 3" />
-
-                {/* Actual Baseline Curve (Dashed gray) */}
-                <path
-                  d="M 20 20 Q 250 50 480 140"
-                  fill="none"
-                  stroke="#94a3b8"
-                  strokeWidth="3"
-                  strokeDasharray="6 6"
-                />
-
-                {/* Sim Area & Curve (Solid Cyan-Teal) */}
-                <path
-                  d="M 20 20 Q 200 45 350 140 L 350 140 L 20 140 Z"
-                  fill="url(#simGradient)"
-                />
-                <path
-                  d="M 20 20 Q 200 45 350 140"
-                  fill="none"
-                  stroke="#088395"
-                  strokeWidth="4"
-                  strokeLinecap="round"
-                />
-
-                {/* Target Dot Milestone */}
-                <circle cx="350" cy="140" r="5" fill="#088395" />
-                <circle cx="480" cy="140" r="4" fill="#94a3b8" />
-              </svg>
-
-              {/* Labels below */}
-              <div className="flex justify-between text-[11px] font-semibold text-slate-400 px-2 mt-1">
-                <span>Hoy</span>
-                <span className="text-teal-700 dark:text-cyan-400 font-bold">
-                  {simulationResult.newPayoffDate} (Meta)
-                </span>
-                <span>{simulationResult.originalPayoffDate}</span>
-              </div>
-            </div>
+            <SimulationChart timeline={simulationResult.timeline} formatCurrency={formatCurrency} />
 
           </div>
 

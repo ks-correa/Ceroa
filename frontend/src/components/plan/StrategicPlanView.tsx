@@ -9,6 +9,8 @@ import {
 import { useApp } from '../../context/AppContext';
 import { simulationService } from '../../services/simulationService';
 import { useStrategyComparison } from './useStrategyComparison';
+import { calculateStrategyAllocation } from '../../utils/strategyAllocation';
+import { getMonthlyCommitment } from '../../utils/financial';
 
 export const StrategicPlanView: React.FC = () => {
   const { 
@@ -16,6 +18,8 @@ export const StrategicPlanView: React.FC = () => {
     activeStrategy, 
     setActiveStrategy, 
     formatCurrency, 
+    financialProfile,
+    openRecordPaymentModal,
     navigateToDebtDetail,
     setIsExportReportOpen
   } = useApp();
@@ -27,6 +31,13 @@ export const StrategicPlanView: React.FC = () => {
   const prioritizedDebts = orderedDebtIds.length > 0
     ? orderedDebtIds.map((id) => debts.find((debt) => debt.id === id)).filter((debt): debt is NonNullable<typeof debt> => Boolean(debt))
     : simulationService.sortDebtsByStrategy(debts, activeStrategy);
+  const strategyBudget = financialProfile.paymentCapacity > 0
+    ? financialProfile.paymentCapacity
+    : debts.reduce((sum, debt) => sum + getMonthlyCommitment(debt), 0);
+  const allocations = calculateStrategyAllocation(debts, activeStrategy, strategyBudget);
+  const allocationByDebt = new Map(allocations.map((allocation) => [allocation.debtId, allocation]));
+  const minimumCommitments = allocations.reduce((sum, allocation) => sum + allocation.basePayment, 0);
+  const extraAssigned = allocations.reduce((sum, allocation) => sum + allocation.extraPayment, 0);
 
   if (debts.length === 0) {
     return (
@@ -214,6 +225,12 @@ export const StrategicPlanView: React.FC = () => {
 
       {/* Prioritized Roadmap Section (Page 7 & 19 of PDF) */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 shadow-xs space-y-5">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 rounded-2xl bg-teal-50/60 dark:bg-teal-950/20 border border-teal-200 dark:border-teal-900 p-4">
+          <div><span className="text-[10px] uppercase font-bold text-slate-400">Presupuesto mensual</span><strong className="block text-sm text-slate-900 dark:text-white">{formatCurrency(strategyBudget)}</strong></div>
+          <div><span className="text-[10px] uppercase font-bold text-slate-400">Cuotas base</span><strong className="block text-sm text-slate-900 dark:text-white">{formatCurrency(minimumCommitments)}</strong></div>
+          <div><span className="text-[10px] uppercase font-bold text-slate-400">Extra dirigido por estrategia</span><strong className="block text-sm text-teal-700 dark:text-cyan-300">{formatCurrency(extraAssigned)}</strong></div>
+          <p className="sm:col-span-3 text-[11px] text-slate-600 dark:text-slate-300">La estrategia cubre las cuotas de todas las deudas y dirige el excedente a la prioridad 1. Ceroa no mueve dinero automáticamente: el botón de pago abre el registro con el valor recomendado.</p>
+        </div>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <div>
             <h2 className="text-lg font-bold text-slate-900 dark:text-white">
@@ -234,6 +251,7 @@ export const StrategicPlanView: React.FC = () => {
           {prioritizedDebts.map((debt, index) => {
             const priorityNumber = index + 1;
             const isFocus = priorityNumber === 1;
+            const allocation = allocationByDebt.get(debt.id);
 
             const paidPct = debt.originalAmount > 0 
               ? Math.min(100, Math.round(((debt.originalAmount - debt.currentBalance) / debt.originalAmount) * 100))
@@ -301,14 +319,17 @@ export const StrategicPlanView: React.FC = () => {
                   {/* Right: Payment suggested & Payoff Projection */}
                   <div className="text-left lg:text-right flex-shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-200 dark:border-slate-800">
                     <span className="text-[11px] font-semibold text-slate-400 block uppercase">
-                      {isFocus ? 'Cuota registrada' : 'Pago mínimo'}
+                      Pago recomendado este mes
                     </span>
                     <span className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white">
-                      {formatCurrency(isFocus ? debt.monthlyPayment : debt.minimumPayment)}
+                      {formatCurrency(allocation?.recommendedPayment ?? 0)}
                     </span>
                     <span className="text-xs text-teal-700 dark:text-cyan-400 font-semibold block mt-0.5">
                       Orden {priorityNumber} de {prioritizedDebts.length} · Cierre del plan: {activeStrategy === 'snowball' ? strategyStats.snowball.payoffDate : strategyStats.avalanche.payoffDate}
                     </span>
+                    {(allocation?.recommendedPayment ?? 0) > 0 && (
+                      <button type="button" onClick={(event) => { event.stopPropagation(); openRecordPaymentModal(debt.id, undefined, allocation?.recommendedPayment); }} className="mt-2 px-3 py-2 rounded-xl bg-[var(--ceroa-primary)] text-white text-xs font-bold">Registrar pago recomendado</button>
+                    )}
                   </div>
 
                 </div>

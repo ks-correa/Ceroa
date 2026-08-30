@@ -28,6 +28,7 @@ import {
 import { useLayoutState } from './useLayoutState';
 import { useOverlayState } from './useOverlayState';
 import { useToast } from '../hooks/useToast';
+import { SESSION_EXPIRED_EVENT } from '../services/api';
 
 interface AppContextType {
   // Navigation & Screen
@@ -66,6 +67,7 @@ interface AppContextType {
   totalDebt: number;
   totalOriginalDebt: number;
   totalPaidSoFar: number;
+  totalRecordedPayments: number;
   overallProgressPercentage: number;
   nextTotalMonthlyPayment: number;
   activeAccountsCount: number;
@@ -84,7 +86,8 @@ interface AppContextType {
   targetPaymentDebtId: string | null;
   setTargetPaymentDebtId: (id: string | null) => void;
   editingPayment: PaymentRecord | null;
-  openRecordPaymentModal: (debtId?: string, payment?: PaymentRecord) => void;
+  suggestedPaymentAmount: number | null;
+  openRecordPaymentModal: (debtId?: string, payment?: PaymentRecord, suggestedAmount?: number) => void;
   editingDebtId: string | null;
   setEditingDebtId: (id: string | null) => void;
   openEditDebtModal: (debtId: string) => void;
@@ -133,6 +136,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     isRecordPaymentOpen, setIsRecordPaymentOpen,
     targetPaymentDebtId, setTargetPaymentDebtId,
     editingPayment, setEditingPayment,
+    suggestedPaymentAmount, setSuggestedPaymentAmount,
     editingDebtId, setEditingDebtId,
     isEditFinancialOpen, setIsEditFinancialOpen,
     isEditProfileOpen, setIsEditProfileOpen,
@@ -159,9 +163,50 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const refreshRequestId = useRef(0);
 
+  const clearAuthenticatedState = useCallback(() => {
+    refreshRequestId.current += 1;
+    setIsAuthenticated(false);
+    setCurrentScreen('login');
+    setSelectedDebtId(null);
+    setDebts([]);
+    setPayments([]);
+    setUserProfile(DEFAULT_USER_PROFILE);
+    setFinancialProfile(DEFAULT_FINANCIAL_PROFILE);
+    setNotifications([]);
+    setActiveStrategyState('snowball');
+    setDataError(null);
+    setIsLoading(false);
+    setIsAddDebtOpen(false);
+    setIsRecordPaymentOpen(false);
+    setIsEditFinancialOpen(false);
+    setIsEditProfileOpen(false);
+    setIsSubscriptionModalOpen(false);
+    setIsExportReportOpen(false);
+    setIsNotificationsOpen(false);
+  }, [
+    setCurrentScreen,
+    setIsAddDebtOpen,
+    setIsEditFinancialOpen,
+    setIsEditProfileOpen,
+    setIsExportReportOpen,
+    setIsNotificationsOpen,
+    setIsRecordPaymentOpen,
+    setIsSubscriptionModalOpen,
+    setSelectedDebtId
+  ]);
+
   useEffect(() => () => {
     refreshRequestId.current += 1;
   }, []);
+
+  useEffect(() => {
+    const handleSessionExpired = () => {
+      clearAuthenticatedState();
+      showToast('Tu sesión venció. Inicia sesión nuevamente.');
+    };
+    window.addEventListener(SESSION_EXPIRED_EVENT, handleSessionExpired);
+    return () => window.removeEventListener(SESSION_EXPIRED_EVENT, handleSessionExpired);
+  }, [clearAuthenticatedState, showToast]);
 
   const refreshAllData = useCallback(async () => {
     const requestId = ++refreshRequestId.current;
@@ -234,8 +279,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const openRecordPaymentModal = (debtId?: string, payment?: PaymentRecord) => {
+  const openRecordPaymentModal = (debtId?: string, payment?: PaymentRecord, suggestedAmount?: number) => {
     setEditingPayment(payment || null);
+    setSuggestedPaymentAmount(suggestedAmount ?? null);
     if (debtId) {
       setTargetPaymentDebtId(debtId);
     } else if (debts.length > 0) {
@@ -325,7 +371,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const handleUpdateFinancialProfile = async (updates: Partial<FinancialProfile>) => {
-    const updated = await userService.updateFinancialProfile(updates);
+    const updated = await userService.updateFinancialProfile({ ...financialProfile, ...updates });
     setFinancialProfile(updated);
     setActiveStrategyState(updated.activeStrategy);
     showToast('Datos financieros actualizados');
@@ -334,7 +380,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const setActiveStrategy = (strategy: StrategyType) => {
     const previous = activeStrategy;
     setActiveStrategyState(strategy);
-    void userService.updateFinancialProfile({ activeStrategy: strategy })
+    void userService.updateFinancialProfile({ ...financialProfile, activeStrategy: strategy })
       .then((updated) => {
         setFinancialProfile(updated);
         showToast(`Estrategia ${strategy === 'snowball' ? 'Bola de Nieve' : 'Avalancha'} guardada`);
@@ -372,12 +418,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       await authService.logout();
     } finally {
-      refreshRequestId.current += 1;
-      setIsAuthenticated(false);
-      setCurrentScreen('login');
-      setDebts([]);
-      setPayments([]);
-      setDataError(null);
+      clearAuthenticatedState();
       showToast('Sesión cerrada con éxito');
     }
   };
@@ -405,10 +446,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     totalDebt,
     totalOriginalDebt,
     totalPaidSoFar,
+    totalRecordedPayments,
     overallProgressPercentage,
     nextTotalMonthlyPayment,
     activeAccountsCount
-  } = useMemo(() => calculateDebtSummary(debts), [debts]);
+  } = useMemo(() => calculateDebtSummary(debts, payments), [debts, payments]);
   const unreadNotificationsCount = useMemo(
     () => notifications.filter((notification) => !notification.read).length,
     [notifications]
@@ -453,6 +495,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         totalDebt,
         totalOriginalDebt,
         totalPaidSoFar,
+        totalRecordedPayments,
         overallProgressPercentage,
         nextTotalMonthlyPayment,
         activeAccountsCount,
@@ -467,6 +510,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         targetPaymentDebtId,
         setTargetPaymentDebtId,
         editingPayment,
+        suggestedPaymentAmount,
         openRecordPaymentModal,
         editingDebtId,
         setEditingDebtId,
