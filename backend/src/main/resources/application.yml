@@ -1,0 +1,33 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  application:
+    name: ceroa-backend
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/ceroa}
+    username: ${DB_USERNAME:ceroa}
+    password: ${DB_PASSWORD:ceroa_dev}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  jackson:
+    time-zone: America/Bogota
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+ceroa:
+  frontend-url: ${FRONTEND_URL:http://localhost:3000}
+  session:
+    days: ${SESSION_DAYS:30}
+    secure-cookie: ${SESSION_SECURE_COOKIE:false}
