@@ -4,7 +4,6 @@ import { LocalStorageManager } from './storage';
 export const notificationService = {
   async getNotifications(): Promise<NotificationItem[]> {
     LocalStorageManager.initInterfaceData();
-    await new Promise((res) => setTimeout(res, 30));
     return LocalStorageManager.get<NotificationItem[]>('notifications', []);
   },
 

@@ -2,14 +2,15 @@ import { FinancialProfile, UserPreferences, UserProfile } from '../types';
 import { LocalStorageManager } from './storage';
 import { apiRequest } from './api';
 import { normalizeUser } from './authService';
+import { DEFAULT_PREFERENCES } from '../constants/defaults';
 
 interface BackendUser {
   id: string;
   fullName: string;
   email: string;
   phone?: string;
+  documentId?: string;
   plan: 'CERO' | 'PLUS';
-  billingCycle: 'monthly' | 'annual';
 }
 
 export const userService = {
@@ -24,7 +25,8 @@ export const userService = {
       body: JSON.stringify({
         fullName: profile.fullName ?? current.fullName,
         email: profile.email ?? current.email,
-        phone: profile.phone ?? current.phone ?? ''
+        phone: profile.phone ?? current.phone ?? '',
+        documentId: profile.documentId ?? current.documentId ?? ''
       })
     }));
   },
@@ -56,14 +58,7 @@ export const userService = {
 
   async getPreferences(): Promise<UserPreferences> {
     LocalStorageManager.initInterfaceData();
-    await new Promise((res) => setTimeout(res, 30));
-    return LocalStorageManager.get<UserPreferences>('preferences', {
-      darkMode: false,
-      language: 'es',
-      currency: 'COP',
-      emailNotifications: true,
-      dueAlertsDaysBefore: 3
-    });
+    return LocalStorageManager.get<UserPreferences>('preferences', DEFAULT_PREFERENCES);
   },
 
   async updatePreferences(prefs: Partial<UserPreferences>): Promise<UserPreferences> {
@@ -74,14 +69,8 @@ export const userService = {
   },
 
   async upgradePlan(plan: 'cero' | 'plus', billingCycle: 'monthly' | 'annual'): Promise<UserProfile> {
-    return this.updateUserProfile({
-      plan,
-      billingCycle,
-      planRenewalDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000).toLocaleDateString('es-ES', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric'
-      })
-    });
+    void plan;
+    void billingCycle;
+    throw new Error('Las suscripciones todavía no están conectadas a un proveedor de pagos. No se realizó ningún cargo.');
   }
 };

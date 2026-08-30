@@ -1,48 +1,17 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { User, Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { CeroaLogo } from '../common/CeroaLogo';
+import { useRegisterForm } from './useRegisterForm';
 
 export const RegisterView: React.FC = () => {
   const { handleRegister, setCurrentScreen, showToast } = useApp();
-  const [fullName, setFullName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [acceptTerms, setAcceptTerms] = useState(false);
-  const [acceptPrivacy, setAcceptPrivacy] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!fullName || !email || !password || !confirmPassword) {
-      showToast('Por favor completa todos los campos');
-      return;
-    }
-    if (!/^(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{8,72}$/.test(password)) {
-      showToast('La contraseña requiere 8 caracteres, una mayúscula y un carácter especial');
-      return;
-    }
-    if (password !== confirmPassword) {
-      showToast('Las contraseñas no coinciden');
-      return;
-    }
-
-    if (!acceptTerms || !acceptPrivacy) {
-      showToast('Debes aceptar los términos y la política de privacidad');
-      return;
-    }
-    try {
-      setIsSubmitting(true);
-      await handleRegister({ fullName, email, password, acceptTerms, acceptPrivacy });
-    } catch (error) {
-      showToast(error instanceof Error ? error.message : 'No fue posible crear la cuenta');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  const {
+    fullName, setFullName, email, setEmail, password, setPassword,
+    confirmPassword, setConfirmPassword, showPassword, setShowPassword,
+    showConfirmPassword, setShowConfirmPassword, acceptTerms, setAcceptTerms,
+    acceptPrivacy, setAcceptPrivacy, isSubmitting, submit: handleSubmit
+  } = useRegisterForm(handleRegister, showToast);
 
   return (
     <div className="min-h-screen w-full bg-slate-50 dark:bg-slate-950 flex items-center justify-center p-4 sm:p-6 md:p-10 font-sans">
@@ -67,7 +36,7 @@ export const RegisterView: React.FC = () => {
             
             {/* Full Name */}
             <div className="space-y-1">
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+              <label htmlFor="register-fullname-input" className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
                 Nombre completo
               </label>
               <div className="relative flex items-center">
@@ -86,7 +55,7 @@ export const RegisterView: React.FC = () => {
 
             {/* Email */}
             <div className="space-y-1">
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+              <label htmlFor="register-email-input" className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
                 Correo electrónico
               </label>
               <div className="relative flex items-center">
@@ -105,7 +74,7 @@ export const RegisterView: React.FC = () => {
 
             {/* Password */}
             <div className="space-y-1">
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+              <label htmlFor="register-password-input" className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
                 Contraseña
               </label>
               <div className="relative flex items-center">
@@ -124,6 +93,7 @@ export const RegisterView: React.FC = () => {
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3.5 text-slate-400 hover:text-slate-600"
+                  aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -132,7 +102,7 @@ export const RegisterView: React.FC = () => {
 
             {/* Confirm Password */}
             <div className="space-y-1">
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+              <label htmlFor="register-confirm-password-input" className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
                 Confirmar contraseña
               </label>
               <div className="relative flex items-center">
@@ -150,6 +120,7 @@ export const RegisterView: React.FC = () => {
                   type="button"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-3.5 text-slate-400 hover:text-slate-600"
+                  aria-label={showConfirmPassword ? 'Ocultar confirmación de contraseña' : 'Mostrar confirmación de contraseña'}
                 >
                   {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -163,7 +134,7 @@ export const RegisterView: React.FC = () => {
                   type="checkbox"
                   checked={acceptTerms}
                   onChange={(event) => setAcceptTerms(event.target.checked)}
-                  className="mt-0.5 rounded border-slate-300 text-[#008FA6]"
+                  className="mt-0.5 rounded border-slate-300 text-[var(--ceroa-primary)]"
                 />
                 <span>Acepto los términos y condiciones de Ceroa.</span>
               </label>
@@ -172,7 +143,7 @@ export const RegisterView: React.FC = () => {
                   type="checkbox"
                   checked={acceptPrivacy}
                   onChange={(event) => setAcceptPrivacy(event.target.checked)}
-                  className="mt-0.5 rounded border-slate-300 text-[#008FA6]"
+                  className="mt-0.5 rounded border-slate-300 text-[var(--ceroa-primary)]"
                 />
                 <span>Acepto la política de tratamiento de datos.</span>
               </label>
@@ -184,7 +155,7 @@ export const RegisterView: React.FC = () => {
                 type="submit"
                 id="register-submit-btn"
                 disabled={isSubmitting}
-                className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-[#008FA6] hover:bg-[#007A8E] text-white rounded-xl font-bold text-sm shadow-sm hover:shadow-md transition-all cursor-pointer"
+                className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-[var(--ceroa-primary)] hover:bg-[var(--ceroa-primary-hover)] disabled:opacity-60 disabled:cursor-not-allowed text-white rounded-xl font-bold text-sm shadow-sm hover:shadow-md transition-all cursor-pointer"
               >
                 <span>{isSubmitting ? 'Creando cuenta...' : 'Crear cuenta'}</span>
                 <ArrowRight className="w-4 h-4" />
@@ -200,7 +171,7 @@ export const RegisterView: React.FC = () => {
                 type="button"
                 id="goto-login-btn"
                 onClick={() => setCurrentScreen('login')}
-                className="text-xs font-bold text-[#008FA6] dark:text-cyan-400 hover:underline cursor-pointer"
+                className="text-xs font-bold text-[var(--ceroa-primary)] dark:text-cyan-400 hover:underline cursor-pointer"
               >
                 Inicia sesión
               </button>
@@ -210,7 +181,7 @@ export const RegisterView: React.FC = () => {
         </div>
 
         {/* Right Hero Graphic Section (Desktop) */}
-        <div className="hidden lg:flex flex-col justify-between p-12 bg-gradient-to-tr from-[#004D5A] via-[#006A7C] to-[#008FA6] text-white relative overflow-hidden order-1 lg:order-2">
+        <div className="hidden lg:flex flex-col justify-between p-12 bg-gradient-to-tr from-[#004D5A] via-[#006A7C] to-[var(--ceroa-primary)] text-white relative overflow-hidden order-1 lg:order-2">
           
           <div className="relative z-10 flex justify-end">
             <div className="px-3 py-1 rounded-full bg-white/10 border border-white/20 text-[11px] font-semibold text-cyan-200">

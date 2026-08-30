@@ -1,26 +1,20 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { 
   Zap, 
   Minus, 
   Plus, 
   Info, 
-  Calendar, 
   TrendingDown, 
   Clock, 
-  CheckCircle2, 
   Sparkles,
-  Sliders,
-  DollarSign
+  Sliders
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { useSimulation } from './useSimulation';
 
 export const SimulationView: React.FC = () => {
   const { 
     debts, 
-    simulationParams, 
-    setSimulationParams, 
-    simulationResult, 
-    runSimulationCalculation,
     formatCurrency, 
     formatNumber,
     activeStrategy,
@@ -28,16 +22,22 @@ export const SimulationView: React.FC = () => {
     userProfile,
     setCurrentScreen
   } = useApp();
-
-  const [isCalculating, setIsCalculating] = useState(false);
+  const {
+    params: simulationParams,
+    setParams: setSimulationParams,
+    result: simulationResult,
+    isCalculating,
+    error: simulationError,
+    calculate: runSimulationCalculation
+  } = useSimulation(debts, activeStrategy, userProfile.plan === 'plus');
 
   if (userProfile.plan === 'cero') {
     return (
       <div className="max-w-2xl mx-auto py-14 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-8">
-        <Sparkles className="w-12 h-12 mx-auto text-[#008FA6]" />
+        <Sparkles className="w-12 h-12 mx-auto text-[var(--ceroa-primary)]" />
         <h1 className="mt-4 text-2xl font-extrabold text-slate-900 dark:text-white">Simular está disponible con Ceroa Plus</h1>
         <p className="mt-2 text-sm text-slate-500">Puedes entrar a esta sección con Plan Cero, pero ejecutar escenarios hipotéticos es una función exclusiva de Plus.</p>
-        <button onClick={() => setCurrentScreen('subscription')} className="mt-6 px-5 py-2.5 bg-[#008FA6] text-white rounded-xl text-sm font-bold">Conocer Ceroa Plus</button>
+        <button onClick={() => setCurrentScreen('subscription')} className="mt-6 px-5 py-2.5 bg-[var(--ceroa-primary)] text-white rounded-xl text-sm font-bold">Conocer Ceroa Plus</button>
       </div>
     );
   }
@@ -67,10 +67,10 @@ export const SimulationView: React.FC = () => {
   };
 
   const handleRecalculate = async () => {
-    setIsCalculating(true);
-    await runSimulationCalculation();
-    setIsCalculating(false);
-    showToast('¡Escenario recalculado con éxito!');
+    const succeeded = await runSimulationCalculation();
+    showToast(succeeded
+      ? '¡Escenario recalculado con éxito!'
+      : simulationError || 'No fue posible recalcular el escenario');
   };
 
   return (
@@ -107,7 +107,7 @@ export const SimulationView: React.FC = () => {
 
           {/* Debt selector */}
           <div className="space-y-1.5">
-            <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+            <label htmlFor="simulation-debt-select" className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
               Selecciona la deuda
             </label>
             <select
@@ -151,7 +151,7 @@ export const SimulationView: React.FC = () => {
                 type="button"
                 id="lump-sum-plus-btn"
                 onClick={() => handleLumpSumStep(100000)}
-                className="w-10 h-10 rounded-xl bg-[#008FA6] hover:bg-[#007A8E] text-white flex items-center justify-center font-bold text-lg transition-colors cursor-pointer"
+                className="w-10 h-10 rounded-xl bg-[var(--ceroa-primary)] hover:bg-[var(--ceroa-primary-hover)] text-white flex items-center justify-center font-bold text-lg transition-colors cursor-pointer"
               >
                 <Plus className="w-4 h-4" />
               </button>
@@ -173,8 +173,8 @@ export const SimulationView: React.FC = () => {
                 <Minus className="w-4 h-4" />
               </button>
               
-              <div className="flex-1 px-4 py-2 bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-700 rounded-xl text-center">
-                <span className="text-base font-extrabold text-[#008FA6] dark:text-cyan-300">
+              <div className="flex-1 px-4 py-2 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-center">
+                <span className="text-base font-extrabold text-[var(--ceroa-primary)] dark:text-cyan-300">
                   +${formatNumber(simulationParams.monthlyIncrease)}
                 </span>
                 <span className="text-[10px] text-slate-400 block -mt-0.5">COP / mes</span>
@@ -184,7 +184,7 @@ export const SimulationView: React.FC = () => {
                 type="button"
                 id="monthly-inc-plus-btn"
                 onClick={() => handleMonthlyStep(20000)}
-                className="w-10 h-10 rounded-xl bg-[#008FA6] hover:bg-[#007A8E] text-white flex items-center justify-center font-bold text-lg transition-colors cursor-pointer"
+                className="w-10 h-10 rounded-xl bg-[var(--ceroa-primary)] hover:bg-[var(--ceroa-primary-hover)] text-white flex items-center justify-center font-bold text-lg transition-colors cursor-pointer"
               >
                 <Plus className="w-4 h-4" />
               </button>
@@ -196,14 +196,14 @@ export const SimulationView: React.FC = () => {
             id="simulation-recalculate-btn"
             onClick={handleRecalculate}
             disabled={isCalculating}
-            className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-[#008FA6] hover:bg-[#007A8E] text-white rounded-xl font-bold text-xs shadow-xs hover:shadow-sm transition-all cursor-pointer"
+            className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-[var(--ceroa-primary)] hover:bg-[var(--ceroa-primary-hover)] text-white rounded-xl font-bold text-xs shadow-xs hover:shadow-sm transition-all cursor-pointer"
           >
             <Sparkles className="w-4 h-4" />
             <span>{isCalculating ? 'Calculando...' : 'Recalcular Escenario'}</span>
           </button>
 
           {/* Legal / Mathematical Disclaimer */}
-          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-850 border border-slate-200/60 dark:border-slate-800 flex items-start gap-2.5">
+          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200/60 dark:border-slate-800 flex items-start gap-2.5">
             <Info className="w-4 h-4 text-slate-400 flex-shrink-0 mt-0.5" />
             <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
               Los resultados de esta simulación son una estimación basada en las tasas de interés actuales. No constituyen una promesa financiera exacta.
@@ -342,7 +342,7 @@ export const SimulationView: React.FC = () => {
 
                 {/* Grid Lines */}
                 <line x1="0" y1="140" x2="500" y2="140" stroke="currentColor" className="text-slate-200 dark:text-slate-800" strokeWidth="1" />
-                <line x1="0" y1="70" x2="500" y2="70" stroke="currentColor" className="text-slate-100 dark:text-slate-850" strokeWidth="1" strokeDasharray="3 3" />
+                <line x1="0" y1="70" x2="500" y2="70" stroke="currentColor" className="text-slate-100 dark:text-slate-800" strokeWidth="1" strokeDasharray="3 3" />
 
                 {/* Actual Baseline Curve (Dashed gray) */}
                 <path

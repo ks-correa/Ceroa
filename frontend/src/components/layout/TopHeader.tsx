@@ -13,6 +13,12 @@ import {
 import { useApp } from '../../context/AppContext';
 import { CeroaLogo } from '../common/CeroaLogo';
 
+const CURRENCY_LABELS = {
+  COP: 'COP ($)',
+  MXN: 'MXN ($)',
+  USD: 'USD ($)'
+} as const;
+
 export const TopHeader: React.FC = () => {
   const { 
     currentScreen, 
@@ -55,7 +61,7 @@ export const TopHeader: React.FC = () => {
           <div className="flex items-center gap-1.5 text-xs text-slate-500 dark:text-slate-400 font-medium">
             <button 
               onClick={() => setCurrentScreen('debts')} 
-              className="hover:text-[#008FA6] dark:hover:text-cyan-400 flex items-center gap-1"
+              className="hover:text-[var(--ceroa-primary)] dark:hover:text-cyan-400 flex items-center gap-1"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               Deudas
@@ -123,7 +129,7 @@ export const TopHeader: React.FC = () => {
         <button
           id="desktop-header-hamburger-btn"
           onClick={toggleSidebarCollapse}
-          className="hidden lg:flex p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-[#008FA6] dark:hover:text-cyan-400 transition-colors cursor-pointer"
+          className="hidden lg:flex p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-[var(--ceroa-primary)] dark:hover:text-cyan-400 transition-colors cursor-pointer"
           title={isSidebarCollapsed ? 'Expandir barra lateral' : 'Colapsar barra lateral'}
           aria-label="Alternar barra lateral"
         >
@@ -139,7 +145,7 @@ export const TopHeader: React.FC = () => {
           <button
             id="mobile-header-hamburger-btn"
             onClick={() => setIsMobileSidebarOpen(true)}
-            className="p-1.5 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-[#008FA6] transition-colors"
+            className="p-1.5 rounded-xl text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-[var(--ceroa-primary)] transition-colors"
             title="Abrir menú de páginas"
             aria-label="Abrir menú de navegación"
           >
@@ -168,9 +174,9 @@ export const TopHeader: React.FC = () => {
       {/* Right Area: Currency selector, Dark mode toggle, Notification bell, User avatar */}
       <div className="flex items-center gap-2 sm:gap-3.5">
         {/* Currency Switcher */}
-        <div id="currency-indicator" aria-label="Moneda: pesos colombianos" className="flex items-center gap-1.5 text-xs bg-slate-100 dark:bg-slate-800 py-1.5 px-3 rounded-xl border border-slate-200/60 dark:border-slate-700/60">
+        <div id="currency-indicator" aria-label={`Moneda: ${preferences.currency}`} className="flex items-center gap-1.5 text-xs bg-slate-100 dark:bg-slate-800 py-1.5 px-3 rounded-xl border border-slate-200/60 dark:border-slate-700/60">
           <span className="hidden sm:inline text-slate-500 dark:text-slate-400 font-medium">Moneda:</span>
-          <span className="text-slate-800 dark:text-slate-200 font-semibold">COP ($)</span>
+          <span className="text-slate-800 dark:text-slate-200 font-semibold">{CURRENCY_LABELS[preferences.currency]}</span>
         </div>
 
         {/* Theme quick toggle */}
@@ -203,7 +209,7 @@ export const TopHeader: React.FC = () => {
         {/* Plan badge (Desktop) */}
         <button
           onClick={() => setCurrentScreen('subscription')}
-          className="hidden md:flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-[#008FA6]/10 dark:bg-cyan-950/80 text-[#008FA6] dark:text-cyan-400 border border-[#008FA6]/20 hover:bg-[#008FA6]/20 transition-colors"
+          className="hidden md:flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-[var(--ceroa-primary)]/10 dark:bg-cyan-950/80 text-[var(--ceroa-primary)] dark:text-cyan-400 border border-[var(--ceroa-primary)]/20 hover:bg-[var(--ceroa-primary)]/20 transition-colors"
         >
           <ShieldCheck className="w-3.5 h-3.5" />
           <span>{userProfile.plan === 'plus' ? 'Ceroa Plus' : 'Plan Cero'}</span>
@@ -213,7 +219,7 @@ export const TopHeader: React.FC = () => {
         <button
           id="topbar-user-profile-btn"
           onClick={() => setCurrentScreen('profile')}
-          className="flex items-center gap-2 p-0.5 rounded-full hover:ring-2 hover:ring-[#008FA6]/30 transition-all cursor-pointer"
+          className="flex items-center gap-2 p-0.5 rounded-full hover:ring-2 hover:ring-[var(--ceroa-primary)]/30 transition-all cursor-pointer"
         >
           <img
             src={userProfile.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'}

@@ -1,12 +1,6 @@
 import React from 'react';
-import { 
-  LayoutDashboard, 
-  CreditCard, 
-  ClipboardList, 
-  Zap, 
-  User, 
+import {
   LogOut,
-  Menu,
   X,
   PanelLeftClose,
   PanelLeftOpen,
@@ -16,6 +10,7 @@ import {
 import { useApp } from '../../context/AppContext';
 import { AppScreen } from '../../types';
 import { CeroaLogo } from '../common/CeroaLogo';
+import { isNavigationItemActive, MAIN_NAVIGATION_ITEMS } from './navigation';
 
 export const Sidebar: React.FC = () => {
   const { 
@@ -28,14 +23,6 @@ export const Sidebar: React.FC = () => {
     setIsMobileSidebarOpen,
     userProfile
   } = useApp();
-
-  const navItems: { id: AppScreen; label: string; icon: React.FC<{ className?: string }>; badge?: string }[] = [
-    { id: 'dashboard', label: 'Inicio', icon: LayoutDashboard },
-    { id: 'debts', label: 'Deudas', icon: CreditCard },
-    { id: 'strategy', label: 'Estrategia', icon: ClipboardList },
-    { id: 'simulation', label: 'Simular', icon: Zap },
-    { id: 'profile', label: 'Perfil', icon: User }
-  ];
 
   const handleNavigate = (screen: AppScreen) => {
     setCurrentScreen(screen);
@@ -78,18 +65,18 @@ export const Sidebar: React.FC = () => {
             aria-label={isSidebarCollapsed ? 'Expandir barra lateral' : 'Colapsar barra lateral'}
           >
             {isSidebarCollapsed ? (
-              <PanelLeftOpen className="w-5 h-5 text-[#008FA6] dark:text-cyan-400" />
+              <PanelLeftOpen className="w-5 h-5 text-[var(--ceroa-primary)] dark:text-cyan-400" />
             ) : (
-              <PanelLeftClose className="w-5 h-5 text-slate-500 hover:text-[#008FA6]" />
+              <PanelLeftClose className="w-5 h-5 text-slate-500 hover:text-[var(--ceroa-primary)]" />
             )}
           </button>
         </div>
 
         {/* Main Navigation Links */}
         <div className="flex-1 py-5 px-3 space-y-1.5 overflow-y-auto overflow-x-hidden">
-          {navItems.map((item) => {
+          {MAIN_NAVIGATION_ITEMS.map((item) => {
             const Icon = item.icon;
-            const isActive = currentScreen === item.id || (item.id === 'debts' && currentScreen === 'debt_detail');
+            const isActive = isNavigationItemActive(item.id, currentScreen);
 
             return (
               <div key={item.id} className="relative group">
@@ -100,24 +87,15 @@ export const Sidebar: React.FC = () => {
                     isSidebarCollapsed ? 'justify-center p-3' : 'gap-3.5 px-3.5 py-2.5'
                   } ${
                     isActive
-                      ? 'bg-[#008FA6] text-white shadow-xs font-semibold'
+                      ? 'bg-[var(--ceroa-primary)] text-white shadow-xs font-semibold'
                       : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-slate-100'
                   }`}
                 >
-                  <Icon className={`w-5 h-5 flex-shrink-0 ${isActive ? 'text-white' : 'text-slate-500 dark:text-slate-400 group-hover:text-[#008FA6]'}`} />
+                  <Icon className={`w-5 h-5 flex-shrink-0 ${isActive ? 'text-white' : 'text-slate-500 dark:text-slate-400 group-hover:text-[var(--ceroa-primary)]'}`} />
                   
                   {!isSidebarCollapsed && (
                     <div className="flex-1 flex items-center justify-between min-w-0">
                       <span className="truncate">{item.label}</span>
-                      {item.badge && (
-                        <span className={`text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded-full ${
-                          isActive 
-                            ? 'bg-white/20 text-white' 
-                            : 'bg-[#008FA6]/10 dark:bg-cyan-950/60 text-[#008FA6] dark:text-cyan-300'
-                        }`}>
-                          {item.badge}
-                        </span>
-                      )}
                     </div>
                   )}
                 </button>
@@ -127,11 +105,6 @@ export const Sidebar: React.FC = () => {
                   <div className="absolute left-full top-1/2 -translate-y-1/2 ml-3 hidden group-hover:flex items-center z-50 pointer-events-none">
                     <div className="bg-slate-900 text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow-lg whitespace-nowrap border border-slate-700">
                       {item.label}
-                      {item.badge && (
-                        <span className="ml-1.5 text-[10px] text-cyan-300 font-extrabold uppercase">
-                          ({item.badge})
-                        </span>
-                      )}
                     </div>
                   </div>
                 )}
@@ -206,7 +179,7 @@ export const Sidebar: React.FC = () => {
             </div>
 
             {/* User Profile Mini Header */}
-            <div className="px-5 py-3.5 bg-slate-50 dark:bg-slate-850/60 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
+            <div className="px-5 py-3.5 bg-slate-50 dark:bg-slate-800/60 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <img
                   src={userProfile.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'}
@@ -224,7 +197,7 @@ export const Sidebar: React.FC = () => {
               </div>
               <button
                 onClick={() => handleNavigate('subscription')}
-                className="p-1 rounded-lg text-[#008FA6] dark:text-cyan-400 hover:bg-[#008FA6]/10"
+                className="p-1 rounded-lg text-[var(--ceroa-primary)] dark:text-cyan-400 hover:bg-[var(--ceroa-primary)]/10"
                 title="Ver Suscripción"
               >
                 <ShieldCheck className="w-4 h-4" />
@@ -236,9 +209,9 @@ export const Sidebar: React.FC = () => {
               <span className="px-3 text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider block mb-2">
                 Navegación
               </span>
-              {navItems.map((item) => {
+              {MAIN_NAVIGATION_ITEMS.map((item) => {
                 const Icon = item.icon;
-                const isActive = currentScreen === item.id || (item.id === 'debts' && currentScreen === 'debt_detail');
+                const isActive = isNavigationItemActive(item.id, currentScreen);
 
                 return (
                   <button
@@ -247,7 +220,7 @@ export const Sidebar: React.FC = () => {
                     onClick={() => handleNavigate(item.id)}
                     className={`w-full flex items-center justify-between px-3.5 py-3 rounded-xl text-sm font-medium transition-all text-left cursor-pointer ${
                       isActive
-                        ? 'bg-[#008FA6] text-white shadow-xs font-semibold'
+                        ? 'bg-[var(--ceroa-primary)] text-white shadow-xs font-semibold'
                         : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
                     }`}
                   >
@@ -255,15 +228,7 @@ export const Sidebar: React.FC = () => {
                       <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-slate-500 dark:text-slate-400'}`} />
                       <span>{item.label}</span>
                     </div>
-                    {item.badge ? (
-                      <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
-                        isActive ? 'bg-white/20 text-white' : 'bg-[#008FA6]/10 text-[#008FA6] dark:text-cyan-300'
-                      }`}>
-                        {item.badge}
-                      </span>
-                    ) : (
-                      <ChevronRight className={`w-4 h-4 opacity-50 ${isActive ? 'text-white' : 'text-slate-400'}`} />
-                    )}
+                    <ChevronRight className={`w-4 h-4 opacity-50 ${isActive ? 'text-white' : 'text-slate-400'}`} />
                   </button>
                 );
               })}

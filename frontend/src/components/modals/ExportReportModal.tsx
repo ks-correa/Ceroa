@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { X, FileDown, CheckCircle2, Printer, Download, Sparkles } from 'lucide-react';
+import React from 'react';
+import { X, FileDown, Printer, Download } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 
 export const ExportReportModal: React.FC = () => {
@@ -9,26 +9,24 @@ export const ExportReportModal: React.FC = () => {
     debts, 
     financialProfile, 
     activeStrategy, 
-    formatCurrency, 
-    formatNumber,
+    formatCurrency,
     userProfile,
     showToast
   } = useApp();
-
-  const [isExporting, setIsExporting] = useState(false);
 
   if (!isExportReportOpen) return null;
 
   const totalBalance = debts.reduce((acc, d) => acc + d.currentBalance, 0);
   const totalMonthly = debts.reduce((acc, d) => acc + d.monthlyPayment, 0);
+  const reportDate = new Intl.DateTimeFormat('es-CO', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  }).format(new Date());
 
   const handleDownload = () => {
-    setIsExporting(true);
-    setTimeout(() => {
-      setIsExporting(false);
-      setIsExportReportOpen(false);
-      showToast('¡Reporte financiero generado y descargado exitosamente!');
-    }, 1200);
+    window.print();
+    showToast('Selecciona “Guardar como PDF” en el diálogo de impresión.');
   };
 
   const handlePrint = () => {
@@ -36,7 +34,7 @@ export const ExportReportModal: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="export-report-modal-title">
       <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 dark:border-slate-800 my-8">
         
         <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
@@ -45,22 +43,23 @@ export const ExportReportModal: React.FC = () => {
               <FileDown className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+              <h3 id="export-report-modal-title" className="text-lg font-bold text-slate-900 dark:text-white">
                 Resumen Ejecutivo y Hoja de Ruta
               </h3>
-              <p className="text-xs text-slate-500">Reporte de amortización financiera descargable en PDF</p>
+              <p className="text-xs text-slate-500">Reporte financiero listo para imprimir o guardar como PDF</p>
             </div>
           </div>
           <button
             onClick={() => setIsExportReportOpen(false)}
             className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+            aria-label="Cerrar reporte"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Report Preview Document */}
-        <div className="my-6 p-6 rounded-2xl bg-slate-50 dark:bg-slate-850 border border-slate-200 dark:border-slate-800 space-y-5 text-xs">
+        <div className="my-6 p-6 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-800 space-y-5 text-xs">
           
           {/* Header of Doc */}
           <div className="flex justify-between items-start border-b border-slate-200 dark:border-slate-700 pb-4">
@@ -72,7 +71,7 @@ export const ExportReportModal: React.FC = () => {
                 Titular: {userProfile.fullName} ({userProfile.email})
               </div>
               <div className="text-slate-400 text-[10px]">
-                Fecha de Emisión: 15 de Octubre, 2023 | Estrategia: {activeStrategy === 'snowball' ? 'Bola de Nieve' : 'Avalancha'}
+                Fecha de emisión: {reportDate} | Estrategia: {activeStrategy === 'snowball' ? 'Bola de Nieve' : 'Avalancha'}
               </div>
             </div>
 
@@ -134,11 +133,10 @@ export const ExportReportModal: React.FC = () => {
           <button
             type="button"
             onClick={handleDownload}
-            disabled={isExporting}
-            className="px-6 py-2.5 text-xs font-bold text-white bg-[#008FA6] hover:bg-[#007A8E] rounded-xl shadow-xs flex items-center justify-center gap-2 cursor-pointer"
+            className="px-6 py-2.5 text-xs font-bold text-white bg-[var(--ceroa-primary)] hover:bg-[var(--ceroa-primary-hover)] rounded-xl shadow-xs flex items-center justify-center gap-2 cursor-pointer"
           >
             <Download className="w-4 h-4" />
-            <span>{isExporting ? 'Generando PDF...' : 'Descargar Reporte PDF'}</span>
+            <span>Guardar reporte como PDF</span>
           </button>
         </div>
 

@@ -37,7 +37,7 @@ class DebtServiceTest {
         User user = new User();
         user.setId(UUID.randomUUID());
         user.setPlan(UserPlan.CERO);
-        when(currentUser.entity()).thenReturn(user);
+        when(currentUser.entityForUpdate()).thenReturn(user);
         when(debtRepository.countByUserId(user.getId())).thenReturn(2L);
 
         assertThatThrownBy(() -> service.create(validRequest()))
@@ -45,6 +45,7 @@ class DebtServiceTest {
                 .hasMessageContaining("máximo 2 deudas");
 
         verify(debtRepository, never()).save(any());
+        verify(currentUser).entityForUpdate();
     }
 
     @Test
@@ -52,7 +53,7 @@ class DebtServiceTest {
         User user = new User();
         user.setId(UUID.randomUUID());
         user.setPlan(UserPlan.PLUS);
-        when(currentUser.entity()).thenReturn(user);
+        when(currentUser.entityForUpdate()).thenReturn(user);
 
         DebtRequest invalid = new DebtRequest(
                 "Crédito", "Entidad", DebtType.PERSONAL_LOAN, null,

@@ -2,8 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Landmark, X } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { Debt, DebtType, RateType } from '../../types';
-
-const today = new Date().toISOString().slice(0, 10);
+import { getTodayIsoDate } from '../../utils/date';
 
 const TYPE_OPTIONS: { value: DebtType; label: string; category: string }[] = [
   { value: 'credit_card', label: 'Tarjeta de crédito', category: 'Tarjeta de crédito' },
@@ -43,7 +42,7 @@ const emptyForm = (): FormState => ({
   monthlyPayment: 0,
   minimumPayment: 0,
   dueDateDay: 15,
-  nextDueDate: today,
+  nextDueDate: getTodayIsoDate(),
   disbursementDate: undefined,
   termRemainingMonths: 0,
   accountNumber: '',
@@ -211,7 +210,7 @@ export const AddDebtModal: React.FC = () => {
           {form.type === 'family_loan' && <label className="flex items-center gap-2 text-xs font-semibold"><input type="checkbox" checked={form.rateType !== 'NONE'} onChange={(e) => setField('rateType', e.target.checked ? 'EA' : 'NONE')} /> Tiene intereses</label>}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <label className="space-y-1 text-xs font-semibold">Fecha de desembolso / inicio<input type="date" max={today} value={form.disbursementDate || ''} onChange={(e) => setField('disbursementDate', e.target.value || undefined)} className={inputClass} /></label>
+            <label className="space-y-1 text-xs font-semibold">Fecha de desembolso / inicio<input type="date" max={getTodayIsoDate()} value={form.disbursementDate || ''} onChange={(e) => setField('disbursementDate', e.target.value || undefined)} className={inputClass} /></label>
             <label className="space-y-1 text-xs font-semibold">Referencia de cuenta<input value={form.accountNumber || ''} onChange={(e) => setField('accountNumber', e.target.value)} className={inputClass} /></label>
           </div>
 
@@ -219,7 +218,7 @@ export const AddDebtModal: React.FC = () => {
 
           <div className="flex justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
             <button type="button" onClick={close} className="px-4 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 rounded-xl">Cancelar</button>
-            <button type="submit" disabled={saving} className="px-5 py-2 text-xs font-bold text-white bg-[#008FA6] hover:bg-[#007A8E] disabled:opacity-60 rounded-xl shadow-xs">{saving ? 'Guardando...' : editingDebtId ? 'Guardar cambios' : 'Guardar deuda'}</button>
+            <button type="submit" disabled={saving} className="px-5 py-2 text-xs font-bold text-white bg-[var(--ceroa-primary)] hover:bg-[var(--ceroa-primary-hover)] disabled:opacity-60 rounded-xl shadow-xs">{saving ? 'Guardando...' : editingDebtId ? 'Guardar cambios' : 'Guardar deuda'}</button>
           </div>
         </form>
       </div>

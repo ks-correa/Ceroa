@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { 
   AppScreen, 
   CurrencyCode, 
@@ -6,17 +6,28 @@ import {
   FinancialProfile, 
   NotificationItem, 
   PaymentRecord, 
-  SimulationParams, 
-  SimulationResult, 
   StrategyType, 
   UserPreferences, 
   UserProfile 
 } from '../types';
 import { debtService } from '../services/debtService';
 import { userService } from '../services/userService';
-import { simulationService } from '../services/simulationService';
 import { notificationService } from '../services/notificationService';
 import { authService, RegisterPayload } from '../services/authService';
+import {
+  DEFAULT_FINANCIAL_PROFILE,
+  DEFAULT_PREFERENCES,
+  DEFAULT_USER_PROFILE
+} from '../constants/defaults';
+import { calculateDebtSummary } from '../utils/financial';
+import {
+  formatCurrency as formatCurrencyValue,
+  formatDate as formatDateValue,
+  formatNumber as formatNumberValue
+} from '../utils/formatters';
+import { useLayoutState } from './useLayoutState';
+import { useOverlayState } from './useOverlayState';
+import { useToast } from '../hooks/useToast';
 
 interface AppContextType {
   // Navigation & Screen
@@ -47,13 +58,9 @@ interface AppContextType {
   isLoading: boolean;
   dataError: string | null;
 
-  // Strategy & Simulation
+  // Strategy
   activeStrategy: StrategyType;
   setActiveStrategy: (strategy: StrategyType) => void;
-  simulationParams: SimulationParams;
-  setSimulationParams: React.Dispatch<React.SetStateAction<SimulationParams>>;
-  simulationResult: SimulationResult | null;
-  runSimulationCalculation: () => Promise<void>;
 
   // Financial Aggregates
   totalDebt: number;
@@ -71,6 +78,7 @@ interface AppContextType {
   // Modals & Drawers
   isAddDebtOpen: boolean;
   setIsAddDebtOpen: (open: boolean) => void;
+  openAddDebtModal: () => void;
   isRecordPaymentOpen: boolean;
   setIsRecordPaymentOpen: (open: boolean) => void;
   targetPaymentDebtId: string | null;
@@ -115,101 +123,48 @@ interface AppContextType {
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currentScreen, setCurrentScreen] = useState<AppScreen>('login');
+  const {
+    currentScreen, setCurrentScreen, selectedDebtId, setSelectedDebtId,
+    isSidebarCollapsed, setIsSidebarCollapsed, toggleSidebarCollapse,
+    isMobileSidebarOpen, setIsMobileSidebarOpen, toggleMobileSidebar
+  } = useLayoutState();
+  const {
+    isAddDebtOpen, setIsAddDebtOpen,
+    isRecordPaymentOpen, setIsRecordPaymentOpen,
+    targetPaymentDebtId, setTargetPaymentDebtId,
+    editingPayment, setEditingPayment,
+    editingDebtId, setEditingDebtId,
+    isEditFinancialOpen, setIsEditFinancialOpen,
+    isEditProfileOpen, setIsEditProfileOpen,
+    isSubscriptionModalOpen, setIsSubscriptionModalOpen,
+    isExportReportOpen, setIsExportReportOpen,
+    isNotificationsOpen, setIsNotificationsOpen
+  } = useOverlayState();
+  const { toastMessage, showToast } = useToast();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAuthChecking, setIsAuthChecking] = useState(true);
-  const [selectedDebtId, setSelectedDebtId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [dataError, setDataError] = useState<string | null>(null);
 
   // Core Data
   const [debts, setDebts] = useState<Debt[]>([]);
   const [payments, setPayments] = useState<PaymentRecord[]>([]);
-  const [userProfile, setUserProfile] = useState<UserProfile>({
-    id: 'usr-1',
-    fullName: 'Mateo Mendoza',
-    email: 'mateo.mendoza@email.com',
-    plan: 'plus',
-    billingCycle: 'annual'
-  });
-  const [financialProfile, setFinancialProfile] = useState<FinancialProfile>({
-    monthlyIncome: 0,
-    fixedExpenses: 0,
-    availableMoney: 0,
-    paymentCapacity: 0,
-    capacityUsagePercentage: 0,
-    totalDeclaredDebts: 1,
-    registeredDebts: 0,
-    incompleteCoverage: true,
-    activeStrategy: 'snowball'
-  });
-  const [preferences, setPreferences] = useState<UserPreferences>({
-    darkMode: false,
-    language: 'es',
-    currency: 'COP',
-    emailNotifications: true,
-    dueAlertsDaysBefore: 3
-  });
+  const [userProfile, setUserProfile] = useState<UserProfile>(DEFAULT_USER_PROFILE);
+  const [financialProfile, setFinancialProfile] = useState<FinancialProfile>(DEFAULT_FINANCIAL_PROFILE);
+  const [preferences, setPreferences] = useState<UserPreferences>(DEFAULT_PREFERENCES);
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
 
-  // Modals & Drawers
-  const [isAddDebtOpen, setIsAddDebtOpen] = useState(false);
-  const [isRecordPaymentOpen, setIsRecordPaymentOpen] = useState(false);
-  const [targetPaymentDebtId, setTargetPaymentDebtId] = useState<string | null>(null);
-  const [editingPayment, setEditingPayment] = useState<PaymentRecord | null>(null);
-  const [editingDebtId, setEditingDebtId] = useState<string | null>(null);
-  const [isEditFinancialOpen, setIsEditFinancialOpen] = useState(false);
-  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
-  const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState(false);
-  const [isExportReportOpen, setIsExportReportOpen] = useState(false);
-  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
-
-  // Sidebar Controls (Desktop collapse & Mobile slide-over)
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(() => {
-    try {
-      const saved = localStorage.getItem('ceroa_sidebar_collapsed');
-      return saved ? JSON.parse(saved) : false;
-    } catch {
-      return false;
-    }
-  });
-
-  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState<boolean>(false);
-
-  const toggleSidebarCollapse = useCallback(() => {
-    setIsSidebarCollapsed((prev) => {
-      const next = !prev;
-      try {
-        localStorage.setItem('ceroa_sidebar_collapsed', JSON.stringify(next));
-      } catch {
-        // ignore
-      }
-      return next;
-    });
-  }, []);
-
-  const toggleMobileSidebar = useCallback(() => {
-    setIsMobileSidebarOpen((prev) => !prev);
-  }, []);
-
-  // Strategy & Simulation
+  // Strategy
   const [activeStrategy, setActiveStrategyState] = useState<StrategyType>('snowball');
-  const [simulationParams, setSimulationParams] = useState<SimulationParams>({
-    selectedDebtId: 'all',
-    lumpSumExtra: 500000,
-    monthlyIncrease: 50000
-  });
-  const [simulationResult, setSimulationResult] = useState<SimulationResult | null>(null);
 
-  const showToast = useCallback((msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => {
-      setToastMessage((prev) => (prev === msg ? null : prev));
-    }, 3500);
+  const refreshRequestId = useRef(0);
+
+  useEffect(() => () => {
+    refreshRequestId.current += 1;
   }, []);
 
   const refreshAllData = useCallback(async () => {
+    const requestId = ++refreshRequestId.current;
     try {
       setIsLoading(true);
       setDataError(null);
@@ -222,6 +177,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         notificationService.getNotifications()
       ]);
 
+      if (requestId !== refreshRequestId.current) return;
       setDebts(fDebts);
       setPayments(fPayments);
       setUserProfile(fUser);
@@ -231,10 +187,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setNotifications(fNotifs);
 
     } catch (e) {
+      if (requestId !== refreshRequestId.current) return;
       console.error('Failed to load initial application data:', e);
       setDataError(e instanceof Error ? e.message : 'No fue posible cargar la información financiera.');
     } finally {
-      setIsLoading(false);
+      if (requestId === refreshRequestId.current) setIsLoading(false);
     }
   }, []);
 
@@ -270,17 +227,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   }, [preferences.darkMode]);
 
-  // Recalculate simulation when debts, strategy or params change
-  const runSimulationCalculation = useCallback(async () => {
-    if (debts.length === 0) return;
-    const res = await simulationService.runSimulation(debts, simulationParams, activeStrategy);
-    setSimulationResult(res);
-  }, [debts, simulationParams, activeStrategy]);
-
-  useEffect(() => {
-    runSimulationCalculation();
-  }, [runSimulationCalculation]);
-
   // Navigation helper
   const navigateToDebtDetail = (id: string) => {
     setSelectedDebtId(id);
@@ -300,6 +246,16 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const openEditDebtModal = (debtId: string) => {
     setEditingDebtId(debtId);
+    setIsAddDebtOpen(true);
+  };
+
+  const openAddDebtModal = () => {
+    if (userProfile.plan === 'cero' && debts.length >= 2) {
+      showToast('El plan Cero permite registrar máximo 2 deudas.');
+      setCurrentScreen('subscription');
+      return;
+    }
+    setEditingDebtId(null);
     setIsAddDebtOpen(true);
   };
 
@@ -416,6 +372,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     try {
       await authService.logout();
     } finally {
+      refreshRequestId.current += 1;
       setIsAuthenticated(false);
       setCurrentScreen('login');
       setDebts([]);
@@ -444,42 +401,27 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Financial aggregates
-  const totalDebt = debts.reduce((sum, d) => sum + d.currentBalance, 0);
-  const totalOriginalDebt = debts.reduce((sum, d) => sum + d.originalAmount, 0);
-  const totalPaidSoFar = Math.max(0, totalOriginalDebt - totalDebt);
-  const overallProgressPercentage = totalOriginalDebt > 0 
-    ? Math.min(100, Math.round((totalPaidSoFar / totalOriginalDebt) * 100)) 
-    : 0;
-  const nextTotalMonthlyPayment = debts.reduce((sum, d) => sum + (d.monthlyPayment || d.minimumPayment || 0), 0);
-  const activeAccountsCount = debts.filter((d) => d.currentBalance > 0).length;
-  const unreadNotificationsCount = notifications.filter((n) => !n.read).length;
+  const {
+    totalDebt,
+    totalOriginalDebt,
+    totalPaidSoFar,
+    overallProgressPercentage,
+    nextTotalMonthlyPayment,
+    activeAccountsCount
+  } = useMemo(() => calculateDebtSummary(debts), [debts]);
+  const unreadNotificationsCount = useMemo(
+    () => notifications.filter((notification) => !notification.read).length,
+    [notifications]
+  );
 
   // Formatters
-  const formatNumber = (val: number): string => {
-    return new Intl.NumberFormat('es-CO', {
-      maximumFractionDigits: 0
-    }).format(val);
-  };
-
-  const formatCurrency = (amount: number, overrideCurrency?: CurrencyCode): string => {
-    const curr = overrideCurrency || preferences.currency || 'COP';
-    const formattedNum = formatNumber(amount);
-    
-    if (curr === 'COP') {
-      return `$ ${formattedNum}`;
-    } else if (curr === 'MXN') {
-      return `$${formattedNum} MXN`;
-    } else {
-      return `$${formattedNum} USD`;
-    }
-  };
-
-  const formatDate = (date: string | undefined): string => {
-    if (!date) return 'Sin fecha';
-    const parsed = new Date(`${date.slice(0, 10)}T12:00:00`);
-    if (Number.isNaN(parsed.getTime())) return date;
-    return new Intl.DateTimeFormat('es-CO', { day: '2-digit', month: 'short', year: 'numeric' }).format(parsed);
-  };
+  const formatNumber = formatNumberValue;
+  const formatCurrency = useCallback(
+    (amount: number, overrideCurrency?: CurrencyCode) =>
+      formatCurrencyValue(amount, overrideCurrency ?? preferences.currency),
+    [preferences.currency]
+  );
+  const formatDate = formatDateValue;
 
   return (
     <AppContext.Provider
@@ -508,10 +450,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         dataError,
         activeStrategy,
         setActiveStrategy,
-        simulationParams,
-        setSimulationParams,
-        simulationResult,
-        runSimulationCalculation,
         totalDebt,
         totalOriginalDebt,
         totalPaidSoFar,
@@ -523,6 +461,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         formatDate,
         isAddDebtOpen,
         setIsAddDebtOpen,
+        openAddDebtModal,
         isRecordPaymentOpen,
         setIsRecordPaymentOpen,
         targetPaymentDebtId,

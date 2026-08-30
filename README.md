@@ -20,6 +20,8 @@ Spring Data JPA / Hibernate
 
 El backend es un monolito modular. React nunca se conecta directamente a PostgreSQL.
 
+La clasificación de hallazgos, decisiones y validaciones de la refactorización está en [ARCHITECTURE_AUDIT.md](ARCHITECTURE_AUDIT.md).
+
 ## Navegación
 
 El área autenticada mantiene exactamente cinco secciones principales, tanto en escritorio como en móvil:
@@ -145,12 +147,13 @@ Aplicación: `http://localhost:3000`
 
 - `POST /api/v1/auth/register`
 - `POST /api/v1/auth/login`
+- `GET /api/v1/auth/csrf`
 - `GET /api/v1/auth/me`
 - `POST /api/v1/auth/logout`
 - `GET /api/v1/users/me`
 - `PUT /api/v1/users/me`
 
-Las rutas financieras requieren una sesión válida. El navegador recibe una cookie `HttpOnly`; en PostgreSQL solo se almacena el hash del token de sesión.
+Las rutas financieras requieren una sesión válida. El navegador recibe una cookie `HttpOnly`; en PostgreSQL solo se almacena el hash del token de sesión. Las operaciones mutables también requieren el token CSRF que obtiene automáticamente el cliente web.
 
 ### Perfil financiero
 

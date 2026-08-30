@@ -23,8 +23,6 @@ export const simulationService = {
     params: SimulationParams,
     strategy: StrategyType = 'snowball'
   ): Promise<SimulationResult> {
-    await new Promise((res) => setTimeout(res, 40));
-
     const sorted = this.sortDebtsByStrategy(debts, strategy);
     const targetDebts = params.selectedDebtId === 'all' 
       ? sorted 
@@ -45,7 +43,13 @@ export const simulationService = {
     }
 
     // Baseline calculation (average monthly payment & interest)
-    const baseMonthlyPayment = targetDebts.reduce((sum, d) => sum + (d.monthlyPayment || d.minimumPayment || 50000), 0);
+    const baseMonthlyPayment = targetDebts.reduce(
+      (sum, debt) => sum + (debt.monthlyPayment || debt.minimumPayment || 0),
+      0
+    );
+    if (baseMonthlyPayment <= 0) {
+      throw new Error('Registra una cuota mensual válida antes de ejecutar la simulación.');
+    }
     const weightedRate = targetDebts.reduce((sum, d) => sum + (d.interestRate * (d.currentBalance / totalBalance)), 0) / 100;
     const monthlyRate = weightedRate / 12;
 
@@ -59,13 +63,10 @@ export const simulationService = {
       baseMonths++;
       const interest = baseRemaining * monthlyRate;
       baseTotalInterest += interest;
-      const principal = Math.min(baseRemaining, Math.max(0, baseMonthlyPayment - interest));
-      if (principal <= 0) {
-        // Minimum payment doesn't cover interest fallback
-        baseRemaining -= baseMonthlyPayment * 0.5;
-      } else {
-        baseRemaining -= principal;
-      }
+      const principal = baseMonthlyPayment - interest;
+      baseRemaining = principal > 0
+        ? baseRemaining - Math.min(baseRemaining, principal)
+        : baseRemaining + Math.abs(principal);
     }
 
     // Simulated scenario with lump sum + monthly increase
@@ -90,8 +91,10 @@ export const simulationService = {
       // Step actual
       if (currentActual > 0) {
         const intA = currentActual * monthlyRate;
-        const priA = Math.min(currentActual, Math.max(0, baseMonthlyPayment - intA));
-        currentActual = Math.max(0, currentActual - (priA || baseMonthlyPayment * 0.5));
+        const priA = baseMonthlyPayment - intA;
+        currentActual = priA > 0
+          ? Math.max(0, currentActual - Math.min(currentActual, priA))
+          : currentActual + Math.abs(priA);
       }
 
       // Step sim
@@ -99,8 +102,10 @@ export const simulationService = {
         simMonths++;
         const intS = currentSim * monthlyRate;
         simTotalInterest += intS;
-        const priS = Math.min(currentSim, Math.max(0, simMonthlyPayment - intS));
-        currentSim = Math.max(0, currentSim - (priS || simMonthlyPayment * 0.7));
+        const priS = simMonthlyPayment - intS;
+        currentSim = priS > 0
+          ? Math.max(0, currentSim - Math.min(currentSim, priS))
+          : currentSim + Math.abs(priS);
       }
 
       // Record key milestones for graph (every 6 months or key points)
@@ -144,7 +149,7 @@ export const simulationService = {
       newPayoffDate,
       originalTotalCost: originalCost,
       simulatedTotalCost: simulatedCost,
-      reductionPercentage: reductionPercentage || 15,
+      reductionPercentage,
       timeline: timelinePoints.slice(0, 7)
     };
   }

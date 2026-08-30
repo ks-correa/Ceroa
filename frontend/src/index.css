@@ -24,6 +24,28 @@ body {
   color: #F8FAFC;
 }
 
+.safe-area-pb {
+  padding-bottom: max(0.5rem, env(safe-area-inset-bottom));
+}
+
+@keyframes ceroa-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes ceroa-slide-in-from-left {
+  from { transform: translateX(-1rem); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.animate-in.fade-in {
+  animation: ceroa-fade-in 200ms ease-out;
+}
+
+.animate-in.slide-in-from-left {
+  animation: ceroa-slide-in-from-left 200ms ease-out;
+}
+
 /* Custom scrollbars */
 ::-webkit-scrollbar {
   width: 6px;

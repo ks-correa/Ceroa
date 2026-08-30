@@ -12,7 +12,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class DebtService {
@@ -30,8 +32,18 @@ public class DebtService {
 
     @Transactional(readOnly = true)
     public List<DebtResponse> findAll() {
-        return debtRepository.findAllByUserIdOrderByCreatedAtDesc(currentUser.id())
-                .stream().map(this::toResponse).toList();
+        List<Debt> debts = debtRepository.findAllByUserIdOrderByCreatedAtDesc(currentUser.id());
+        if (debts.isEmpty()) return List.of();
+
+        Map<UUID, Long> paymentCounts = paymentRepository
+                .countByDebtIds(debts.stream().map(Debt::getId).toList())
+                .stream()
+                .collect(Collectors.toMap(
+                        PaymentRepository.DebtPaymentCount::getDebtId,
+                        PaymentRepository.DebtPaymentCount::getPaymentCount));
+        return debts.stream()
+                .map(debt -> toResponse(debt, paymentCounts.getOrDefault(debt.getId(), 0L)))
+                .toList();
     }
 
     @Transactional(readOnly = true)
@@ -41,7 +53,7 @@ public class DebtService {
 
     @Transactional
     public DebtResponse create(DebtRequest request) {
-        User user = currentUser.entity();
+        User user = currentUser.entityForUpdate();
         if (user.getPlan() == UserPlan.CERO && debtRepository.countByUserId(user.getId()) >= CERO_DEBT_LIMIT) {
             throw new BusinessRuleException(
                     "PLAN_CERO_DEBT_LIMIT",
@@ -122,11 +134,15 @@ public class DebtService {
     }
 
     private DebtResponse toResponse(Debt debt) {
+        return toResponse(debt, paymentRepository.countByDebtId(debt.getId()));
+    }
+
+    private DebtResponse toResponse(Debt debt, long paymentCount) {
         return new DebtResponse(
                 debt.getId(), debt.getName(), debt.getEntity(), debt.getType(), debt.getCategoryLabel(),
                 debt.getOriginalAmount(), debt.getCurrentBalance(), debt.getInterestRate(), debt.getRateType(),
                 debt.getMonthlyPayment(), debt.getMinimumPayment(), debt.getDueDateDay(), debt.getNextDueDate(),
                 debt.getDisbursementDate(), debt.getTermRemainingMonths(), debt.getAccountNumber(), debt.getStatus(),
-                debt.getNotes(), debt.getColor(), debt.getDetails(), paymentRepository.countByDebtId(debt.getId()));
+                debt.getNotes(), debt.getColor(), debt.getDetails(), paymentCount);
     }
 }

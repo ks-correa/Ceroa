@@ -34,6 +34,8 @@ public class UserService {
         user.setFullName(request.fullName().trim());
         user.setEmail(email);
         user.setPhone(request.phone() == null || request.phone().isBlank() ? null : request.phone().trim());
+        user.setDocumentId(request.documentId() == null || request.documentId().isBlank()
+                ? null : request.documentId().trim());
         return authService.toResponse(userRepository.save(user));
     }
 }

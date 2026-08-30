@@ -1,12 +1,5 @@
-import { NotificationItem, UserPreferences } from '../types';
-
-const INITIAL_PREFERENCES: UserPreferences = {
-  darkMode: false,
-  language: 'es',
-  currency: 'COP',
-  emailNotifications: true,
-  dueAlertsDaysBefore: 3
-};
+import { NotificationItem } from '../types';
+import { DEFAULT_PREFERENCES } from '../constants/defaults';
 
 const INITIAL_NOTIFICATIONS: NotificationItem[] = [];
 
@@ -33,7 +26,7 @@ export class LocalStorageManager {
   }
 
   static initInterfaceData(): void {
-    if (!localStorage.getItem(this.getKey('preferences'))) this.set('preferences', INITIAL_PREFERENCES);
+    if (!localStorage.getItem(this.getKey('preferences'))) this.set('preferences', DEFAULT_PREFERENCES);
     if (!localStorage.getItem(this.getKey('notifications'))) this.set('notifications', INITIAL_NOTIFICATIONS);
   }
 }

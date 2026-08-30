@@ -1,46 +1,17 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { CeroaLogo } from '../common/CeroaLogo';
+import { useLoginForm } from './useLoginForm';
 
 export const LoginView: React.FC = () => {
   const { handleLogin, setCurrentScreen, showToast } = useApp();
-  const [email, setEmail] = useState('demo@ceroa.local');
-  const [password, setPassword] = useState('Demo123!');
-  const [showPassword, setShowPassword] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
-  const [recoveryEmail, setRecoveryEmail] = useState('');
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email || !password) {
-      showToast('Por favor completa todos los campos');
-      return;
-    }
-    try {
-      setIsSubmitting(true);
-      await handleLogin(email, password);
-    } catch (error) {
-      showToast(error instanceof Error ? error.message : 'No fue posible iniciar sesión');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleSSO = (provider: 'Google' | 'Microsoft') => {
-    showToast(`El acceso con ${provider} estará disponible próximamente`);
-  };
-
-  const handleSendRecovery = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!recoveryEmail) {
-      showToast('Ingresa tu correo para recuperar contraseña');
-      return;
-    }
-    setIsForgotPasswordOpen(false);
-    showToast('La recuperación por correo estará disponible próximamente');
-  };
+  const {
+    email, setEmail, password, setPassword, showPassword, setShowPassword,
+    isSubmitting, isForgotPasswordOpen, setIsForgotPasswordOpen,
+    recoveryEmail, setRecoveryEmail, submit: handleSubmit,
+    sendRecovery: handleSendRecovery, requestSso: handleSSO
+  } = useLoginForm(handleLogin, showToast);
 
   return (
     <div className="min-h-screen w-full bg-slate-50 dark:bg-slate-950 flex items-center justify-center p-4 sm:p-6 md:p-10 font-sans">
@@ -49,7 +20,7 @@ export const LoginView: React.FC = () => {
       <div className="w-full max-w-5xl bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-800 overflow-hidden grid grid-cols-1 lg:grid-cols-2">
         
         {/* Left Hero Graphic Section (Desktop) */}
-        <div className="hidden lg:flex flex-col justify-between p-12 bg-gradient-to-br from-[#004D5A] via-[#006A7C] to-[#008FA6] text-white relative overflow-hidden">
+        <div className="hidden lg:flex flex-col justify-between p-12 bg-gradient-to-br from-[#004D5A] via-[#006A7C] to-[var(--ceroa-primary)] text-white relative overflow-hidden">
           {/* Subtle Background Art */}
           <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:20px_20px]"></div>
           <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-cyan-400/20 rounded-full blur-3xl pointer-events-none"></div>
@@ -114,7 +85,7 @@ export const LoginView: React.FC = () => {
             
             {/* Email Field */}
             <div className="space-y-1.5">
-              <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+              <label htmlFor="login-email-input" className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
                 Correo Electrónico
               </label>
               <div className="relative flex items-center">
@@ -134,7 +105,7 @@ export const LoginView: React.FC = () => {
             {/* Password Field */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
-                <label className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
+                <label htmlFor="login-password-input" className="block text-xs font-semibold text-slate-700 dark:text-slate-300">
                   Contraseña
                 </label>
                 <button
@@ -162,6 +133,7 @@ export const LoginView: React.FC = () => {
                   id="toggle-password-visibility-btn"
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                  aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -174,7 +146,7 @@ export const LoginView: React.FC = () => {
                 type="submit"
                 id="login-submit-btn"
                 disabled={isSubmitting}
-                className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-[#008FA6] hover:bg-[#007A8E] text-white rounded-xl font-semibold text-sm shadow-sm hover:shadow-md transition-all cursor-pointer"
+                className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-[var(--ceroa-primary)] hover:bg-[var(--ceroa-primary-hover)] disabled:opacity-60 disabled:cursor-not-allowed text-white rounded-xl font-semibold text-sm shadow-sm hover:shadow-md transition-all cursor-pointer"
               >
                 <span>{isSubmitting ? 'Ingresando...' : 'Iniciar sesión'}</span>
                 <ArrowRight className="w-4 h-4" />
@@ -195,7 +167,7 @@ export const LoginView: React.FC = () => {
                 type="button"
                 id="login-google-sso-btn"
                 onClick={() => handleSSO('Google')}
-                className="w-full flex items-center justify-center gap-3 py-2.5 px-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
+                className="w-full flex items-center justify-center gap-3 py-2.5 px-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
               >
                 <svg className="w-4 h-4" viewBox="0 0 24 24">
                   <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
@@ -210,7 +182,7 @@ export const LoginView: React.FC = () => {
                 type="button"
                 id="login-microsoft-sso-btn"
                 onClick={() => handleSSO('Microsoft')}
-                className="w-full flex items-center justify-center gap-3 py-2.5 px-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-750 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
+                className="w-full flex items-center justify-center gap-3 py-2.5 px-4 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-semibold shadow-2xs transition-colors cursor-pointer"
               >
                 <svg className="w-4 h-4" viewBox="0 0 23 23">
                   <path fill="#f35325" d="M1 1h10v10H1z" />

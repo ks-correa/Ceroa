@@ -2,8 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { CheckCircle2, X } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { PaymentType } from '../../types';
-
-const today = new Date().toISOString().slice(0, 10);
+import { getTodayIsoDate } from '../../utils/date';
 
 const PAYMENT_TYPES: { value: PaymentType; label: string }[] = [
   { value: 'minimum', label: 'Pago mínimo' },
@@ -26,7 +25,7 @@ export const RecordPaymentModal: React.FC = () => {
   const [selectedDebtId, setSelectedDebtId] = useState('');
   const [amount, setAmount] = useState(0);
   const [paymentType, setPaymentType] = useState<PaymentType>('monthly_fee');
-  const [date, setDate] = useState(today);
+  const [date, setDate] = useState(getTodayIsoDate);
   const [notes, setNotes] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -45,7 +44,7 @@ export const RecordPaymentModal: React.FC = () => {
       setSelectedDebtId(debtId);
       setAmount(debt?.monthlyPayment || debt?.minimumPayment || 0);
       setPaymentType('monthly_fee');
-      setDate(today);
+      setDate(getTodayIsoDate());
       setNotes('');
     }
     setError(null);
@@ -105,17 +104,17 @@ export const RecordPaymentModal: React.FC = () => {
           <fieldset>
             <legend className="text-xs font-semibold mb-1">Tipo de pago</legend>
             <div className="grid grid-cols-2 gap-2">
-              {PAYMENT_TYPES.map((type) => <button key={type.value} type="button" onClick={() => selectType(type.value)} className={`py-2 px-2 rounded-xl text-xs font-bold transition-all ${paymentType === type.value ? 'bg-[#008FA6] text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'}`}>{type.label}</button>)}
+              {PAYMENT_TYPES.map((type) => <button key={type.value} type="button" onClick={() => selectType(type.value)} className={`py-2 px-2 rounded-xl text-xs font-bold transition-all ${paymentType === type.value ? 'bg-[var(--ceroa-primary)] text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'}`}>{type.label}</button>)}
             </div>
           </fieldset>
 
           <label className="space-y-1 text-xs font-semibold block">Valor del pago *
-            <input type="number" min="0.01" step="0.01" max={editingPayment && currentDebt ? currentDebt.currentBalance + editingPayment.amount : currentDebt?.currentBalance} value={amount} onChange={(e) => setAmount(Number(e.target.value))} required className="w-full px-3.5 py-2.5 text-base font-extrabold text-[#008FA6] dark:text-cyan-300 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-teal-500 focus:outline-none" />
+            <input type="number" min="0.01" step="0.01" max={editingPayment && currentDebt ? currentDebt.currentBalance + editingPayment.amount : currentDebt?.currentBalance} value={amount} onChange={(e) => setAmount(Number(e.target.value))} required className="w-full px-3.5 py-2.5 text-base font-extrabold text-[var(--ceroa-primary)] dark:text-cyan-300 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-teal-500 focus:outline-none" />
             {currentDebt && <span className="text-[11px] font-normal text-slate-500">Saldo actual: {formatCurrency(currentDebt.currentBalance)}</span>}
           </label>
 
           <label className="space-y-1 text-xs font-semibold block">Fecha del pago *
-            <input type="date" max={today} value={date} onChange={(e) => setDate(e.target.value)} required className="w-full px-3.5 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-teal-500 focus:outline-none" />
+            <input type="date" max={getTodayIsoDate()} value={date} onChange={(e) => setDate(e.target.value)} required className="w-full px-3.5 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-teal-500 focus:outline-none" />
           </label>
 
           <label className="space-y-1 text-xs font-semibold block">Nota (opcional)
@@ -124,7 +123,7 @@ export const RecordPaymentModal: React.FC = () => {
 
           <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
             <button type="button" onClick={() => setIsRecordPaymentOpen(false)} className="px-3.5 py-2 text-xs font-semibold text-slate-600 dark:text-slate-400 hover:bg-slate-100 rounded-xl">Cancelar</button>
-            <button type="submit" disabled={saving} className="px-5 py-2 text-xs font-bold text-white bg-[#008FA6] hover:bg-[#007A8E] disabled:opacity-60 rounded-xl shadow-xs">{saving ? 'Guardando...' : editingPayment ? 'Guardar cambios' : 'Confirmar pago'}</button>
+            <button type="submit" disabled={saving} className="px-5 py-2 text-xs font-bold text-white bg-[var(--ceroa-primary)] hover:bg-[var(--ceroa-primary-hover)] disabled:opacity-60 rounded-xl shadow-xs">{saving ? 'Guardando...' : editingPayment ? 'Guardar cambios' : 'Confirmar pago'}</button>
           </div>
         </form>
       </div>

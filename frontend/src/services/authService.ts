@@ -6,9 +6,9 @@ interface BackendUser {
   fullName: string;
   email: string;
   phone?: string;
+  documentId?: string;
   birthDate?: string;
   plan: 'CERO' | 'PLUS';
-  billingCycle: 'monthly' | 'annual';
 }
 
 export interface RegisterPayload {
@@ -26,8 +26,8 @@ export const normalizeUser = (user: BackendUser): UserProfile => ({
   fullName: user.fullName,
   email: user.email,
   phone: user.phone,
-  plan: user.plan.toLowerCase() as UserProfile['plan'],
-  billingCycle: user.billingCycle
+  documentId: user.documentId,
+  plan: user.plan.toLowerCase() as UserProfile['plan']
 });
 
 export const authService = {

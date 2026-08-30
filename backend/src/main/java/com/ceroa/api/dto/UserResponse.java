@@ -10,7 +10,7 @@ public record UserResponse(
         String fullName,
         String email,
         String phone,
+        String documentId,
         LocalDate birthDate,
-        UserPlan plan,
-        String billingCycle
+        UserPlan plan
 ) {}

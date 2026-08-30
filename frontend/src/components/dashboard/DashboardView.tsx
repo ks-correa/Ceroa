@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { 
   Eye, 
   EyeOff, 
@@ -8,16 +8,12 @@ import {
   Plus, 
   Sliders, 
   CreditCard, 
-  Landmark, 
-  Sparkles, 
+  Landmark,
   CheckCircle2, 
-  AlertCircle,
-  HelpCircle,
-  Zap,
-  DollarSign
+  AlertCircle
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { simulationService } from '../../services/simulationService';
+import { useDashboardOverview } from './useDashboardOverview';
 
 export const DashboardView: React.FC = () => {
   const { 
@@ -33,21 +29,13 @@ export const DashboardView: React.FC = () => {
     setCurrentScreen, 
     navigateToDebtDetail, 
     openRecordPaymentModal, 
-    setIsAddDebtOpen,
+    openAddDebtModal,
     setIsEditFinancialOpen,
     activeStrategy
   } = useApp();
 
-  const [hideBalances, setHideBalances] = useState(false);
-
-  // Find upcoming due commitments
-  const sortedByDue = [...debts].sort((a, b) => a.dueDateDay - b.dueDateDay);
-  const prioritizedDebts = simulationService.sortDebtsByStrategy(debts, activeStrategy);
-  const topPriorityDebt = prioritizedDebts[0];
-
-  const maskValue = (formatted: string) => {
-    return hideBalances ? '••••••••' : formatted;
-  };
+  const { hideBalances, setHideBalances, upcomingDebts, topPriorityDebt, maskValue } =
+    useDashboardOverview(debts, activeStrategy);
 
   if (debts.length === 0) {
     return (
@@ -55,7 +43,7 @@ export const DashboardView: React.FC = () => {
         <Landmark className="w-12 h-12 text-slate-300 mx-auto" />
         <h1 className="mt-4 text-2xl font-extrabold text-slate-900 dark:text-white">Empieza registrando tu primera deuda</h1>
         <p className="mt-2 text-sm text-slate-500">Inicio mostrará tu resumen real cuando exista al menos una obligación registrada.</p>
-        <button onClick={() => setIsAddDebtOpen(true)} className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 bg-[#008FA6] text-white rounded-xl text-sm font-bold"><Plus className="w-4 h-4" />Agregar deuda</button>
+        <button onClick={openAddDebtModal} className="mt-6 inline-flex items-center gap-2 px-5 py-2.5 bg-[var(--ceroa-primary)] text-white rounded-xl text-sm font-bold"><Plus className="w-4 h-4" />Agregar deuda</button>
       </div>
     );
   }
@@ -67,7 +55,7 @@ export const DashboardView: React.FC = () => {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-            Hola, {userProfile.fullName.split(' ')[0] || 'Mateo'}.
+            Hola, {userProfile.fullName.split(' ')[0] || 'bienvenido'}.
           </h1>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
             Aquí está el resumen de tu camino hacia cero deudas.
@@ -117,7 +105,7 @@ export const DashboardView: React.FC = () => {
             <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full mt-1.5 overflow-hidden">
               <div 
                 className="bg-gradient-to-r from-teal-600 to-cyan-500 h-full rounded-full transition-all duration-700"
-                style={{ width: `${Math.max(5, overallProgressPercentage)}%` }}
+                style={{ width: `${overallProgressPercentage}%` }}
               />
             </div>
           </div>
@@ -166,7 +154,7 @@ export const DashboardView: React.FC = () => {
         </div>
 
         {/* Capacidad de Pago Card */}
-        <div className="bg-gradient-to-br from-teal-50/70 to-cyan-50/70 dark:from-slate-800 dark:to-slate-850 border border-teal-200/60 dark:border-slate-700 rounded-2xl p-5 shadow-xs flex flex-col justify-between">
+        <div className="bg-gradient-to-br from-teal-50/70 to-cyan-50/70 dark:from-slate-800 dark:to-slate-800 border border-teal-200/60 dark:border-slate-700 rounded-2xl p-5 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <span className="text-[11px] font-bold tracking-wider text-teal-800 dark:text-cyan-300 uppercase">
               Capacidad de Pago
@@ -220,11 +208,13 @@ export const DashboardView: React.FC = () => {
                   <TrendingUp className="w-4 h-4" />
                 </div>
                 <h3 className="text-xs font-bold text-slate-900 dark:text-white">
-                  Pagar {topPriorityDebt?.name || 'Tarjeta Visa Platinum'}
+                  {topPriorityDebt ? `Priorizar ${topPriorityDebt.name}` : 'Registra tu primera deuda'}
                 </h3>
               </div>
               <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-                Hacer un pago extra de <strong className="text-slate-900 dark:text-white">$500.000 COP</strong> este mes te ahorrará aproximadamente <strong className="text-teal-700 dark:text-cyan-400">$340.000 en intereses</strong>.
+                {topPriorityDebt
+                  ? 'Un abono adicional reduce el saldo y los intereses futuros. Usa el simulador para estimar el impacto con un monto que se ajuste a tu capacidad.'
+                  : 'Agrega tus obligaciones para construir una estrategia basada en tus saldos y tasas reales.'}
               </p>
             </div>
           </div>
@@ -233,7 +223,7 @@ export const DashboardView: React.FC = () => {
             <button
               id="dashboard-pago-extra-btn"
               onClick={() => openRecordPaymentModal(topPriorityDebt?.id)}
-              className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-[#008FA6] hover:bg-[#007A8E] text-white rounded-xl font-bold text-xs shadow-xs hover:shadow-sm transition-all cursor-pointer"
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-[var(--ceroa-primary)] hover:bg-[var(--ceroa-primary-hover)] text-white rounded-xl font-bold text-xs shadow-xs hover:shadow-sm transition-all cursor-pointer"
             >
               <span>Registrar Pago Extra</span>
               <ArrowRight className="w-4 h-4" />
@@ -268,7 +258,7 @@ export const DashboardView: React.FC = () => {
             <div className="w-full bg-slate-100 dark:bg-slate-800 h-3.5 rounded-full overflow-hidden p-0.5 border border-slate-200/50 dark:border-slate-700/50">
               <div 
                 className="bg-gradient-to-r from-teal-600 via-teal-500 to-cyan-400 h-full rounded-full transition-all duration-700 shadow-xs"
-                style={{ width: `${Math.max(8, overallProgressPercentage)}%` }}
+                style={{ width: `${overallProgressPercentage}%` }}
               />
             </div>
           </div>
@@ -288,7 +278,7 @@ export const DashboardView: React.FC = () => {
             </div>
 
             {/* Visual Amortization Wave Simulation */}
-            <div className="h-20 w-full rounded-xl bg-slate-50 dark:bg-slate-850/60 p-2 flex items-end justify-between gap-2 overflow-hidden relative">
+            <div className="h-20 w-full rounded-xl bg-slate-50 dark:bg-slate-800/60 p-2 flex items-end justify-between gap-2 overflow-hidden relative">
               <div className="absolute inset-x-0 bottom-3 h-[1px] bg-slate-200 dark:bg-slate-700" />
               
               {/* Simulated timeline bars */}
@@ -347,14 +337,14 @@ export const DashboardView: React.FC = () => {
           </div>
 
           <div className="space-y-2.5">
-            {sortedByDue.slice(0, 3).map((d) => {
-              const isUrgent = d.status === 'vence_hoy' || d.dueDateDay === 15;
+            {upcomingDebts.slice(0, 3).map(({ debt, daysUntilDue, relativeLabel }) => {
+              const isUrgent = daysUntilDue <= 3;
 
               return (
                 <div 
-                  key={d.id}
-                  onClick={() => navigateToDebtDetail(d.id)}
-                  className="p-3.5 rounded-xl border border-slate-100 dark:border-slate-800 hover:border-teal-200 dark:hover:border-teal-900 hover:bg-slate-50/50 dark:hover:bg-slate-850/50 transition-all flex items-center justify-between cursor-pointer group"
+                  key={debt.id}
+                  onClick={() => navigateToDebtDetail(debt.id)}
+                  className="p-3.5 rounded-xl border border-slate-100 dark:border-slate-800 hover:border-teal-200 dark:hover:border-teal-900 hover:bg-slate-50/50 dark:hover:bg-slate-800/50 transition-all flex items-center justify-between cursor-pointer group"
                 >
                   <div className="flex items-center gap-3">
                     <div className={`p-2 rounded-xl ${isUrgent ? 'bg-rose-50 text-rose-600 dark:bg-rose-950/50 dark:text-rose-400' : 'bg-teal-50 text-teal-700 dark:bg-teal-950 dark:text-cyan-400'}`}>
@@ -362,20 +352,20 @@ export const DashboardView: React.FC = () => {
                     </div>
                     <div>
                       <h4 className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-teal-700 dark:group-hover:text-cyan-400 transition-colors">
-                        {d.name}
+                        {debt.name}
                       </h4>
                       <span className={`text-[11px] font-semibold ${isUrgent ? 'text-rose-600 dark:text-rose-400' : 'text-slate-500 dark:text-slate-400'}`}>
-                        {isUrgent ? '• Vence hoy' : `En ${Math.abs(d.dueDateDay - 12)} días`}
+                        {isUrgent ? `• ${relativeLabel}` : relativeLabel}
                       </span>
                     </div>
                   </div>
 
                   <div className="text-right">
                     <div className="text-xs font-bold text-slate-900 dark:text-white">
-                      {maskValue(formatCurrency(d.monthlyPayment || d.minimumPayment))}
+                      {maskValue(formatCurrency(debt.monthlyPayment || debt.minimumPayment))}
                     </div>
                     <span className="text-[10px] text-slate-400 block">
-                      {d.type === 'credit_card' ? 'Pago mínimo' : 'Cuota fija'}
+                      {debt.type === 'credit_card' ? 'Pago mínimo' : 'Cuota fija'}
                     </span>
                   </div>
                 </div>
@@ -397,7 +387,7 @@ export const DashboardView: React.FC = () => {
             </div>
 
             {topPriorityDebt ? (
-              <div className="p-4 rounded-2xl bg-gradient-to-br from-slate-50 to-teal-50/40 dark:from-slate-850 dark:to-teal-950/20 border border-teal-100/80 dark:border-slate-700 space-y-3">
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-slate-50 to-teal-50/40 dark:from-slate-800 dark:to-teal-950/20 border border-teal-100/80 dark:border-slate-700 space-y-3">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="w-3 h-3 rounded-full bg-cyan-600" />
@@ -444,7 +434,7 @@ export const DashboardView: React.FC = () => {
               <button
                 id="quick-ajustar-plan-btn"
                 onClick={() => setCurrentScreen('strategy')}
-                className="w-full flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 hover:bg-teal-50/50 dark:hover:bg-slate-750 text-xs font-semibold text-slate-700 dark:text-slate-200 transition-colors cursor-pointer border border-transparent hover:border-teal-200/60"
+                className="w-full flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 hover:bg-teal-50/50 dark:hover:bg-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 transition-colors cursor-pointer border border-transparent hover:border-teal-200/60"
               >
                 <span>Ajustar estrategia de pago</span>
                 <ChevronRightIcon />
@@ -453,7 +443,7 @@ export const DashboardView: React.FC = () => {
               <button
                 id="quick-registrar-pago-btn"
                 onClick={() => openRecordPaymentModal()}
-                className="w-full flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 hover:bg-teal-50/50 dark:hover:bg-slate-750 text-xs font-semibold text-slate-700 dark:text-slate-200 transition-colors cursor-pointer border border-transparent hover:border-teal-200/60"
+                className="w-full flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 hover:bg-teal-50/50 dark:hover:bg-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 transition-colors cursor-pointer border border-transparent hover:border-teal-200/60"
               >
                 <span>Registrar pago realizado</span>
                 <ChevronRightIcon />
@@ -462,7 +452,7 @@ export const DashboardView: React.FC = () => {
               <button
                 id="quick-simular-pago-btn"
                 onClick={() => setCurrentScreen('simulation')}
-                className="w-full flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 hover:bg-teal-50/50 dark:hover:bg-slate-750 text-xs font-semibold text-slate-700 dark:text-slate-200 transition-colors cursor-pointer border border-transparent hover:border-teal-200/60"
+                className="w-full flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 hover:bg-teal-50/50 dark:hover:bg-slate-700 text-xs font-semibold text-slate-700 dark:text-slate-200 transition-colors cursor-pointer border border-transparent hover:border-teal-200/60"
               >
                 <span>Simular abono adicional</span>
                 <ChevronRightIcon />
@@ -472,8 +462,8 @@ export const DashboardView: React.FC = () => {
 
           <button
             id="quick-add-debt-btn"
-            onClick={() => setIsAddDebtOpen(true)}
-            className="mt-4 w-full flex items-center justify-center gap-2 py-3 px-4 bg-[#008FA6] hover:bg-[#007A8E] text-white rounded-xl font-bold text-xs shadow-xs hover:shadow-sm transition-all cursor-pointer"
+            onClick={openAddDebtModal}
+            className="mt-4 w-full flex items-center justify-center gap-2 py-3 px-4 bg-[var(--ceroa-primary)] hover:bg-[var(--ceroa-primary-hover)] text-white rounded-xl font-bold text-xs shadow-xs hover:shadow-sm transition-all cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>Registrar nueva deuda</span>
@@ -496,7 +486,7 @@ export const DashboardView: React.FC = () => {
 
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setIsAddDebtOpen(true)}
+              onClick={openAddDebtModal}
               className="p-1.5 rounded-lg bg-teal-50 dark:bg-teal-950 text-teal-700 dark:text-cyan-400 hover:bg-teal-100"
               title="Agregar deuda"
             >
@@ -527,7 +517,7 @@ export const DashboardView: React.FC = () => {
                 <tr 
                   key={debt.id} 
                   onClick={() => navigateToDebtDetail(debt.id)}
-                  className="hover:bg-slate-50 dark:hover:bg-slate-850/60 cursor-pointer transition-colors"
+                  className="hover:bg-slate-50 dark:hover:bg-slate-800/60 cursor-pointer transition-colors"
                 >
                   <td className="py-3.5 pr-3">
                     <div className="flex items-center gap-2.5">

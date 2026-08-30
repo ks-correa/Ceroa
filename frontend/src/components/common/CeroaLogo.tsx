@@ -37,7 +37,7 @@ export const CeroaLogo: React.FC<CeroaLogoProps> = ({
       onClick={onClick}
       className={`inline-flex items-center gap-2.5 select-none ${onClick ? 'cursor-pointer' : ''} ${className}`}
     >
-      <div className={`${iconSizes[size]} rounded-xl bg-[#008FA6] flex items-center justify-center shadow-xs relative overflow-hidden flex-shrink-0`}>
+      <div className={`${iconSizes[size]} rounded-xl bg-[var(--ceroa-primary)] flex items-center justify-center shadow-xs relative overflow-hidden flex-shrink-0`}>
         {/* Geometric spark/zero-debt node icon from original design */}
         <svg 
           viewBox="0 0 24 24" 

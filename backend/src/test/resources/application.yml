@@ -9,3 +9,9 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create-drop
+
+ceroa:
+  frontend-url: http://localhost:3000
+  session:
+    days: 30
+    secure-cookie: false

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { 
   Plus, 
   Search, 
@@ -9,14 +9,13 @@ import {
   Landmark, 
   ChevronRight, 
   Eye, 
-  EyeOff, 
-  SlidersHorizontal,
+  EyeOff,
   TrendingDown,
-  Calendar,
-  Percent
+  Calendar
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
-import { Debt, DebtType } from '../../types';
+import { DebtType } from '../../types';
+import { useDebtFilters } from './useDebtFilters';
 
 export const DebtsListView: React.FC = () => {
   const { 
@@ -27,32 +26,14 @@ export const DebtsListView: React.FC = () => {
     activeAccountsCount, 
     formatCurrency, 
     formatDate,
-    navigateToDebtDetail, 
-    setIsAddDebtOpen,
-    setEditingDebtId
+    navigateToDebtDetail,
+    openAddDebtModal
   } = useApp();
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeCategory, setActiveCategory] = useState<'all' | 'cards' | 'loans'>('all');
-  const [hideBalances, setHideBalances] = useState(false);
-
-  // Filter debts
-  const filteredDebts = debts.filter((d) => {
-    const matchesSearch = 
-      d.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      d.entity.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      d.categoryLabel.toLowerCase().includes(searchQuery.toLowerCase());
-
-    if (!matchesSearch) return false;
-
-    if (activeCategory === 'cards') {
-      return d.type === 'credit_card';
-    }
-    if (activeCategory === 'loans') {
-      return d.type === 'mortgage' || d.type === 'auto_loan' || d.type === 'personal_loan' || d.type === 'student_loan';
-    }
-    return true;
-  });
+  const {
+    searchQuery, setSearchQuery, activeCategory, setActiveCategory,
+    hideBalances, setHideBalances, filteredDebts, maskValue
+  } = useDebtFilters(debts);
 
   const getDebtIcon = (type: DebtType) => {
     switch (type) {
@@ -71,10 +52,6 @@ export const DebtsListView: React.FC = () => {
     }
   };
 
-  const maskValue = (formatted: string) => {
-    return hideBalances ? '••••••••' : formatted;
-  };
-
   return (
     <div className="space-y-6 pb-24 lg:pb-12 max-w-7xl mx-auto">
       
@@ -91,8 +68,8 @@ export const DebtsListView: React.FC = () => {
 
         <button
           id="debts-add-debt-btn"
-          onClick={() => { setEditingDebtId(null); setIsAddDebtOpen(true); }}
-          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[#008FA6] hover:bg-[#007A8E] text-white rounded-xl font-bold text-xs shadow-xs hover:shadow-sm transition-all cursor-pointer self-start sm:self-auto"
+          onClick={openAddDebtModal}
+          className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-[var(--ceroa-primary)] hover:bg-[var(--ceroa-primary-hover)] text-white rounded-xl font-bold text-xs shadow-xs hover:shadow-sm transition-all cursor-pointer self-start sm:self-auto"
         >
           <Plus className="w-4 h-4" />
           <span>Agregar deuda</span>
@@ -113,12 +90,13 @@ export const DebtsListView: React.FC = () => {
               <div className="flex items-center gap-2">
                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-teal-50 dark:bg-teal-950/80 text-teal-700 dark:text-cyan-300 border border-teal-200/60 dark:border-teal-800">
                   <TrendingDown className="w-3 h-3" />
-                  -2.4% este mes
+                  {overallProgressPercentage}% pagado
                 </span>
                 <button
                   onClick={() => setHideBalances(!hideBalances)}
                   className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
                   title="Ocultar/Mostrar saldo"
+                  aria-label={hideBalances ? 'Mostrar saldos' : 'Ocultar saldos'}
                 >
                   {hideBalances ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -138,7 +116,7 @@ export const DebtsListView: React.FC = () => {
               <div className="w-full bg-slate-100 dark:bg-slate-800 h-2.5 rounded-full overflow-hidden">
                 <div 
                   className="bg-gradient-to-r from-teal-700 to-cyan-500 h-full rounded-full transition-all duration-700"
-                  style={{ width: `${Math.max(5, overallProgressPercentage)}%` }}
+                  style={{ width: `${overallProgressPercentage}%` }}
                 />
               </div>
             </div>
@@ -146,7 +124,7 @@ export const DebtsListView: React.FC = () => {
 
           {/* Quick Sub-Stats */}
           <div className="grid grid-cols-2 md:grid-cols-1 gap-4 pt-4 md:pt-0 md:pl-6 md:border-l border-slate-100 dark:border-slate-800">
-            <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-850 border border-slate-100 dark:border-slate-800">
+            <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-800">
               <span className="text-[11px] font-semibold text-slate-400 block">
                 Próximo pago total
               </span>
@@ -155,7 +133,7 @@ export const DebtsListView: React.FC = () => {
               </span>
             </div>
 
-            <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-850 border border-slate-100 dark:border-slate-800">
+            <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-800">
               <span className="text-[11px] font-semibold text-slate-400 block">
                 Cuentas activas
               </span>
@@ -176,6 +154,7 @@ export const DebtsListView: React.FC = () => {
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
             id="debts-search-input"
+            aria-label="Buscar deudas"
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -240,6 +219,11 @@ export const DebtsListView: React.FC = () => {
                 key={debt.id}
                 id={`debt-card-${debt.id}`}
                 onClick={() => navigateToDebtDetail(debt.id)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') navigateToDebtDetail(debt.id);
+                }}
+                role="button"
+                tabIndex={0}
                 className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 hover:border-teal-500/50 dark:hover:border-cyan-500/50 rounded-2xl p-5 shadow-xs hover:shadow-md transition-all cursor-pointer group"
               >
                 <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -315,7 +299,7 @@ export const DebtsListView: React.FC = () => {
 
                     {/* Arrow Button */}
                     <div className="flex justify-end items-center">
-                      <div className="w-9 h-9 rounded-xl bg-slate-50 dark:bg-slate-800 group-hover:bg-[#008FA6] group-hover:text-white dark:group-hover:bg-[#008FA6] text-slate-500 dark:text-slate-300 flex items-center justify-center transition-all shadow-2xs">
+                      <div className="w-9 h-9 rounded-xl bg-slate-50 dark:bg-slate-800 group-hover:bg-[var(--ceroa-primary)] group-hover:text-white dark:group-hover:bg-[var(--ceroa-primary)] text-slate-500 dark:text-slate-300 flex items-center justify-center transition-all shadow-2xs">
                         <ChevronRight className="w-5 h-5" />
                       </div>
                     </div>
@@ -337,8 +321,8 @@ export const DebtsListView: React.FC = () => {
             Intenta con otro término de búsqueda o registra una nueva deuda.
           </p>
           <button
-            onClick={() => { setEditingDebtId(null); setIsAddDebtOpen(true); }}
-            className="mt-4 px-4 py-2 bg-[#008FA6] hover:bg-[#007A8E] text-white rounded-xl text-xs font-bold shadow-xs"
+            onClick={openAddDebtModal}
+            className="mt-4 px-4 py-2 bg-[var(--ceroa-primary)] hover:bg-[var(--ceroa-primary-hover)] text-white rounded-xl text-xs font-bold shadow-xs"
           >
             + Registrar Deuda
           </button>
@@ -348,8 +332,8 @@ export const DebtsListView: React.FC = () => {
       {/* Floating Action Button (Mobile Only - Page 5) */}
       <button
         id="mobile-floating-add-debt"
-        onClick={() => { setEditingDebtId(null); setIsAddDebtOpen(true); }}
-        className="lg:hidden fixed bottom-20 right-5 w-14 h-14 bg-[#008FA6] hover:bg-[#007A8E] text-white rounded-full flex items-center justify-center shadow-lg hover:shadow-xl z-30 transition-all cursor-pointer"
+        onClick={openAddDebtModal}
+        className="lg:hidden fixed bottom-20 right-5 w-14 h-14 bg-[var(--ceroa-primary)] hover:bg-[var(--ceroa-primary-hover)] text-white rounded-full flex items-center justify-center shadow-lg hover:shadow-xl z-30 transition-all cursor-pointer"
         title="Agregar deuda"
       >
         <Plus className="w-6 h-6" />

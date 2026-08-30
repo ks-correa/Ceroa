@@ -1,9 +1,6 @@
 import React, { useState } from 'react';
 import { 
-  User, 
-  Mail, 
-  Phone, 
-  FileText, 
+  User,
   Edit3, 
   TrendingUp, 
   DollarSign, 
@@ -28,8 +25,7 @@ export const ProfileView: React.FC = () => {
     preferences, 
     handleUpdatePreferences, 
     handleLogout, 
-    formatCurrency, 
-    formatNumber,
+    formatCurrency,
     setCurrentScreen,
     setIsEditProfileOpen,
     setIsEditFinancialOpen,
@@ -118,7 +114,7 @@ export const ProfileView: React.FC = () => {
                     Teléfono
                   </span>
                   <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                    {userProfile.phone || '+57 300 123 4567'}
+                    {userProfile.phone || 'No registrado'}
                   </span>
                 </div>
 
@@ -127,7 +123,7 @@ export const ProfileView: React.FC = () => {
                     Documento
                   </span>
                   <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                    {userProfile.documentId || 'CC 1.020.***.***'}
+                    {userProfile.documentId || 'No registrado'}
                   </span>
                 </div>
               </div>
@@ -162,11 +158,12 @@ export const ProfileView: React.FC = () => {
                 <label className="relative inline-flex items-center cursor-pointer">
                   <input
                     type="checkbox"
+                    aria-label="Activar modo oscuro"
                     checked={preferences.darkMode}
                     onChange={(e) => handleUpdatePreferences({ darkMode: e.target.checked })}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#008FA6]"></div>
+                  <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[var(--ceroa-primary)]"></div>
                 </label>
               </div>
 
@@ -187,6 +184,7 @@ export const ProfileView: React.FC = () => {
                 </div>
 
                 <select
+                  aria-label="Idioma"
                   value={preferences.language}
                   onChange={(e) => handleUpdatePreferences({ language: e.target.value as 'es' | 'en' })}
                   className="px-3 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-800 dark:text-slate-200 focus:outline-none"
@@ -213,6 +211,7 @@ export const ProfileView: React.FC = () => {
                 </div>
 
                 <select
+                  aria-label="Moneda"
                   value={preferences.currency}
                   onChange={(e) => handleUpdatePreferences({ currency: e.target.value as CurrencyCode })}
                   className="px-3 py-1.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-800 dark:text-slate-200 focus:outline-none"
@@ -234,7 +233,7 @@ export const ProfileView: React.FC = () => {
             </h2>
 
             <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer" onClick={() => showToast('Módulo de actualización de contraseña activo')}>
+              <button type="button" className="w-full flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 transition-colors cursor-pointer text-left" onClick={() => showToast('La actualización de contraseña estará disponible próximamente')}>
                 <div className="flex items-center gap-3">
                   <Lock className="w-4 h-4 text-slate-400" />
                   <div>
@@ -242,27 +241,27 @@ export const ProfileView: React.FC = () => {
                       Contraseña
                     </span>
                     <span className="text-[11px] text-slate-400">
-                      Actualizada hace 3 meses
+                      Gestión disponible próximamente
                     </span>
                   </div>
                 </div>
                 <ChevronRight className="w-4 h-4 text-slate-400" />
-              </div>
+              </button>
 
-              <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-850 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer" onClick={() => showToast('Autenticación en 2 pasos configurada')}>
+              <button type="button" className="w-full flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 transition-colors cursor-pointer text-left" onClick={() => showToast('La autenticación en dos pasos estará disponible próximamente')}>
                 <div className="flex items-center gap-3">
                   <ShieldCheck className="w-4 h-4 text-emerald-500" />
                   <div>
                     <span className="text-xs font-bold text-slate-900 dark:text-white block">
                       Autenticación en 2 Pasos (2FA)
                     </span>
-                    <span className="text-[11px] text-emerald-600 font-semibold">
-                      Activada
+                    <span className="text-[11px] text-slate-400 font-semibold">
+                      No configurada
                     </span>
                   </div>
                 </div>
                 <ChevronRight className="w-4 h-4 text-slate-400" />
-              </div>
+              </button>
             </div>
           </div>
 
@@ -288,7 +287,7 @@ export const ProfileView: React.FC = () => {
 
             <div className="space-y-3.5">
               
-              <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-850 flex items-center justify-between">
+              <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800 flex items-center justify-between">
                 <div>
                   <span className="text-[11px] font-semibold text-slate-400 uppercase block">
                     Ingresos Mensuales
@@ -302,7 +301,7 @@ export const ProfileView: React.FC = () => {
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-850 flex items-center justify-between">
+              <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800 flex items-center justify-between">
                 <div>
                   <span className="text-[11px] font-semibold text-slate-400 uppercase block">
                     Gastos Fijos Estimados
@@ -316,7 +315,7 @@ export const ProfileView: React.FC = () => {
                 </div>
               </div>
 
-              <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-850 flex items-center justify-between">
+              <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800 flex items-center justify-between">
                 <div>
                   <span className="text-[11px] font-semibold text-slate-400 uppercase block">
                     Dinero Disponible
@@ -358,7 +357,7 @@ export const ProfileView: React.FC = () => {
               <button
                 id="profile-update-financial-btn"
                 onClick={() => setIsEditFinancialOpen(true)}
-                className="w-full py-2.5 px-4 bg-white dark:bg-slate-800 border border-teal-600 text-teal-700 dark:text-cyan-400 hover:bg-teal-50 dark:hover:bg-slate-750 rounded-xl text-xs font-bold transition-colors cursor-pointer"
+                className="w-full py-2.5 px-4 bg-white dark:bg-slate-800 border border-teal-600 text-teal-700 dark:text-cyan-400 hover:bg-teal-50 dark:hover:bg-slate-700 rounded-xl text-xs font-bold transition-colors cursor-pointer"
               >
                 Actualizar Datos Financieros
               </button>
@@ -380,14 +379,14 @@ export const ProfileView: React.FC = () => {
                 {userProfile.plan === 'plus' ? 'Ceroa Plus' : 'Plan Cero'}
               </h3>
               <p className="text-xs text-slate-300 mt-1">
-                Facturación Anual (Ahorro del 20% aplicado)
+                {userProfile.plan === 'plus' ? 'Plan asignado a esta cuenta' : 'Plan gratuito sin cobros'}
               </p>
             </div>
 
             <div className="pt-3 border-t border-white/15 flex items-center justify-between text-xs">
               <div>
                 <span className="text-[10px] text-slate-400 block">Próximo cobro</span>
-                <span className="font-bold text-slate-200">{userProfile.planRenewalDate || '15 Nov, 2024'}</span>
+                <span className="font-bold text-slate-200">{userProfile.plan === 'cero' ? 'No aplica' : 'No disponible'}</span>
               </div>
 
               <button

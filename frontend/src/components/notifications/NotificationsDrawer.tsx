@@ -1,6 +1,5 @@
 import React from 'react';
 import { 
-  X, 
   CreditCard, 
   CheckCircle2, 
   RefreshCw, 

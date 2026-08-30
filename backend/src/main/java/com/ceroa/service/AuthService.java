@@ -94,8 +94,8 @@ public class AuthService {
 
     public UserResponse toResponse(User user) {
         return new UserResponse(
-                user.getId(), user.getFullName(), user.getEmail(), user.getPhone(), user.getBirthDate(),
-                user.getPlan(), "annual");
+                user.getId(), user.getFullName(), user.getEmail(), user.getPhone(), user.getDocumentId(), user.getBirthDate(),
+                user.getPlan());
     }
 
     private AuthResult createSession(User user) {

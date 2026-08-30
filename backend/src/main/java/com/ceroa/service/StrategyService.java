@@ -20,7 +20,6 @@ import java.util.*;
 @Service
 public class StrategyService {
     private static final int MAX_MONTHS = 600;
-    private static final BigDecimal DEFAULT_PAYMENT = new BigDecimal("100000");
     private static final DateTimeFormatter PAYOFF_FORMAT = DateTimeFormatter.ofPattern("MMM 'de' yyyy", Locale.forLanguageTag("es-CO"));
 
     private final DebtRepository debtRepository;
@@ -61,6 +60,7 @@ public class StrategyService {
         if (source.isEmpty()) return new Projection(BigDecimal.ZERO, 0);
         List<DebtBalance> debts = source.stream().map(DebtBalance::new).toList();
         BigDecimal budget = source.stream().map(this::monthlyCommitment).reduce(BigDecimal.ZERO, BigDecimal::add);
+        if (budget.signum() == 0) return new Projection(BigDecimal.ZERO, MAX_MONTHS);
         BigDecimal totalInterest = BigDecimal.ZERO;
         int month = 0;
 
@@ -113,7 +113,7 @@ public class StrategyService {
     private BigDecimal monthlyCommitment(Debt debt) {
         if (debt.getMonthlyPayment() != null && debt.getMonthlyPayment().signum() > 0) return debt.getMonthlyPayment();
         if (debt.getMinimumPayment() != null && debt.getMinimumPayment().signum() > 0) return debt.getMinimumPayment();
-        return DEFAULT_PAYMENT;
+        return BigDecimal.ZERO;
     }
 
     private StrategyStatsResponse stats(Projection projection, BigDecimal savings) {

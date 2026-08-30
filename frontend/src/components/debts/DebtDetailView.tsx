@@ -1,22 +1,17 @@
 import React, { useState } from 'react';
 import { 
   ArrowLeft, 
-  MoreVertical, 
   Eye, 
   EyeOff, 
   CheckCircle2, 
-  Calendar, 
-  Percent, 
-  DollarSign, 
   Edit3, 
   PlusCircle, 
   Clock, 
-  CreditCard, 
-  Building2, 
   FileText,
   Trash2
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { formatRelativeDueDate, getCalendarDayDifference } from '../../utils/date';
 
 export const DebtDetailView: React.FC = () => {
   const { 
@@ -60,6 +55,21 @@ export const DebtDetailView: React.FC = () => {
   const progressPct = debt.originalAmount > 0 
     ? Math.min(100, Math.round((paidAmount / debt.originalAmount) * 100))
     : 0;
+  const parsedDueDate = new Date(`${debt.nextDueDate.slice(0, 10)}T12:00:00`);
+  const relativeDueDate = Number.isNaN(parsedDueDate.getTime())
+    ? 'Fecha por confirmar'
+    : formatRelativeDueDate(getCalendarDayDifference(parsedDueDate));
+  const statusLabel = {
+    al_dia: 'Al día',
+    vence_hoy: 'Vence hoy',
+    en_mora: 'En mora',
+    pagada: 'Pagada'
+  }[debt.status];
+  const statusClass = debt.status === 'en_mora'
+    ? 'bg-rose-50 dark:bg-rose-950 text-rose-700 dark:text-rose-400 border-rose-200/80 dark:border-rose-800'
+    : debt.status === 'vence_hoy'
+      ? 'bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-400 border-amber-200/80 dark:border-amber-800'
+      : 'bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 border-emerald-200/80 dark:border-emerald-800';
 
   const maskValue = (formatted: string) => {
     return hideBalance ? '••••••••' : formatted;
@@ -84,6 +94,7 @@ export const DebtDetailView: React.FC = () => {
             onClick={() => setHideBalance(!hideBalance)}
             className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-500 hover:text-slate-700 dark:hover:text-slate-200 cursor-pointer shadow-2xs"
             title="Ocultar saldo"
+            aria-label={hideBalance ? 'Mostrar saldo' : 'Ocultar saldo'}
           >
             {hideBalance ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
           </button>
@@ -92,6 +103,7 @@ export const DebtDetailView: React.FC = () => {
             onClick={() => setShowDeleteConfirm(true)}
             className="p-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 cursor-pointer shadow-2xs"
             title="Eliminar deuda"
+            aria-label="Eliminar deuda"
           >
             <Trash2 className="w-4 h-4" />
           </button>
@@ -106,11 +118,11 @@ export const DebtDetailView: React.FC = () => {
           <div className="space-y-3">
             <div className="flex items-center gap-2.5 flex-wrap">
               <span className="px-3 py-1 rounded-full text-xs font-bold bg-teal-50 dark:bg-teal-950 text-teal-700 dark:text-cyan-300 border border-teal-200/80 dark:border-teal-800">
-                {debt.categoryLabel || 'Hipotecario'}
+                {debt.categoryLabel || 'Otra obligación'}
               </span>
-              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 border border-emerald-200/80 dark:border-emerald-800">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                Al día
+              <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold border ${statusClass}`}>
+                <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
+                {statusLabel}
               </span>
             </div>
 
@@ -127,12 +139,12 @@ export const DebtDetailView: React.FC = () => {
               <span>•</span>
               <span>{debt.entity}</span>
               <span>•</span>
-              <span className="text-teal-700 dark:text-cyan-400 font-semibold">-2.4% vs mes anterior</span>
+              <span className="text-teal-700 dark:text-cyan-400 font-semibold">{progressPct}% pagado</span>
             </div>
           </div>
 
           {/* Radial / Progress Gauge */}
-          <div className="flex flex-col sm:flex-row items-center gap-6 p-5 rounded-2xl bg-slate-50 dark:bg-slate-850 border border-slate-100 dark:border-slate-800">
+          <div className="flex flex-col sm:flex-row items-center gap-6 p-5 rounded-2xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-800">
             {/* SVG Circular Donut Ring */}
             <div className="relative w-28 h-28 flex items-center justify-center flex-shrink-0">
               <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
@@ -144,7 +156,7 @@ export const DebtDetailView: React.FC = () => {
                   d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                 />
                 <path
-                  className="text-[#008FA6] dark:text-cyan-400 transition-all duration-1000 ease-out"
+                  className="text-[var(--ceroa-primary)] dark:text-cyan-400 transition-all duration-1000 ease-out"
                   strokeDasharray={`${progressPct}, 100`}
                   strokeWidth="3.5"
                   strokeLinecap="round"
@@ -194,42 +206,42 @@ export const DebtDetailView: React.FC = () => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             
-            <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-850">
+            <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800">
               <span className="text-[11px] font-semibold text-slate-400 block">Valor original</span>
               <span className="text-sm font-bold text-slate-900 dark:text-white mt-0.5 block">
                 {maskValue(formatCurrency(debt.originalAmount))}
               </span>
             </div>
 
-            <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-850">
+            <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800">
               <span className="text-[11px] font-semibold text-slate-400 block">Tasa de interés</span>
               <span className="text-sm font-bold text-teal-800 dark:text-cyan-400 mt-0.5 block">
                 {debt.interestRate}% {debt.rateType} (Tasa Fija)
               </span>
             </div>
 
-            <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-850">
+            <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800">
               <span className="text-[11px] font-semibold text-slate-400 block">Cuota mensual</span>
               <span className="text-sm font-bold text-slate-900 dark:text-white mt-0.5 block">
                 {maskValue(formatCurrency(debt.monthlyPayment))}
               </span>
             </div>
 
-            <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-850">
+            <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800">
               <span className="text-[11px] font-semibold text-slate-400 block">Plazo restante</span>
               <span className="text-sm font-bold text-slate-900 dark:text-white mt-0.5 block">
                 {debt.termRemainingMonths || 120} Meses
               </span>
             </div>
 
-            <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-850">
+            <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800">
               <span className="text-[11px] font-semibold text-slate-400 block">Fecha de Desembolso</span>
               <span className="text-sm font-bold text-slate-900 dark:text-white mt-0.5 block">
                 {debt.disbursementDate || '10 Ene 2018'}
               </span>
             </div>
 
-            <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-850">
+            <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800">
               <span className="text-[11px] font-semibold text-slate-400 block">Entidad emisora</span>
               <span className="text-sm font-bold text-slate-900 dark:text-white mt-0.5 block">
                 {debt.entity}
@@ -252,7 +264,7 @@ export const DebtDetailView: React.FC = () => {
 
             <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
               <Clock className="w-3.5 h-3.5" />
-              <span>Faltan {Math.abs(debt.dueDateDay - 12)} días</span>
+              <span>{relativeDueDate}</span>
             </div>
 
             <div className="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-1.5 text-xs">
@@ -271,7 +283,7 @@ export const DebtDetailView: React.FC = () => {
             <button
               id="debt-detail-register-payment-btn"
               onClick={() => openEditDebtModal(debt.id)}
-              className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-[#008FA6] hover:bg-[#007A8E] text-white rounded-xl font-bold text-xs shadow-xs hover:shadow-sm transition-all cursor-pointer"
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 bg-[var(--ceroa-primary)] hover:bg-[var(--ceroa-primary-hover)] text-white rounded-xl font-bold text-xs shadow-xs hover:shadow-sm transition-all cursor-pointer"
             >
               <PlusCircle className="w-4 h-4" />
               <span>Registrar pago</span>
@@ -328,7 +340,7 @@ export const DebtDetailView: React.FC = () => {
               </thead>
               <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                 {debtPayments.map((pay) => (
-                  <tr key={pay.id} className="hover:bg-slate-50 dark:hover:bg-slate-850/50">
+                  <tr key={pay.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/50">
                     <td className="py-3 font-semibold text-slate-900 dark:text-white">
                       {formatDate(pay.date)}
                     </td>

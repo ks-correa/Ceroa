@@ -18,6 +18,10 @@ public class Debt {
     @Id
     private UUID id;
 
+    @Version
+    @Column(nullable = false)
+    private long version;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;

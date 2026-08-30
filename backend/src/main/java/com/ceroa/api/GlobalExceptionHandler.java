@@ -8,6 +8,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.security.access.AccessDeniedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.OffsetDateTime;
 import java.util.LinkedHashMap;
@@ -15,6 +20,7 @@ import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+    private static final Logger LOGGER = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     @ExceptionHandler(ResourceNotFoundException.class)
     ResponseEntity<ApiError> handleNotFound(ResourceNotFoundException exception) {
@@ -42,6 +48,32 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     ResponseEntity<ApiError> handleIllegalArgument(IllegalArgumentException exception) {
         return response(HttpStatus.BAD_REQUEST, "INVALID_VALUE", exception.getMessage(), Map.of());
+    }
+
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    ResponseEntity<ApiError> handleOptimisticLock(ObjectOptimisticLockingFailureException exception) {
+        return response(HttpStatus.CONFLICT, "CONCURRENT_UPDATE",
+                "La información cambió mientras realizabas la operación. Actualiza los datos e intenta de nuevo.", Map.of());
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    ResponseEntity<ApiError> handleDataIntegrity(DataIntegrityViolationException exception) {
+        LOGGER.warn("Database constraint violation", exception);
+        return response(HttpStatus.CONFLICT, "DATA_CONFLICT",
+                "La operación entra en conflicto con información existente.", Map.of());
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    ResponseEntity<ApiError> handleAccessDenied(AccessDeniedException exception) {
+        return response(HttpStatus.FORBIDDEN, "ACCESS_DENIED",
+                "No tienes permiso para realizar esta operación.", Map.of());
+    }
+
+    @ExceptionHandler(Exception.class)
+    ResponseEntity<ApiError> handleUnexpected(Exception exception) {
+        LOGGER.error("Unexpected API error", exception);
+        return response(HttpStatus.INTERNAL_SERVER_ERROR, "INTERNAL_ERROR",
+                "Ocurrió un error inesperado. Intenta nuevamente.", Map.of());
     }
 
     private ResponseEntity<ApiError> response(

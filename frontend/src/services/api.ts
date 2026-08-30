@@ -1,4 +1,6 @@
 const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1').replace(/\/$/, '');
+const SAFE_HTTP_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
+let csrfTokenRequest: Promise<string> | null = null;
 
 interface ApiErrorPayload {
   code?: string;
@@ -14,21 +16,41 @@ export class ApiError extends Error {
     public readonly fieldErrors: Record<string, string> = {}
   ) {
     super(message);
+    this.name = 'ApiError';
   }
 }
+
+const getCsrfToken = (): Promise<string> => {
+  if (!csrfTokenRequest) {
+    csrfTokenRequest = fetch(`${API_URL}/auth/csrf`, { credentials: 'include' })
+      .then(async (response) => {
+        if (!response.ok) throw new ApiError('No fue posible iniciar una solicitud segura.', response.status);
+        const payload = await response.json() as { token: string };
+        return payload.token;
+      })
+      .catch((cause) => {
+        csrfTokenRequest = null;
+        throw cause;
+      });
+  }
+  return csrfTokenRequest;
+};
 
 export async function apiRequest<T>(path: string, init?: RequestInit): Promise<T> {
   let response: Response;
   try {
+    const method = (init?.method || 'GET').toUpperCase();
+    const headers = new Headers(init?.headers);
+    if (init?.body && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
+    if (!SAFE_HTTP_METHODS.has(method)) headers.set('X-XSRF-TOKEN', await getCsrfToken());
+
     response = await fetch(`${API_URL}${path}`, {
       ...init,
       credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json',
-        ...init?.headers
-      }
+      headers
     });
-  } catch {
+  } catch (cause) {
+    if (cause instanceof ApiError) throw cause;
     throw new ApiError(
       'No fue posible conectar con el servicio de Ceroa. Verifica que el backend esté en ejecución.',
       0,
@@ -37,6 +59,7 @@ export async function apiRequest<T>(path: string, init?: RequestInit): Promise<T
   }
 
   if (!response.ok) {
+    if (response.status === 403) csrfTokenRequest = null;
     const payload = await response.json().catch(() => ({})) as ApiErrorPayload;
     throw new ApiError(
       payload.message || 'El servicio no pudo completar la solicitud.',

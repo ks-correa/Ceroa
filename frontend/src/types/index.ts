@@ -78,8 +78,6 @@ export interface UserProfile {
   documentId?: string;
   avatarUrl?: string;
   plan: 'cero' | 'plus';
-  billingCycle: 'monthly' | 'annual';
-  planRenewalDate?: string;
 }
 
 export interface FinancialProfile {

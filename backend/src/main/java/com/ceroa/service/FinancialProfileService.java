@@ -4,6 +4,7 @@ import com.ceroa.api.dto.FinancialProfileRequest;
 import com.ceroa.api.dto.FinancialProfileResponse;
 import com.ceroa.domain.FinancialProfile;
 import com.ceroa.exception.ResourceNotFoundException;
+import com.ceroa.exception.BusinessRuleException;
 import com.ceroa.repository.DebtRepository;
 import com.ceroa.repository.FinancialProfileRepository;
 import org.springframework.stereotype.Service;
@@ -34,6 +35,7 @@ public class FinancialProfileService {
 
     @Transactional
     public FinancialProfileResponse update(FinancialProfileRequest request) {
+        validateBudget(request);
         FinancialProfile profile = findProfile();
         profile.setMonthlyIncome(request.monthlyIncome());
         profile.setEssentialExpenses(request.fixedExpenses());
@@ -41,6 +43,20 @@ public class FinancialProfileService {
         profile.setTotalDeclaredDebts(request.totalDeclaredDebts());
         profile.setActiveStrategy(request.activeStrategy());
         return toResponse(profileRepository.save(profile));
+    }
+
+    private void validateBudget(FinancialProfileRequest request) {
+        if (request.fixedExpenses().compareTo(request.monthlyIncome()) > 0) {
+            throw new BusinessRuleException(
+                    "EXPENSES_EXCEED_INCOME",
+                    "Los gastos fijos no pueden superar los ingresos mensuales.");
+        }
+        BigDecimal availableAfterExpenses = request.monthlyIncome().subtract(request.fixedExpenses());
+        if (request.availableMoney().compareTo(availableAfterExpenses) > 0) {
+            throw new BusinessRuleException(
+                    "INVALID_AVAILABLE_MONEY",
+                    "El dinero disponible para deudas no puede superar el ingreso restante después de gastos.");
+        }
     }
 
     private FinancialProfile findProfile() {

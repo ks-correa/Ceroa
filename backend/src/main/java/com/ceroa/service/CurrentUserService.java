@@ -31,4 +31,9 @@ public class CurrentUserService {
         return userRepository.findById(id())
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario autenticado no encontrado"));
     }
+
+    public User entityForUpdate() {
+        return userRepository.findByIdForUpdate(id())
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario autenticado no encontrado"));
+    }
 }

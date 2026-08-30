@@ -1,20 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { 
   Snowflake, 
   Flame, 
   CheckCircle2, 
-  TrendingDown, 
-  Calendar, 
   FileDown, 
-  ArrowRight, 
-  Sparkles, 
-  Info,
-  Layers,
-  ChevronRight
+  Info
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { simulationService } from '../../services/simulationService';
-import { strategyService } from '../../services/strategyService';
+import { useStrategyComparison } from './useStrategyComparison';
 
 export const StrategicPlanView: React.FC = () => {
   const { 
@@ -22,31 +16,12 @@ export const StrategicPlanView: React.FC = () => {
     activeStrategy, 
     setActiveStrategy, 
     formatCurrency, 
-    formatNumber,
     navigateToDebtDetail,
-    setIsExportReportOpen,
-    setCurrentScreen
+    setIsExportReportOpen
   } = useApp();
-
-  const [strategyStats, setStrategyStats] = useState<{
-    snowball: { totalInterest: number; payoffDate: string; months: number };
-    avalanche: { totalInterest: number; payoffDate: string; months: number; savingsVsSnowball: number };
-  }>({
-    snowball: { totalInterest: 0, payoffDate: 'Calculando...', months: 0 },
-    avalanche: { totalInterest: 0, payoffDate: 'Calculando...', months: 0, savingsVsSnowball: 0 }
-  });
-  const [orderedDebtIds, setOrderedDebtIds] = useState<string[]>([]);
-
-  useEffect(() => {
-    const loadStats = async () => {
-      if (debts.length > 0) {
-        const comparison = await strategyService.getComparison(activeStrategy);
-        setStrategyStats({ snowball: comparison.snowball, avalanche: comparison.avalanche });
-        setOrderedDebtIds(comparison.orderedDebtIds);
-      }
-    };
-    loadStats();
-  }, [debts, activeStrategy]);
+  const { comparison, isLoading, error } = useStrategyComparison(activeStrategy, debts.length > 0);
+  const strategyStats = comparison;
+  const orderedDebtIds = comparison.orderedDebtIds;
 
   // Sort according to current active strategy
   const prioritizedDebts = orderedDebtIds.length > 0
@@ -65,6 +40,12 @@ export const StrategicPlanView: React.FC = () => {
 
   return (
     <div className="space-y-6 pb-24 lg:pb-12 max-w-7xl mx-auto">
+      {error && (
+        <div role="alert" className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-900 dark:bg-rose-950/30 dark:text-rose-300">
+          {error} Se muestra el orden calculado localmente mientras vuelves a intentarlo.
+        </div>
+      )}
+      {isLoading && <span className="sr-only" role="status">Actualizando comparación de estrategias</span>}
       
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -93,36 +74,42 @@ export const StrategicPlanView: React.FC = () => {
           Estrategia Activa
         </span>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5" role="radiogroup" aria-label="Estrategia de pago">
           
           {/* Card 1: Bola de Nieve */}
           <div
             id="strategy-snowball-card"
             onClick={() => setActiveStrategy('snowball')}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') setActiveStrategy('snowball');
+            }}
+            role="radio"
+            aria-checked={activeStrategy === 'snowball'}
+            tabIndex={0}
             className={`p-6 rounded-3xl border-2 transition-all cursor-pointer relative overflow-hidden flex flex-col justify-between ${
               activeStrategy === 'snowball'
-                ? 'bg-gradient-to-br from-white to-cyan-50/40 dark:from-slate-900 dark:to-teal-950/40 border-[#008FA6] dark:border-cyan-400 shadow-sm ring-4 ring-[#008FA6]/10'
+                ? 'bg-gradient-to-br from-white to-cyan-50/40 dark:from-slate-900 dark:to-teal-950/40 border-[var(--ceroa-primary)] dark:border-cyan-400 shadow-sm ring-4 ring-[var(--ceroa-primary)]/10'
                 : 'bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800 hover:border-slate-300 opacity-80 hover:opacity-100'
             }`}
           >
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className={`p-2.5 rounded-2xl ${activeStrategy === 'snowball' ? 'bg-[#008FA6] text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'}`}>
+                  <div className={`p-2.5 rounded-2xl ${activeStrategy === 'snowball' ? 'bg-[var(--ceroa-primary)] text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'}`}>
                     <Snowflake className="w-5 h-5" />
                   </div>
                   <div>
                     <h3 className="text-base font-bold text-slate-900 dark:text-white">
                       Bola de Nieve
                     </h3>
-                    <span className="text-xs text-[#008FA6] dark:text-cyan-400 font-semibold">
+                    <span className="text-xs text-[var(--ceroa-primary)] dark:text-cyan-400 font-semibold">
                       Prioriza saldos menores
                     </span>
                   </div>
                 </div>
 
                 {activeStrategy === 'snowball' && (
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-[#008FA6] text-white">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-[var(--ceroa-primary)] text-white">
                     ACTIVA
                   </span>
                 )}
@@ -154,30 +141,36 @@ export const StrategicPlanView: React.FC = () => {
           <div
             id="strategy-avalanche-card"
             onClick={() => setActiveStrategy('avalanche')}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') setActiveStrategy('avalanche');
+            }}
+            role="radio"
+            aria-checked={activeStrategy === 'avalanche'}
+            tabIndex={0}
             className={`p-6 rounded-3xl border-2 transition-all cursor-pointer relative overflow-hidden flex flex-col justify-between ${
               activeStrategy === 'avalanche'
-                ? 'bg-gradient-to-br from-white to-cyan-50/40 dark:from-slate-900 dark:to-teal-950/40 border-[#008FA6] dark:border-cyan-400 shadow-sm ring-4 ring-[#008FA6]/10'
+                ? 'bg-gradient-to-br from-white to-cyan-50/40 dark:from-slate-900 dark:to-teal-950/40 border-[var(--ceroa-primary)] dark:border-cyan-400 shadow-sm ring-4 ring-[var(--ceroa-primary)]/10'
                 : 'bg-white dark:bg-slate-900 border-slate-200/80 dark:border-slate-800 hover:border-slate-300 opacity-80 hover:opacity-100'
             }`}
           >
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className={`p-2.5 rounded-2xl ${activeStrategy === 'avalanche' ? 'bg-[#008FA6] text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'}`}>
+                  <div className={`p-2.5 rounded-2xl ${activeStrategy === 'avalanche' ? 'bg-[var(--ceroa-primary)] text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300'}`}>
                     <Flame className="w-5 h-5" />
                   </div>
                   <div>
                     <h3 className="text-base font-bold text-slate-900 dark:text-white">
                       Avalancha
                     </h3>
-                    <span className="text-xs text-[#008FA6] dark:text-cyan-400 font-semibold">
+                    <span className="text-xs text-[var(--ceroa-primary)] dark:text-cyan-400 font-semibold">
                       Prioriza tasas de interés altas
                     </span>
                   </div>
                 </div>
 
                 {activeStrategy === 'avalanche' ? (
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-[#008FA6] text-white flex items-center gap-1">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-[var(--ceroa-primary)] text-white flex items-center gap-1">
                     <CheckCircle2 className="w-3 h-3" />
                     ACTIVA
                   </span>
@@ -197,7 +190,7 @@ export const StrategicPlanView: React.FC = () => {
             <div className="mt-6 pt-4 border-t border-slate-100 dark:border-slate-800 grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs">
               <div>
                 <span className="text-[11px] text-slate-400 block">Intereses Estimados</span>
-                <span className="font-bold text-[#008FA6] dark:text-cyan-300">
+                <span className="font-bold text-[var(--ceroa-primary)] dark:text-cyan-300">
                   {formatCurrency(strategyStats.avalanche.totalInterest)}
                 </span>
               </div>
@@ -253,7 +246,7 @@ export const StrategicPlanView: React.FC = () => {
                 className={`p-5 rounded-2xl border transition-all cursor-pointer ${
                   isFocus
                     ? 'bg-cyan-50/50 dark:bg-cyan-950/20 border-cyan-300 dark:border-cyan-700/60 shadow-xs'
-                    : 'bg-slate-50/70 dark:bg-slate-850/60 border-slate-200/70 dark:border-slate-800 hover:border-slate-300'
+                    : 'bg-slate-50/70 dark:bg-slate-800/60 border-slate-200/70 dark:border-slate-800 hover:border-slate-300'
                 }`}
               >
                 <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -263,7 +256,7 @@ export const StrategicPlanView: React.FC = () => {
                     <div className="flex items-center gap-2.5 flex-wrap">
                       <span className={`px-2.5 py-0.5 rounded-md text-[11px] font-extrabold uppercase ${
                         isFocus 
-                          ? 'bg-[#008FA6] text-white' 
+                          ? 'bg-[var(--ceroa-primary)] text-white'
                           : 'bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200'
                       }`}>
                         PRIORIDAD {priorityNumber}
@@ -281,7 +274,7 @@ export const StrategicPlanView: React.FC = () => {
                     <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
                       {isFocus ? (
                         <span>
-                          <strong className="text-slate-900 dark:text-white">Foco Principal Actual.</strong> Asignando cuota mensual ({formatCurrency(debt.monthlyPayment)}) + $150.000 COP extra.
+                          <strong className="text-slate-900 dark:text-white">Foco principal actual.</strong> Cubre los pagos mínimos y concentra aquí cualquier excedente disponible.
                         </span>
                       ) : (
                         <span>
@@ -299,7 +292,7 @@ export const StrategicPlanView: React.FC = () => {
                       <div className="w-full bg-slate-200 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
                         <div 
                           className="bg-cyan-600 h-full rounded-full"
-                          style={{ width: `${Math.max(5, paidPct)}%` }}
+                          style={{ width: `${paidPct}%` }}
                         />
                       </div>
                     </div>
@@ -308,13 +301,13 @@ export const StrategicPlanView: React.FC = () => {
                   {/* Right: Payment suggested & Payoff Projection */}
                   <div className="text-left lg:text-right flex-shrink-0 pt-2 lg:pt-0 border-t lg:border-t-0 border-slate-200 dark:border-slate-800">
                     <span className="text-[11px] font-semibold text-slate-400 block uppercase">
-                      {isFocus ? 'Pago sugerido mensual' : 'Pago mínimo'}
+                      {isFocus ? 'Cuota registrada' : 'Pago mínimo'}
                     </span>
                     <span className="text-lg sm:text-xl font-extrabold text-slate-900 dark:text-white">
-                      {formatCurrency(isFocus ? debt.monthlyPayment + 150000 : debt.minimumPayment)}
+                      {formatCurrency(isFocus ? debt.monthlyPayment : debt.minimumPayment)}
                     </span>
                     <span className="text-xs text-teal-700 dark:text-cyan-400 font-semibold block mt-0.5">
-                      Proyección: {isFocus ? 'Pagado en ~6 meses' : `Inicio en ${2024 + index}`}
+                      Orden {priorityNumber} de {prioritizedDebts.length} · Cierre del plan: {activeStrategy === 'snowball' ? strategyStats.snowball.payoffDate : strategyStats.avalanche.payoffDate}
                     </span>
                   </div>
 
