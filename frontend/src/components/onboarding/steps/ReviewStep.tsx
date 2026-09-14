@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { CheckCircle2, AlertTriangle, Landmark, Flame, Snowflake, DollarSign, Wallet, PiggyBank, Edit2, AlertCircle } from 'lucide-react';
-import { Debt, FinancialProfile, StrategyType } from '../../../types';
+import { CheckCircle2, AlertTriangle, Flame, Snowflake, DollarSign, Wallet, PiggyBank, Edit2, AlertCircle } from 'lucide-react';
+import { Debt, FinancialProfile } from '../../../types';
 import { formatCurrency } from '../../../utils/formatters';
 
 interface ReviewStepProps {

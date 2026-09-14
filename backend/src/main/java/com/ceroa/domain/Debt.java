@@ -29,7 +29,7 @@ public class Debt {
     @Column(nullable = false, length = 160)
     private String name;
 
-    @Column(nullable = false, length = 160)
+    @Column(length = 160)
     private String entity;
 
     @Enumerated(EnumType.STRING)
@@ -39,7 +39,7 @@ public class Debt {
     @Column(name = "category_label", nullable = false, length = 100)
     private String categoryLabel;
 
-    @Column(name = "original_amount", nullable = false, precision = 19, scale = 2)
+    @Column(name = "original_amount", precision = 19, scale = 2)
     private BigDecimal originalAmount;
 
     @Column(name = "current_balance", nullable = false, precision = 19, scale = 2)

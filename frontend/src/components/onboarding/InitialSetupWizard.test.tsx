@@ -1,7 +1,6 @@
 // @vitest-environment jsdom
 import { describe, it, expect, vi, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
-import React from 'react';
 import { FinancialSituationStep } from './steps/FinancialSituationStep';
 import { TotalDeclaredDebtsStep } from './steps/TotalDeclaredDebtsStep';
 import { SelectStrategyStep } from './steps/SelectStrategyStep';

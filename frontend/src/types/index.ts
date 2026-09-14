@@ -37,9 +37,30 @@ export interface Debt {
   notes?: string;
   color?: string;
   isPriority?: boolean;
-  details?: Record<string, string | number | boolean | null>;
+  details?: Record<string, any>;
   paymentCount?: number;
 }
+
+export type CreateDebtPayload = {
+  name: string;
+  entity?: string;
+  type: DebtType;
+  categoryLabel: string;
+  originalAmount?: number;
+  currentBalance: number;
+  interestRate: number;
+  rateType: RateType;
+  monthlyPayment: number;
+  minimumPayment: number;
+  dueDateDay?: number;
+  nextDueDate?: string;
+  disbursementDate?: string;
+  termRemainingMonths?: number;
+  accountNumber?: string;
+  notes?: string;
+  color?: string;
+  details?: Record<string, any>;
+};
 
 export type PaymentType = 'monthly_fee' | 'extra_principal' | 'minimum' | 'full';
 

@@ -19,7 +19,7 @@ export const RegisterDebtsStep: React.FC<RegisterDebtsStepProps> = ({
   onNext,
   onBack
 }) => {
-  const { setIsAddDebtOpen, handleDeleteDebt, setIsSubscriptionOpen } = useApp();
+  const { setIsAddDebtOpen, handleDeleteDebt, setIsSubscriptionModalOpen } = useApp();
   const [limitModalOpen, setLimitModalOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -180,7 +180,7 @@ export const RegisterDebtsStep: React.FC<RegisterDebtsStepProps> = ({
                 type="button"
                 onClick={() => {
                   setLimitModalOpen(false);
-                  setIsSubscriptionOpen(true);
+                  setIsSubscriptionModalOpen(true);
                 }}
                 className="w-full py-2.5 px-4 rounded-xl font-bold text-xs text-white bg-gradient-to-r from-teal-700 to-cyan-600 hover:from-teal-800 hover:to-cyan-700 transition-all shadow-sm flex items-center justify-center gap-2"
               >

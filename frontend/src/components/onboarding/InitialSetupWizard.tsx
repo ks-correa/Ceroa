@@ -28,6 +28,7 @@ export const InitialSetupWizard: React.FC = () => {
 
   const loadBackendState = async () => {
     try {
+      setLoading(true);
       setFetchError(null);
       const profile = await userService.getFinancialProfile();
       setFinancialProfile(profile);
@@ -36,6 +37,8 @@ export const InitialSetupWizard: React.FC = () => {
       if (!financialProfile) {
         setFetchError(cause instanceof Error ? cause.message : 'Error al cargar tu configuración inicial.');
       }
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -157,7 +160,6 @@ export const InitialSetupWizard: React.FC = () => {
       <div className="bg-slate-100 dark:bg-slate-900/60 border-b border-slate-200 dark:border-slate-800 py-3 px-4 overflow-x-auto">
         <div className="max-w-4xl mx-auto flex items-center justify-between min-w-[500px]">
           {STEPS.map((step, idx) => {
-            const Icon = step.icon;
             const isCompleted = idx < currentStep;
             const isCurrent = idx === currentStep;
             return (

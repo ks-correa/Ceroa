@@ -1,15 +1,16 @@
-import { Debt, PaymentRecord, PaymentType } from '../types';
+import { CreateDebtPayload, Debt, PaymentRecord, PaymentType } from '../types';
 import { apiRequest } from './api';
-
-type DebtPayload = Omit<Debt, 'id' | 'paymentCount' | 'isPriority'>;
 
 const normalizeDebt = (debt: Debt): Debt => ({
   ...debt,
-  originalAmount: Number(debt.originalAmount),
+  entity: debt.entity || '',
+  originalAmount: Number(debt.originalAmount || 0),
   currentBalance: Number(debt.currentBalance),
   interestRate: Number(debt.interestRate || 0),
   monthlyPayment: Number(debt.monthlyPayment || 0),
-  minimumPayment: Number(debt.minimumPayment || 0)
+  minimumPayment: Number(debt.minimumPayment || 0),
+  dueDateDay: Number(debt.dueDateDay || 15),
+  nextDueDate: debt.nextDueDate || ''
 });
 
 const normalizePayment = (payment: PaymentRecord): PaymentRecord => ({
@@ -27,16 +28,35 @@ export const debtService = {
     return normalizeDebt(await apiRequest<Debt>(`/debts/${id}`));
   },
 
-  async createDebt(newDebtData: Omit<Debt, 'id'>): Promise<Debt> {
+  async createDebt(newDebtData: CreateDebtPayload): Promise<Debt> {
     return normalizeDebt(await apiRequest<Debt>('/debts', {
       method: 'POST',
-      body: JSON.stringify(newDebtData satisfies DebtPayload)
+      body: JSON.stringify(newDebtData)
     }));
   },
 
-  async updateDebt(id: string, updates: Partial<Debt>): Promise<Debt> {
+  async updateDebt(id: string, updates: Partial<CreateDebtPayload>): Promise<Debt> {
     const current = await this.getDebtById(id);
-    const payload: DebtPayload = { ...current, ...updates };
+    const payload: CreateDebtPayload = {
+      name: updates.name ?? current.name,
+      entity: updates.entity ?? current.entity,
+      type: updates.type ?? current.type,
+      categoryLabel: updates.categoryLabel ?? current.categoryLabel,
+      originalAmount: updates.originalAmount !== undefined ? updates.originalAmount : current.originalAmount,
+      currentBalance: updates.currentBalance ?? current.currentBalance,
+      interestRate: updates.interestRate ?? current.interestRate,
+      rateType: updates.rateType ?? current.rateType,
+      monthlyPayment: updates.monthlyPayment ?? current.monthlyPayment,
+      minimumPayment: updates.minimumPayment ?? current.minimumPayment,
+      dueDateDay: updates.dueDateDay ?? current.dueDateDay,
+      nextDueDate: updates.nextDueDate ?? current.nextDueDate,
+      disbursementDate: updates.disbursementDate ?? current.disbursementDate,
+      termRemainingMonths: updates.termRemainingMonths ?? current.termRemainingMonths,
+      accountNumber: updates.accountNumber ?? current.accountNumber,
+      notes: updates.notes ?? current.notes,
+      color: updates.color ?? current.color,
+      details: updates.details ?? current.details
+    };
     return normalizeDebt(await apiRequest<Debt>(`/debts/${id}`, {
       method: 'PUT',
       body: JSON.stringify(payload)

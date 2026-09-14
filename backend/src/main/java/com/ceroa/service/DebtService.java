@@ -7,10 +7,13 @@ import com.ceroa.exception.BusinessRuleException;
 import com.ceroa.exception.ResourceNotFoundException;
 import com.ceroa.repository.DebtRepository;
 import com.ceroa.repository.PaymentRepository;
+import com.ceroa.service.validation.DebtValidator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -23,11 +26,17 @@ public class DebtService {
     private final DebtRepository debtRepository;
     private final PaymentRepository paymentRepository;
     private final CurrentUserService currentUser;
+    private final DebtValidator debtValidator;
 
-    public DebtService(DebtRepository debtRepository, PaymentRepository paymentRepository, CurrentUserService currentUser) {
+    public DebtService(
+            DebtRepository debtRepository,
+            PaymentRepository paymentRepository,
+            CurrentUserService currentUser,
+            DebtValidator debtValidator) {
         this.debtRepository = debtRepository;
         this.paymentRepository = paymentRepository;
         this.currentUser = currentUser;
+        this.debtValidator = debtValidator;
     }
 
     @Transactional(readOnly = true)
@@ -59,7 +68,7 @@ public class DebtService {
                     "PLAN_CERO_DEBT_LIMIT",
                     "El plan Cero permite registrar máximo 2 deudas. Mejora a Ceroa Plus para agregar más.");
         }
-        validateAmounts(request);
+        debtValidator.validate(request);
         Debt debt = new Debt();
         debt.setUser(user);
         apply(debt, request);
@@ -68,7 +77,7 @@ public class DebtService {
 
     @Transactional
     public DebtResponse update(UUID id, DebtRequest request) {
-        validateAmounts(request);
+        debtValidator.validate(request);
         Debt debt = findEntity(id);
         apply(debt, request);
         return toResponse(debtRepository.save(debt));
@@ -84,25 +93,27 @@ public class DebtService {
                 .orElseThrow(() -> new ResourceNotFoundException("Deuda no encontrada"));
     }
 
-    private void validateAmounts(DebtRequest request) {
-        if (request.currentBalance().compareTo(request.originalAmount()) > 0) {
-            throw new BusinessRuleException("INVALID_DEBT_BALANCE", "El saldo actual no puede superar el valor original.");
-        }
-        if (request.rateType() == RateType.NONE && request.interestRate() != null
-                && request.interestRate().compareTo(BigDecimal.ZERO) > 0) {
-            throw new BusinessRuleException("INVALID_RATE", "Una deuda sin intereses debe tener tasa igual a cero.");
-        }
-    }
-
     private void apply(Debt debt, DebtRequest request) {
         debt.setName(request.name().trim());
-        debt.setEntity(request.entity().trim());
+        debt.setEntity(request.entity() != null && !request.entity().trim().isBlank()
+                ? request.entity().trim()
+                : (request.type() == DebtType.OTHER ? "Particular / Otro" : (request.type() == DebtType.FAMILY_LOAN ? "Familiar / Amigo" : "No especificada")));
         debt.setType(request.type());
         debt.setCategoryLabel(request.categoryLabel() == null || request.categoryLabel().isBlank()
                 ? categoryFor(request.type()) : request.categoryLabel().trim());
-        debt.setOriginalAmount(request.originalAmount());
+
+        // Manejo de originalAmount: si es tarjeta y viene en details.creditLimit
+        BigDecimal originalAmount = request.originalAmount();
+        Map<String, Object> details = request.details() == null ? new LinkedHashMap<>() : new LinkedHashMap<>(request.details());
+        if (originalAmount == null && request.type() == DebtType.CREDIT_CARD && details.get("creditLimit") != null) {
+            try {
+                originalAmount = new BigDecimal(String.valueOf(details.get("creditLimit")));
+            } catch (Exception ignored) {}
+        }
+        debt.setOriginalAmount(originalAmount);
+
         debt.setCurrentBalance(request.currentBalance());
-        debt.setInterestRate(request.interestRate() == null ? BigDecimal.ZERO : request.interestRate());
+        debt.setInterestRate(request.interestRate() == null || request.rateType() == RateType.NONE ? BigDecimal.ZERO : request.interestRate());
         debt.setRateType(request.rateType());
         debt.setMonthlyPayment(request.monthlyPayment() == null ? BigDecimal.ZERO : request.monthlyPayment());
         debt.setMinimumPayment(request.minimumPayment() == null ? BigDecimal.ZERO : request.minimumPayment());
@@ -111,11 +122,46 @@ public class DebtService {
         debt.setDisbursementDate(request.disbursementDate());
         debt.setTermRemainingMonths(request.termRemainingMonths());
         debt.setAccountNumber(request.accountNumber());
-        debt.setStatus(request.currentBalance().signum() == 0 ? DebtStatus.PAID
-                : request.status() == null ? DebtStatus.CURRENT : request.status());
+
+        // Determinar status estrictamente en backend
+        debt.setStatus(calculateSystemStatus(debt.getCurrentBalance(), debt.getNextDueDate(), debt.getType(), details));
+
+        // Señalizar capacidad de proyección para deudas familiares y otras
+        if (request.type() == DebtType.FAMILY_LOAN || request.type() == DebtType.OTHER) {
+            boolean hasSufficientProjection = (debt.getMonthlyPayment() != null && debt.getMonthlyPayment().compareTo(BigDecimal.ZERO) > 0)
+                    || debt.getNextDueDate() != null;
+            details.put("hasSufficientProjectionData", hasSufficientProjection);
+        } else {
+            details.put("hasSufficientProjectionData", true);
+        }
+
         debt.setNotes(request.notes());
         debt.setColor(request.color() == null ? "#008FA6" : request.color());
-        debt.setDetails(request.details());
+        debt.setDetails(details);
+    }
+
+    private DebtStatus calculateSystemStatus(
+            BigDecimal currentBalance,
+            LocalDate nextDueDate,
+            DebtType type,
+            Map<String, Object> details) {
+        if (currentBalance != null && currentBalance.compareTo(BigDecimal.ZERO) == 0) {
+            return DebtStatus.PAID;
+        }
+        if (type == DebtType.OVERDUE_BILL) {
+            return DebtStatus.OVERDUE;
+        }
+        if (nextDueDate != null) {
+            LocalDate today = LocalDate.now();
+            if (nextDueDate.isBefore(today)) {
+                return DebtStatus.OVERDUE;
+            }
+            if (nextDueDate.isEqual(today)) {
+                return DebtStatus.DUE_TODAY;
+            }
+            return DebtStatus.CURRENT;
+        }
+        return DebtStatus.CURRENT;
     }
 
     private String categoryFor(DebtType type) {

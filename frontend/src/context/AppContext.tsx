@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import { 
   AppScreen, 
+  CreateDebtPayload,
   CurrencyCode, 
   Debt, 
   FinancialProfile, 
@@ -110,7 +111,7 @@ interface AppContextType {
 
   // Actions
   refreshAllData: () => Promise<void>;
-  handleAddDebt: (debt: Omit<Debt, 'id'>) => Promise<void>;
+  handleAddDebt: (debt: CreateDebtPayload) => Promise<void>;
   handleUpdateDebt: (id: string, updates: Partial<Debt>) => Promise<void>;
   handleDeleteDebt: (id: string) => Promise<void>;
   handleRecordPayment: (payment: { debtId: string; amount: number; type: PaymentRecord['type']; notes?: string; date: string }) => Promise<void>;
@@ -332,7 +333,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   // Actions
-  const handleAddDebt = async (newDebtData: Omit<Debt, 'id'>) => {
+  const handleAddDebt = async (newDebtData: CreateDebtPayload) => {
     const wasEditing = Boolean(editingDebtId);
     const created = editingDebtId
       ? await debtService.updateDebt(editingDebtId, newDebtData)

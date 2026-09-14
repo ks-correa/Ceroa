@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import { 
-  User,
-  Edit3, 
   TrendingUp, 
   DollarSign, 
   Moon, 
@@ -25,13 +23,16 @@ export const ProfileView: React.FC = () => {
     financialProfile, 
     preferences, 
     handleUpdatePreferences, 
+    handleUpdateUserProfile,
     handleLogout, 
     formatCurrency,
     setCurrentScreen,
-    setIsEditProfileOpen,
     setIsEditFinancialOpen,
     showToast
   } = useApp();
+
+  const isLoading = false;
+  const dataError = null;
 
   const [hideFinancials, setHideFinancials] = useState(false);
 

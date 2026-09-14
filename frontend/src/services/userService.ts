@@ -1,4 +1,4 @@
-import { FinancialProfile, UserPreferences, UserProfile } from '../types';
+import { FinancialProfile, StrategyType, UserPreferences, UserProfile } from '../types';
 import { LocalStorageManager } from './storage';
 import { apiRequest } from './api';
 import { normalizeUser } from './authService';
