@@ -148,4 +148,8 @@ public class Debt {
     public void setColor(String color) { this.color = color; }
     public Map<String, Object> getDetails() { return details; }
     public void setDetails(Map<String, Object> details) { this.details = details == null ? new LinkedHashMap<>() : details; }
+    public OffsetDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(OffsetDateTime createdAt) { this.createdAt = createdAt; }
+    public OffsetDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(OffsetDateTime updatedAt) { this.updatedAt = updatedAt; }
 }

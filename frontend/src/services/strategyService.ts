@@ -1,4 +1,4 @@
-import { StrategyType } from '../types';
+import { StrategyComparisonDetail, StrategyResponse, StrategyType } from '../types';
 import { apiRequest } from './api';
 
 export interface StrategyComparison {
@@ -9,12 +9,17 @@ export interface StrategyComparison {
 }
 
 export const strategyService = {
-  async getComparison(strategy: StrategyType): Promise<StrategyComparison> {
-    const result = await apiRequest<StrategyComparison>(`/strategies/comparison?strategy=${strategy}`);
-    return {
-      ...result,
-      snowball: { ...result.snowball, totalInterest: Number(result.snowball.totalInterest), savingsVsSnowball: Number(result.snowball.savingsVsSnowball) },
-      avalanche: { ...result.avalanche, totalInterest: Number(result.avalanche.totalInterest), savingsVsSnowball: Number(result.avalanche.savingsVsSnowball) }
-    };
+  async getActiveStrategy(): Promise<StrategyResponse> {
+    return apiRequest<StrategyResponse>('/strategies/active');
+  },
+
+  async updateActiveStrategy(strategy: StrategyType): Promise<StrategyResponse> {
+    return apiRequest<StrategyResponse>(`/strategies/active?strategy=${strategy}`, {
+      method: 'PUT'
+    });
+  },
+
+  async getComparison(): Promise<StrategyComparisonDetail> {
+    return apiRequest<StrategyComparisonDetail>('/strategies/comparison');
   }
 };

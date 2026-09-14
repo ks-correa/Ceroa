@@ -206,3 +206,72 @@ export interface DashboardSummary {
   partialCoverage: boolean;
   status: DashboardStatus;
 }
+
+export interface StrategyDebtItem {
+  id: string;
+  name: string;
+  entity: string;
+  type: DebtType;
+  categoryLabel: string;
+  currentBalance: number;
+  originalAmount: number;
+  interestRate: number;
+  rateType: RateType;
+  comparableRate: number | null;
+  isRateComparable: boolean;
+  rateReason: string | null;
+  priority: number | null;
+  isPriority: boolean;
+  basePayment: number;
+  extraPayment: number | null;
+  recommendedPayment: number;
+  projectedInterest: number | null;
+  projectedPrincipal: number | null;
+  estimatedPayoffDate: string | null;
+  estimatedMonths: number | null;
+  projectionAvailable: boolean;
+}
+
+export interface StrategyProjection {
+  available: boolean;
+  payoffDate: string | null;
+  months: number | null;
+  totalInterest: number | null;
+  totalPrincipal: number | null;
+  monthlyBudget: number | null;
+  isEstimated: boolean;
+  missingReason: string | null;
+}
+
+export interface StrategyStats {
+  totalInterest: number;
+  payoffDate: string;
+  months: number;
+  orderedDebtIds: string[];
+}
+
+export interface StrategyComparisonDetail {
+  available: boolean;
+  snowball: StrategyStats | null;
+  avalanche: StrategyStats | null;
+  interestDifference: number | null;
+  monthsDifference: number | null;
+  missingReason: string | null;
+}
+
+export type StrategyExecutionStatus = 'EMPTY' | 'INSUFFICIENT_DATA' | 'SUCCESS';
+
+export interface StrategyResponse {
+  plan: 'cero' | 'plus' | 'CERO' | 'PLUS';
+  activeStrategy: StrategyType;
+  status: StrategyExecutionStatus;
+  statusReason: string | null;
+  hasNonComparableDebts: boolean;
+  consideredDebtsCount: number;
+  totalActiveDebtsCount: number;
+  orderedDebts: StrategyDebtItem[];
+  priorityDebt: StrategyDebtItem | null;
+  summaryProjection: StrategyProjection | null;
+  globalProjection: StrategyProjection | null;
+  comparison: StrategyComparisonDetail | null;
+}

@@ -26,9 +26,20 @@ export const useStrategyComparison = (
 
     setIsLoading(true);
     setError(null);
-    void strategyService.getComparison(strategy)
-      .then((nextComparison) => {
-        if (!cancelled) setComparison(nextComparison);
+    void strategyService.getComparison()
+      .then((detail) => {
+        if (!cancelled) {
+          setComparison({
+            activeStrategy: strategy,
+            snowball: detail.snowball
+              ? { ...detail.snowball, savingsVsSnowball: 0 }
+              : { totalInterest: 0, payoffDate: 'Calculando...', months: 0, savingsVsSnowball: 0 },
+            avalanche: detail.avalanche
+              ? { ...detail.avalanche, savingsVsSnowball: detail.interestDifference ?? 0 }
+              : { totalInterest: 0, payoffDate: 'Calculando...', months: 0, savingsVsSnowball: 0 },
+            orderedDebtIds: (strategy === 'avalanche' ? detail.avalanche?.orderedDebtIds : detail.snowball?.orderedDebtIds) ?? []
+          });
+        }
       })
       .catch((cause) => {
         if (!cancelled) {

@@ -66,6 +66,9 @@ public class FinancialProfileService {
         if (strategy == null) {
             throw new BusinessRuleException("INVALID_STRATEGY", "Debe seleccionar una estrategia de pago válida.");
         }
+        if (debtRepository.countByUserId(currentUser.id()) < 1) {
+            throw new BusinessRuleException("NO_DEBTS_REGISTERED", "Debe tener al menos una deuda registrada para cambiar o aplicar una estrategia.");
+        }
         FinancialProfile profile = profileRepository.findByUserId(currentUser.id())
                 .orElseGet(() -> {
                     FinancialProfile p = new FinancialProfile();

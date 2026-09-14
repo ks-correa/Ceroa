@@ -158,6 +158,7 @@ class FinancialProfileServiceTest {
     void updatesStrategySuccessfully() {
         when(currentUser.id()).thenReturn(userId);
         when(currentUser.entity()).thenReturn(testUser);
+        when(debtRepository.countByUserId(userId)).thenReturn(1L);
         when(profileRepository.findByUserId(userId)).thenReturn(Optional.empty());
         when(profileRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
@@ -165,5 +166,17 @@ class FinancialProfileServiceTest {
 
         assertThat(res.activeStrategy()).isEqualTo(StrategyType.AVALANCHE);
         verify(profileRepository).save(any());
+    }
+
+    @Test
+    void rejectsUpdateStrategyWithoutRegisteredDebts() {
+        when(currentUser.id()).thenReturn(userId);
+        when(debtRepository.countByUserId(userId)).thenReturn(0L);
+
+        assertThatThrownBy(() -> service.updateStrategy(StrategyType.AVALANCHE))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasMessageContaining("al menos una deuda registrada");
+
+        verify(profileRepository, never()).save(any());
     }
 }

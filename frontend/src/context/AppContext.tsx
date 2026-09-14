@@ -17,6 +17,7 @@ import { userService } from '../services/userService';
 import { notificationService } from '../services/notificationService';
 import { authService, RegisterPayload } from '../services/authService';
 import { dashboardService } from '../services/dashboardService';
+import { strategyService } from '../services/strategyService';
 import {
   DEFAULT_FINANCIAL_PROFILE,
   DEFAULT_PREFERENCES,
@@ -74,7 +75,7 @@ interface AppContextType {
 
   // Strategy
   activeStrategy: StrategyType;
-  setActiveStrategy: (strategy: StrategyType) => void;
+  setActiveStrategy: (strategy: StrategyType) => Promise<void>;
 
   // Financial Aggregates
   totalDebt: number;
@@ -447,19 +448,17 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     showToast('Datos financieros actualizados');
   };
 
-  const setActiveStrategy = (strategy: StrategyType) => {
-    const previous = activeStrategy;
-    setActiveStrategyState(strategy);
-    void userService.updateFinancialProfile({ ...financialProfile, activeStrategy: strategy })
-      .then(async (updated) => {
-        setFinancialProfile(updated);
-        await refreshDashboard();
-        showToast(`Estrategia ${strategy === 'snowball' ? 'Bola de Nieve' : 'Avalancha'} guardada`);
-      })
-      .catch((error) => {
-        setActiveStrategyState(previous);
-        showToast(error instanceof Error ? error.message : 'No fue posible guardar la estrategia');
-      });
+  const setActiveStrategy = async (strategy: StrategyType): Promise<void> => {
+    try {
+      await strategyService.updateActiveStrategy(strategy);
+      setActiveStrategyState(strategy);
+      setFinancialProfile((prev) => ({ ...prev, activeStrategy: strategy }));
+      await refreshDashboard();
+      showToast(`Estrategia ${strategy === 'snowball' ? 'Bola de Nieve' : 'Avalancha'} guardada`);
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'No fue posible guardar la estrategia');
+      throw error;
+    }
   };
 
   const handleUpdatePreferences = async (updates: Partial<UserPreferences>) => {
