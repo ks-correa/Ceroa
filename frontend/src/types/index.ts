@@ -168,3 +168,41 @@ export type AppScreen =
   | 'notifications'
   | 'login'
   | 'register';
+
+export interface DashboardNextDue {
+  debtId: string;
+  debtName: string;
+  entity: string;
+  debtType: DebtType;
+  amount: number;
+  dueDate: string;
+  daysUntilDue: number;
+}
+
+export interface DashboardProgress {
+  totalOriginalDebt: number | null;
+  totalPaidSoFar: number | null;
+  totalRecordedPayments: number;
+  percentage: number | null;
+  hasProgressData: boolean;
+}
+
+export type DashboardStatus = 'EMPTY' | 'INSUFFICIENT_DATA' | 'SUCCESS';
+
+export interface DashboardSummary {
+  totalRegisteredDebt: number;
+  activeDebtCount: number;
+  requiredPaymentsCurrentPeriod: number | null;
+  hasRequiredPaymentsData: boolean;
+  nextDue: DashboardNextDue | null;
+  upcomingDues: DashboardNextDue[];
+  availableForDebt: number;
+  activeStrategy: StrategyType;
+  progress: DashboardProgress;
+  estimatedDebtFreeDate: string | null;
+  hasEstimatedDebtFreeDate: boolean;
+  totalDeclaredDebts: number;
+  registeredDebtCount: number;
+  partialCoverage: boolean;
+  status: DashboardStatus;
+}

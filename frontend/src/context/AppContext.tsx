@@ -9,12 +9,14 @@ import {
   PaymentRecord, 
   StrategyType, 
   UserPreferences, 
-  UserProfile 
+  UserProfile,
+  DashboardSummary
 } from '../types';
 import { debtService } from '../services/debtService';
 import { userService } from '../services/userService';
 import { notificationService } from '../services/notificationService';
 import { authService, RegisterPayload } from '../services/authService';
+import { dashboardService } from '../services/dashboardService';
 import {
   DEFAULT_FINANCIAL_PROFILE,
   DEFAULT_PREFERENCES,
@@ -63,6 +65,12 @@ interface AppContextType {
   unreadNotificationsCount: number;
   isLoading: boolean;
   dataError: string | null;
+
+  // Dashboard (EP-08)
+  dashboardSummary: DashboardSummary | null;
+  isDashboardLoading: boolean;
+  dashboardError: string | null;
+  refreshDashboard: () => Promise<void>;
 
   // Strategy
   activeStrategy: StrategyType;
@@ -172,7 +180,26 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   // Strategy
   const [activeStrategy, setActiveStrategyState] = useState<StrategyType>('snowball');
 
+  // Dashboard Summary (EP-08)
+  const [dashboardSummary, setDashboardSummary] = useState<DashboardSummary | null>(null);
+  const [isDashboardLoading, setIsDashboardLoading] = useState<boolean>(true);
+  const [dashboardError, setDashboardError] = useState<string | null>(null);
+
   const refreshRequestId = useRef(0);
+
+  const refreshDashboard = useCallback(async () => {
+    try {
+      setIsDashboardLoading(true);
+      setDashboardError(null);
+      const summary = await dashboardService.getSummary();
+      setDashboardSummary(summary);
+    } catch (e) {
+      console.error('Failed to load dashboard summary:', e);
+      setDashboardError(e instanceof Error ? e.message : 'No fue posible cargar el resumen financiero.');
+    } finally {
+      setIsDashboardLoading(false);
+    }
+  }, []);
 
   const clearAuthenticatedState = useCallback(() => {
     invalidateSessionRequests();
@@ -185,6 +212,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setPayments([]);
     setUserProfile(DEFAULT_USER_PROFILE);
     setFinancialProfile(DEFAULT_FINANCIAL_PROFILE);
+    setDashboardSummary(null);
+    setIsDashboardLoading(false);
+    setDashboardError(null);
     setNotifications([]);
     setActiveStrategyState('snowball');
     setDataError(null);
@@ -233,14 +263,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const requestId = ++refreshRequestId.current;
     try {
       setIsLoading(true);
+      setIsDashboardLoading(true);
       setDataError(null);
-      const [fDebts, fPayments, fUser, fFin, fPrefs, fNotifs] = await Promise.all([
+      setDashboardError(null);
+      const [fDebts, fPayments, fUser, fFin, fPrefs, fNotifs, fDashboard] = await Promise.all([
         debtService.getDebts(),
         debtService.getPayments(),
         userService.getUserProfile(),
         userService.getFinancialProfile(),
         userService.getPreferences(),
-        notificationService.getNotifications()
+        notificationService.getNotifications(),
+        dashboardService.getSummary().catch((err) => {
+          console.error('Failed to fetch dashboard summary in refreshAllData:', err);
+          return null;
+        })
       ]);
 
       if (requestId !== refreshRequestId.current) return;
@@ -251,13 +287,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setActiveStrategyState(fFin.activeStrategy);
       setPreferences(fPrefs);
       setNotifications(fNotifs);
-
+      if (fDashboard) {
+        setDashboardSummary(fDashboard);
+        setDashboardError(null);
+      }
     } catch (e) {
       if (requestId !== refreshRequestId.current) return;
       console.error('Failed to load initial application data:', e);
       setDataError(e instanceof Error ? e.message : 'No fue posible cargar la información financiera.');
     } finally {
-      if (requestId === refreshRequestId.current) setIsLoading(false);
+      if (requestId === refreshRequestId.current) {
+        setIsLoading(false);
+        setIsDashboardLoading(false);
+      }
     }
   }, []);
 
@@ -401,6 +443,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const updated = await userService.updateFinancialProfile({ ...financialProfile, ...updates });
     setFinancialProfile(updated);
     setActiveStrategyState(updated.activeStrategy);
+    await refreshDashboard();
     showToast('Datos financieros actualizados');
   };
 
@@ -408,8 +451,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const previous = activeStrategy;
     setActiveStrategyState(strategy);
     void userService.updateFinancialProfile({ ...financialProfile, activeStrategy: strategy })
-      .then((updated) => {
+      .then(async (updated) => {
         setFinancialProfile(updated);
+        await refreshDashboard();
         showToast(`Estrategia ${strategy === 'snowball' ? 'Bola de Nieve' : 'Avalancha'} guardada`);
       })
       .catch((error) => {
@@ -541,6 +585,10 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         unreadNotificationsCount,
         isLoading,
         dataError,
+        dashboardSummary,
+        isDashboardLoading,
+        dashboardError,
+        refreshDashboard,
         activeStrategy,
         setActiveStrategy,
         totalDebt,
