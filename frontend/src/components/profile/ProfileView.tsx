@@ -16,6 +16,7 @@ import {
   EyeOff
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { PersonalInfoSection } from './PersonalInfoSection';
 import { CurrencyCode } from '../../types';
 
 export const ProfileView: React.FC = () => {
@@ -67,68 +68,13 @@ export const ProfileView: React.FC = () => {
         {/* Left Column: Personal Info & Preferences (7 cols) */}
         <div className="lg:col-span-7 space-y-6">
           
-          {/* Card 1: Datos Personales (Page 15 of PDF) */}
-          <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 shadow-xs space-y-5">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
-              <h2 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <User className="w-4 h-4 text-teal-700 dark:text-cyan-400" />
-                Datos Personales
-              </h2>
-              <button
-                onClick={() => setIsEditProfileOpen(true)}
-                className="text-xs font-bold text-teal-700 dark:text-cyan-400 hover:underline flex items-center gap-1 cursor-pointer"
-              >
-                <Edit3 className="w-3.5 h-3.5" />
-                Editar Datos
-              </button>
-            </div>
-
-            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-5">
-              <img
-                src={userProfile.avatarUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80'}
-                alt={userProfile.fullName}
-                className="w-20 h-20 rounded-2xl object-cover border-2 border-teal-500/30 shadow-md flex-shrink-0"
-              />
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-1 w-full">
-                <div>
-                  <span className="text-[11px] font-semibold text-slate-400 block uppercase">
-                    Nombre Completo
-                  </span>
-                  <span className="text-sm font-bold text-slate-900 dark:text-white">
-                    {userProfile.fullName}
-                  </span>
-                </div>
-
-                <div>
-                  <span className="text-[11px] font-semibold text-slate-400 block uppercase">
-                    Correo Electrónico
-                  </span>
-                  <span className="text-sm font-bold text-slate-900 dark:text-white truncate block">
-                    {userProfile.email}
-                  </span>
-                </div>
-
-                <div>
-                  <span className="text-[11px] font-semibold text-slate-400 block uppercase">
-                    Teléfono
-                  </span>
-                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                    {userProfile.phone || 'No registrado'}
-                  </span>
-                </div>
-
-                <div>
-                  <span className="text-[11px] font-semibold text-slate-400 block uppercase">
-                    Documento
-                  </span>
-                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                    {userProfile.documentId || 'No registrado'}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
+          {/* Card 1: Datos Personales */}
+          <PersonalInfoSection
+            userProfile={userProfile}
+            onProfileUpdated={(updated) => handleUpdateUserProfile(updated)}
+            isLoading={isLoading}
+            error={dataError}
+          />
 
           {/* Card 2: Preferencias (Page 9 & 15 of PDF) */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 shadow-xs space-y-4">

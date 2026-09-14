@@ -10,7 +10,9 @@ interface BackendUser {
   email: string;
   phone?: string;
   documentId?: string;
+  birthDate?: string;
   plan: 'CERO' | 'PLUS';
+  initialSetupComplete?: boolean;
 }
 
 type FinancialProfileUpdate = Pick<
@@ -37,10 +39,24 @@ export const userService = {
       method: 'PUT',
       body: JSON.stringify({
         fullName: profile.fullName ?? current.fullName,
-        email: profile.email ?? current.email,
         phone: profile.phone ?? current.phone ?? '',
-        documentId: profile.documentId ?? current.documentId ?? ''
+        documentId: profile.documentId ?? current.documentId ?? '',
+        birthDate: profile.birthDate ?? current.birthDate ?? ''
       })
+    }));
+  },
+
+  async requestEmailChange(newEmail: string): Promise<{ requestId: string; message: string }> {
+    return apiRequest<{ requestId: string; message: string }>('/users/me/email/change', {
+      method: 'POST',
+      body: JSON.stringify({ newEmail })
+    });
+  },
+
+  async verifyEmailChange(requestId: string, code: string): Promise<UserProfile> {
+    return normalizeUser(await apiRequest<BackendUser>('/users/me/email/verify', {
+      method: 'POST',
+      body: JSON.stringify({ requestId, code })
     }));
   },
 

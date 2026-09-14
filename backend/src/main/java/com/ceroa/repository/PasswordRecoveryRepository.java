@@ -12,6 +12,9 @@ public interface PasswordRecoveryRepository extends JpaRepository<PasswordRecove
     Optional<PasswordRecovery> lockById(UUID id);
     long countByEmailAndCreatedAtAfter(String email, OffsetDateTime since);
     long countBySourceHashAndCreatedAtAfter(String hash, OffsetDateTime since);
+    /** Used by RecoveryDeliveryJob — only PASSWORD_RESET purpose */
+    List<PasswordRecovery> findTop20ByStateAndPurposeOrderByCreatedAtAsc(String state, String purpose);
+    /** Legacy method kept for backward compatibility; use the purpose-aware variant */
     List<PasswordRecovery> findTop20ByStateOrderByCreatedAtAsc(String state);
     void deleteByCreatedAtBefore(OffsetDateTime before);
 }

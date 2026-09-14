@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, User } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
+import { validateProfileUpdate, ProfileFieldErrors } from '../profile/profile.validation';
 
 export const EditProfileModal: React.FC = () => {
   const { 
@@ -11,24 +12,50 @@ export const EditProfileModal: React.FC = () => {
   } = useApp();
 
   const [fullName, setFullName] = useState(userProfile.fullName);
-  const [email, setEmail] = useState(userProfile.email);
   const [phone, setPhone] = useState(userProfile.phone || '');
   const [documentId, setDocumentId] = useState(userProfile.documentId || '');
+  const [birthDate, setBirthDate] = useState(userProfile.birthDate || '');
+  const [fieldErrors, setFieldErrors] = useState<ProfileFieldErrors>({});
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+
+  useEffect(() => {
+    if (isEditProfileOpen) {
+      setFullName(userProfile.fullName);
+      setPhone(userProfile.phone || '');
+      setDocumentId(userProfile.documentId || '');
+      setBirthDate(userProfile.birthDate || '');
+      setFieldErrors({});
+      setError(null);
+    }
+  }, [isEditProfileOpen, userProfile]);
 
   if (!isEditProfileOpen) return null;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    const errors = validateProfileUpdate({
+      fullName,
+      phone,
+      birthDate
+    });
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
+      return;
+    }
+
+    setFieldErrors({});
+
     try {
       setIsSaving(true);
       await handleUpdateUserProfile({
         fullName: fullName.trim(),
-        email: email.trim(),
         phone: phone.trim(),
-        documentId: documentId.trim()
+        documentId: documentId.trim(),
+        birthDate: birthDate.trim()
       });
       setIsEditProfileOpen(false);
     } catch (cause) {
@@ -51,7 +78,7 @@ export const EditProfileModal: React.FC = () => {
               <h3 id="profile-modal-title" className="text-base font-bold text-slate-900 dark:text-white">
                 Editar Datos Personales
               </h3>
-              <p className="text-xs text-slate-500">Actualiza tu información de contacto</p>
+              <p className="text-xs text-slate-500">Actualiza tu información personal</p>
             </div>
           </div>
           <button
@@ -68,7 +95,7 @@ export const EditProfileModal: React.FC = () => {
           
           <div className="space-y-1">
             <label htmlFor="profile-full-name" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-              Nombre Completo
+              Nombre Completo <span className="text-rose-500">*</span>
             </label>
             <input
               id="profile-full-name"
@@ -78,19 +105,19 @@ export const EditProfileModal: React.FC = () => {
               required
               className="w-full px-3.5 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-teal-500 focus:outline-none"
             />
+            {fieldErrors.fullName && <p className="text-xs text-rose-600 mt-1">{fieldErrors.fullName}</p>}
           </div>
 
           <div className="space-y-1">
-            <label htmlFor="profile-email" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-              Correo Electrónico
+            <label htmlFor="profile-email-readonly" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+              Correo Electrónico (Para cambiarlo usa la opción de Cambio de Correo)
             </label>
             <input
-              id="profile-email"
+              id="profile-email-readonly"
               type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full px-3.5 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-teal-500 focus:outline-none"
+              value={userProfile.email}
+              readOnly
+              className="w-full px-3.5 py-2 text-xs bg-slate-100 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl text-slate-500 cursor-not-allowed"
             />
           </div>
 
@@ -104,8 +131,10 @@ export const EditProfileModal: React.FC = () => {
                 type="text"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
+                placeholder="+573001234567"
                 className="w-full px-3.5 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-teal-500 focus:outline-none"
               />
+              {fieldErrors.phone && <p className="text-xs text-rose-600 mt-1">{fieldErrors.phone}</p>}
             </div>
 
             <div className="space-y-1">
@@ -120,6 +149,20 @@ export const EditProfileModal: React.FC = () => {
                 className="w-full px-3.5 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-teal-500 focus:outline-none"
               />
             </div>
+          </div>
+
+          <div className="space-y-1">
+            <label htmlFor="profile-birthdate" className="text-xs font-semibold text-slate-700 dark:text-slate-300">
+              Fecha de Nacimiento
+            </label>
+            <input
+              id="profile-birthdate"
+              type="date"
+              value={birthDate}
+              onChange={(e) => setBirthDate(e.target.value)}
+              className="w-full px-3.5 py-2 text-xs bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-teal-500 focus:outline-none"
+            />
+            {fieldErrors.birthDate && <p className="text-xs text-rose-600 mt-1">{fieldErrors.birthDate}</p>}
           </div>
 
           <div className="flex justify-end gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">

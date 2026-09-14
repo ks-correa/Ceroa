@@ -18,5 +18,7 @@ public class PasswordRecovery {
     @Column(name = "expires_at", nullable = false) public OffsetDateTime expiresAt;
     @Column(name = "grant_expires_at") public OffsetDateTime grantExpiresAt;
     @Column(nullable = false) public int attempts;
-    @Column(nullable = false, length = 16) public String state;
+    @Column(nullable = false, length = 20) public String state;
+    @Column(nullable = false, length = 20) public String purpose = "PASSWORD_RESET";
+    @Column(name = "new_email", length = 254) public String newEmail;
 }

@@ -77,6 +77,7 @@ export interface UserProfile {
   email: string;
   phone?: string;
   documentId?: string;
+  birthDate?: string;
   avatarUrl?: string;
   plan: 'cero' | 'plus';
 }

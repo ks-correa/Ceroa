@@ -28,6 +28,7 @@ export const normalizeUser = (user: BackendUser): UserProfile => ({
   fullName: user.fullName,
   email: user.email,
   phone: user.phone,
+  birthDate: user.birthDate,
   initialSetupComplete: user.initialSetupComplete === true,
   documentId: user.documentId,
   plan: user.plan.toLowerCase() as UserProfile['plan']

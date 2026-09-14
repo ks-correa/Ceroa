@@ -19,7 +19,8 @@ public class RecoveryDeliveryJob {
     }
     @Scheduled(fixedDelay = 2000)
     public void deliverPending() {
-        for (var recovery : repository.findTop20ByStateOrderByCreatedAtAsc("PENDING")) {
+        // Only process PASSWORD_RESET purpose; EMAIL_CHANGE is handled by EmailChangeDeliveryJob
+        for (var recovery : repository.findTop20ByStateAndPurposeOrderByCreatedAtAsc("PENDING", "PASSWORD_RESET")) {
             try { service.deliver(recovery.id); }
             catch (RuntimeException error) { org.slf4j.LoggerFactory.getLogger(getClass()).warn("Recovery delivery temporarily unavailable"); }
         }
