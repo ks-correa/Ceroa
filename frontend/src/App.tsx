@@ -9,6 +9,8 @@ import { BottomNav } from './components/layout/BottomNav';
 import { Sidebar } from './components/layout/Sidebar';
 import { TopHeader } from './components/layout/TopHeader';
 import { NotificationsDrawer } from './components/notifications/NotificationsDrawer';
+import { MobileOnboarding } from './components/onboarding/MobileOnboarding';
+import { useMobileOnboarding } from './components/onboarding/useMobileOnboarding';
 
 const AppContent: React.FC = () => {
   const {
@@ -20,9 +22,19 @@ const AppContent: React.FC = () => {
     dataError,
     refreshAllData
   } = useApp();
+  const { isOpen: isOnboardingOpen, dismiss: dismissOnboarding } = useMobileOnboarding();
 
   if (isAuthChecking) return <FullPageLoadingState />;
-  if (!isAuthenticated) return currentScreen === 'register' ? <RegisterView /> : <LoginView />;
+  if (!isAuthenticated) {
+    return (
+      <>
+        <div inert={isOnboardingOpen ? true : undefined} aria-hidden={isOnboardingOpen || undefined}>
+          {currentScreen === 'register' ? <RegisterView /> : <LoginView />}
+        </div>
+        <MobileOnboarding open={isOnboardingOpen} onDismiss={dismissOnboarding} />
+      </>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col">

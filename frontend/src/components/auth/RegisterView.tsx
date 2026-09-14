@@ -3,6 +3,7 @@ import { User, Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { CeroaLogo } from '../common/CeroaLogo';
 import { useRegisterForm } from './useRegisterForm';
+import { DesktopOnboardingPanel } from '../onboarding/DesktopOnboardingPanel';
 
 export const RegisterView: React.FC = () => {
   const { handleRegister, setCurrentScreen, showToast } = useApp();
@@ -180,31 +181,8 @@ export const RegisterView: React.FC = () => {
           </form>
         </div>
 
-        {/* Right Hero Graphic Section (Desktop) */}
-        <div className="hidden lg:flex flex-col justify-between p-12 bg-gradient-to-tr from-[#004D5A] via-[#006A7C] to-[var(--ceroa-primary)] text-white relative overflow-hidden order-1 lg:order-2">
-          
-          <div className="relative z-10 flex justify-end">
-            <div className="px-3 py-1 rounded-full bg-white/10 border border-white/20 text-[11px] font-semibold text-cyan-200">
-              Registro Seguro
-            </div>
-          </div>
-
-          <div className="relative z-10 my-auto text-center space-y-4 py-8">
-            <div className="w-20 h-20 mx-auto rounded-3xl bg-white/20 backdrop-blur-md p-1 shadow-2xl flex items-center justify-center">
-              <CeroaLogo size="lg" />
-            </div>
-            
-            <blockquote className="text-lg font-medium text-slate-100 italic max-w-sm mx-auto leading-relaxed pt-4">
-              "La claridad estructural es el primer paso hacia la libertad."
-            </blockquote>
-            <p className="text-xs font-semibold text-cyan-200">
-              — Filosofía Ceroa
-            </p>
-          </div>
-
-          <div className="relative z-10 text-center text-[11px] text-cyan-100/80">
-            Tu contraseña se almacena únicamente como un hash seguro.
-          </div>
+        <div className="order-1 lg:order-2 contents lg:block">
+          <DesktopOnboardingPanel />
         </div>
 
       </div>

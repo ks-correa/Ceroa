@@ -3,6 +3,7 @@ import { Mail, Lock, Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { CeroaLogo } from '../common/CeroaLogo';
 import { useLoginForm } from './useLoginForm';
+import { DesktopOnboardingPanel } from '../onboarding/DesktopOnboardingPanel';
 
 export const LoginView: React.FC = () => {
   const { handleLogin, setCurrentScreen, showToast } = useApp();
@@ -19,50 +20,7 @@ export const LoginView: React.FC = () => {
       {/* Container - Split on PC, Centered Card on Mobile */}
       <div className="w-full max-w-5xl bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-800 overflow-hidden grid grid-cols-1 lg:grid-cols-2">
         
-        {/* Left Hero Graphic Section (Desktop) */}
-        <div className="hidden lg:flex flex-col justify-between p-12 bg-gradient-to-br from-[#004D5A] via-[#006A7C] to-[var(--ceroa-primary)] text-white relative overflow-hidden">
-          {/* Subtle Background Art */}
-          <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:20px_20px]"></div>
-          <div className="absolute -bottom-20 -right-20 w-80 h-80 bg-cyan-400/20 rounded-full blur-3xl pointer-events-none"></div>
-
-          {/* Top Brand */}
-          <div className="relative z-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-xs font-semibold tracking-wide text-cyan-200">
-              <span className="w-2 h-2 rounded-full bg-[#00E5FF] animate-pulse"></span>
-              Plataforma de Libertad Financiera
-            </div>
-          </div>
-
-          {/* Center Title & Mission */}
-          <div className="relative z-10 space-y-4 my-auto py-8">
-            <div className="w-14 h-14 rounded-2xl bg-white/15 backdrop-blur-md flex items-center justify-center border border-white/30 shadow-inner">
-              <svg viewBox="0 0 24 24" className="w-8 h-8 text-cyan-200" fill="none" stroke="currentColor" strokeWidth="2.5">
-                <path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z" fill="currentColor" fillOpacity="0.8" />
-              </svg>
-            </div>
-            
-            <h1 className="text-3xl xl:text-4xl font-extrabold tracking-tight leading-tight text-white">
-              Agencia Financiera <br />
-              <span className="text-cyan-200">
-                Tranquila
-              </span>
-            </h1>
-            
-            <p className="text-slate-100 text-sm leading-relaxed max-w-md">
-              Toma el control de tus deudas con claridad y estructura. Un enfoque moderno y matemático hacia la salud financiera duradera.
-            </p>
-          </div>
-
-          {/* Quote Footer */}
-          <div className="relative z-10 pt-6 border-t border-white/15">
-            <p className="text-xs text-cyan-100/90 italic">
-              "La tranquilidad financiera no es ganar más, sino eliminar lo que te resta libertad."
-            </p>
-            <span className="text-[11px] font-semibold text-cyan-200 block mt-1">
-              — Filosofía Ceroa
-            </span>
-          </div>
-        </div>
+        <DesktopOnboardingPanel />
 
         {/* Right Form Section */}
         <div className="p-6 sm:p-10 lg:p-12 flex flex-col justify-center">
@@ -198,7 +156,7 @@ export const LoginView: React.FC = () => {
             <div className="pt-4 text-center">
               <div className="p-3 bg-cyan-50/60 dark:bg-cyan-950/30 rounded-xl border border-cyan-100 dark:border-cyan-900/50">
                 <span className="text-xs text-slate-600 dark:text-slate-300">
-                  Don't have an account?{' '}
+                  ¿Aún no tienes una cuenta?{' '}
                 </span>
                 <button
                   type="button"
@@ -206,7 +164,7 @@ export const LoginView: React.FC = () => {
                   onClick={() => setCurrentScreen('register')}
                   className="text-xs font-bold text-teal-800 dark:text-cyan-400 hover:underline cursor-pointer"
                 >
-                  Create account
+                  Crear cuenta
                 </button>
               </div>
             </div>
