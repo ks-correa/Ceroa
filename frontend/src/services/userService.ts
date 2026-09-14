@@ -20,12 +20,13 @@ type FinancialProfileUpdate = Pick<
   'monthlyIncome' | 'fixedExpenses' | 'availableMoney' | 'totalDeclaredDebts' | 'activeStrategy'
 >;
 
-const normalizeFinancialProfile = (profile: FinancialProfile): FinancialProfile => ({
+const normalizeFinancialProfile = (profile: any): FinancialProfile => ({
   ...profile,
-  monthlyIncome: Number(profile.monthlyIncome),
-  fixedExpenses: Number(profile.fixedExpenses),
-  availableMoney: Number(profile.availableMoney),
-  paymentCapacity: Number(profile.paymentCapacity)
+  activeStrategy: (profile.activeStrategy?.toLowerCase() || 'snowball') as StrategyType,
+  monthlyIncome: Number(profile.monthlyIncome || 0),
+  fixedExpenses: Number(profile.fixedExpenses || profile.essentialExpenses || 0),
+  availableMoney: Number(profile.availableMoney || profile.availableForDebts || 0),
+  paymentCapacity: Number(profile.paymentCapacity || profile.availableForDebts || 0)
 });
 
 export const userService = {
@@ -72,10 +73,23 @@ export const userService = {
         fixedExpenses: financial.fixedExpenses,
         availableMoney: financial.availableMoney,
         totalDeclaredDebts: financial.totalDeclaredDebts,
-        activeStrategy: financial.activeStrategy
+        activeStrategy: (financial.activeStrategy || 'snowball').toUpperCase()
       })
     });
     return normalizeFinancialProfile(updated);
+  },
+
+  async updateStrategy(strategy: StrategyType): Promise<FinancialProfile> {
+    const updated = await apiRequest<FinancialProfile>(`/financial-profile/strategy?strategy=${strategy.toUpperCase()}`, {
+      method: 'PUT'
+    });
+    return normalizeFinancialProfile(updated);
+  },
+
+  async completeInitialSetup(): Promise<UserProfile> {
+    return normalizeUser(await apiRequest<BackendUser>('/financial-profile/complete', {
+      method: 'POST'
+    }));
   },
 
   async getPreferences(): Promise<UserPreferences> {
@@ -96,3 +110,4 @@ export const userService = {
     throw new Error('Las suscripciones todavía no están conectadas a un proveedor de pagos. No se realizó ningún cargo.');
   }
 };
+
