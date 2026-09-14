@@ -77,15 +77,20 @@ public class DebtService {
 
     @Transactional
     public DebtResponse update(UUID id, DebtRequest request) {
-        debtValidator.validate(request);
         Debt debt = findEntity(id);
+        if (request.type() != null && request.type() != debt.getType()) {
+            throw new BusinessRuleException("IMMUTABLE_DEBT_TYPE", "No se permite cambiar el tipo de una obligación existente.");
+        }
+        debtValidator.validate(request);
         apply(debt, request);
         return toResponse(debtRepository.save(debt));
     }
 
     @Transactional
     public void delete(UUID id) {
-        debtRepository.delete(findEntity(id));
+        Debt debt = findEntity(id);
+        paymentRepository.deleteAllByDebtId(debt.getId());
+        debtRepository.delete(debt);
     }
 
     Debt findEntity(UUID id) {

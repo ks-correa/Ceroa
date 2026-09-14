@@ -8,13 +8,15 @@ interface CommonFieldsSectionProps {
   errors: Record<string, string>;
   onTypeChange: (type: DebtType) => void;
   onFieldChange: <K extends keyof DebtFormState>(key: K, value: DebtFormState[K]) => void;
+  isEditing?: boolean;
 }
 
 export const CommonFieldsSection: React.FC<CommonFieldsSectionProps> = ({
   form,
   errors,
   onTypeChange,
-  onFieldChange
+  onFieldChange,
+  isEditing = false
 }) => {
   const currentSchema = DEBT_TYPES.find((t) => t.value === form.type) || DEBT_TYPES[0];
 
@@ -44,16 +46,26 @@ export const CommonFieldsSection: React.FC<CommonFieldsSectionProps> = ({
     <div className="space-y-4">
       {/* 1. Selector de Tipo de Obligación (HU-023: Exactamente 10 tipos) */}
       <div>
-        <label htmlFor="debt-type-select" className="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1">
-          Tipo de obligación financiera *
-        </label>
+        <div className="flex items-center justify-between mb-1">
+          <label htmlFor="debt-type-select" className="block text-xs font-bold text-slate-700 dark:text-slate-200">
+            Tipo de obligación financiera *
+          </label>
+          {isEditing && (
+            <span className="text-[10px] font-medium text-slate-400 dark:text-slate-500">
+              Tipo no modificable
+            </span>
+          )}
+        </div>
         <div className="relative">
           <select
             id="debt-type-select"
             aria-label="Tipo de obligación financiera"
             value={form.type}
+            disabled={isEditing}
             onChange={(e) => onTypeChange(e.target.value as DebtType)}
-            className="w-full px-3.5 py-2.5 text-xs font-medium bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-teal-500 focus:outline-none text-slate-900 dark:text-white"
+            className={`w-full px-3.5 py-2.5 text-xs font-medium bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-teal-500 focus:outline-none text-slate-900 dark:text-white ${
+              isEditing ? 'opacity-70 cursor-not-allowed bg-slate-100 dark:bg-slate-800/80' : ''
+            }`}
           >
             {DEBT_TYPES.map((typeOption) => (
               <option key={typeOption.value} value={typeOption.value}>

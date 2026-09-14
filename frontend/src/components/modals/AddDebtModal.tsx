@@ -333,6 +333,7 @@ export const AddDebtModal: React.FC = () => {
               errors={fieldErrors}
               onTypeChange={handleTypeChange}
               onFieldChange={setField}
+              isEditing={Boolean(editingDebtId)}
             />
 
             {/* 2. Sección de Tasas y Costos */}

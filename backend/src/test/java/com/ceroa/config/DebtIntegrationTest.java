@@ -17,13 +17,17 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.time.LocalDate;
+import com.ceroa.repository.PaymentRepository;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -35,6 +39,7 @@ class DebtIntegrationTest {
     @Autowired ObjectMapper json;
     @Autowired UserRepository userRepository;
     @Autowired DebtRepository debtRepository;
+    @Autowired PaymentRepository paymentRepository;
 
     private Cookie session;
     private UUID userId;
@@ -293,6 +298,258 @@ class DebtIntegrationTest {
                 .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("máximo 2 deudas")));
 
         assertThat(debtRepository.countByUserId(userId)).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("HU-034: Consultar detalle de deuda autorizada e historial de pagos")
+    void testConsultDebtDetailAndPayments_HU034() throws Exception {
+        // 1. Crear deuda
+        Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("name", "Préstamo Libre Inversión");
+        payload.put("entity", "Banco Davivienda");
+        payload.put("type", DebtType.PERSONAL_LOAN.name());
+        payload.put("originalAmount", 10000000);
+        payload.put("currentBalance", 8000000);
+        payload.put("interestRate", 16.5);
+        payload.put("rateType", RateType.EA.name());
+        payload.put("monthlyPayment", 450000);
+        payload.put("termRemainingMonths", 24);
+        payload.put("disbursementDate", LocalDate.now().minusMonths(6).toString());
+        payload.put("nextDueDate", LocalDate.now().plusDays(10).toString());
+        payload.put("details", Map.of("totalInstallments", 30));
+
+        String createdJson = postDebt(payload)
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+        String debtId = json.readTree(createdJson).get("id").asText();
+
+        // 2. Registrar pago asociado a la deuda
+        Map<String, Object> paymentPayload = new LinkedHashMap<>();
+        paymentPayload.put("debtId", debtId);
+        paymentPayload.put("amount", 450000);
+        paymentPayload.put("date", LocalDate.now().toString());
+        paymentPayload.put("type", "monthly_fee");
+        paymentPayload.put("notes", "Pago cuota 7");
+
+        mvc.perform(post("/api/v1/payments").with(csrf())
+                        .cookie(session)
+                        .contentType("application/json")
+                        .content(json.writeValueAsString(paymentPayload)))
+                .andExpect(status().isCreated());
+
+        // 3. Consultar detalle de la deuda como usuario propietario
+        mvc.perform(get("/api/v1/debts/" + debtId)
+                        .cookie(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(debtId))
+                .andExpect(jsonPath("$.name").value("Préstamo Libre Inversión"))
+                .andExpect(jsonPath("$.entity").value("Banco Davivienda"))
+                .andExpect(jsonPath("$.type").value("personal_loan"))
+                .andExpect(jsonPath("$.paymentCount").value(1));
+
+        // 4. Consultar historial de pagos de la deuda
+        mvc.perform(get("/api/v1/payments?debtId=" + debtId)
+                        .cookie(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].amount").value(450000))
+                .andExpect(jsonPath("$[0].debtName").value("Préstamo Libre Inversión"))
+                .andExpect(jsonPath("$[0].notes").value("Pago cuota 7"));
+
+        // 5. CA-05: Otro usuario autenticado no puede consultar esta deuda
+        String otherEmail = "other-" + UUID.randomUUID() + "@example.com";
+        Cookie otherSession = mvc.perform(post("/api/v1/auth/register").with(csrf())
+                        .contentType("application/json")
+                        .content(json.writeValueAsString(Map.of(
+                                "fullName", "Other User",
+                                "email", otherEmail,
+                                "phone", "+573001234567",
+                                "birthDate", "1990-05-15",
+                                "password", "Password!123",
+                                "confirmPassword", "Password!123",
+                                "acceptTerms", true,
+                                "acceptPrivacy", true
+                        ))))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getCookie(SessionAuthenticationFilter.COOKIE_NAME);
+
+        mvc.perform(get("/api/v1/debts/" + debtId)
+                        .cookie(otherSession))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("HU-035: Editar deuda autorizada con validaciones y recálculo de estado")
+    void testEditDebtAuthorized_HU035() throws Exception {
+        // 1. Crear deuda inicial
+        Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("name", "Auto Financiado");
+        payload.put("entity", "Banco Santander");
+        payload.put("type", DebtType.AUTO_LOAN.name());
+        payload.put("originalAmount", 40000000);
+        payload.put("currentBalance", 35000000);
+        payload.put("interestRate", 15.0);
+        payload.put("rateType", RateType.EA.name());
+        payload.put("monthlyPayment", 800000);
+        payload.put("termRemainingMonths", 36);
+        payload.put("nextDueDate", LocalDate.now().plusDays(20).toString());
+        payload.put("details", Map.of("residualValue", 5000000));
+
+        String createdJson = postDebt(payload)
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+        String debtId = json.readTree(createdJson).get("id").asText();
+
+        // 2. Modificar datos válidos
+        Map<String, Object> updatePayload = new LinkedHashMap<>();
+        updatePayload.put("name", "Auto Familiar Actualizado");
+        updatePayload.put("entity", "Banco Santander Corp");
+        updatePayload.put("type", DebtType.AUTO_LOAN.name());
+        updatePayload.put("originalAmount", 40000000);
+        updatePayload.put("currentBalance", 30000000);
+        updatePayload.put("interestRate", 14.5);
+        updatePayload.put("rateType", RateType.EA.name());
+        updatePayload.put("monthlyPayment", 780000);
+        updatePayload.put("termRemainingMonths", 30);
+        updatePayload.put("nextDueDate", LocalDate.now().plusDays(15).toString());
+        updatePayload.put("details", Map.of("residualValue", 4000000));
+
+        mvc.perform(put("/api/v1/debts/" + debtId).with(csrf())
+                        .cookie(session)
+                        .contentType("application/json")
+                        .content(json.writeValueAsString(updatePayload)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.name").value("Auto Familiar Actualizado"))
+                .andExpect(jsonPath("$.entity").value("Banco Santander Corp"))
+                .andExpect(jsonPath("$.currentBalance").value(30000000))
+                .andExpect(jsonPath("$.interestRate").value(14.5))
+                .andExpect(jsonPath("$.status").value("al_dia"));
+
+        // 3. Intento de modificar el tipo de deuda es rechazado
+        Map<String, Object> changeTypePayload = new LinkedHashMap<>(updatePayload);
+        changeTypePayload.put("type", DebtType.CREDIT_CARD.name());
+
+        mvc.perform(put("/api/v1/debts/" + debtId).with(csrf())
+                        .cookie(session)
+                        .contentType("application/json")
+                        .content(json.writeValueAsString(changeTypePayload)))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.code").value("IMMUTABLE_DEBT_TYPE"));
+
+        // 4. Intento de actualizar con datos inválidos (monto negativo)
+        Map<String, Object> invalidPayload = new LinkedHashMap<>(updatePayload);
+        invalidPayload.put("currentBalance", -500);
+
+        mvc.perform(put("/api/v1/debts/" + debtId).with(csrf())
+                        .cookie(session)
+                        .contentType("application/json")
+                        .content(json.writeValueAsString(invalidPayload)))
+                .andExpect(status().isBadRequest());
+
+        // 5. Otro usuario no puede editar esta deuda
+        String otherEmail = "other-edit-" + UUID.randomUUID() + "@example.com";
+        Cookie otherSession = mvc.perform(post("/api/v1/auth/register").with(csrf())
+                        .contentType("application/json")
+                        .content(json.writeValueAsString(Map.of(
+                                "fullName", "Other Editor",
+                                "email", otherEmail,
+                                "phone", "+573007654321",
+                                "birthDate", "1988-08-20",
+                                "password", "Password!123",
+                                "confirmPassword", "Password!123",
+                                "acceptTerms", true,
+                                "acceptPrivacy", true
+                        ))))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getCookie(SessionAuthenticationFilter.COOKIE_NAME);
+
+        mvc.perform(put("/api/v1/debts/" + debtId).with(csrf())
+                        .cookie(otherSession)
+                        .contentType("application/json")
+                        .content(json.writeValueAsString(updatePayload)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    @DisplayName("HU-036: Eliminar definitivamente una deuda y su historial de pagos asociado")
+    void testDeleteDebtDefinitivelyWithPayments_HU036() throws Exception {
+        // 1. Crear deuda
+        Map<String, Object> payload = new LinkedHashMap<>();
+        payload.put("name", "Tarjeta Éxito");
+        payload.put("entity", "Tuya");
+        payload.put("type", DebtType.CREDIT_CARD.name());
+        payload.put("originalAmount", 3000000);
+        payload.put("currentBalance", 1000000);
+        payload.put("interestRate", 26.0);
+        payload.put("rateType", RateType.EA.name());
+        payload.put("minimumPayment", 70000);
+        payload.put("nextDueDate", LocalDate.now().plusDays(10).toString());
+        payload.put("details", Map.of(
+                "creditLimit", 3000000,
+                "statementDay", 15,
+                "paymentDueDate", LocalDate.now().plusDays(10).toString()
+        ));
+
+        String createdJson = postDebt(payload)
+                .andExpect(status().isCreated())
+                .andReturn().getResponse().getContentAsString();
+        String debtId = json.readTree(createdJson).get("id").asText();
+        UUID debtUuid = UUID.fromString(debtId);
+
+        // 2. Registrar pago asociado
+        Map<String, Object> paymentPayload = new LinkedHashMap<>();
+        paymentPayload.put("debtId", debtId);
+        paymentPayload.put("amount", 200000);
+        paymentPayload.put("date", LocalDate.now().toString());
+        paymentPayload.put("type", "minimum");
+        paymentPayload.put("notes", "Abono mínimo Tuya");
+
+        mvc.perform(post("/api/v1/payments").with(csrf())
+                        .cookie(session)
+                        .contentType("application/json")
+                        .content(json.writeValueAsString(paymentPayload)))
+                .andExpect(status().isCreated());
+
+        assertThat(paymentRepository.countByDebtId(debtUuid)).isEqualTo(1);
+
+        // 3. Otro usuario intenta eliminar la deuda y es rechazado
+        String otherEmail = "other-del-" + UUID.randomUUID() + "@example.com";
+        Cookie otherSession = mvc.perform(post("/api/v1/auth/register").with(csrf())
+                        .contentType("application/json")
+                        .content(json.writeValueAsString(Map.of(
+                                "fullName", "Other Deleter",
+                                "email", otherEmail,
+                                "phone", "+573003332211",
+                                "birthDate", "1995-11-12",
+                                "password", "Password!123",
+                                "confirmPassword", "Password!123",
+                                "acceptTerms", true,
+                                "acceptPrivacy", true
+                        ))))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getCookie(SessionAuthenticationFilter.COOKIE_NAME);
+
+        mvc.perform(delete("/api/v1/debts/" + debtId).with(csrf())
+                        .cookie(otherSession))
+                .andExpect(status().isNotFound());
+
+        // La deuda y el pago siguen existiendo
+        assertThat(debtRepository.findById(debtUuid)).isPresent();
+        assertThat(paymentRepository.countByDebtId(debtUuid)).isEqualTo(1);
+
+        // 4. Propietario elimina definitivamente la deuda
+        mvc.perform(delete("/api/v1/debts/" + debtId).with(csrf())
+                        .cookie(session))
+                .andExpect(status().isNoContent());
+
+        // 5. Verificar que la deuda y sus pagos fueron eliminados físicamente
+        assertThat(debtRepository.findById(debtUuid)).isEmpty();
+        assertThat(paymentRepository.countByDebtId(debtUuid)).isEqualTo(0);
+
+        // 6. Consultar la deuda eliminada ahora devuelve 404
+        mvc.perform(get("/api/v1/debts/" + debtId)
+                        .cookie(session))
+                .andExpect(status().isNotFound());
     }
 }
 

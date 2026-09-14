@@ -2,6 +2,7 @@ package com.ceroa.repository;
 
 import com.ceroa.domain.Payment;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -14,6 +15,10 @@ public interface PaymentRepository extends JpaRepository<Payment, UUID> {
     List<Payment> findAllByDebtIdAndDebtUserIdOrderByDateDescCreatedAtDesc(UUID debtId, UUID userId);
     Optional<Payment> findByIdAndDebtUserId(UUID id, UUID userId);
     long countByDebtId(UUID debtId);
+
+    @Modifying
+    @Query("DELETE FROM Payment p WHERE p.debt.id = :debtId")
+    void deleteAllByDebtId(@Param("debtId") UUID debtId);
 
     @Query("""
             select payment.debt.id as debtId, count(payment.id) as paymentCount
