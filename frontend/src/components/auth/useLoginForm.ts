@@ -1,48 +1,32 @@
 import { useState } from 'react';
-
-type Login = (email: string, password: string) => Promise<void>;
-
-export const useLoginForm = (login: Login, notify: (message: string) => void) => {
-  const [email, setEmail] = useState('');
+import { validEmail } from './auth.validation';
+export const REMEMBER_EMAIL_KEY = 'ceroa_remembered_email';
+export const rememberedEmail = () => {
+  try { const value = localStorage.getItem(REMEMBER_EMAIL_KEY) || ''; return validEmail(value) ? value : ''; } catch { return ''; }
+};
+export const saveRememberedEmail = (email: string, remember: boolean) => {
+  try { if (remember) localStorage.setItem(REMEMBER_EMAIL_KEY, email); else localStorage.removeItem(REMEMBER_EMAIL_KEY); } catch { /* Storage may be unavailable. */ }
+};
+export const useLoginForm = (login: (email: string, password: string) => Promise<void>) => {
+  const [email, setEmail] = useState(rememberedEmail);
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
+  const [remember, setRemember] = useState(() => Boolean(rememberedEmail()));
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [message, setMessage] = useState(() => new URLSearchParams(location.search).get('auth') === 'error' ? 'El acceso con el proveedor fue cancelado o no pudo completarse. Intenta nuevamente.' : '');
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isForgotPasswordOpen, setIsForgotPasswordOpen] = useState(false);
-  const [recoveryEmail, setRecoveryEmail] = useState('');
-
+  const toggleRemember = (value: boolean) => { setRemember(value); if (!value) saveRememberedEmail('', false); };
   const submit = async (event: React.FormEvent) => {
     event.preventDefault();
-    if (!email.trim() || !password) {
-      notify('Por favor completa todos los campos');
-      return;
-    }
-    try {
-      setIsSubmitting(true);
-      await login(email.trim(), password);
-    } catch (cause) {
-      notify(cause instanceof Error ? cause.message : 'No fue posible iniciar sesión');
-    } finally {
-      setIsSubmitting(false);
-    }
+    if (isSubmitting) return;
+    const next: Record<string, string> = {};
+    if (!validEmail(email)) next.email = 'Ingresa un correo válido, sin espacios.';
+    if (!password) next.password = 'Ingresa tu contraseña.';
+    setErrors(next); setMessage('');
+    if (Object.keys(next).length) { document.getElementById('auth-' + Object.keys(next)[0])?.focus(); return; }
+    setIsSubmitting(true); saveRememberedEmail(email, remember);
+    try { await login(email, password); }
+    catch (cause) { setMessage(cause instanceof Error ? cause.message : 'No fue posible iniciar sesión.'); }
+    finally { setPassword(''); setIsSubmitting(false); }
   };
-
-  const sendRecovery = (event: React.FormEvent) => {
-    event.preventDefault();
-    if (!recoveryEmail.trim()) {
-      notify('Ingresa tu correo para recuperar contraseña');
-      return;
-    }
-    setIsForgotPasswordOpen(false);
-    notify('La recuperación por correo estará disponible próximamente');
-  };
-
-  const requestSso = (provider: 'Google' | 'Microsoft') => {
-    notify(`El acceso con ${provider} estará disponible próximamente`);
-  };
-
-  return {
-    email, setEmail, password, setPassword, showPassword, setShowPassword,
-    isSubmitting, isForgotPasswordOpen, setIsForgotPasswordOpen,
-    recoveryEmail, setRecoveryEmail, submit, sendRecovery, requestSso
-  };
+  return { email, setEmail, password, setPassword, remember, toggleRemember, errors, message, isSubmitting, submit };
 };

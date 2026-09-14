@@ -1,0 +1,65 @@
+// @vitest-environment jsdom
+import { act, cleanup, renderHook, waitFor } from '@testing-library/react';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import { AppProvider, useApp } from './AppContext';
+import { authService } from '../services/authService';
+import { debtService } from '../services/debtService';
+import { userService } from '../services/userService';
+import { notificationService } from '../services/notificationService';
+vi.mock('../services/authService', () => ({ authService: { me: vi.fn(), logout: vi.fn() } }));
+vi.mock('../services/debtService', () => ({ debtService: { getDebts: vi.fn(), getPayments: vi.fn() } }));
+vi.mock('../services/userService', () => ({ userService: { getUserProfile: vi.fn(), getFinancialProfile: vi.fn(), getPreferences: vi.fn() } }));
+vi.mock('../services/notificationService', () => ({ notificationService: { getNotifications: vi.fn() } }));
+import { DEFAULT_USER_PROFILE, DEFAULT_FINANCIAL_PROFILE, DEFAULT_PREFERENCES } from '../constants/defaults';
+beforeEach(() => {
+  vi.resetAllMocks(); localStorage.clear();
+  vi.mocked(authService.me).mockResolvedValue({ ...DEFAULT_USER_PROFILE, id: 'private-user', email: 'ana@example.com', initialSetupComplete: true });
+  vi.mocked(authService.logout).mockResolvedValue();
+  vi.mocked(debtService.getDebts).mockResolvedValue([]); vi.mocked(debtService.getPayments).mockResolvedValue([]);
+  vi.mocked(userService.getUserProfile).mockResolvedValue({ ...DEFAULT_USER_PROFILE, id: 'private-user', initialSetupComplete: true });
+  vi.mocked(userService.getFinancialProfile).mockResolvedValue({ ...DEFAULT_FINANCIAL_PROFILE, monthlyIncome: 987654 });
+  vi.mocked(userService.getPreferences).mockResolvedValue(DEFAULT_PREFERENCES);
+  vi.mocked(notificationService.getNotifications).mockResolvedValue([]);
+});
+afterEach(cleanup);
+it('clears sensitive state and overlays while retaining only the authorized email preference', async () => {
+  localStorage.setItem('ceroa_remembered_email', 'ana@example.com');
+  const { result } = renderHook(useApp, { wrapper: AppProvider });
+  await waitFor(() => expect(result.current.isAuthChecking).toBe(false));
+  act(() => { result.current.setSelectedDebtId('private-debt'); result.current.openRecordPaymentModal('private-debt', undefined, 99); result.current.setIsMobileSidebarOpen(true); });
+  await act(() => result.current.handleLogout());
+  expect(result.current.isAuthenticated).toBe(false); expect(result.current.currentScreen).toBe('login');
+  expect(result.current.financialProfile).toEqual(DEFAULT_FINANCIAL_PROFILE);
+  expect(result.current.userProfile).toEqual(DEFAULT_USER_PROFILE);
+  expect(result.current.debts).toEqual([]); expect(result.current.payments).toEqual([]);
+  expect(result.current.selectedDebtId).toBeNull(); expect(result.current.targetPaymentDebtId).toBeNull();
+  expect(result.current.editingPayment).toBeNull(); expect(result.current.suggestedPaymentAmount).toBeNull();
+  expect(result.current.isRecordPaymentOpen).toBe(false); expect(result.current.isMobileSidebarOpen).toBe(false);
+  expect(localStorage.getItem('ceroa_remembered_email')).toBe('ana@example.com');
+  expect(JSON.stringify(localStorage)).not.toMatch(/987654|private-user|private-debt/);
+});
+it('hides data on network failure, preserves pending logout across reload and retries', async () => {
+  vi.mocked(authService.logout).mockRejectedValueOnce(new Error('offline'));
+  const first = renderHook(useApp, { wrapper: AppProvider });
+  await waitFor(() => expect(first.result.current.isAuthChecking).toBe(false));
+  await act(() => first.result.current.handleLogout());
+  expect(first.result.current.isAuthenticated).toBe(false);
+  expect(first.result.current.logoutPending).toBe(true); expect(first.result.current.logoutError).toContain('no fue posible confirmar');
+  expect(localStorage.getItem('ceroa_logout_pending')).toBe('true');
+  first.unmount(); vi.mocked(authService.me).mockClear();
+  const second = renderHook(useApp, { wrapper: AppProvider });
+  await waitFor(() => expect(second.result.current.logoutPending).toBe(false));
+  expect(authService.me).not.toHaveBeenCalled();
+  expect(authService.logout).toHaveBeenCalledTimes(2);
+  expect(localStorage.getItem('ceroa_logout_pending')).toBeNull();
+});
+it('ignores financial responses that arrive after logout', async () => {
+  let resolve!: (value: typeof DEFAULT_FINANCIAL_PROFILE) => void;
+  vi.mocked(userService.getFinancialProfile).mockImplementation(() => new Promise(done => { resolve = done; }));
+  const { result } = renderHook(useApp, { wrapper: AppProvider });
+  await waitFor(() => expect(result.current.isAuthenticated).toBe(true));
+  await act(() => result.current.handleLogout());
+  await act(async () => resolve({ ...DEFAULT_FINANCIAL_PROFILE, monthlyIncome: 987654 }));
+  expect(result.current.isAuthenticated).toBe(false);
+  expect(result.current.financialProfile).toEqual(DEFAULT_FINANCIAL_PROFILE);
+});

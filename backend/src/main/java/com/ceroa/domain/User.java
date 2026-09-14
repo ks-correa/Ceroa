@@ -9,6 +9,10 @@ import java.util.UUID;
 @Entity
 @Table(name = "users")
 public class User {
+    @Column(name = "password_changed_at")
+    private OffsetDateTime passwordChangedAt;
+    public OffsetDateTime getPasswordChangedAt() { return passwordChangedAt; }
+    public void setPasswordChangedAt(OffsetDateTime value) { passwordChangedAt = value; }
 
     @Id
     private UUID id;
@@ -30,6 +34,22 @@ public class User {
 
     @Column(name = "password_hash", length = 100)
     private String passwordHash;
+
+    @Column(name = "initial_setup_complete", nullable = false)
+    private boolean initialSetupComplete;
+
+    @Column(name = "terms_accepted_at")
+    private OffsetDateTime termsAcceptedAt;
+
+    @Column(name = "privacy_accepted_at")
+    private OffsetDateTime privacyAcceptedAt;
+
+    public boolean isInitialSetupComplete() { return initialSetupComplete; }
+    public void setInitialSetupComplete(boolean value) { initialSetupComplete = value; }
+    public OffsetDateTime getTermsAcceptedAt() { return termsAcceptedAt; }
+    public void setTermsAcceptedAt(OffsetDateTime value) { termsAcceptedAt = value; }
+    public OffsetDateTime getPrivacyAcceptedAt() { return privacyAcceptedAt; }
+    public void setPrivacyAcceptedAt(OffsetDateTime value) { privacyAcceptedAt = value; }
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)

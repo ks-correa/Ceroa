@@ -7,11 +7,25 @@ spring:
   flyway:
     enabled: false
   jpa:
+    open-in-view: false
     hibernate:
       ddl-auto: create-drop
 
 ceroa:
+  recovery:
+    delivery-enabled: false
   frontend-url: http://localhost:3000
   session:
     days: 30
     secure-cookie: false
+
+logging:
+  level:
+    root: WARN
+    org.springframework: WARN
+    org.springframework.web: WARN
+    org.springframework.boot: WARN
+    org.springframework.test: WARN
+    org.springframework.security: WARN
+    org.hibernate: WARN
+    org.hibernate.SQL: OFF

@@ -12,5 +12,6 @@ public record UserResponse(
         String phone,
         String documentId,
         LocalDate birthDate,
-        UserPlan plan
+        UserPlan plan,
+        boolean initialSetupComplete
 ) {}

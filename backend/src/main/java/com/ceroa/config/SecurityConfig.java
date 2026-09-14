@@ -24,7 +24,19 @@ import java.util.List;
 public class SecurityConfig {
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http, SessionAuthenticationFilter sessionFilter) throws Exception {
+    SecurityFilterChain securityFilterChain(HttpSecurity http, SessionAuthenticationFilter sessionFilter,
+                                           OAuthProviders providers, OAuthHandlers handlers) throws Exception {
+        if (providers.available()) {
+            http.oauth2Login(oauth -> oauth.clientRegistrationRepository(providers)
+                .authorizedClientService(new org.springframework.security.oauth2.client.OAuth2AuthorizedClientService() {
+                    public <T extends org.springframework.security.oauth2.client.OAuth2AuthorizedClient> T loadAuthorizedClient(String id, String name) { return null; }
+                    public void saveAuthorizedClient(org.springframework.security.oauth2.client.OAuth2AuthorizedClient client, org.springframework.security.core.Authentication principal) {}
+                    public void removeAuthorizedClient(String id, String name) {}
+                })
+                .securityContextRepository(new org.springframework.security.web.context.NullSecurityContextRepository())
+                .successHandler(handlers::success)
+                .failureHandler((request, response, error) -> handlers.failure(request, response)));
+        }
         CookieCsrfTokenRepository csrfTokenRepository = CookieCsrfTokenRepository.withHttpOnlyFalse();
         csrfTokenRepository.setCookiePath("/");
         return http
@@ -32,15 +44,21 @@ public class SecurityConfig {
                         .csrfTokenRepository(csrfTokenRepository)
                         .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler()))
                 .cors(cors -> {})
+                .requestCache(cache -> cache.disable())
+                .logout(logout -> logout.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers("/oauth2/authorization/**", "/login/oauth2/code/**", "/api/v1/auth/external/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/csrf").permitAll()
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/api/v1/auth/login",
                                 "/api/v1/auth/register",
+                                "/api/v1/auth/recovery/request",
+                                "/api/v1/auth/recovery/verify",
+                                "/api/v1/auth/recovery/reset",
                                 "/api/v1/auth/logout").permitAll()
                         .requestMatchers("/api/v1/**").authenticated()
                         .anyRequest().denyAll())

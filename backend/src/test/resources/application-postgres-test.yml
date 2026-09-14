@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    url: ${PG_TEST_URL:jdbc:postgresql://127.0.0.1:55432/ceroa_ep02}
+    username: ${PG_TEST_USERNAME:ceroa_ep02}
+    password: ${PG_TEST_PASSWORD:}
+    driver-class-name: org.postgresql.Driver
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  jpa:
+    hibernate:
+      ddl-auto: validate

@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+:where(button, input, a):focus-visible { outline: 3px solid #008fa6; outline-offset: 3px; }
+
 /* Tailwind 4 uses the operating-system media query by default. Ceroa's theme
    is user-controlled, so dark variants follow the class on <html>. */
 @custom-variant dark (&:where(.dark, .dark *));

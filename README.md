@@ -216,3 +216,6 @@ npm run build
 ## Alcance pendiente
 
 OAuth2 con Google/Microsoft, recuperación de contraseña por correo, onboarding financiero guiado, simulador backend, suscripciones, Mercado Pago, Telegram y notificaciones persistentes pertenecen a fases posteriores. Los botones OAuth visibles no simulan acceso: informan que la integración aún no está habilitada.
+# Registro y acceso (EP-02)
+
+Consulta [EP02.md](EP02.md) para la configuración de Google/Microsoft, migraciones, ejecución de pruebas y matrices de aceptación. La validación real con proveedores requiere credenciales externas.

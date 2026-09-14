@@ -1,9 +1,11 @@
-const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1').replace(/\/$/, '');
+export const API_URL = (import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1').replace(/\/$/, '');
 const SAFE_HTTP_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 const AUTH_PATHS_WITH_EXPECTED_UNAUTHORIZED = new Set(['/auth/login', '/auth/register', '/auth/me']);
 export const SESSION_EXPIRED_EVENT = 'ceroa:session-expired';
 let csrfTokenRequest: Promise<string> | null = null;
 let sessionExpirationNotified = false;
+let sessionGeneration = 0;
+export const invalidateSessionRequests = () => { sessionGeneration++; };
 
 const readCookie = (name: string): string | null => {
   const prefix = `${encodeURIComponent(name)}=`;
@@ -54,6 +56,7 @@ const getCsrfToken = (): Promise<string> => {
 };
 
 export async function apiRequest<T>(path: string, init?: RequestInit): Promise<T> {
+  const generation = sessionGeneration;
   let response: Response;
   try {
     const method = (init?.method || 'GET').toUpperCase();
@@ -75,11 +78,12 @@ export async function apiRequest<T>(path: string, init?: RequestInit): Promise<T
     );
   }
 
+  if (!path.startsWith('/auth/') && generation !== sessionGeneration) throw new ApiError('La sesión ha finalizado.', 401);
   if (!response.ok) {
     if (response.status === 403) csrfTokenRequest = null;
     if (
       response.status === 401
-      && !AUTH_PATHS_WITH_EXPECTED_UNAUTHORIZED.has(path)
+      && !AUTH_PATHS_WITH_EXPECTED_UNAUTHORIZED.has(path) && !path.startsWith('/auth/external/')
       && !sessionExpirationNotified
     ) {
       sessionExpirationNotified = true;

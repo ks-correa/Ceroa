@@ -16,5 +16,9 @@ export const useToast = (duration = 3_500) => {
     if (timer.current) clearTimeout(timer.current);
   }, []);
 
-  return { toastMessage, showToast };
+  const clearToast = useCallback(() => {
+    if (timer.current) clearTimeout(timer.current);
+    setToastMessage(null);
+  }, []);
+  return { toastMessage, showToast, clearToast };
 };

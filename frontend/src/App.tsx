@@ -11,30 +11,45 @@ import { TopHeader } from './components/layout/TopHeader';
 import { NotificationsDrawer } from './components/notifications/NotificationsDrawer';
 import { MobileOnboarding } from './components/onboarding/MobileOnboarding';
 import { useMobileOnboarding } from './components/onboarding/useMobileOnboarding';
+import { ExternalRegistrationView } from './components/auth/ExternalRegistrationView';
+import { AuthLayout } from './components/auth/AuthLayout';
+import { RecoveryView } from './components/auth/RecoveryView';
 
 const AppContent: React.FC = () => {
   const {
     currentScreen,
+    userProfile,
     isAuthenticated,
     isAuthChecking,
     isSidebarCollapsed,
     isLoading,
     dataError,
-    refreshAllData
+    refreshAllData, handleLogout, logoutPending, logoutError
   } = useApp();
   const { isOpen: isOnboardingOpen, dismiss: dismissOnboarding } = useMobileOnboarding();
 
   if (isAuthChecking) return <FullPageLoadingState />;
+  if (logoutPending) return <AuthLayout title="Cerrar sesión">
+    <p role={logoutError ? 'alert' : 'status'}>{logoutError || 'Cerrando tu sesión de forma segura…'}</p>
+    {logoutError && <button className="mt-4 underline" onClick={() => void handleLogout()}>Reintentar cierre de sesión</button>}
+  </AuthLayout>;
   if (!isAuthenticated) {
+    if (new URLSearchParams(location.search).get('auth') === 'complete') return <ExternalRegistrationView />;
     return (
       <>
         <div inert={isOnboardingOpen ? true : undefined} aria-hidden={isOnboardingOpen || undefined}>
-          {currentScreen === 'register' ? <RegisterView /> : <LoginView />}
+          {currentScreen === 'register' ? <RegisterView /> : currentScreen === 'recovery' ? <RecoveryView /> : <LoginView />}
         </div>
         <MobileOnboarding open={isOnboardingOpen} onDismiss={dismissOnboarding} />
       </>
     );
   }
+
+  if (!userProfile.initialSetupComplete) return <AuthLayout title="Configuración financiera inicial">
+    <p role="status">Tu acceso está confirmado. Tu configuración financiera inicial está pendiente.</p>
+    <p className="mt-3 text-slate-600 dark:text-slate-300">Aquí continuarás con tu configuración cuando esté disponible.</p>
+    <button type="button" onClick={() => void handleLogout()} className="mt-5 underline">Cerrar sesión</button>
+  </AuthLayout>;
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col">

@@ -28,7 +28,7 @@ import {
 import { useLayoutState } from './useLayoutState';
 import { useOverlayState } from './useOverlayState';
 import { useToast } from '../hooks/useToast';
-import { SESSION_EXPIRED_EVENT } from '../services/api';
+import { SESSION_EXPIRED_EVENT, invalidateSessionRequests } from '../services/api';
 import { LocalStorageManager } from '../services/storage';
 import { applyColorTheme } from '../utils/theme';
 
@@ -38,6 +38,8 @@ interface AppContextType {
   setCurrentScreen: (screen: AppScreen) => void;
   isAuthenticated: boolean;
   isAuthChecking: boolean;
+  logoutPending: boolean;
+  logoutError: string;
   selectedDebtId: string | null;
   setSelectedDebtId: (id: string | null) => void;
   navigateToDebtDetail: (id: string) => void;
@@ -146,9 +148,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     isExportReportOpen, setIsExportReportOpen,
     isNotificationsOpen, setIsNotificationsOpen
   } = useOverlayState();
-  const { toastMessage, showToast } = useToast();
+  const { toastMessage, showToast, clearToast } = useToast();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAuthChecking, setIsAuthChecking] = useState(true);
+  const [logoutPending, setLogoutPending] = useState(() => localStorage.getItem('ceroa_logout_pending') === 'true');
+  const [logoutError, setLogoutError] = useState('');
+  const logoutInFlight = useRef(false);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [dataError, setDataError] = useState<string | null>(null);
 
@@ -169,6 +174,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const refreshRequestId = useRef(0);
 
   const clearAuthenticatedState = useCallback(() => {
+    invalidateSessionRequests();
+    clearToast();
     refreshRequestId.current += 1;
     setIsAuthenticated(false);
     setCurrentScreen('login');
@@ -188,7 +195,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setIsSubscriptionModalOpen(false);
     setIsExportReportOpen(false);
     setIsNotificationsOpen(false);
+    setTargetPaymentDebtId(null);
+    setEditingPayment(null);
+    setSuggestedPaymentAmount(null);
+    setEditingDebtId(null);
+    setIsMobileSidebarOpen(false);
+    LocalStorageManager.set('notifications', []);
+    ['debts', 'payments', 'userProfile', 'financialProfile', 'token', 'password'].forEach(key => localStorage.removeItem('ceroa_' + key));
   }, [
+    clearToast, setTargetPaymentDebtId, setEditingPayment, setSuggestedPaymentAmount, setEditingDebtId, setIsMobileSidebarOpen,
     setCurrentScreen,
     setIsAddDebtOpen,
     setIsEditFinancialOpen,
@@ -248,13 +263,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     let cancelled = false;
     const restoreSession = async () => {
+      if (localStorage.getItem('ceroa_logout_pending') === 'true') { setIsAuthChecking(false); setIsLoading(false); return; }
+      const restoreId = refreshRequestId.current;
       try {
         const user = await authService.me();
-        if (cancelled) return;
+        if (cancelled || restoreId !== refreshRequestId.current) return;
         setUserProfile(user);
         setIsAuthenticated(true);
-        setCurrentScreen('dashboard');
-        await refreshAllData();
+        setCurrentScreen(user.initialSetupComplete ? 'dashboard' : 'initial_setup');
+        if (user.initialSetupComplete) await refreshAllData(); else setIsLoading(false);
       } catch {
         if (cancelled) return;
         setIsAuthenticated(false);
@@ -424,20 +441,42 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const handleLogout = async () => {
+    if (logoutInFlight.current) return;
+    logoutInFlight.current = true;
+    localStorage.setItem('ceroa_logout_pending', 'true');
+    setLogoutPending(true);
+    setLogoutError('');
+    clearAuthenticatedState();
     try {
       await authService.logout();
-    } finally {
-      clearAuthenticatedState();
+      localStorage.removeItem('ceroa_logout_pending');
+      setLogoutPending(false);
       showToast('Sesión cerrada con éxito');
+    } catch {
+      setLogoutError('Tus datos están ocultos, pero no fue posible confirmar el cierre en el servidor. Reintenta para finalizar la sesión.');
+    } finally {
+      logoutInFlight.current = false;
     }
   };
+
+  useEffect(() => {
+    if (localStorage.getItem('ceroa_logout_pending') === 'true') void handleLogout();
+    const onStorage = (event: StorageEvent) => {
+      if (event.key !== 'ceroa_logout_pending') return;
+      clearAuthenticatedState();
+      if (event.newValue === 'true') void handleLogout();
+      else { setLogoutPending(false); setLogoutError(''); }
+    };
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, [clearAuthenticatedState]);
 
   const handleLogin = async (email: string, password: string) => {
     const user = await authService.login(email, password);
     setUserProfile(user);
     setIsAuthenticated(true);
-    setCurrentScreen('dashboard');
-    await refreshAllData();
+    setCurrentScreen(user.initialSetupComplete ? 'dashboard' : 'initial_setup');
+    if (user.initialSetupComplete) await refreshAllData(); else setIsLoading(false);
     showToast('¡Bienvenido a Ceroa!');
   };
 
@@ -445,8 +484,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const user = await authService.register(payload);
     setUserProfile(user);
     setIsAuthenticated(true);
-    setCurrentScreen('dashboard');
-    await refreshAllData();
+    setCurrentScreen(user.initialSetupComplete ? 'dashboard' : 'initial_setup');
+    if (user.initialSetupComplete) await refreshAllData(); else setIsLoading(false);
     showToast(`¡Cuenta creada con éxito para ${user.fullName}!`);
   };
 
@@ -481,6 +520,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         setCurrentScreen,
         isAuthenticated,
         isAuthChecking,
+        logoutPending,
+        logoutError,
         selectedDebtId,
         setSelectedDebtId,
         navigateToDebtDetail,

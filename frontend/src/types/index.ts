@@ -71,6 +71,7 @@ export interface CalendarCommitment {
 export type StrategyType = 'snowball' | 'avalanche';
 
 export interface UserProfile {
+  initialSetupComplete?: boolean;
   id: string;
   fullName: string;
   email: string;
@@ -132,6 +133,8 @@ export interface NotificationItem {
 }
 
 export type AppScreen = 
+  | 'recovery'
+  | 'initial_setup'
   | 'dashboard'
   | 'debts'
   | 'debt_detail'
