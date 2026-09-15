@@ -1,10 +1,39 @@
-import { Debt, SimulationParams, SimulationResult, StrategyType } from '../types';
+import {
+  Debt,
+  SimulationPeriodDetail,
+  SimulationProjectionDetail,
+  SimulationRequestPayload,
+  SimulationResponsePayload,
+  StrategyType
+} from '../types';
+import { apiRequest } from './api';
+
+const normalizePeriod = (p: SimulationPeriodDetail): SimulationPeriodDetail => ({
+  period: Number(p.period),
+  date: String(p.date || ''),
+  openingBalance: Number(p.openingBalance || 0),
+  normalPayment: Number(p.normalPayment || 0),
+  extraPayment: Number(p.extraPayment || 0),
+  interest: Number(p.interest || 0),
+  principal: Number(p.principal || 0),
+  closingBalance: Number(p.closingBalance || 0)
+});
+
+const normalizeProjection = (proj: SimulationProjectionDetail | null): SimulationProjectionDetail | null => {
+  if (!proj) return null;
+  return {
+    totalInterest: Number(proj.totalInterest || 0),
+    totalPrincipal: Number(proj.totalPrincipal || 0),
+    estimatedMonths: Number(proj.estimatedMonths || 0),
+    estimatedPayoffDate: String(proj.estimatedPayoffDate || '')
+  };
+};
 
 export const simulationService = {
   /**
-   * Sorts debts according to the selected strategy:
-   * - Snowball: lowest current balance first (quick psychological wins)
-   * - Avalanche: highest interest rate first (mathematically optimal interest savings)
+   * Ordena obligaciones según la estrategia:
+   * - Snowball: menor saldo primero
+   * - Avalanche: mayor tasa primero
    */
   sortDebtsByStrategy(debts: Debt[], strategy: StrategyType): Debt[] {
     const activeDebts = debts.filter((d) => d.currentBalance > 0);
@@ -16,148 +45,23 @@ export const simulationService = {
   },
 
   /**
-   * Calculates detailed payoff simulation comparing Baseline vs Accelerated scenario.
+   * Ejecuta la simulación de pagos puramente en backend.
    */
-  async runSimulation(
-    debts: Debt[],
-    params: SimulationParams,
-    strategy: StrategyType = 'snowball'
-  ): Promise<SimulationResult> {
-    const sorted = this.sortDebtsByStrategy(debts, strategy);
-    const targetDebts = params.selectedDebtId === 'all' 
-      ? sorted 
-      : sorted.filter((d) => d.id === params.selectedDebtId);
-
-    const totalBalance = targetDebts.reduce((sum, d) => sum + d.currentBalance, 0);
-    if (totalBalance === 0) {
-      return {
-        savedInterest: 0,
-        savedMonths: 0,
-        originalPayoffDate: 'Al día',
-        newPayoffDate: 'Al día',
-        originalTotalCost: 0,
-        simulatedTotalCost: 0,
-        reductionPercentage: 0,
-        timeline: []
-      };
-    }
-
-    // Baseline calculation (average monthly payment & interest)
-    const baseMonthlyPayment = targetDebts.reduce(
-      (sum, debt) => sum + (debt.monthlyPayment || debt.minimumPayment || 0),
-      0
-    );
-    if (baseMonthlyPayment <= 0) {
-      throw new Error('Registra una cuota mensual válida antes de ejecutar la simulación.');
-    }
-    const weightedRate = targetDebts.reduce((sum, d) => sum + (d.interestRate * (d.currentBalance / totalBalance)), 0) / 100;
-    const monthlyRate = weightedRate / 12;
-
-    // Simulate baseline months & total interest
-    let baseMonths = 0;
-    let baseRemaining = totalBalance;
-    let baseTotalInterest = 0;
-    const maxMonths = 360;
-
-    while (baseRemaining > 0 && baseMonths < maxMonths) {
-      baseMonths++;
-      const interest = baseRemaining * monthlyRate;
-      baseTotalInterest += interest;
-      const principal = baseMonthlyPayment - interest;
-      baseRemaining = principal > 0
-        ? baseRemaining - Math.min(baseRemaining, principal)
-        : baseRemaining + Math.abs(principal);
-    }
-
-    // Simulated scenario with lump sum + monthly increase
-    let simMonths = 0;
-    let simRemaining = Math.max(0, totalBalance - params.lumpSumExtra);
-    let simTotalInterest = 0;
-    const simMonthlyPayment = baseMonthlyPayment + params.monthlyIncrease;
-
-    const timelinePoints: { label: string; actualBalance: number; simulatedBalance: number }[] = [];
-    
-    // Add point 0
-    timelinePoints.push({
-      label: 'Hoy',
-      actualBalance: Math.round(totalBalance),
-      simulatedBalance: Math.round(simRemaining)
+  async runSimulation(payload: SimulationRequestPayload): Promise<SimulationResponsePayload> {
+    const response = await apiRequest<SimulationResponsePayload>('/simulations', {
+      method: 'POST',
+      body: JSON.stringify(payload)
     });
 
-    let currentActual = totalBalance;
-    let currentSim = simRemaining;
-
-    for (let m = 1; m <= Math.max(baseMonths, 12); m++) {
-      const simBeforeStep = currentSim;
-      // Step actual
-      if (currentActual > 0) {
-        const intA = currentActual * monthlyRate;
-        const priA = baseMonthlyPayment - intA;
-        currentActual = priA > 0
-          ? Math.max(0, currentActual - Math.min(currentActual, priA))
-          : currentActual + Math.abs(priA);
-      }
-
-      // Step sim
-      if (currentSim > 0) {
-        simMonths++;
-        const intS = currentSim * monthlyRate;
-        simTotalInterest += intS;
-        const priS = simMonthlyPayment - intS;
-        currentSim = priS > 0
-          ? Math.max(0, currentSim - Math.min(currentSim, priS))
-          : currentSim + Math.abs(priS);
-      }
-
-      // Record key milestones for graph (every 6 months or key points)
-      if (m % 6 === 0 || (simBeforeStep > 0 && currentSim === 0)) {
-        const dateObj = new Date();
-        dateObj.setMonth(dateObj.getMonth() + m);
-        const label = dateObj.toLocaleDateString('es-ES', { month: 'short', year: '2-digit' });
-        
-        timelinePoints.push({
-          label,
-          actualBalance: Math.round(currentActual),
-          simulatedBalance: Math.round(currentSim)
-        });
-      }
-
-      if (currentSim === 0 && currentActual === 0) break;
-    }
-
-    const savedMonths = Math.max(0, baseMonths - simMonths);
-    const savedInterest = Math.max(0, Math.round(baseTotalInterest - simTotalInterest));
-    
-    const originalCost = Math.round(totalBalance + baseTotalInterest);
-    const simulatedCost = Math.round(totalBalance + simTotalInterest);
-    const reductionPercentage = originalCost > 0 ? Math.min(99, Math.round((savedInterest / originalCost) * 100)) : 0;
-
-    // Formatting target dates
-    const today = new Date();
-    
-    const originalDate = new Date(today);
-    originalDate.setMonth(today.getMonth() + baseMonths);
-    const originalPayoffDate = originalDate.toLocaleDateString('es-ES', { month: 'short', year: 'numeric' });
-
-    const newDate = new Date(today);
-    newDate.setMonth(today.getMonth() + simMonths);
-    const newPayoffDate = newDate.toLocaleDateString('es-ES', { month: 'short', year: 'numeric' });
-
-    const timeline = timelinePoints.length <= 7
-      ? timelinePoints
-      : Array.from({ length: 7 }, (_, index) => timelinePoints[
-          Math.round(index * (timelinePoints.length - 1) / 6)
-        ]);
-
     return {
-      savedInterest,
-      savedMonths,
-      originalPayoffDate,
-      newPayoffDate,
-      originalTotalCost: originalCost,
-      simulatedTotalCost: simulatedCost,
-      reductionPercentage,
-      timeline
+      ...response,
+      baseline: normalizeProjection(response.baseline),
+      simulated: normalizeProjection(response.simulated),
+      differences: response.differences ? {
+        monthsReduced: Number(response.differences.monthsReduced || 0),
+        estimatedInterestSavings: Number(response.differences.estimatedInterestSavings || 0)
+      } : null,
+      periods: (response.periods || []).map(normalizePeriod)
     };
   }
 };

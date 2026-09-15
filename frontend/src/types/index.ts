@@ -137,6 +137,68 @@ export interface UserPreferences {
   dueAlertsDaysBefore: number;
 }
 
+export interface SimulationEventItem {
+  id: string;
+  date?: string;
+  period?: number;
+  extraPayment?: number;
+  modifiedMonthlyPayment?: number;
+}
+
+export interface SimulationRequestPayload {
+  debtId: string;
+  strategy: StrategyType;
+  events: Array<{
+    date?: string;
+    period?: number;
+    extraPayment?: number;
+    modifiedMonthlyPayment?: number;
+  }>;
+}
+
+export interface SimulationPeriodDetail {
+  period: number;
+  date: string;
+  openingBalance: number;
+  normalPayment: number;
+  extraPayment: number;
+  interest: number;
+  principal: number;
+  closingBalance: number;
+}
+
+export interface SimulationProjectionDetail {
+  totalInterest: number;
+  totalPrincipal: number;
+  estimatedMonths: number;
+  estimatedPayoffDate: string;
+}
+
+export interface SimulationDifferencesDetail {
+  monthsReduced: number;
+  estimatedInterestSavings: number;
+}
+
+export interface SimulationResponsePayload {
+  status: 'SUCCESS' | 'INSUFFICIENT_DATA';
+  statusReason?: string | null;
+  debt: {
+    id: string;
+    name: string;
+    entity: string;
+    currentBalance: number;
+    interestRate: number;
+    rateType: RateType;
+    categoryLabel: string;
+  };
+  simulatedStrategy: StrategyType;
+  assumptions: string[];
+  baseline: SimulationProjectionDetail | null;
+  simulated: SimulationProjectionDetail | null;
+  differences: SimulationDifferencesDetail | null;
+  periods: SimulationPeriodDetail[];
+}
+
 export interface SimulationParams {
   selectedDebtId: string; // 'all' or specific debt ID
   lumpSumExtra: number;
