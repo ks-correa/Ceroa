@@ -1,10 +1,11 @@
 package com.ceroa.service;
 
+import com.ceroa.api.dto.PaymentMutationResponse;
 import com.ceroa.api.dto.PaymentRequest;
 import com.ceroa.api.dto.PaymentResponse;
 import com.ceroa.domain.Debt;
-import com.ceroa.domain.DebtStatus;
 import com.ceroa.domain.Payment;
+import com.ceroa.domain.PaymentType;
 import com.ceroa.exception.BusinessRuleException;
 import com.ceroa.exception.ResourceNotFoundException;
 import com.ceroa.repository.DebtRepository;
@@ -37,10 +38,13 @@ public class PaymentService {
 
     @Transactional(readOnly = true)
     public List<PaymentResponse> findAll(UUID debtId) {
-        List<Payment> payments = debtId == null
-                ? paymentRepository.findAllByDebtUserIdOrderByDateDescCreatedAtDesc(currentUser.id())
-                : paymentRepository.findAllByDebtIdAndDebtUserIdOrderByDateDescCreatedAtDesc(debtId, currentUser.id());
-        return payments.stream().map(this::toResponse).toList();
+        if (debtId != null) {
+            debtService.findEntity(debtId);
+            return paymentRepository.findAllByDebtIdAndDebtUserIdOrderByDateDescCreatedAtDesc(debtId, currentUser.id())
+                    .stream().map(this::toResponse).toList();
+        }
+        return paymentRepository.findAllByDebtUserIdOrderByDateDescCreatedAtDesc(currentUser.id())
+                .stream().map(this::toResponse).toList();
     }
 
     @Transactional(readOnly = true)
@@ -51,53 +55,92 @@ public class PaymentService {
     @Transactional
     public PaymentResponse create(PaymentRequest request) {
         validateDate(request.date());
+        validateAmountGreaterThanZero(request.amount());
         Debt debt = debtService.findEntity(request.debtId());
-        validateAmount(request.amount(), debt.getCurrentBalance());
+
+        if (request.type() == PaymentType.FULL) {
+            validateFullPaymentAmount(request.amount(), debt.getCurrentBalance());
+        }
+
+        applyPaymentImpact(debt, request.amount());
+        debtRepository.save(debt);
 
         Payment payment = new Payment();
         payment.setDebt(debt);
         apply(payment, request);
-        debt.setCurrentBalance(debt.getCurrentBalance().subtract(request.amount()));
-        updateDebtStatus(debt);
-        debtRepository.save(debt);
-        return toResponse(paymentRepository.save(payment));
+        Payment savedPayment = paymentRepository.save(payment);
+        return toResponse(savedPayment);
     }
 
     @Transactional
     public PaymentResponse update(UUID id, PaymentRequest request) {
         validateDate(request.date());
+        validateAmountGreaterThanZero(request.amount());
         Payment payment = findEntity(id);
-        Debt originalDebt = payment.getDebt();
-        Debt targetDebt = debtService.findEntity(request.debtId());
+        Debt debt = payment.getDebt();
 
-        BigDecimal originalRestoredBalance = originalDebt.getCurrentBalance().add(payment.getAmount())
-                .min(originalDebt.getOriginalAmount());
-        if (originalDebt.getId().equals(targetDebt.getId())) {
-            validateAmount(request.amount(), originalRestoredBalance);
-            targetDebt.setCurrentBalance(originalRestoredBalance.subtract(request.amount()));
-        } else {
-            validateAmount(request.amount(), targetDebt.getCurrentBalance());
-            originalDebt.setCurrentBalance(originalRestoredBalance);
-            targetDebt.setCurrentBalance(targetDebt.getCurrentBalance().subtract(request.amount()));
-            updateDebtStatus(originalDebt);
-            debtRepository.save(originalDebt);
+        if (request.debtId() != null && !request.debtId().equals(debt.getId())) {
+            throw new BusinessRuleException("IMMUTABLE_PAYMENT_DEBT", "No se permite transferir un pago a una deuda diferente.");
         }
 
-        payment.setDebt(targetDebt);
+        // 1. Revertir exactamente el efecto previamente confirmado
+        revertPaymentImpact(debt, payment.getAmount());
+
+        // 2. Validar nuevo pago contra el estado restaurado de la obligación
+        if (request.type() == PaymentType.FULL) {
+            validateFullPaymentAmount(request.amount(), debt.getCurrentBalance());
+        }
+
+        // 3. Aplicar el nuevo efecto financiero
+        applyPaymentImpact(debt, request.amount());
+        debtRepository.save(debt);
+
+        // 4. Actualizar movimiento
         apply(payment, request);
-        updateDebtStatus(targetDebt);
-        debtRepository.save(targetDebt);
-        return toResponse(paymentRepository.save(payment));
+        Payment savedPayment = paymentRepository.save(payment);
+        return toResponse(savedPayment);
     }
 
     @Transactional
-    public void delete(UUID id) {
+    public PaymentMutationResponse delete(UUID id) {
         Payment payment = findEntity(id);
         Debt debt = payment.getDebt();
-        debt.setCurrentBalance(debt.getCurrentBalance().add(payment.getAmount()).min(debt.getOriginalAmount()));
-        updateDebtStatus(debt);
-        paymentRepository.delete(payment);
+        BigDecimal oldAmount = payment.getAmount();
+
+        // Revertir exactamente el efecto confirmado del movimiento
+        revertPaymentImpact(debt, oldAmount);
         debtRepository.save(debt);
+
+        paymentRepository.delete(payment);
+        return new PaymentMutationResponse(
+                payment.getId(),
+                debt.getId(),
+                debt.getName(),
+                oldAmount,
+                debt.getCurrentBalance(),
+                debt.getStatus(),
+                debt.getOriginalAmount(),
+                "Pago eliminado y saldo de la obligación recalculado correctamente."
+        );
+    }
+
+    /**
+     * Política canónica centralizada para aplicar el impacto financiero de un pago a una deuda.
+     */
+    private void applyPaymentImpact(Debt debt, BigDecimal amount) {
+        if (debt.getCurrentBalance().compareTo(amount) < 0) {
+            throw new BusinessRuleException("PAYMENT_EXCEEDS_BALANCE", "El pago no puede superar el saldo actual de la obligación.");
+        }
+        debt.setCurrentBalance(debt.getCurrentBalance().subtract(amount));
+        debtService.updateDebtStatus(debt);
+    }
+
+    /**
+     * Política canónica centralizada para revertir el impacto financiero de un pago en una deuda.
+     */
+    private void revertPaymentImpact(Debt debt, BigDecimal amount) {
+        debt.setCurrentBalance(debt.getCurrentBalance().add(amount));
+        debtService.updateDebtStatus(debt);
     }
 
     private Payment findEntity(UUID id) {
@@ -106,14 +149,26 @@ public class PaymentService {
     }
 
     private void validateDate(LocalDate date) {
+        if (date == null) {
+            throw new BusinessRuleException("PAYMENT_DATE_REQUIRED", "La fecha del pago es obligatoria.");
+        }
         if (date.isAfter(LocalDate.now())) {
             throw new BusinessRuleException("FUTURE_PAYMENT_DATE", "La fecha del pago no puede ser futura.");
         }
     }
 
-    private void validateAmount(BigDecimal amount, BigDecimal balance) {
-        if (amount.compareTo(balance) > 0) {
-            throw new BusinessRuleException("PAYMENT_EXCEEDS_BALANCE", "El pago no puede superar el saldo actual.");
+    private void validateAmountGreaterThanZero(BigDecimal amount) {
+        if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new BusinessRuleException("INVALID_PAYMENT_AMOUNT", "El valor del pago debe ser mayor que cero.");
+        }
+    }
+
+    private void validateFullPaymentAmount(BigDecimal amount, BigDecimal currentBalance) {
+        if (amount.compareTo(currentBalance) != 0) {
+            throw new BusinessRuleException(
+                    "FULL_PAYMENT_AMOUNT_MISMATCH",
+                    "El valor del pago total debe coincidir exactamente con el saldo actual de la obligación (" + currentBalance + ")."
+            );
         }
     }
 
@@ -124,13 +179,22 @@ public class PaymentService {
         payment.setNotes(request.notes());
     }
 
-    private void updateDebtStatus(Debt debt) {
-        debt.setStatus(debt.getCurrentBalance().signum() == 0 ? DebtStatus.PAID : DebtStatus.CURRENT);
-    }
-
     private PaymentResponse toResponse(Payment payment) {
+        Debt debt = payment.getDebt();
         return new PaymentResponse(
-                payment.getId(), payment.getDebt().getId(), payment.getDebt().getName(), payment.getAmount(),
-                payment.getDate(), payment.getType(), payment.getType().label(), "completed", payment.getNotes());
+                payment.getId(),
+                debt.getId(),
+                debt.getName(),
+                payment.getAmount(),
+                payment.getDate(),
+                payment.getType(),
+                payment.getType().label(),
+                "completed",
+                payment.getNotes(),
+                debt.getCurrentBalance(),
+                debt.getStatus(),
+                debt.getOriginalAmount()
+        );
     }
 }
+

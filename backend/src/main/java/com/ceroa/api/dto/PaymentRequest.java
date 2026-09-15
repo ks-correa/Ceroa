@@ -11,9 +11,10 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 public record PaymentRequest(
-        @NotNull UUID debtId,
-        @NotNull PaymentType type,
-        @NotNull @DecimalMin(value = "0.01") BigDecimal amount,
-        @NotNull @PastOrPresent LocalDate date,
-        @Size(max = 500) String notes
+        @NotNull(message = "La deuda relacionada es obligatoria.") UUID debtId,
+        @NotNull(message = "El tipo de pago es obligatorio.") PaymentType type,
+        @NotNull(message = "El valor del pago es obligatorio.") @DecimalMin(value = "0.01", message = "El valor del pago debe ser mayor que cero.") BigDecimal amount,
+        @NotNull(message = "La fecha del pago es obligatoria.") @PastOrPresent(message = "La fecha del pago no puede ser futura.") LocalDate date,
+        @Size(max = 500, message = "La nota no puede superar los 500 caracteres.") String notes
 ) {}
+

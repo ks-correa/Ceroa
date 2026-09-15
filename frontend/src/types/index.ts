@@ -74,6 +74,20 @@ export interface PaymentRecord {
   typeLabel: string;
   status: 'completed' | 'pending';
   notes?: string;
+  debtCurrentBalance?: number;
+  debtStatus?: DebtStatus;
+  debtOriginalAmount?: number;
+}
+
+export interface PaymentMutationResponse {
+  paymentId: string;
+  debtId: string;
+  debtName: string;
+  amount: number;
+  debtCurrentBalance: number;
+  debtStatus: DebtStatus;
+  debtOriginalAmount?: number;
+  message: string;
 }
 
 export interface CalendarCommitment {

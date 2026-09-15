@@ -31,7 +31,7 @@ export const useStrategyData = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [debts.length]);
+  }, [debts]);
 
   useEffect(() => {
     void fetchStrategy();

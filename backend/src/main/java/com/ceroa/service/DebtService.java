@@ -145,6 +145,21 @@ public class DebtService {
         debt.setDetails(details);
     }
 
+    public DebtStatus calculateSystemStatus(Debt debt) {
+        if (debt == null) return DebtStatus.CURRENT;
+        return calculateSystemStatus(
+                debt.getCurrentBalance(),
+                debt.getNextDueDate(),
+                debt.getType(),
+                debt.getDetails());
+    }
+
+    public void updateDebtStatus(Debt debt) {
+        if (debt != null) {
+            debt.setStatus(calculateSystemStatus(debt));
+        }
+    }
+
     private DebtStatus calculateSystemStatus(
             BigDecimal currentBalance,
             LocalDate nextDueDate,

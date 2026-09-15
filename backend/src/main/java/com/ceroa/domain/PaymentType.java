@@ -28,8 +28,13 @@ public enum PaymentType {
 
     @JsonCreator
     public static PaymentType fromValue(String value) {
+        if (value == null || value.isBlank()) {
+            throw new IllegalArgumentException("El tipo de pago es obligatorio.");
+        }
         for (PaymentType type : values()) {
-            if (type.value.equalsIgnoreCase(value)) return type;
+            if (type.value.equalsIgnoreCase(value) || type.name().equalsIgnoreCase(value)) {
+                return type;
+            }
         }
         throw new IllegalArgumentException("Tipo de pago no soportado: " + value);
     }

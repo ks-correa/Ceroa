@@ -1,6 +1,7 @@
 package com.ceroa.repository;
 
 import com.ceroa.domain.Payment;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -11,9 +12,15 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface PaymentRepository extends JpaRepository<Payment, UUID> {
+    @EntityGraph(attributePaths = {"debt"})
     List<Payment> findAllByDebtUserIdOrderByDateDescCreatedAtDesc(UUID userId);
+
+    @EntityGraph(attributePaths = {"debt"})
     List<Payment> findAllByDebtIdAndDebtUserIdOrderByDateDescCreatedAtDesc(UUID debtId, UUID userId);
+
+    @EntityGraph(attributePaths = {"debt"})
     Optional<Payment> findByIdAndDebtUserId(UUID id, UUID userId);
+
     long countByDebtId(UUID debtId);
 
     @Modifying

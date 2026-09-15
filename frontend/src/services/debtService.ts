@@ -1,4 +1,4 @@
-import { CreateDebtPayload, Debt, PaymentRecord, PaymentType } from '../types';
+import { CreateDebtPayload, Debt, PaymentMutationResponse, PaymentRecord, PaymentType } from '../types';
 import { apiRequest } from './api';
 
 const normalizeDebt = (debt: Debt): Debt => ({
@@ -15,7 +15,9 @@ const normalizeDebt = (debt: Debt): Debt => ({
 
 const normalizePayment = (payment: PaymentRecord): PaymentRecord => ({
   ...payment,
-  amount: Number(payment.amount)
+  amount: Number(payment.amount),
+  debtCurrentBalance: payment.debtCurrentBalance !== undefined ? Number(payment.debtCurrentBalance) : undefined,
+  debtOriginalAmount: payment.debtOriginalAmount !== undefined ? Number(payment.debtOriginalAmount) : undefined
 });
 
 export const debtService = {
@@ -99,7 +101,7 @@ export const debtService = {
     }));
   },
 
-  async deletePayment(id: string): Promise<void> {
-    await apiRequest<void>(`/payments/${id}`, { method: 'DELETE' });
+  async deletePayment(id: string): Promise<PaymentMutationResponse | void> {
+    return await apiRequest<PaymentMutationResponse>(`/payments/${id}`, { method: 'DELETE' });
   }
 };

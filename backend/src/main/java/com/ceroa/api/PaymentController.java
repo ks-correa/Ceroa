@@ -1,5 +1,6 @@
 package com.ceroa.api;
 
+import com.ceroa.api.dto.PaymentMutationResponse;
 import com.ceroa.api.dto.PaymentRequest;
 import com.ceroa.api.dto.PaymentResponse;
 import com.ceroa.service.PaymentService;
@@ -37,6 +38,6 @@ public class PaymentController {
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable UUID id) { service.delete(id); }
+    public PaymentMutationResponse delete(@PathVariable UUID id) { return service.delete(id); }
 }
+
