@@ -15,7 +15,6 @@ import {
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { useSimulation } from './useSimulation';
-import { StrategyType } from '../../types';
 
 export const SimulationView: React.FC = () => {
   const {
