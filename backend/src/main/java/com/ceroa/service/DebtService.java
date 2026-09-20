@@ -27,16 +27,28 @@ public class DebtService {
     private final PaymentRepository paymentRepository;
     private final CurrentUserService currentUser;
     private final DebtValidator debtValidator;
+    private final com.ceroa.repository.NotificationRepository notificationRepository;
 
     public DebtService(
             DebtRepository debtRepository,
             PaymentRepository paymentRepository,
             CurrentUserService currentUser,
             DebtValidator debtValidator) {
+        this(debtRepository, paymentRepository, currentUser, debtValidator, null);
+    }
+
+    @org.springframework.beans.factory.annotation.Autowired
+    public DebtService(
+            DebtRepository debtRepository,
+            PaymentRepository paymentRepository,
+            CurrentUserService currentUser,
+            DebtValidator debtValidator,
+            com.ceroa.repository.NotificationRepository notificationRepository) {
         this.debtRepository = debtRepository;
         this.paymentRepository = paymentRepository;
         this.currentUser = currentUser;
         this.debtValidator = debtValidator;
+        this.notificationRepository = notificationRepository;
     }
 
     @Transactional(readOnly = true)
@@ -89,6 +101,9 @@ public class DebtService {
     @Transactional
     public void delete(UUID id) {
         Debt debt = findEntity(id);
+        if (notificationRepository != null) {
+            notificationRepository.detachDebtReference(debt.getId());
+        }
         paymentRepository.deleteAllByDebtId(debt.getId());
         debtRepository.delete(debt);
     }

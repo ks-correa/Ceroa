@@ -10,11 +10,13 @@ import {
   StrategyType, 
   UserPreferences, 
   UserProfile,
-  DashboardSummary
+  DashboardSummary,
+  UpcomingDueItem
 } from '../types';
 import { debtService } from '../services/debtService';
 import { userService } from '../services/userService';
 import { notificationService } from '../services/notificationService';
+import { dueService } from '../services/dueService';
 import { authService, RegisterPayload } from '../services/authService';
 import { dashboardService } from '../services/dashboardService';
 import { strategyService } from '../services/strategyService';
@@ -63,6 +65,7 @@ interface AppContextType {
   financialProfile: FinancialProfile;
   preferences: UserPreferences;
   notifications: NotificationItem[];
+  upcomingDues: UpcomingDueItem[];
   unreadNotificationsCount: number;
   isLoading: boolean;
   dataError: string | null;
@@ -177,6 +180,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return LocalStorageManager.get<UserPreferences>('preferences', DEFAULT_PREFERENCES);
   });
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [upcomingDues, setUpcomingDues] = useState<UpcomingDueItem[]>([]);
+  const [unreadNotificationsCount, setUnreadNotificationsCount] = useState<number>(0);
 
   // Strategy
   const [activeStrategy, setActiveStrategyState] = useState<StrategyType>('snowball');
@@ -217,6 +222,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setIsDashboardLoading(false);
     setDashboardError(null);
     setNotifications([]);
+    setUpcomingDues([]);
+    setUnreadNotificationsCount(0);
     setActiveStrategyState('snowball');
     setDataError(null);
     setIsLoading(false);
@@ -267,16 +274,20 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setIsDashboardLoading(true);
       setDataError(null);
       setDashboardError(null);
-      const [fDebts, fPayments, fUser, fFin, fPrefs, fNotifs, fDashboard] = await Promise.all([
+      const [fDebts, fPayments, fUser, fFin, fPrefs, fNotifs, fDashboard, fDues] = await Promise.all([
         debtService.getDebts(),
         debtService.getPayments(),
         userService.getUserProfile(),
         userService.getFinancialProfile(),
         userService.getPreferences(),
-        notificationService.getNotifications(),
+        notificationService.getNotificationCenter().catch(() => notificationService.getNotifications()),
         dashboardService.getSummary().catch((err) => {
           console.error('Failed to fetch dashboard summary in refreshAllData:', err);
           return null;
+        }),
+        dueService.getUpcomingDues().catch((err) => {
+          console.error('Failed to fetch upcoming dues in refreshAllData:', err);
+          return [];
         })
       ]);
 
@@ -287,7 +298,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setFinancialProfile(fFin);
       setActiveStrategyState(fFin.activeStrategy);
       setPreferences(fPrefs);
-      setNotifications(fNotifs);
+      if (Array.isArray(fNotifs)) {
+        setNotifications(fNotifs);
+        setUnreadNotificationsCount(fNotifs.filter((n: any) => !n.read).length);
+      } else if (fNotifs && typeof fNotifs === 'object') {
+        setNotifications(fNotifs.notifications || []);
+        setUnreadNotificationsCount(Number(fNotifs.unreadCount || 0));
+      }
+      setUpcomingDues(fDues || []);
       if (fDashboard) {
         setDashboardSummary(fDashboard);
         setDashboardError(null);
@@ -474,13 +492,21 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const handleMarkNotificationRead = async (id: string) => {
-    const updated = await notificationService.markAsRead(id);
-    setNotifications(updated);
+    try {
+      const res = await notificationService.markAsReadSingle(id);
+      setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true, readAt: res.readAt } : n)));
+      setUnreadNotificationsCount(res.unreadCount);
+    } catch {
+      const updated = await notificationService.markAsRead(id);
+      setNotifications(updated);
+      setUnreadNotificationsCount(updated.filter((n) => !n.read).length);
+    }
   };
 
   const handleMarkAllNotificationsRead = async () => {
     const updated = await notificationService.markAllAsRead();
     setNotifications(updated);
+    setUnreadNotificationsCount(0);
     showToast('Todas las notificaciones marcadas como leídas');
   };
 
@@ -543,10 +569,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     nextTotalMonthlyPayment,
     activeAccountsCount
   } = useMemo(() => calculateDebtSummary(debts, payments), [debts, payments]);
-  const unreadNotificationsCount = useMemo(
-    () => notifications.filter((notification) => !notification.read).length,
-    [notifications]
-  );
 
   // Formatters
   const formatNumber = formatNumberValue;
@@ -581,6 +603,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         financialProfile,
         preferences,
         notifications,
+        upcomingDues,
         unreadNotificationsCount,
         isLoading,
         dataError,

@@ -26,14 +26,16 @@ import { useApp } from '../../context/AppContext';
 import { Debt, DebtType, PaymentRecord } from '../../types';
 import { debtService } from '../../services/debtService';
 import { formatRelativeDueDate, getCalendarDayDifference } from '../../utils/date';
+import { UpcomingDuesWidget } from '../common/UpcomingDuesWidget';
 
 export const DebtDetailView: React.FC = () => {
   const { 
     selectedDebtId, 
     debts, 
     payments, 
+    upcomingDues = [],
     formatCurrency, 
-    formatNumber,
+    formatNumber, 
     formatDate,
     setCurrentScreen, 
     openRecordPaymentModal, 
@@ -725,37 +727,42 @@ export const DebtDetailView: React.FC = () => {
           </div>
         </div>
 
-        {/* Próximo Vencimiento & Botones de Acción (1 col) */}
+        {/* Próximo Vencimiento & Botones de Acción (1 col) (HU-048 CA-01, CA-02, CA-03) */}
         <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 shadow-xs flex flex-col justify-between space-y-4">
-          <div className="space-y-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
-              Próximo Vencimiento
-            </span>
-            
-            <div className="text-2xl sm:text-3xl font-extrabold text-teal-900 dark:text-cyan-300">
-              {debt.nextDueDate ? formatDate(debt.nextDueDate) : 'Sin vencimiento fijo'}
+          {(() => {
+            const currentDue = upcomingDues.find(u => u.debtId === debt.id) || (debt.nextDueDate ? {
+              debtId: debt.id,
+              debtName: debt.name,
+              entity: debt.entity,
+              type: debt.type,
+              amount: debt.type === 'credit_card' ? (debt.minimumPayment || debt.currentBalance) : (debt.monthlyPayment || debt.currentBalance),
+              dueDate: debt.nextDueDate,
+              daysUntilDue: Math.round((new Date(debt.nextDueDate + 'T00:00:00').getTime() - new Date().setHours(0,0,0,0)) / (1000 * 60 * 60 * 24)),
+              status: debt.status,
+              reminderMilestone: Math.round((new Date(debt.nextDueDate + 'T00:00:00').getTime() - new Date().setHours(0,0,0,0)) / (1000 * 60 * 60 * 24)) === 7 ? 'SEVEN_DAYS' : (Math.round((new Date(debt.nextDueDate + 'T00:00:00').getTime() - new Date().setHours(0,0,0,0)) / (1000 * 60 * 60 * 24)) === 3 ? 'THREE_DAYS' : (Math.round((new Date(debt.nextDueDate + 'T00:00:00').getTime() - new Date().setHours(0,0,0,0)) / (1000 * 60 * 60 * 24)) === 0 ? 'DUE_TODAY' : 'NONE'))
+            } as any : null);
+
+            return (
+              <UpcomingDuesWidget
+                variant="detail"
+                singleDue={currentDue}
+                showStatusBadge={false}
+              />
+            );
+          })()}
+
+          <div className="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-1.5 text-xs">
+            <div className="flex justify-between">
+              <span className="text-slate-400">{debt.type === 'credit_card' ? 'Pago Mínimo:' : 'Cuota / Pago:'}</span>
+              <strong className="text-slate-800 dark:text-slate-200">
+                {maskValue(formatCurrency(debt.type === 'credit_card' ? debt.minimumPayment : debt.monthlyPayment))}
+              </strong>
             </div>
-
-            {debt.nextDueDate && (
-              <div className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 dark:bg-amber-950 text-amber-700 dark:text-amber-400 border border-amber-200 dark:border-amber-800">
-                <Clock className="w-3.5 h-3.5" />
-                <span>{relativeDueDate}</span>
-              </div>
-            )}
-
-            <div className="pt-3 border-t border-slate-100 dark:border-slate-800 space-y-1.5 text-xs">
-              <div className="flex justify-between">
-                <span className="text-slate-400">{debt.type === 'credit_card' ? 'Pago Mínimo:' : 'Cuota / Pago:'}</span>
-                <strong className="text-slate-800 dark:text-slate-200">
-                  {maskValue(formatCurrency(debt.type === 'credit_card' ? debt.minimumPayment : debt.monthlyPayment))}
-                </strong>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-slate-400">Tasa de Interés:</span>
-                <strong className="text-teal-700 dark:text-cyan-400">
-                  {debt.rateType === 'NONE' || !debt.interestRate ? '0%' : `${debt.interestRate}% ${debt.rateType}`}
-                </strong>
-              </div>
+            <div className="flex justify-between">
+              <span className="text-slate-400">Tasa de Interés:</span>
+              <strong className="text-teal-700 dark:text-cyan-400">
+                {debt.rateType === 'NONE' || !debt.interestRate ? '0%' : `${debt.interestRate}% ${debt.rateType}`}
+              </strong>
             </div>
           </div>
 

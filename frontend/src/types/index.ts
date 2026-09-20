@@ -220,14 +220,36 @@ export interface SimulationResult {
   }[];
 }
 
+export type ReminderMilestone = 'SEVEN_DAYS' | 'THREE_DAYS' | 'DUE_TODAY' | 'NONE';
+
+export interface UpcomingDueItem {
+  debtId: string;
+  debtName: string;
+  entity: string;
+  type: DebtType;
+  amount: number;
+  dueDate: string;
+  daysUntilDue: number;
+  status: 'al_dia' | 'vence_hoy' | 'en_mora' | 'pagada';
+  reminderMilestone: ReminderMilestone;
+}
+
 export interface NotificationItem {
   id: string;
   title: string;
   message: string;
-  timeAgo: string;
-  type: 'reminder' | 'milestone' | 'system' | 'tip';
+  timeAgo?: string;
+  type: string;
   read: boolean;
-  date: string;
+  date?: string;
+  eventDate?: string;
+  relatedDebtId?: string | null;
+  relatedDebtName?: string | null;
+  readAt?: string | null;
+  channel?: 'IN_APP' | 'TELEGRAM' | string;
+  eventKey?: string | null;
+  planRestricted?: boolean;
+  createdAt?: string;
 }
 
 export type AppScreen = 

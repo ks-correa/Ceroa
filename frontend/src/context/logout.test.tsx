@@ -9,7 +9,7 @@ import { notificationService } from '../services/notificationService';
 vi.mock('../services/authService', () => ({ authService: { me: vi.fn(), logout: vi.fn() } }));
 vi.mock('../services/debtService', () => ({ debtService: { getDebts: vi.fn(), getPayments: vi.fn() } }));
 vi.mock('../services/userService', () => ({ userService: { getUserProfile: vi.fn(), getFinancialProfile: vi.fn(), getPreferences: vi.fn() } }));
-vi.mock('../services/notificationService', () => ({ notificationService: { getNotifications: vi.fn() } }));
+vi.mock('../services/notificationService', () => ({ notificationService: { getNotifications: vi.fn(), getNotificationCenter: vi.fn(), getUnreadCount: vi.fn(), markAsRead: vi.fn() } }));
 import { DEFAULT_USER_PROFILE, DEFAULT_FINANCIAL_PROFILE, DEFAULT_PREFERENCES } from '../constants/defaults';
 beforeEach(() => {
   vi.resetAllMocks(); localStorage.clear();
@@ -20,6 +20,8 @@ beforeEach(() => {
   vi.mocked(userService.getFinancialProfile).mockResolvedValue({ ...DEFAULT_FINANCIAL_PROFILE, monthlyIncome: 987654 });
   vi.mocked(userService.getPreferences).mockResolvedValue(DEFAULT_PREFERENCES);
   vi.mocked(notificationService.getNotifications).mockResolvedValue([]);
+  vi.mocked(notificationService.getNotificationCenter).mockResolvedValue({ notifications: [], unreadCount: 0 });
+  vi.mocked(notificationService.getUnreadCount).mockResolvedValue(0);
 });
 afterEach(cleanup);
 it('clears sensitive state and overlays while retaining only the authorized email preference', async () => {

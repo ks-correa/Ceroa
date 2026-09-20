@@ -292,12 +292,33 @@ export const DashboardView: React.FC = () => {
                       {maskValue(formatCurrency(nextDue.amount))}
                     </span>
                   </div>
-                  <button
-                    onClick={() => navigateToDebtDetail(nextDue.debtId)}
-                    className="mt-2 text-xs font-bold text-teal-700 dark:text-cyan-400 hover:underline inline-flex items-center gap-1 cursor-pointer"
-                  >
-                    Ver detalle de la deuda &rarr;
-                  </button>
+                  {/* Hitos aprobados 7, 3 y 0 días (HU-048 CA-03) */}
+                  {nextDue.daysUntilDue === 7 && (
+                    <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 text-blue-700 dark:bg-blue-950/70 dark:text-blue-300 border border-blue-200 dark:border-blue-800" data-testid="dashboard-milestone-7">
+                      <Clock className="w-3 h-3" />
+                      <span>Hito: 7 días antes</span>
+                    </div>
+                  )}
+                  {nextDue.daysUntilDue === 3 && (
+                    <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 dark:bg-amber-950/70 dark:text-amber-300 border border-amber-200 dark:border-amber-800" data-testid="dashboard-milestone-3">
+                      <Clock className="w-3 h-3" />
+                      <span>Hito: 3 días antes</span>
+                    </div>
+                  )}
+                  {nextDue.daysUntilDue === 0 && (
+                    <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-50 text-rose-700 dark:bg-rose-950/70 dark:text-rose-300 border border-rose-200 dark:border-rose-800" data-testid="dashboard-milestone-0">
+                      <AlertCircle className="w-3 h-3" />
+                      <span>Hito: Vence hoy</span>
+                    </div>
+                  )}
+                  <div>
+                    <button
+                      onClick={() => navigateToDebtDetail(nextDue.debtId)}
+                      className="mt-2 text-xs font-bold text-teal-700 dark:text-cyan-400 hover:underline inline-flex items-center gap-1 cursor-pointer"
+                    >
+                      Ver detalle de la deuda &rarr;
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <div>
@@ -503,9 +524,29 @@ export const DashboardView: React.FC = () => {
                       <CreditCard className="w-4 h-4" />
                     </div>
                     <div>
-                      <h3 className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-teal-700 dark:group-hover:text-cyan-400 transition-colors">
-                        {due.debtName}
-                      </h3>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-teal-700 dark:group-hover:text-cyan-400 transition-colors">
+                          {due.debtName}
+                        </h3>
+                        {due.daysUntilDue === 7 && (
+                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 dark:bg-blue-950/70 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                            <Clock className="w-2.5 h-2.5" />
+                            Hito 7d
+                          </span>
+                        )}
+                        {due.daysUntilDue === 3 && (
+                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-700 dark:bg-amber-950/70 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                            <Clock className="w-2.5 h-2.5" />
+                            Hito 3d
+                          </span>
+                        )}
+                        {due.daysUntilDue === 0 && (
+                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-50 text-rose-700 dark:bg-rose-950/70 dark:text-rose-300 border border-rose-200 dark:border-rose-800">
+                            <AlertCircle className="w-2.5 h-2.5" />
+                            Vence hoy
+                          </span>
+                        )}
+                      </div>
                       <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
                         {due.entity || 'Entidad no especificada'} • Vence el {formatDate(due.dueDate)} ({due.daysUntilDue} {due.daysUntilDue === 1 ? 'día' : 'días'})
                       </span>

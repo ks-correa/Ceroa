@@ -16,10 +16,12 @@ import {
 import { useApp } from '../../context/AppContext';
 import { DebtType } from '../../types';
 import { useDebtFilters } from './useDebtFilters';
+import { UpcomingDuesWidget } from '../common/UpcomingDuesWidget';
 
 export const DebtsListView: React.FC = () => {
   const { 
     debts, 
+    upcomingDues = [],
     totalDebt, 
     overallProgressPercentage, 
     nextTotalMonthlyPayment, 
@@ -146,6 +148,16 @@ export const DebtsListView: React.FC = () => {
         </div>
       </div>
 
+      {/* Próximos Vencimientos (HU-048 CA-01) */}
+      {upcomingDues.length > 0 && (
+        <UpcomingDuesWidget
+          variant="list"
+          dues={upcomingDues}
+          onSelectDebt={navigateToDebtDetail}
+          title="Próximos Vencimientos"
+        />
+      )}
+
       {/* Search & Category Filter Controls */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
         
@@ -213,6 +225,7 @@ export const DebtsListView: React.FC = () => {
               : 0;
 
             const isCard = debt.type === 'credit_card';
+            const matchingDue = upcomingDues.find((u) => u.debtId === debt.id);
 
             return (
               <div
@@ -244,9 +257,26 @@ export const DebtsListView: React.FC = () => {
                         </span>
                       </div>
                       
-                      <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
-                        <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                        <span>Vence: <strong className="text-slate-700 dark:text-slate-200">{formatDate(debt.nextDueDate)}</strong></span>
+                      <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 flex-wrap">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                          <span>Vence: <strong className="text-slate-700 dark:text-slate-200">{formatDate(debt.nextDueDate)}</strong></span>
+                        </span>
+                        {matchingDue?.reminderMilestone === 'SEVEN_DAYS' && (
+                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 dark:bg-blue-950/70 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                            Hito 7d
+                          </span>
+                        )}
+                        {matchingDue?.reminderMilestone === 'THREE_DAYS' && (
+                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-700 dark:bg-amber-950/70 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+                            Hito 3d
+                          </span>
+                        )}
+                        {matchingDue?.reminderMilestone === 'DUE_TODAY' && (
+                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-50 text-rose-700 dark:bg-rose-950/70 dark:text-rose-300 border border-rose-200 dark:border-rose-800">
+                            Vence hoy
+                          </span>
+                        )}
                       </div>
 
                       {/* Small Progress Pill */}

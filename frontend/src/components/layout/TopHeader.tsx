@@ -200,11 +200,19 @@ export const TopHeader: React.FC = () => {
           id="notifications-bell-btn"
           onClick={() => setIsNotificationsOpen(true)}
           className="relative p-2 rounded-xl text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
-          title="Notificaciones"
+          title={unreadNotificationsCount > 0 ? `${unreadNotificationsCount} notificaciones no leídas` : 'Notificaciones'}
+          aria-label={unreadNotificationsCount > 0 ? `${unreadNotificationsCount} notificaciones no leídas` : 'Notificaciones'}
         >
-          <Bell className="w-4 h-4" />
+          <Bell className="w-4 h-4" aria-hidden="true" />
           {unreadNotificationsCount > 0 && (
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-white dark:ring-slate-900 animate-pulse" />
+            <span 
+              id="notifications-badge"
+              data-testid="notifications-unread-badge"
+              aria-label={`${unreadNotificationsCount} no leídas`}
+              className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 bg-rose-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center ring-2 ring-white dark:ring-slate-900 shadow-xs"
+            >
+              {unreadNotificationsCount > 99 ? '99+' : unreadNotificationsCount}
+            </span>
           )}
         </button>
 
