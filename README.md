@@ -221,3 +221,10 @@ OAuth2 con Google/Microsoft, recuperación de contraseña por correo, onboarding
 # Registro y acceso (EP-02)
 
 Consulta [EP02.md](EP02.md) para la configuración de Google/Microsoft, migraciones, ejecución de pruebas y matrices de aceptación. La validación real con proveedores requiere credenciales externas.
+# Ceroa Plus (EP-14)
+
+La oferta comercial la publica el backend en `GET /api/v1/plus/offers`. Configure `PLUS_MONTHLY_PRICE`, `PLUS_YEARLY_PRICE` y `PLUS_CURRENCY` en el entorno; no hay precios predeterminados. Sin precios positivos, `MP_ACCESS_TOKEN` y `MP_WEBHOOK_SECRET`, el checkout permanece deshabilitado.
+
+Configure en Mercado Pago el webhook público `POST https://<backend>/api/v1/plus/webhook` para el tópico `subscription_preapproval`, y copie su secreto de firma a `MP_WEBHOOK_SECRET`. `FRONTEND_URL` debe ser la URL pública HTTPS de Ceroa para el retorno. Use el token y el secreto del mismo entorno de Mercado Pago; las pruebas y producción requieren configuraciones separadas.
+
+El backend crea `/preapproval` con el monto configurado, guarda la referencia y conserva `PENDING` hasta consultar el recurso mediante la API de Mercado Pago. El webhook valida `x-signature` y vuelve a consultar el recurso; el retorno de navegador también consulta al backend. Solo `authorized` con referencia, monto, moneda y frecuencia coincidentes actualiza el plan central a Plus. No se guardan datos de tarjeta.

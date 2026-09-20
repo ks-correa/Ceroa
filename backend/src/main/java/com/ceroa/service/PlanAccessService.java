@@ -24,6 +24,12 @@ public class PlanAccessService {
                 new Limits(plus ? null : CERO_DEBT_LIMIT, plus ? "FULL" : "BASIC", plus ? "DETAILED" : "BASIC"));
     }
 
+    public PlanAccess catalog(UserPlan plan) {
+        User candidate = new User();
+        candidate.setPlan(plan);
+        return access(candidate);
+    }
+
     public record PlanAccess(UserPlan plan, boolean plusActive, Capabilities capabilities, Limits limits) {}
     public record Capabilities(boolean payments, boolean dashboard, boolean snowballAndAvalanche,
             boolean simulation, boolean fullStrategyDetail, boolean advancedReminders, boolean detailedMonthlySummary) {}

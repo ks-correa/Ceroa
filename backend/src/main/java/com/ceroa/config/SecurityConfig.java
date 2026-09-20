@@ -42,7 +42,8 @@ public class SecurityConfig {
         return http
                 .csrf(csrf -> csrf
                         .csrfTokenRepository(csrfTokenRepository)
-                        .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler()))
+                        .csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler())
+                        .ignoringRequestMatchers("/api/v1/plus/webhook"))
                 .cors(cors -> {})
                 .requestCache(cache -> cache.disable())
                 .logout(logout -> logout.disable())
@@ -52,6 +53,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/oauth2/authorization/**", "/login/oauth2/code/**", "/api/v1/auth/external/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/auth/csrf").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/plus/webhook").permitAll()
                         .requestMatchers(
                                 HttpMethod.POST,
                                 "/api/v1/auth/login",

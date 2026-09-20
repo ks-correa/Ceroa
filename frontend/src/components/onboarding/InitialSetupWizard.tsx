@@ -124,6 +124,8 @@ export const InitialSetupWizard: React.FC = () => {
     setSaving(true);
     try {
       await userService.completeInitialSetup();
+      sessionStorage.setItem('ceroa-plus-offer', '1');
+      window.dispatchEvent(new Event('ceroa:plus-offer'));
       await refreshAllData();
     } finally {
       setSaving(false);
