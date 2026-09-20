@@ -60,6 +60,7 @@ public class SecurityConfig {
                                 "/api/v1/auth/recovery/verify",
                                 "/api/v1/auth/recovery/reset",
                                 "/api/v1/auth/logout").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/notifications/external-reminder").denyAll()
                         .requestMatchers("/api/v1/**").authenticated()
                         .anyRequest().denyAll())
                 .exceptionHandling(exceptions -> exceptions

@@ -37,10 +37,5 @@ public class NotificationController {
         return service.markAsRead(id);
     }
 
-    @PostMapping("/external-reminder")
-    @Operation(summary = "Registrar o sincronizar recordatorio externo (Telegram) con verificación de plan y deduplicación (HU-051)")
-    public NotificationResponse registerExternalReminder(@RequestBody ExternalReminderRequest request) {
-        return service.registerExternalReminder(request);
-    }
 }
 

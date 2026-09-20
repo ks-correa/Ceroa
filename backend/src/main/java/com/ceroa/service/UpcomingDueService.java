@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.YearMonth;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -38,7 +39,7 @@ public class UpcomingDueService {
 
     @Transactional(readOnly = true)
     public List<UpcomingDueResponse> getUpcomingDues() {
-        return getUpcomingDues(currentUser.id(), LocalDate.now());
+        return getUpcomingDues(currentUser.id(), LocalDate.now(ZoneId.of("America/Bogota")));
     }
 
     @Transactional(readOnly = true)
@@ -83,7 +84,7 @@ public class UpcomingDueService {
 
     @Transactional(readOnly = true)
     public UpcomingDueResponse getUpcomingDueForDebt(UUID debtId) {
-        return getUpcomingDueForDebt(debtId, currentUser.id(), LocalDate.now());
+        return getUpcomingDueForDebt(debtId, currentUser.id(), LocalDate.now(ZoneId.of("America/Bogota")));
     }
 
     @Transactional(readOnly = true)

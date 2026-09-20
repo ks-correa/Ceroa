@@ -9,8 +9,6 @@ import {
   CheckCheck, 
   CalendarClock, 
   ChevronRight,
-  CreditCard,
-  Landmark,
   ShieldCheck
 } from 'lucide-react';
 import { UpcomingDueItem, ReminderMilestone } from '../../types';

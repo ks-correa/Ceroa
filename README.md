@@ -22,6 +22,8 @@ El backend es un monolito modular. React nunca se conecta directamente a Postgre
 
 La clasificación de hallazgos, decisiones y validaciones de la refactorización está en [ARCHITECTURE_AUDIT.md](ARCHITECTURE_AUDIT.md).
 
+El estado de vencimientos y notificaciones, incluidas las tareas pendientes de Telegram, está en [EP12.md](EP12.md).
+
 ## Navegación
 
 El área autenticada mantiene exactamente cinco secciones principales, tanto en escritorio como en móvil:

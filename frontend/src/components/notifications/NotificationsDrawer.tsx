@@ -1,17 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { 
   CreditCard, 
   CheckCircle2, 
   RefreshCw, 
-  Lightbulb, 
   CheckCheck,
   ArrowLeft,
-  X,
   Send,
   Calendar,
-  AlertTriangle,
   Lock,
-  ExternalLink,
   BellOff
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
@@ -27,11 +23,9 @@ export const NotificationsDrawer: React.FC = () => {
     handleMarkNotificationRead,
     handleMarkAllNotificationsRead,
     navigateToDebtDetail,
-    setCurrentScreen,
-    isLoading
+    setCurrentScreen
   } = useApp();
 
-  const [activeNotificationId, setActiveNotificationId] = useState<string | null>(null);
 
   // Close on ESC key
   useEffect(() => {
@@ -47,11 +41,14 @@ export const NotificationsDrawer: React.FC = () => {
   if (!isNotificationsOpen) return null;
 
   const handleOpenNotification = async (notif: NotificationItem) => {
-    setActiveNotificationId(notif.id);
     
     // Marcar como leída de forma autoritativa en backend
     if (!notif.read) {
-      await handleMarkNotificationRead(notif.id);
+      try {
+        await handleMarkNotificationRead(notif.id);
+      } catch {
+        return;
+      }
     }
 
     // Si tiene deuda relacionada, navegar al detalle (HU-050 CA-02)

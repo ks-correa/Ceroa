@@ -33,7 +33,7 @@ public class SimulationService {
         User user = currentUser.entity();
 
         // Verificación autoritativa de Plan Plus activo
-        if (user.getPlan() != UserPlan.PLUS) {
+        if (!PlanAccessService.plusActive(user)) {
             throw new BusinessRuleException(
                     "PLAN_RESTRICTED",
                     "La simulación de pagos es una funcionalidad exclusiva de Ceroa Plus."
@@ -62,4 +62,3 @@ public class SimulationService {
         return simulationEngine.simulate(debt, request.strategy(), request.safeEvents(), null);
     }
 }
-

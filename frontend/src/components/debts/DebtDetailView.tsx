@@ -6,7 +6,6 @@ import {
   CheckCircle2, 
   Edit3, 
   PlusCircle, 
-  Clock, 
   FileText,
   Trash2,
   AlertTriangle,
@@ -25,7 +24,6 @@ import {
 import { useApp } from '../../context/AppContext';
 import { Debt, DebtType, PaymentRecord } from '../../types';
 import { debtService } from '../../services/debtService';
-import { formatRelativeDueDate, getCalendarDayDifference } from '../../utils/date';
 import { UpcomingDuesWidget } from '../common/UpcomingDuesWidget';
 
 export const DebtDetailView: React.FC = () => {
@@ -205,11 +203,6 @@ export const DebtDetailView: React.FC = () => {
   const progressPct = debt.originalAmount > 0 
     ? Math.min(100, Math.round((paidAmount / debt.originalAmount) * 100))
     : 0;
-
-  const parsedDueDate = debt.nextDueDate ? new Date(`${debt.nextDueDate.slice(0, 10)}T12:00:00`) : null;
-  const relativeDueDate = parsedDueDate && !Number.isNaN(parsedDueDate.getTime())
-    ? formatRelativeDueDate(getCalendarDayDifference(parsedDueDate))
-    : 'Fecha por confirmar';
 
   // CA-04: Representar el estado recibido del backend sin permitir edición manual
   const statusLabel = {

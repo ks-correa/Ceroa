@@ -114,6 +114,7 @@ describe('EP-11 — Simulación de pagos (HU-045, HU-046, HU-047)', () => {
       formatNumber: (amount: number) => amount.toLocaleString('es-CO'),
       activeStrategy: 'snowball',
       showToast: mockShowToast,
+      planAccess: { capabilities: { simulation: plan === 'plus' } },
       userProfile: {
         id: 'test-user',
         email: 'user@test.com',

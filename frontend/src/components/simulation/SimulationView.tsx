@@ -23,11 +23,11 @@ export const SimulationView: React.FC = () => {
     formatNumber,
     activeStrategy,
     showToast,
-    userProfile,
+    planAccess,
     setCurrentScreen
   } = useApp();
 
-  const isPlus = userProfile.plan === 'plus';
+  const isPlus = planAccess?.capabilities.simulation === true;
 
   const {
     selectedDebtId,

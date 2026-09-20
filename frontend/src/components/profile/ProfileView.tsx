@@ -20,6 +20,7 @@ import { CurrencyCode } from '../../types';
 export const ProfileView: React.FC = () => {
   const { 
     userProfile, 
+    planAccess,
     financialProfile, 
     preferences, 
     handleUpdatePreferences, 
@@ -323,24 +324,30 @@ export const ProfileView: React.FC = () => {
 
             <div>
               <h3 className="text-2xl font-extrabold text-white">
-                {userProfile.plan === 'plus' ? 'Ceroa Plus' : 'Plan Cero'}
+                {planAccess?.plusActive ? 'Ceroa Plus' : 'Cero'}
               </h3>
               <p className="text-xs text-slate-300 mt-1">
-                {userProfile.plan === 'plus' ? 'Plan asignado a esta cuenta' : 'Plan gratuito sin cobros'}
+                {planAccess?.plusActive ? 'Activo' : 'Modalidad predeterminada'}
               </p>
             </div>
 
+            <ul className="text-xs leading-6 list-disc pl-5">
+              <li>{planAccess?.limits.maxDetailedDebts === null ? 'Deudas ilimitadas' : `Máximo ${planAccess?.limits.maxDetailedDebts ?? 2} deudas`}</li>
+              <li>Registro y gestión de pagos</li>
+              <li>Dashboard básico</li>
+              <li>Bola de Nieve y Avalancha</li>
+              <li>{planAccess?.capabilities.fullStrategyDetail ? 'Detalle completo de estrategias' : 'Detalle básico de estrategia'}</li>
+              {planAccess?.capabilities.simulation && <li>Simular</li>}
+              {planAccess?.capabilities.advancedReminders && <li>Recordatorios y alertas avanzados</li>}
+              {planAccess?.capabilities.detailedMonthlySummary && <li>Resumen mensual detallado</li>}
+            </ul>
             <div className="pt-3 border-t border-white/15 flex items-center justify-between text-xs">
-              <div>
-                <span className="text-[10px] text-slate-400 block">Próximo cobro</span>
-                <span className="font-bold text-slate-200">{userProfile.plan === 'cero' ? 'No aplica' : 'No disponible'}</span>
-              </div>
 
               <button
                 onClick={() => setCurrentScreen('subscription')}
                 className="font-bold text-cyan-300 hover:text-cyan-200 underline inline-flex items-center gap-1 cursor-pointer"
               >
-                Gestionar Suscripción &rarr;
+                {planAccess?.plusActive ? 'Ver plan' : 'Mejorar a Ceroa Plus'} &rarr;
               </button>
             </div>
           </div>

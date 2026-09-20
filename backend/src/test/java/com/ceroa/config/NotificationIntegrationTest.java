@@ -156,63 +156,13 @@ class NotificationIntegrationTest {
     }
 
     @Test
-    @DisplayName("HU-051: Ingesta de recordatorio Telegram con deduplicación y verificación de plan PLUS")
-    void externalTelegramReminderWithDeduplicationPlusPlan() throws Exception {
-        LocalDate today = LocalDate.now();
-        String debtId = createDebt("Crédito Vehicular", "20000000", "450000", today.plusDays(3));
-
-        // 1. Sincronizar evento de vencimiento (genera notificación interna inicial)
-        mvc.perform(get("/api/v1/notifications").cookie(session))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.unreadCount").value(1));
-
-        String eventKey = "DUE_MILESTONE:" + debtId + ":" + today.plusDays(3) + ":THREE_DAYS";
-
-        // 2. Ingestar recordatorio Telegram correspondiente al mismo evento financiero
+    @DisplayName("La API pública no permite fingir una entrega Telegram")
+    void externalReminderCannotBeSpoofedByUser() throws Exception {
         mvc.perform(post("/api/v1/notifications/external-reminder")
                         .cookie(session).with(csrf())
                         .contentType("application/json")
-                        .content(json.writeValueAsString(Map.of(
-                                "debtId", debtId,
-                                "title", "Recordatorio Telegram: Crédito Vehicular",
-                                "message", "Recordatorio enviado por Telegram para el vencimiento en 3 días.",
-                                "eventDate", today.plusDays(3).toString(),
-                                "channel", "TELEGRAM",
-                                "eventKey", eventKey
-                        ))))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.channel").value("TELEGRAM"))
-                .andExpect(jsonPath("$.planRestricted").value(false));
-
-        // 3. Verificar deduplicación: NO debe existir duplicado en el centro de notificaciones
-        mvc.perform(get("/api/v1/notifications").cookie(session))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.notifications", hasSize(1)))
-                .andExpect(jsonPath("$.notifications[0].channel").value("TELEGRAM"));
-    }
-
-    @Test
-    @DisplayName("HU-051: Plan CERO restringe recordatorios externos (RQF-027) sin simular entrega")
-    void planCeroRestrictsExternalReminders() throws Exception {
-        User user = userRepository.findById(userId).orElseThrow();
-        user.setPlan(UserPlan.CERO);
-        userRepository.save(user);
-
-        LocalDate eventDate = LocalDate.now().plusDays(7);
-
-        mvc.perform(post("/api/v1/notifications/external-reminder")
-                        .cookie(session).with(csrf())
-                        .contentType("application/json")
-                        .content(json.writeValueAsString(Map.of(
-                                "title", "Recordatorio externo Telegram",
-                                "message", "Intento de entrega externa",
-                                "eventDate", eventDate.toString(),
-                                "channel", "TELEGRAM",
-                                "eventKey", "EXT_CERO:" + UUID.randomUUID()
-                        ))))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.channel").value("TELEGRAM"))
-                .andExpect(jsonPath("$.planRestricted").value(true));
+                        .content("{}"))
+                .andExpect(status().isForbidden());
     }
 
     @Test

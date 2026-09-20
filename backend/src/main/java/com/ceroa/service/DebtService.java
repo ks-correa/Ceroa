@@ -21,7 +21,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class DebtService {
-    private static final int CERO_DEBT_LIMIT = 2;
 
     private final DebtRepository debtRepository;
     private final PaymentRepository paymentRepository;
@@ -75,7 +74,7 @@ public class DebtService {
     @Transactional
     public DebtResponse create(DebtRequest request) {
         User user = currentUser.entityForUpdate();
-        if (user.getPlan() == UserPlan.CERO && debtRepository.countByUserId(user.getId()) >= CERO_DEBT_LIMIT) {
+        if (!PlanAccessService.plusActive(user) && debtRepository.countByUserId(user.getId()) >= PlanAccessService.CERO_DEBT_LIMIT) {
             throw new BusinessRuleException(
                     "PLAN_CERO_DEBT_LIMIT",
                     "El plan Cero permite registrar máximo 2 deudas. Mejora a Ceroa Plus para agregar más.");

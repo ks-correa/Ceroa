@@ -42,7 +42,7 @@ public class StrategyService {
     @Transactional(readOnly = true)
     public StrategyResponse getActiveStrategy() {
         User user = currentUser.entity();
-        UserPlan plan = user.getPlan() != null ? user.getPlan() : UserPlan.CERO;
+        UserPlan plan = PlanAccessService.plan(user);
         FinancialProfile profile = profileRepository.findByUserId(user.getId()).orElse(null);
 
         StrategyType activeStrategy = profile != null && profile.getActiveStrategy() != null
@@ -91,7 +91,7 @@ public class StrategyService {
     @Transactional(readOnly = true)
     public StrategyComparisonDto getComparison() {
         User user = currentUser.entity();
-        if (user.getPlan() != UserPlan.PLUS) {
+        if (!PlanAccessService.plusActive(user)) {
             throw new BusinessRuleException("PLAN_RESTRICTED", "La comparación detallada de estrategias requiere el plan Ceroa Plus.");
         }
 

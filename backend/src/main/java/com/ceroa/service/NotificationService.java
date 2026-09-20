@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -80,7 +81,7 @@ public class NotificationService {
     @Transactional
     public NotificationResponse registerExternalReminder(ExternalReminderRequest request) {
         User user = currentUser.entity();
-        boolean isPlanRestricted = user.getPlan() == UserPlan.CERO;
+        boolean isPlanRestricted = !PlanAccessService.plusActive(user);
 
         String channel = (request.channel() != null && !request.channel().isBlank())
                 ? request.channel().toUpperCase()
@@ -121,7 +122,7 @@ public class NotificationService {
         newNotification.setType("DUE_DATE_REMINDER");
         newNotification.setTitle(request.title() != null ? request.title() : "Recordatorio de vencimiento");
         newNotification.setMessage(request.message() != null ? request.message() : "Tienes un vencimiento programado.");
-        newNotification.setEventDate(request.eventDate() != null ? request.eventDate() : LocalDate.now());
+        newNotification.setEventDate(request.eventDate() != null ? request.eventDate() : LocalDate.now(ZoneId.of("America/Bogota")));
         newNotification.setRelatedDebt(relatedDebt);
         newNotification.setRelatedDebtName(relatedDebtName);
         newNotification.setChannel(channel);
@@ -134,7 +135,7 @@ public class NotificationService {
 
     @Transactional
     public void syncMilestoneNotifications(User user) {
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(ZoneId.of("America/Bogota"));
         List<UpcomingDueResponse> upcomingDues = upcomingDueService.getUpcomingDues(user.getId(), today);
 
         for (UpcomingDueResponse due : upcomingDues) {

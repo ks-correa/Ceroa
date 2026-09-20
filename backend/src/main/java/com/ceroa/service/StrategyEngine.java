@@ -16,7 +16,7 @@ import java.util.*;
 @Component
 public class StrategyEngine {
 
-    public static final int CERO_DEBT_LIMIT = 2;
+    public static final int CERO_DEBT_LIMIT = PlanAccessService.CERO_DEBT_LIMIT;
     public static final int MAX_MONTHS = 600;
     private static final DateTimeFormatter PAYOFF_FORMATTER = DateTimeFormatter.ofPattern("MMM 'de' yyyy", Locale.forLanguageTag("es-CO"));
 
@@ -527,4 +527,3 @@ public class StrategyEngine {
         }
     }
 }
-

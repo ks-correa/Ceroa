@@ -15,6 +15,7 @@ import {
 } from '../types';
 import { debtService } from '../services/debtService';
 import { userService } from '../services/userService';
+import { planService, type PlanAccess } from '../services/planService';
 import { notificationService } from '../services/notificationService';
 import { dueService } from '../services/dueService';
 import { authService, RegisterPayload } from '../services/authService';
@@ -62,6 +63,7 @@ interface AppContextType {
   debts: Debt[];
   payments: PaymentRecord[];
   userProfile: UserProfile;
+  planAccess: PlanAccess | null;
   financialProfile: FinancialProfile;
   preferences: UserPreferences;
   notifications: NotificationItem[];
@@ -174,6 +176,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [debts, setDebts] = useState<Debt[]>([]);
   const [payments, setPayments] = useState<PaymentRecord[]>([]);
   const [userProfile, setUserProfile] = useState<UserProfile>(DEFAULT_USER_PROFILE);
+  const [planAccess, setPlanAccess] = useState<PlanAccess | null>(null);
   const [financialProfile, setFinancialProfile] = useState<FinancialProfile>(DEFAULT_FINANCIAL_PROFILE);
   const [preferences, setPreferences] = useState<UserPreferences>(() => {
     LocalStorageManager.initInterfaceData();
@@ -217,6 +220,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setDebts([]);
     setPayments([]);
     setUserProfile(DEFAULT_USER_PROFILE);
+    setPlanAccess(null);
     setFinancialProfile(DEFAULT_FINANCIAL_PROFILE);
     setDashboardSummary(null);
     setIsDashboardLoading(false);
@@ -274,7 +278,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setIsDashboardLoading(true);
       setDataError(null);
       setDashboardError(null);
-      const [fDebts, fPayments, fUser, fFin, fPrefs, fNotifs, fDashboard, fDues] = await Promise.all([
+      const [fDebts, fPayments, fUser, fFin, fPrefs, fNotifs, fDashboard, fDues, fPlan] = await Promise.all([
         debtService.getDebts(),
         debtService.getPayments(),
         userService.getUserProfile(),
@@ -288,13 +292,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         dueService.getUpcomingDues().catch((err) => {
           console.error('Failed to fetch upcoming dues in refreshAllData:', err);
           return [];
-        })
+        }),
+        planService.getAccess()
       ]);
 
       if (requestId !== refreshRequestId.current) return;
       setDebts(fDebts);
       setPayments(fPayments);
-      setUserProfile(fUser);
+      setUserProfile({ ...fUser, plan: fPlan.plusActive ? 'plus' : 'cero' });
+      setPlanAccess(fPlan);
       setFinancialProfile(fFin);
       setActiveStrategyState(fFin.activeStrategy);
       setPreferences(fPrefs);
@@ -321,6 +327,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
     }
   }, []);
+
+  useEffect(() => {
+    if (!isAuthenticated || !['profile', 'debts', 'strategy', 'simulation', 'subscription'].includes(currentScreen)) return;
+    let cancelled = false;
+    planService.getAccess().then((access) => {
+      if (cancelled) return;
+      setPlanAccess(access);
+      setUserProfile((previous) => ({ ...previous, plan: access.plusActive ? 'plus' : 'cero' }));
+    }).catch(() => {
+      if (!cancelled) setPlanAccess(null);
+    });
+    return () => { cancelled = true; };
+  }, [currentScreen, isAuthenticated]);
 
   useEffect(() => {
     let cancelled = false;
@@ -381,7 +400,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   };
 
   const openAddDebtModal = () => {
-    if (userProfile.plan === 'cero' && debts.length >= 2) {
+    if (planAccess && planAccess.limits.maxDetailedDebts !== null && debts.length >= planAccess.limits.maxDetailedDebts) {
       showToast('El plan Cero permite registrar máximo 2 deudas.');
       setCurrentScreen('subscription');
       return;
@@ -497,16 +516,15 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true, readAt: res.readAt } : n)));
       setUnreadNotificationsCount(res.unreadCount);
     } catch {
-      const updated = await notificationService.markAsRead(id);
-      setNotifications(updated);
-      setUnreadNotificationsCount(updated.filter((n) => !n.read).length);
+      showToast('No se pudo marcar la notificación como leída');
+      throw new Error('No se pudo confirmar la lectura');
     }
   };
 
   const handleMarkAllNotificationsRead = async () => {
     const updated = await notificationService.markAllAsRead();
-    setNotifications(updated);
-    setUnreadNotificationsCount(0);
+    setNotifications(updated.notifications);
+    setUnreadNotificationsCount(updated.unreadCount);
     showToast('Todas las notificaciones marcadas como leídas');
   };
 
@@ -600,6 +618,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         debts,
         payments,
         userProfile,
+        planAccess,
         financialProfile,
         preferences,
         notifications,

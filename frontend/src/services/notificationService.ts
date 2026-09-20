@@ -13,15 +13,6 @@ export interface MarkReadResult {
   unreadCount: number;
 }
 
-export interface ExternalReminderPayload {
-  debtId?: string;
-  title: string;
-  message: string;
-  eventDate: string;
-  channel?: string;
-  eventKey?: string;
-}
-
 export const notificationService = {
   async getNotifications(): Promise<NotificationItem[]> {
     const res = await apiRequest<{ notifications: NotificationItem[]; unreadCount: number }>('/notifications');
@@ -54,19 +45,12 @@ export const notificationService = {
     });
   },
 
-  async markAllAsRead(): Promise<NotificationItem[]> {
-    const list = await this.getNotifications();
-    const unread = list.filter((n) => !n.read);
-    await Promise.all(unread.map((n) => this.markAsReadSingle(n.id).catch(() => null)));
-    return this.getNotifications();
-  },
-
-  async syncExternalReminder(payload: ExternalReminderPayload): Promise<NotificationItem> {
-    const res = await apiRequest<NotificationItem>('/notifications/external-reminder', {
-      method: 'POST',
-      body: JSON.stringify(payload)
-    });
-    return formatNotification(res);
+  async markAllAsRead(): Promise<NotificationListResult> {
+    const list = await this.getNotificationCenter();
+    for (const notification of list.notifications.filter((n) => !n.read)) {
+      await this.markAsReadSingle(notification.id);
+    }
+    return this.getNotificationCenter();
   }
 };
 
