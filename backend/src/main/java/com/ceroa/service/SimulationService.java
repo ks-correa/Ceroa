@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class SimulationService {
+    @org.springframework.beans.factory.annotation.Autowired(required = false) private PlanAccessService planAccess;
 
     private final DebtRepository debtRepository;
     private final CurrentUserService currentUser;
@@ -33,7 +34,7 @@ public class SimulationService {
         User user = currentUser.entity();
 
         // Verificación autoritativa de Plan Plus activo
-        if (!PlanAccessService.plusActive(user)) {
+        if (!(planAccess == null ? PlanAccessService.plusActive(user) : planAccess.entitled(user))) {
             throw new BusinessRuleException(
                     "PLAN_RESTRICTED",
                     "La simulación de pagos es una funcionalidad exclusiva de Ceroa Plus."

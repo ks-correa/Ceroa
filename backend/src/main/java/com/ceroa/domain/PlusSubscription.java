@@ -20,6 +20,9 @@ public class PlusSubscription {
     @Column(name = "automatic_renewal", nullable = false) public boolean automaticRenewal = true;
     @Column(name = "started_at") public OffsetDateTime startedAt;
     @Column(name = "next_payment_at") public OffsetDateTime nextPaymentAt;
+    @Column(name = "access_until") public OffsetDateTime accessUntil;
+    @Column(name = "cancel_requested_at") public OffsetDateTime cancelRequestedAt;
+    @Column(name = "cancellation_confirmed_at") public OffsetDateTime cancellationConfirmedAt;
     @Column(name = "created_at", nullable = false) public OffsetDateTime createdAt;
     @Column(name = "updated_at", nullable = false) public OffsetDateTime updatedAt;
     @PrePersist void create() { if (id == null) id = UUID.randomUUID(); createdAt = OffsetDateTime.now(); updatedAt = createdAt; }

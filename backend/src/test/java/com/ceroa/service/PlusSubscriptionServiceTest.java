@@ -14,6 +14,7 @@ import org.springframework.web.client.RestClient;
 import java.math.BigDecimal;
 import java.util.Optional;
 import java.util.UUID;
+import java.time.OffsetDateTime;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -96,5 +97,34 @@ class PlusSubscriptionServiceTest {
         }
         assertEquals("ERROR", subscription.status);
         server.verify();
+    }
+
+    @Test
+    void confirmedCancellationKeepsPaidAccessAndIsIdempotent() {
+        configure();
+        User user = new User(); user.setId(UUID.randomUUID()); user.setPlan(UserPlan.PLUS);
+        PlusSubscription subscription = new PlusSubscription();
+        subscription.id = UUID.randomUUID(); subscription.user = user; subscription.providerId = "mp-789";
+        subscription.status = "ACTIVE"; subscription.periodicity = "MONTHLY";
+        subscription.amount = new BigDecimal("19900"); subscription.currency = "COP";
+        subscription.nextPaymentAt = OffsetDateTime.now().plusDays(10);
+        assertTrue(service.view(subscription).canCancelRenewal());
+        when(currentUser.entityForUpdate()).thenReturn(user);
+        when(subscriptions.findFirstByUserIdOrderByCreatedAtDesc(user.getId())).thenReturn(Optional.of(subscription));
+        server.expect(requestTo("https://api.mercadopago.com/preapproval/mp-789"))
+                .andExpect(method(org.springframework.http.HttpMethod.PUT))
+                .andExpect(content().json("{\"status\":\"canceled\"}"))
+                .andRespond(withSuccess("{\"id\":\"mp-789\",\"status\":\"canceled\"}", MediaType.APPLICATION_JSON));
+        var result = service.cancelRenewal();
+        assertEquals("CANCEL_SCHEDULED", result.status());
+        assertTrue(result.plusActive());
+        assertEquals(subscription.nextPaymentAt, result.accessUntil());
+        assertFalse(result.automaticRenewal());
+        service.cancelRenewal();
+        server.verify();
+        assertEquals(UserPlan.PLUS, user.getPlan());
+        subscription.accessUntil = OffsetDateTime.now().minusSeconds(1);
+        assertEquals("EXPIRED", service.view(subscription).status());
+        assertFalse(service.view(subscription).plusActive());
     }
 }

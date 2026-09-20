@@ -2,6 +2,13 @@ package com.ceroa.service;
 
 import com.ceroa.domain.User;
 import com.ceroa.domain.UserPlan;
+import com.ceroa.domain.PlusSubscription;
+import com.ceroa.repository.PlusSubscriptionRepository;
+import org.springframework.test.util.ReflectionTestUtils;
+import java.time.OffsetDateTime;
+import java.util.Optional;
+import java.util.UUID;
+import static org.mockito.Mockito.*;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -39,5 +46,20 @@ class PlanAccessServiceTest {
         assertTrue(service.access(user).capabilities().simulation());
         user.setPlan(UserPlan.CERO);
         assertFalse(service.access(user).capabilities().simulation());
+    }
+
+    @Test
+    void scheduledCancellationExpiresByServerClockWithoutDeletingData() {
+        User user = new User(); user.setId(UUID.randomUUID()); user.setPlan(UserPlan.PLUS);
+        PlusSubscription subscription = new PlusSubscription();
+        subscription.status = "CANCEL_SCHEDULED";
+        subscription.accessUntil = OffsetDateTime.now().plusDays(1);
+        PlusSubscriptionRepository repository = mock(PlusSubscriptionRepository.class);
+        when(repository.findFirstByUserIdOrderByCreatedAtDesc(user.getId())).thenReturn(Optional.of(subscription));
+        ReflectionTestUtils.setField(service, "subscriptions", repository);
+        assertTrue(service.access(user).plusActive());
+        subscription.accessUntil = OffsetDateTime.now().minusSeconds(1);
+        assertFalse(service.access(user).plusActive());
+        assertEquals(UserPlan.CERO, service.access(user).plan());
     }
 }

@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { PersonalInfoSection } from './PersonalInfoSection';
+import { SubscriptionStatusCard } from './SubscriptionStatusCard';
 import { CurrencyCode } from '../../types';
 
 export const ProfileView: React.FC = () => {
@@ -353,6 +354,7 @@ export const ProfileView: React.FC = () => {
           </div>
 
           {/* Card 6: Cuenta & Logout */}
+          <SubscriptionStatusCard />
           <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-4 shadow-xs space-y-1">
             <button
               onClick={() => showToast('Centro de ayuda Ceroa: soporte@ceroa.com')}

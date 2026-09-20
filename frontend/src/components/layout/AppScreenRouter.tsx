@@ -8,6 +8,7 @@ import { StrategicPlanView } from '../plan/StrategicPlanView';
 import { ProfileView } from '../profile/ProfileView';
 import { SimulationView } from '../simulation/SimulationView';
 import { SubscriptionView } from '../subscription/SubscriptionView';
+import { MonthlyProgressView } from '../monthly/MonthlyProgressView';
 
 export const AppScreenRouter: React.FC = () => {
   const { currentScreen } = useApp();
@@ -20,6 +21,7 @@ export const AppScreenRouter: React.FC = () => {
     case 'calendar': return <CalendarView />;
     case 'profile': return <ProfileView />;
     case 'subscription': return <SubscriptionView />;
+    case 'monthly_progress': return <MonthlyProgressView />;
     case 'dashboard':
     default: return <DashboardView />;
   }

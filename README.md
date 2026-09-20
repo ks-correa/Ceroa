@@ -24,6 +24,8 @@ La clasificación de hallazgos, decisiones y validaciones de la refactorización
 
 El estado de vencimientos y notificaciones, incluidas las tareas pendientes de Telegram, está en [EP12.md](EP12.md).
 
+El alcance, funcionamiento y límites del resumen mensual están en [README_EP16.md](README_EP16.md).
+
 ## Navegación
 
 El área autenticada mantiene exactamente cinco secciones principales, tanto en escritorio como en móvil:

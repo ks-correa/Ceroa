@@ -35,6 +35,9 @@ public class PlusSubscriptionController {
     }
     @PostMapping("/checkout") public PlusSubscriptionService.SubscriptionView checkout(
             @RequestBody PlusSubscriptionService.CheckoutRequest request) { return service.checkout(request.periodicity()); }
+    @PostMapping("/subscription/cancel-renewal") public PlusSubscriptionService.SubscriptionView cancelRenewal() {
+        return service.cancelRenewal();
+    }
 
     @PostMapping("/webhook")
     public void webhook(@RequestParam(name = "data.id", required = false) String id,

@@ -22,6 +22,7 @@ import java.util.UUID;
 
 @Service
 public class StrategyService {
+    @org.springframework.beans.factory.annotation.Autowired(required = false) private PlanAccessService planAccess;
 
     private final DebtRepository debtRepository;
     private final FinancialProfileRepository profileRepository;
@@ -42,7 +43,7 @@ public class StrategyService {
     @Transactional(readOnly = true)
     public StrategyResponse getActiveStrategy() {
         User user = currentUser.entity();
-        UserPlan plan = PlanAccessService.plan(user);
+        UserPlan plan = planAccess == null ? PlanAccessService.plan(user) : planAccess.effectivePlan(user);
         FinancialProfile profile = profileRepository.findByUserId(user.getId()).orElse(null);
 
         StrategyType activeStrategy = profile != null && profile.getActiveStrategy() != null
@@ -91,7 +92,7 @@ public class StrategyService {
     @Transactional(readOnly = true)
     public StrategyComparisonDto getComparison() {
         User user = currentUser.entity();
-        if (!PlanAccessService.plusActive(user)) {
+        if (!(planAccess == null ? PlanAccessService.plusActive(user) : planAccess.entitled(user))) {
             throw new BusinessRuleException("PLAN_RESTRICTED", "La comparación detallada de estrategias requiere el plan Ceroa Plus.");
         }
 

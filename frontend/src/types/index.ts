@@ -256,6 +256,7 @@ export type AppScreen =
   | 'recovery'
   | 'initial_setup'
   | 'dashboard'
+  | 'monthly_progress'
   | 'debts'
   | 'debt_detail'
   | 'strategy'

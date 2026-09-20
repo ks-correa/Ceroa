@@ -20,6 +20,7 @@ import java.util.UUID;
 
 @Service
 public class PaymentService {
+    @org.springframework.beans.factory.annotation.Autowired(required = false) private MonthlyHistoryService monthlyHistory;
     private final PaymentRepository paymentRepository;
     private final DebtRepository debtRepository;
     private final DebtService debtService;
@@ -62,6 +63,9 @@ public class PaymentService {
             validateFullPaymentAmount(request.amount(), debt.getCurrentBalance());
         }
 
+        if (monthlyHistory != null) monthlyHistory.baseline(currentUser.id());
+        boolean wasPaid = debt.getStatus() == com.ceroa.domain.DebtStatus.PAID;
+
         applyPaymentImpact(debt, request.amount());
         debtRepository.save(debt);
 
@@ -69,6 +73,8 @@ public class PaymentService {
         payment.setDebt(debt);
         apply(payment, request);
         Payment savedPayment = paymentRepository.save(payment);
+        if (monthlyHistory != null) monthlyHistory.observe(currentUser.id(), request.amount(), 1,
+                !wasPaid && debt.getStatus() == com.ceroa.domain.DebtStatus.PAID ? 1 : 0);
         return toResponse(savedPayment);
     }
 
@@ -78,6 +84,9 @@ public class PaymentService {
         validateAmountGreaterThanZero(request.amount());
         Payment payment = findEntity(id);
         Debt debt = payment.getDebt();
+        if (monthlyHistory != null) monthlyHistory.baseline(currentUser.id());
+        boolean wasPaid = debt.getStatus() == com.ceroa.domain.DebtStatus.PAID;
+        BigDecimal previousAmount = payment.getAmount();
 
         if (request.debtId() != null && !request.debtId().equals(debt.getId())) {
             throw new BusinessRuleException("IMMUTABLE_PAYMENT_DEBT", "No se permite transferir un pago a una deuda diferente.");
@@ -98,6 +107,8 @@ public class PaymentService {
         // 4. Actualizar movimiento
         apply(payment, request);
         Payment savedPayment = paymentRepository.save(payment);
+        if (monthlyHistory != null) monthlyHistory.observe(currentUser.id(), request.amount().subtract(previousAmount), 0,
+                (debt.getStatus() == com.ceroa.domain.DebtStatus.PAID ? 1 : 0) - (wasPaid ? 1 : 0));
         return toResponse(savedPayment);
     }
 
@@ -105,6 +116,8 @@ public class PaymentService {
     public PaymentMutationResponse delete(UUID id) {
         Payment payment = findEntity(id);
         Debt debt = payment.getDebt();
+        if (monthlyHistory != null) monthlyHistory.baseline(currentUser.id());
+        boolean wasPaid = debt.getStatus() == com.ceroa.domain.DebtStatus.PAID;
         BigDecimal oldAmount = payment.getAmount();
 
         // Revertir exactamente el efecto confirmado del movimiento
@@ -112,6 +125,8 @@ public class PaymentService {
         debtRepository.save(debt);
 
         paymentRepository.delete(payment);
+        if (monthlyHistory != null) monthlyHistory.observe(currentUser.id(), oldAmount.negate(), -1,
+                (debt.getStatus() == com.ceroa.domain.DebtStatus.PAID ? 1 : 0) - (wasPaid ? 1 : 0));
         return new PaymentMutationResponse(
                 payment.getId(),
                 debt.getId(),

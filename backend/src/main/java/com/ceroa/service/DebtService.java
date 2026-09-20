@@ -21,6 +21,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class DebtService {
+    @org.springframework.beans.factory.annotation.Autowired(required = false) private MonthlyHistoryService monthlyHistory;
+    @org.springframework.beans.factory.annotation.Autowired(required = false) private PlanAccessService planAccess;
 
     private final DebtRepository debtRepository;
     private final PaymentRepository paymentRepository;
@@ -74,16 +76,19 @@ public class DebtService {
     @Transactional
     public DebtResponse create(DebtRequest request) {
         User user = currentUser.entityForUpdate();
-        if (!PlanAccessService.plusActive(user) && debtRepository.countByUserId(user.getId()) >= PlanAccessService.CERO_DEBT_LIMIT) {
+        if (!(planAccess == null ? PlanAccessService.plusActive(user) : planAccess.entitled(user)) && debtRepository.countByUserId(user.getId()) >= PlanAccessService.CERO_DEBT_LIMIT) {
             throw new BusinessRuleException(
                     "PLAN_CERO_DEBT_LIMIT",
                     "El plan Cero permite registrar máximo 2 deudas. Mejora a Ceroa Plus para agregar más.");
         }
         debtValidator.validate(request);
+        if (monthlyHistory != null) monthlyHistory.baseline(user.getId());
         Debt debt = new Debt();
         debt.setUser(user);
         apply(debt, request);
-        return toResponse(debtRepository.save(debt));
+        Debt saved = debtRepository.save(debt);
+        if (monthlyHistory != null) monthlyHistory.observe(user.getId(), null, null, null);
+        return toResponse(saved);
     }
 
     @Transactional
@@ -93,18 +98,23 @@ public class DebtService {
             throw new BusinessRuleException("IMMUTABLE_DEBT_TYPE", "No se permite cambiar el tipo de una obligación existente.");
         }
         debtValidator.validate(request);
+        if (monthlyHistory != null) monthlyHistory.baseline(currentUser.id());
         apply(debt, request);
-        return toResponse(debtRepository.save(debt));
+        Debt saved = debtRepository.save(debt);
+        if (monthlyHistory != null) monthlyHistory.observe(currentUser.id(), null, null, null);
+        return toResponse(saved);
     }
 
     @Transactional
     public void delete(UUID id) {
         Debt debt = findEntity(id);
+        if (monthlyHistory != null) monthlyHistory.baseline(currentUser.id());
         if (notificationRepository != null) {
             notificationRepository.detachDebtReference(debt.getId());
         }
         paymentRepository.deleteAllByDebtId(debt.getId());
         debtRepository.delete(debt);
+        if (monthlyHistory != null) monthlyHistory.observe(currentUser.id(), null, null, null);
     }
 
     Debt findEntity(UUID id) {

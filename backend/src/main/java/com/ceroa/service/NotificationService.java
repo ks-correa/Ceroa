@@ -22,6 +22,7 @@ import java.util.UUID;
 
 @Service
 public class NotificationService {
+    @org.springframework.beans.factory.annotation.Autowired(required = false) private PlanAccessService planAccess;
 
     private final NotificationRepository notificationRepository;
     private final DebtRepository debtRepository;
@@ -81,7 +82,7 @@ public class NotificationService {
     @Transactional
     public NotificationResponse registerExternalReminder(ExternalReminderRequest request) {
         User user = currentUser.entity();
-        boolean isPlanRestricted = !PlanAccessService.plusActive(user);
+        boolean isPlanRestricted = !(planAccess == null ? PlanAccessService.plusActive(user) : planAccess.entitled(user));
 
         String channel = (request.channel() != null && !request.channel().isBlank())
                 ? request.channel().toUpperCase()

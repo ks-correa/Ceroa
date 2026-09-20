@@ -583,6 +583,10 @@ export const DashboardView: React.FC = () => {
               Acciones del panel
             </h2>
             <div className="space-y-2">
+              <button onClick={() => setCurrentScreen('monthly_progress')}
+                className="w-full flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 text-xs font-semibold text-slate-700 dark:text-slate-200 focus-visible:outline-2 focus-visible:outline-teal-600">
+                <span>Ver resumen mensual</span><ArrowRight className="w-3.5 h-3.5" />
+              </button>
               <button
                 id="quick-nav-debts-btn"
                 onClick={() => setCurrentScreen('debts')}

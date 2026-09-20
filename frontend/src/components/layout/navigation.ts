@@ -14,6 +14,7 @@ export const MAIN_NAVIGATION_ITEMS = [
 }>;
 
 const SECONDARY_SCREEN_PARENT: Partial<Record<AppScreen, AppScreen>> = {
+  monthly_progress: 'dashboard',
   calendar: 'dashboard',
   debt_detail: 'debts',
   subscription: 'profile'

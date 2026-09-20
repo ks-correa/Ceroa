@@ -39,7 +39,9 @@ public class PlusSubscriptionService {
 
     public record Offer(String periodicity, BigDecimal price, String currency, boolean automaticRenewal, boolean available) {}
     public record SubscriptionView(String status, String periodicity, BigDecimal price, String currency,
-                                   boolean automaticRenewal, OffsetDateTime startedAt, OffsetDateTime nextPaymentAt, String checkoutUrl) {}
+                                   boolean automaticRenewal, OffsetDateTime startedAt, OffsetDateTime nextPaymentAt,
+                                   OffsetDateTime accessUntil, boolean plusActive, boolean canCancelRenewal,
+                                   String checkoutUrl) {}
     public record CheckoutRequest(String periodicity) {}
 
     public List<Offer> offers() {
@@ -61,7 +63,7 @@ public class PlusSubscriptionService {
         Offer offer = offer(periodicity);
         if (!offer.available()) throw new BusinessRuleException("PLUS_UNAVAILABLE", "La contratación de Plus no está disponible en este momento.");
         User user = currentUser.entityForUpdate();
-        Optional<PlusSubscription> existing = subscriptions.findFirstByUserIdAndStatusIn(user.getId(), List.of("PENDING", "ACTIVE"));
+        Optional<PlusSubscription> existing = subscriptions.findFirstByUserIdAndStatusIn(user.getId(), List.of("PENDING", "ACTIVE", "CANCEL_PENDING", "CANCEL_SCHEDULED"));
         if (existing.isPresent()) return view(existing.get());
         PlusSubscription subscription = new PlusSubscription();
         subscription.user = user; subscription.periodicity = periodicity;
@@ -100,8 +102,50 @@ public class PlusSubscriptionService {
     }
 
     public SubscriptionView view(PlusSubscription s) {
-        return new SubscriptionView(s.status, s.periodicity, s.amount, s.currency,
-                s.automaticRenewal, s.startedAt, s.nextPaymentAt, s.checkoutUrl);
+        boolean validAccess = s.accessUntil != null && s.accessUntil.isAfter(OffsetDateTime.now());
+        String status = "CANCEL_SCHEDULED".equals(s.status) && !validAccess ? "EXPIRED" : s.status;
+        boolean plus = "ACTIVE".equals(status) || (("CANCEL_SCHEDULED".equals(status) || "CANCEL_PENDING".equals(status)) && validAccess);
+        return new SubscriptionView(status, s.periodicity, s.amount, s.currency,
+                s.automaticRenewal, s.startedAt, "ACTIVE".equals(status) ? s.nextPaymentAt : null,
+                s.accessUntil, plus, "ACTIVE".equals(status) && s.automaticRenewal && s.nextPaymentAt != null
+                        && s.nextPaymentAt.isAfter(OffsetDateTime.now()),
+                "PENDING".equals(status) ? s.checkoutUrl : null);
+    }
+
+    @Transactional
+    public SubscriptionView cancelRenewal() {
+        User user = currentUser.entityForUpdate();
+        PlusSubscription s = subscriptions.findFirstByUserIdOrderByCreatedAtDesc(user.getId())
+                .orElseThrow(() -> new BusinessRuleException("NO_SUBSCRIPTION", "No tienes una suscripción para cancelar."));
+        if ("CANCEL_SCHEDULED".equals(s.status) || "CANCEL_PENDING".equals(s.status)) return view(s);
+        if (!"ACTIVE".equals(s.status) || !s.automaticRenewal || s.providerId == null
+                || s.nextPaymentAt == null || !s.nextPaymentAt.isAfter(OffsetDateTime.now()))
+            throw new BusinessRuleException("CANNOT_CANCEL_RENEWAL", "No hay una renovación activa con fecha de acceso confirmada.");
+        // Mercado Pago stops recurrence with status=canceled. Preserve the already confirmed next payment boundary.
+        try {
+            JsonNode response = client.put().uri("/preapproval/{id}", s.providerId)
+                    .header("Authorization", "Bearer " + accessToken)
+                    .contentType(MediaType.APPLICATION_JSON).body(Map.of("status", "canceled"))
+                    .retrieve().body(JsonNode.class);
+            s.cancelRequestedAt = OffsetDateTime.now();
+            if (response != null && ("canceled".equals(response.path("status").asText())
+                    || "cancelled".equals(response.path("status").asText()))
+                    && s.providerId.equals(response.path("id").asText())) {
+                s.status = "CANCEL_SCHEDULED";
+                s.automaticRenewal = false;
+                s.accessUntil = s.nextPaymentAt;
+                s.cancellationConfirmedAt = OffsetDateTime.now();
+            } else {
+                s.status = "CANCEL_PENDING";
+                s.accessUntil = s.nextPaymentAt;
+            }
+            subscriptions.save(s);
+            user.setPlan(view(s).plusActive() ? UserPlan.PLUS : UserPlan.CERO);
+            users.save(user);
+            return view(s);
+        } catch (Exception ex) {
+            throw new BusinessRuleException("CANCEL_ERROR", "No fue posible confirmar la cancelación. Intenta de nuevo.");
+        }
     }
 
     @Transactional
@@ -124,12 +168,24 @@ public class PlusSubscriptionService {
             case "pending" -> "PENDING";
             default -> "ERROR";
         };
-        s.status = status;
+        if ("CANCELLED".equals(status) && ("ACTIVE".equals(s.status) || "CANCEL_PENDING".equals(s.status)
+                || "CANCEL_SCHEDULED".equals(s.status)) && s.nextPaymentAt != null
+                && s.nextPaymentAt.isAfter(OffsetDateTime.now())) {
+            s.status = "CANCEL_SCHEDULED";
+            s.automaticRenewal = false;
+            s.accessUntil = s.nextPaymentAt;
+            if (s.cancellationConfirmedAt == null) s.cancellationConfirmedAt = OffsetDateTime.now();
+        } else if ("CANCEL_SCHEDULED".equals(s.status) && "CANCELLED".equals(status)) {
+            s.status = "EXPIRED";
+        } else if (!("CANCEL_SCHEDULED".equals(s.status) || "CANCEL_PENDING".equals(s.status)) || !"ACTIVE".equals(status)) {
+            s.status = status;
+        }
         if (status.equals("ACTIVE") && s.startedAt == null) s.startedAt = OffsetDateTime.now();
-        if (data.hasNonNull("next_payment_date")) s.nextPaymentAt = OffsetDateTime.parse(data.get("next_payment_date").asText());
+        if ("ACTIVE".equals(s.status) && data.hasNonNull("next_payment_date"))
+            s.nextPaymentAt = OffsetDateTime.parse(data.get("next_payment_date").asText());
         subscriptions.save(s);
         User user = s.user;
-        user.setPlan(subscriptions.existsByUserIdAndStatus(user.getId(), "ACTIVE") ? UserPlan.PLUS : UserPlan.CERO);
+        user.setPlan(view(s).plusActive() ? UserPlan.PLUS : UserPlan.CERO);
         users.save(user);
     }
 
