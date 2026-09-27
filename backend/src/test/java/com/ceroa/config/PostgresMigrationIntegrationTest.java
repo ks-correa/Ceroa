@@ -28,7 +28,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
     "spring.datasource.url=${PG_TEST_URL}",
     "spring.datasource.username=${PG_TEST_USERNAME}",
     "spring.datasource.password=${PG_TEST_PASSWORD}",
-    "spring.datasource.hikari.data-source-properties.sslmode=${PG_TEST_SSLMODE:require}",
+    "spring.datasource.hikari.data-source-properties.sslmode=require",
     "spring.datasource.hikari.data-source-properties.currentSchema=${PG_TEST_SCHEMA:migration_verification}",
     "spring.jpa.properties.hibernate.default_schema=${PG_TEST_SCHEMA:migration_verification}",
     "spring.flyway.default-schema=${PG_TEST_SCHEMA:migration_verification}",

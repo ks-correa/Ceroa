@@ -83,7 +83,7 @@ frontend/backend sin PostgreSQL local. No requiere SDK ni API keys de Supabase.
 
 El análisis, plan, configuración manual, transferencia de datos y comprobaciones
 están en [docs/SUPABASE.md](docs/SUPABASE.md). La conexión real fue verificada el
-26 de septiembre de 2026 con PostgreSQL local detenido. Las credenciales permanecen
+26 de septiembre de 2026 con Supabase como única base de datos. Las credenciales permanecen
 en `.env` privado; no hay secretos en el ejemplo.
 
 1. Crear `.env` desde [.env.example](.env.example) solo si no existe.
@@ -99,8 +99,7 @@ docker compose logs --tail 100 backend
 ```
 
 No sobrescribir un `.env` existente. No compartir la salida de `docker compose config`
-sin `--quiet`, porque puede revelar credenciales. La configuración no mueve los datos
-locales automáticamente. El procedimiento opcional de transferencia está en la guía.
+sin `--quiet`, porque puede revelar credenciales. La conexión utiliza exclusivamente Supabase.
 
 Sin Docker, ejecutar desde `backend` `.\mvnw.cmd spring-boot:run`; importa `../.env`.
 Desde `frontend`, crear `.env.local` desde su ejemplo si no existe y ejecutar
@@ -113,7 +112,7 @@ Desde `frontend`, crear `.env.local` desde su ejemplo si no existe y ejecutar
 
 | Variable | Uso |
 |---|---|
-| `SPRING_PROFILES_ACTIVE` | `supabase` para nube; `local` para la opción local |
+| `SPRING_PROFILES_ACTIVE` | `supabase` |
 | `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` | Conexión JDBC obligatoria, sin fallback localhost |
 | `DB_SCHEMA` | `ceroa` en perfil Supabase, compartido por Flyway, Hibernate y JDBC |
 | `DB_POOL_MAX_SIZE`, `DB_POOL_MIN_IDLE` | 5 y 1 por instancia por defecto |
@@ -122,10 +121,7 @@ Desde `frontend`, crear `.env.local` desde su ejemplo si no existe y ejecutar
 | `SESSION_DAYS`, `SESSION_SECURE_COOKIE` | Duración de sesión y cookie HTTPS |
 | `VITE_API_URL` | URL REST de Spring Boot, nunca de Supabase |
 
-Para desarrollo con base local, usar explícitamente el archivo independiente
-`docker compose -f docker-compose.local.yml up -d --build`. Sus variables
-`POSTGRES_DB/USER/PASSWORD/PORT` son solo locales. No combinar los dos Compose como overrides.
-Los volúmenes locales se conservan; para Maven local se deben proporcionar las variables JDBC.
+La base de datos de Ceroa se aloja exclusivamente en Supabase.
 
 n8n puede utilizar las APIs de automatización con credenciales por usuario, caducidad,
 revocación, permisos e idempotencia. Se gestionan en Perfil → Automatizaciones.

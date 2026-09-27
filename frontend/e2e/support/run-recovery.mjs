@@ -5,6 +5,17 @@ import { spawn } from 'node:child_process';
 import { createWriteStream } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 const messages = [];
+// Use an explicitly authorized disposable Supabase schema, never the application database.
+for (const key of ['PG_TEST_URL', 'PG_TEST_USERNAME', 'PG_TEST_PASSWORD', 'PG_TEST_SCHEMA']) {
+  if (!process.env[key]) throw new Error(`Required isolated Supabase test configuration: ${key}`);
+}
+const testHost = new URL(process.env.PG_TEST_URL.replace(/^jdbc:/, '')).hostname;
+if (!testHost.endsWith('.supabase.com') && !testHost.endsWith('.supabase.co')) {
+  throw new Error('Recovery tests require a Supabase database');
+}
+if (!/^[a-z][a-z0-9_]*$/.test(process.env.PG_TEST_SCHEMA) || ['ceroa', 'public', 'auth', 'n8n_aux'].includes(process.env.PG_TEST_SCHEMA)) {
+  throw new Error('Recovery tests require a disposable test schema');
+}
 const smtp = net.createServer(socket => {
   socket.write('220 localhost EP03 test SMTP\r\n');
   let buffer = '', data = false, recipient = '', lines = [];
@@ -37,8 +48,10 @@ const log = createWriteStream(fileURLToPath(new URL('../../../backend/ep03-e2e.l
 const backend = spawn('java', ['-jar', fileURLToPath(new URL('../../../backend/target/ceroa-backend-0.1.0-SNAPSHOT.jar', import.meta.url))], {
   windowsHide: true,
   env: { ...process.env, SERVER_PORT: '18083', FRONTEND_URL: 'http://localhost:3000',
-    DB_URL: process.env.PG_TEST_URL || 'jdbc:postgresql://127.0.0.1:55432/ceroa_ep03',
-    DB_USERNAME: process.env.PG_TEST_USERNAME || 'ceroa_ep02', DB_PASSWORD: process.env.PG_TEST_PASSWORD || '',
+    SPRING_PROFILES_ACTIVE: 'supabase', CEROA_ENV_FILE: 'optional:file:./missing-recovery-test.env[.properties]',
+    DB_URL: process.env.PG_TEST_URL,
+    DB_USERNAME: process.env.PG_TEST_USERNAME, DB_PASSWORD: process.env.PG_TEST_PASSWORD,
+    DB_SCHEMA: process.env.PG_TEST_SCHEMA,
     MAIL_HOST: '127.0.0.1', MAIL_PORT: '18084', MAIL_FROM: 'recovery@example.com', MAIL_SMTP_AUTH: 'false', MAIL_STARTTLS: 'false' },
   stdio: ['ignore', 'pipe', 'pipe']
 });

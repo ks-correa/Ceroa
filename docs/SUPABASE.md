@@ -9,7 +9,7 @@ publishable/anon key ni service_role key. Nunca poner credenciales de base en va
 
 La conexión real a Supabase fue comprobada el 26 de septiembre de 2026 con las
 credenciales privadas de `.env`. El backend utiliza Session Pooler y el esquema
-`ceroa`; PostgreSQL local quedó detenido, conservando su volumen.
+`ceroa`. Supabase es la única base de datos de Ceroa.
 
 ## Análisis del repositorio y decisiones
 
@@ -17,13 +17,13 @@ credenciales privadas de `.env`. El backend utiliza Session Pooler y el esquema
 |---|---|---|
 | `application.yml` | JDBC con defaults localhost/ceroa/ceroa_dev; import de `.env` relativo a backend | Credenciales obligatorias, sin fallback local; import configurable con `CEROA_ENV_FILE` |
 | `.env.example` | PostgreSQL local y credenciales de desarrollo | Perfil `supabase`, campos JDBC vacíos y pool de 5 conexiones |
-| Compose | Backend esperaba healthcheck de postgres y sobreescribía JDBC con host `postgres` | Compose principal solo backend/frontend; copia local independiente en `docker-compose.local.yml` |
+| Compose | Backend esperaba healthcheck de postgres y sobreescribía JDBC con host `postgres` | Compose principal solo backend/frontend; sin servicio de base local |
 | Dependencias | Spring Boot 3.5, Java 21, driver pgJDBC, Flyway core + PostgreSQL | Ninguna dependencia adicional |
 | Flyway | V1–V14, SQL sin esquema explícito | Scripts intactos; esquema e historial aislados en `ceroa`; validate habilitado, baseline automático y clean deshabilitados |
 | Entidades | 10 tablas, UUID generados en Java, NUMERIC, TIMESTAMPTZ, JSONB, enums como texto, version de deuda | Sin cambios de mapeo; Hibernate sigue en `ddl-auto=validate`, con esquema predeterminado `ceroa` |
 | SQL JDBC | `MonthlyHistoryService` consulta tablas sin calificar | `currentSchema=ceroa` también dirige JDBC al esquema correcto |
 | Frontend | Servicios REST con cookies/CSRF hacia `VITE_API_URL` | Se conserva el cliente; la URL sigue apuntando al backend |
-| Pruebas | H2 con Flyway deshabilitado; perfil postgres-test separado | Prueba PostgreSQL optativa usando configuración principal y perfil Supabase |
+| Pruebas | H2 en memoria con Flyway deshabilitado | Prueba PostgreSQL optativa usando configuración principal y perfil Supabase |
 
 Las migraciones crean users, financial_profiles, debts, payments, auth_sessions,
 external_identities, password_recoveries, notifications, plus_subscriptions y
@@ -33,8 +33,7 @@ crear el esquema y aplicar migraciones y permisos DML para operar la aplicación
 
 El esquema dedicado evita colisiones con `auth.users`, objetos de `public` y otros
 esquemas administrados. No cambiar `DB_SCHEMA` después del primer arranque: Flyway
-interpretaría otro esquema como una instalación nueva. Para datos locales existentes,
-seguir el apartado de transferencia; seleccionar un esquema nuevo no mueve datos.
+interpretaría otro esquema como una instalación nueva.
 
 ## Lo que debes obtener en Supabase
 
@@ -148,10 +147,6 @@ en otro servidor, configurar su URL HTTPS y `FRONTEND_URL` al origen exacto de R
 En despliegue público activar `SESSION_SECURE_COOKIE=true` y mantener frontend/API
 en una disposición compatible con las cookies SameSite=Lax actuales.
 
-La opción local explícita es `docker compose -f docker-compose.local.yml up -d --build`.
-No combinar ambos Compose como overrides. Para backend Maven con base local, proporcionar
-DB_URL/DB_USERNAME/DB_PASSWORD y perfil `local` en variables del proceso; no usar el
-perfil Supabase contra datos antiguos de `public`. Los volúmenes locales se conservan.
 
 ## Verificación en la nube
 
@@ -181,8 +176,7 @@ SELECT ssl, version FROM pg_stat_ssl WHERE pid = pg_backend_pid();
 3. Abrir `http://localhost:3000`, registrar una cuenta nueva y crear perfil, deuda y pago;
    consultar estrategia y resumen mensual. Confirmar esas filas en `ceroa` desde Supabase.
 4. Reiniciar backend y frontend, volver a iniciar sesión y confirmar persistencia.
-   Detener exclusivamente el PostgreSQL local de Ceroa, si estaba activo, y repetir.
-   No detener contenedores de otros proyectos ni borrar volúmenes.
+   La instalación no incluye una base de datos local.
 
 Errores frecuentes: timeout/DNS → revisar host, IPv6 o Session Pooler y restricciones;
 autenticación → contraseña de base y usuario correspondiente al modo; SSL → CA/ruta;
@@ -208,51 +202,25 @@ $env:PG_TEST_SCHEMA='migration_verification'
 Remove-Item Env:PG_MIGRATION_TEST
 ```
 
-Para PostgreSQL local desechable sin TLS, exclusivamente en pruebas,
-`PG_TEST_SSLMODE=disable` y URL sin sslmode. La prueba está deshabilitada en la suite
-normal. No ejecutar pruebas de integración H2/postgres-test sobre la base productiva.
+La prueba está deshabilitada en la suite normal. Utilizar únicamente un esquema
+desechable autorizado de Supabase; nunca ejecutar estas pruebas sobre datos productivos.
 
 ## Validaciones realizadas
 
-Validación realizada el 26 de septiembre de 2026: V1–V14 aplicadas en PostgreSQL 17.11
-con esquema nuevo, 11 tablas incluyendo historial Flyway, validación Hibernate e
-idempotencia correctas; las 3 pruebas PostgreSQL optativas pasaron. También pasaron
-las 205 pruebas habituales del backend y TypeScript/build/153 pruebas del frontend.
-Compose de nube validado con solo backend/frontend y sin dependencia de postgres.
-Las pruebas iniciales utilizaron PostgreSQL desechable con SSL deshabilitado
-exclusivamente para la comprobación local.
-
-Posteriormente se verificó el proyecto Supabase real (PostgreSQL 17.6): V1–V14
+Se verificó el proyecto Supabase real (PostgreSQL 17.6): V1–V14
 aplicadas por el backend, Hibernate validado y reinicio sin nuevas migraciones.
 El cliente psql confirmó TLS 1.3 hacia Session Pooler. En esta conexión,
 `pg_stat_ssl` devolvió `false` para el tramo pooler → PostgreSQL; esa vista no mide
 el TLS cliente → pooler, que se comprobó mediante `\conninfo` y `sslmode=require`.
 Los roles `anon` y `authenticated` no tienen USAGE sobre el esquema `ceroa`.
 
-Con el contenedor `ceroa-postgres` detenido, las APIs comprobaron autenticación,
+Con Supabase como única base de datos, las APIs comprobaron autenticación,
 deudas, estrategia, resumen mensual y creación de deuda/pago con recálculo correcto
 del saldo. El pago y la deuda temporales se eliminaron por las APIs; el historial
 mensual generado por esas operaciones queda asociado a la cuenta de demostración.
 Una prueba de navegador Chromium verificó login desde React, lectura de deuda y
 restauración de sesión al recargar tras reiniciar backend. No se transfirieron datos
 de la base local ni se desactivó la cuenta demo, que sigue disponible para pruebas.
-
-## Transferir datos locales existentes (si se requieren)
-
-Esta integración crea una instancia nueva; no transfiere automáticamente los datos.
-Para conservarlos: parar escrituras y jobs del backend local, hacer backup `pg_dump`
-privado y verificar restauración, anotar versión/historial de Flyway y decidir corte.
-Migrar primero el destino vacío con Flyway; después exportar/importar solo datos de las
-10 tablas con columnas explícitas y esquema destino `ceroa`, respetando claves foráneas
-(users antes de perfiles/deudas/sesiones, debts antes de payments/notifications).
-Resolver previamente los UUID y filas demo que ambos lados comparten; no restaurar
-ciegamente sobre las semillas ni duplicar flyway_schema_history. Transferir también
-historial mensual, identidades, suscripciones y recuperaciones según la política elegida.
-Validar conteos, saldos, relaciones, sesiones y pagos con una restauración de ensayo.
-No aplicar un dump global de public/auth sobre Supabase ni usar Flyway clean.
-Cambiar credenciales del backend solo al completar la validación; conservar backup y
-origen para rollback. Si hubo nuevas escrituras en cloud, reconciliarlas antes de volver
-al origen. La ejecución de esa transferencia requiere definir qué datos conservar.
 
 ## n8n posteriormente
 
