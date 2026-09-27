@@ -117,6 +117,26 @@ class StrategyIntegrationTest {
     }
 
     @Test
+    void manualPriorityPersistsAndCanBeReset() throws Exception {
+        createFinancialProfile(sessionUserCero, new BigDecimal("4000000"), new BigDecimal("2000000"), new BigDecimal("500000"), 2, StrategyType.SNOWBALL);
+        UUID small = createDebt(sessionUserCero, "Small", new BigDecimal("500000"), new BigDecimal("20"), RateType.EA, new BigDecimal("100000"));
+        UUID large = createDebt(sessionUserCero, "Large", new BigDecimal("1500000"), new BigDecimal("25"), RateType.EA, new BigDecimal("100000"));
+        mvc.perform(put("/api/v1/strategies/priority").with(csrf()).cookie(sessionUserCero)
+                        .contentType("application/json").content(json.writeValueAsString(Map.of("debtId", large))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.priorityDebt.id").value(large.toString()))
+                .andExpect(jsonPath("$.priorityDebt.recommendedPayment").value(400000));
+        mvc.perform(get("/api/v1/strategies/active").cookie(sessionUserCero))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.priorityDebt.id").value(large.toString()));
+        mvc.perform(put("/api/v1/strategies/priority").with(csrf()).cookie(sessionUserPlus)
+                        .contentType("application/json").content(json.writeValueAsString(Map.of("debtId", large))))
+                .andExpect(status().isUnprocessableEntity());
+        mvc.perform(put("/api/v1/strategies/priority").with(csrf()).cookie(sessionUserCero)
+                        .contentType("application/json").content("{\"debtId\":null}"))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.priorityDebt.id").value(small.toString()));
+    }
+
+    @Test
     @DisplayName("HU-039 CA-01 a CA-08: Cambiar estrategia persiste correctamente, rechaza sin deudas y no muta saldos")
     void hu039_changeStrategySuccessfullyAndEnforcesInvariance() throws Exception {
         createFinancialProfile(sessionUserCero, new BigDecimal("4000000"), new BigDecimal("2000000"), new BigDecimal("500000"), 2, StrategyType.SNOWBALL);

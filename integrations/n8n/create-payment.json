@@ -1,0 +1,28 @@
+{
+  "id": "ceroaPayment00001",
+  "name": "Ceroa - Registrar pago por API con idempotencia",
+  "active": false,
+  "nodes": [
+    { "id": "manual", "name": "Ejecutar manualmente", "type": "n8n-nodes-base.manualTrigger", "typeVersion": 1, "position": [0, 0], "parameters": {} },
+    { "id": "config", "name": "Configurar evento", "type": "n8n-nodes-base.set", "typeVersion": 3.4, "position": [240, 0], "parameters": { "assignments": { "assignments": [
+      { "id": "backend", "name": "backendUrl", "value": "http://backend:8080", "type": "string" },
+      { "id": "event", "name": "eventId", "value": "", "type": "string" },
+      { "id": "debt", "name": "debtId", "value": "", "type": "string" },
+      { "id": "amount", "name": "amount", "value": 0, "type": "number" },
+      { "id": "date", "name": "date", "value": "", "type": "string" }
+    ] }, "options": {} } },
+    { "id": "payment", "name": "Registrar pago", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2, "position": [480, 0], "parameters": {
+      "method": "POST", "url": "={{ $json.backendUrl + '/api/v1/automation/payments' }}",
+      "authentication": "genericCredentialType", "genericAuthType": "httpBearerAuth",
+      "sendHeaders": true, "headerParameters": { "parameters": [{ "name": "Idempotency-Key", "value": "={{ $json.eventId }}" }] },
+      "sendBody": true, "specifyBody": "json",
+      "jsonBody": "={{ JSON.stringify({ debtId: $json.debtId, amount: $json.amount, date: $json.date, type: 'extra_principal' }) }}",
+      "options": { "timeout": 30000 }
+    } }
+  ],
+  "connections": {
+    "Ejecutar manualmente": { "main": [[{ "node": "Configurar evento", "type": "main", "index": 0 }]] },
+    "Configurar evento": { "main": [[{ "node": "Registrar pago", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1", "saveDataSuccessExecution": "none", "saveDataErrorExecution": "none", "saveManualExecutions": false }
+}

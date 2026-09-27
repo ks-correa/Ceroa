@@ -19,8 +19,13 @@ export function SubscriptionStatusCard() {
   const cancelButton = useRef<HTMLButtonElement>(null);
   const closeButton = useRef<HTMLButtonElement>(null);
   const confirmButton = useRef<HTMLButtonElement>(null);
-  const load = async () => {
-    try { setSubscription(await subscriptionService.current()); await refreshAllData(); setError(''); }
+  const load = async (refresh = false) => {
+    try {
+      setSubscription(await subscriptionService.current());
+      // A global refresh unmounts this card; doing it on mount creates a refresh loop.
+      if (refresh) await refreshAllData();
+      setError('');
+    }
     catch { setError('No pudimos consultar tu suscripción. Intenta de nuevo.'); }
     finally { setLoading(false); }
   };
@@ -50,7 +55,7 @@ export function SubscriptionStatusCard() {
     {subscription?.status === 'CANCEL_SCHEDULED' && <p>Tu acceso Plus continuará hasta la fecha indicada. No se realizarán nuevas renovaciones.</p>}
     {subscription?.status === 'CANCEL_PENDING' && <p role="status">Estamos procesando tu solicitud. La cancelación aún no está confirmada.</p>}
     {subscription?.canCancelRenewal && <button ref={cancelButton} type="button" onClick={() => setConfirm(true)} className="rounded-lg border border-rose-600 px-4 py-2 text-rose-700 focus-visible:outline-2">Cancelar renovación</button>}
-    <button type="button" onClick={() => { setLoading(true); void load(); }} className="block underline focus-visible:outline-2">Actualizar estado</button>
+    <button type="button" onClick={() => { setLoading(true); void load(true); }} className="block underline focus-visible:outline-2">Actualizar estado</button>
     {error && <p role="alert" className="text-rose-700">{error}</p>}
     {confirm && <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onKeyDown={event => {
       if (event.key === 'Escape' && !busy) close();

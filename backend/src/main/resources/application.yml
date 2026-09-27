@@ -28,13 +28,13 @@ spring:
       mail.smtp.writetimeout: 5000
       mail.debug: false
   config:
-    import: optional:file:../.env[.properties]
+    import: ${CEROA_ENV_FILE:optional:file:../.env[.properties]}
   application:
     name: ceroa-backend
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/ceroa}
-    username: ${DB_USERNAME:ceroa}
-    password: ${DB_PASSWORD:ceroa_dev}
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
   jpa:
     open-in-view: false
     hibernate:
@@ -46,6 +46,9 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
+    validate-on-migrate: true
+    baseline-on-migrate: false
+    clean-disabled: true
   jackson:
     time-zone: America/Bogota
 
@@ -61,6 +64,10 @@ logging:
     org.hibernate.SQL: OFF
 
 ceroa:
+  assistant:
+    enabled: ${ASSISTANT_ENABLED:false}
+    webhook-url: ${ASSISTANT_WEBHOOK_URL:}
+    worker-key: ${ASSISTANT_WORKER_KEY:}
   plus:
     monthly-price: ${PLUS_MONTHLY_PRICE:}
     yearly-price: ${PLUS_YEARLY_PRICE:}

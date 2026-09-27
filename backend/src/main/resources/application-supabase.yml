@@ -1,0 +1,20 @@
+# PostgreSQL administrado. No usar Transaction Pooler con este perfil.
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: ${DB_POOL_MAX_SIZE:5}
+      minimum-idle: ${DB_POOL_MIN_IDLE:1}
+      connection-timeout: 30000
+      data-source-properties:
+        sslmode: require
+        currentSchema: ${DB_SCHEMA:ceroa}
+        connectTimeout: 10
+  jpa:
+    properties:
+      hibernate:
+        default_schema: ${DB_SCHEMA:ceroa}
+  flyway:
+    default-schema: ${DB_SCHEMA:ceroa}
+    schemas: ${DB_SCHEMA:ceroa}
+    create-schemas: true

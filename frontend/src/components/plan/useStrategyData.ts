@@ -67,6 +67,21 @@ export const useStrategyData = () => {
     }
   };
 
+  const changePriority = async (debtId: string | null) => {
+    if (isChanging) return;
+    setIsChanging(true);
+    setChangeError(null);
+    try {
+      const confirmed = await strategyService.updatePriority(debtId);
+      setData(confirmed);
+      await refreshDashboard();
+    } catch (err) {
+      setChangeError(err instanceof Error ? err.message : 'No fue posible cambiar la prioridad.');
+    } finally {
+      setIsChanging(false);
+    }
+  };
+
   return {
     data,
     isLoading,
@@ -75,6 +90,7 @@ export const useStrategyData = () => {
     pendingStrategy,
     changeError,
     changeStrategy,
+    changePriority,
     refetch: fetchStrategy
   };
 };

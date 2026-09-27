@@ -1,11 +1,12 @@
 // @vitest-environment jsdom
-import { beforeEach, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { afterEach, beforeEach, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { SubscriptionStatusCard } from './SubscriptionStatusCard';
 import { subscriptionService } from '../../services/subscriptionService';
 import type { Subscription } from '../../services/subscriptionService';
 
-vi.mock('../../context/AppContext', () => ({ useApp: () => ({ planAccess: { plusActive: true }, refreshAllData: vi.fn().mockResolvedValue(undefined) }) }));
+const { refreshAllData } = vi.hoisted(() => ({ refreshAllData: vi.fn().mockResolvedValue(undefined) }));
+vi.mock('../../context/AppContext', () => ({ useApp: () => ({ planAccess: { plusActive: true }, refreshAllData }) }));
 vi.mock('../../services/subscriptionService', () => ({ subscriptionService: { current: vi.fn(), cancelRenewal: vi.fn() } }));
 
 const active: Subscription = {
@@ -14,9 +15,19 @@ const active: Subscription = {
   plusActive: true, canCancelRenewal: true, checkoutUrl: null
 };
 
+afterEach(cleanup);
+
 beforeEach(() => {
   vi.clearAllMocks();
   vi.mocked(subscriptionService.current).mockResolvedValue(active);
+});
+
+it('does not reload the whole application on mount, but refreshes after an explicit update', async () => {
+  render(<SubscriptionStatusCard />);
+  await screen.findByRole('button', { name: 'Cancelar renovación' });
+  expect(refreshAllData).not.toHaveBeenCalled();
+  fireEvent.click(screen.getByRole('button', { name: 'Actualizar estado' }));
+  await waitFor(() => expect(refreshAllData).toHaveBeenCalledTimes(1));
 });
 
 it('shows the server date and closing confirmation does not cancel', async () => {

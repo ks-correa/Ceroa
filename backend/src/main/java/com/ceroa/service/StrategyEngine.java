@@ -34,11 +34,17 @@ public class StrategyEngine {
             UserPlan plan,
             BigDecimal configuredBudget) {
 
+        return execute(allDebts, requestedStrategy, plan, configuredBudget, null);
+    }
+
+    public StrategyResponse execute(List<Debt> allDebts, StrategyType requestedStrategy,
+            UserPlan plan, BigDecimal configuredBudget, UUID priorityDebtId) {
         StrategyType strategy = requestedStrategy != null ? requestedStrategy : StrategyType.SNOWBALL;
         UserPlan effectivePlan = plan != null ? plan : UserPlan.CERO;
 
         List<Debt> activeDebts = allDebts.stream()
                 .filter(d -> d.getCurrentBalance() != null && d.getCurrentBalance().compareTo(BigDecimal.ZERO) > 0)
+                .sorted(Comparator.comparing(d -> !d.getId().equals(priorityDebtId)))
                 .toList();
 
         if (activeDebts.isEmpty()) {
@@ -70,12 +76,22 @@ public class StrategyEngine {
         OrderResult orderResult = orderDebts(consideredDebts, strategy);
         List<EvaluatedDebt> orderedEvaluated = orderResult.evaluatedDebts();
         boolean hasNonComparable = orderResult.hasNonComparable();
+        boolean manualPriority = priorityDebtId != null && orderedEvaluated.stream()
+                .anyMatch(ed -> ed.debt.getId().equals(priorityDebtId));
+        if (manualPriority) {
+            orderedEvaluated = new ArrayList<>(orderedEvaluated);
+            orderedEvaluated.sort(Comparator.comparing(ed -> !ed.debt.getId().equals(priorityDebtId)));
+            int nextPriority = 1;
+            for (EvaluatedDebt ed : orderedEvaluated) {
+                if (ed.debt.getId().equals(priorityDebtId) || ed.priority != null) ed.priority = nextPriority++;
+            }
+        }
 
         // Distribución de presupuesto mensual
         distributePayments(orderedEvaluated, configuredBudget);
 
         // Proyección de amortización si los datos son suficientes
-        SimulationResult simResult = runSimulation(orderedEvaluated, configuredBudget, strategy);
+        SimulationResult simResult = runSimulation(orderedEvaluated, configuredBudget, strategy, manualPriority ? priorityDebtId : null);
 
         // Armar DTOs de deuda
         List<StrategyDebtDto> debtDtos = new ArrayList<>();
@@ -279,6 +295,11 @@ public class StrategyEngine {
     }
 
     public SimulationResult runSimulation(List<EvaluatedDebt> evaluatedDebts, BigDecimal configuredBudget, StrategyType strategy) {
+        return runSimulation(evaluatedDebts, configuredBudget, strategy, null);
+    }
+
+    private SimulationResult runSimulation(List<EvaluatedDebt> evaluatedDebts, BigDecimal configuredBudget,
+            StrategyType strategy, UUID priorityDebtId) {
         if (evaluatedDebts.isEmpty()) {
             return SimulationResult.empty();
         }
@@ -365,6 +386,8 @@ public class StrategyEngine {
                     : Comparator.comparing((SimDebt sd) -> sd.comparableAnnualRate, Comparator.reverseOrder())
                             .thenComparing(sd -> sd.createdAt, Comparator.nullsLast(Comparator.naturalOrder()))
                             .thenComparing(sd -> sd.debtId));
+
+            priorityList.sort(Comparator.comparing(sd -> !sd.debtId.equals(priorityDebtId)));
 
             for (SimDebt sd : priorityList) {
                 if (!sd.isActive() || remBudget.compareTo(BigDecimal.ZERO) <= 0) continue;

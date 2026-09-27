@@ -1,0 +1,41 @@
+# Usar junto con docker-compose.yml. Acceso solo desde esta computadora.
+services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:stable@sha256:ffeb52485f78b1b06c9a832205853cf75da72a07a514c9a27724df85979d6c34
+    container_name: ceroa-n8n
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_started
+    ports:
+      - "127.0.0.1:5678:5678"
+    environment:
+      N8N_HOST: localhost
+      N8N_PORT: 5678
+      N8N_PROTOCOL: http
+      N8N_EDITOR_BASE_URL: http://localhost:5678/
+      WEBHOOK_URL: http://localhost:5678/
+      # HTTP limitado a loopback para desarrollo personal.
+      N8N_SECURE_COOKIE: "false"
+      GENERIC_TIMEZONE: America/Bogota
+      TZ: America/Bogota
+      N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: "true"
+      N8N_DIAGNOSTICS_ENABLED: "false"
+      N8N_PERSONALIZATION_ENABLED: "false"
+      EXECUTIONS_DATA_SAVE_ON_SUCCESS: none
+      EXECUTIONS_DATA_SAVE_ON_ERROR: none
+      EXECUTIONS_DATA_SAVE_MANUAL_EXECUTIONS: "false"
+      EXECUTIONS_DATA_PRUNE: "true"
+    volumes:
+      # SQLite de n8n y clave de cifrado generada por n8n; independiente de Ceroa.
+      - ceroa_n8n_data:/home/node/.n8n
+      - ./integrations/n8n:/opt/ceroa-workflows:ro
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:5678/healthz/readiness').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 90s
+
+volumes:
+  ceroa_n8n_data:

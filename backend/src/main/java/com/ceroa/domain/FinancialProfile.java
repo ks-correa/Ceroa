@@ -39,6 +39,12 @@ public class FinancialProfile {
     @Column(name = "updated_at", nullable = false)
     private OffsetDateTime updatedAt;
 
+    @Column(name = "priority_debt_id")
+    private UUID priorityDebtId;
+
+    public UUID getPriorityDebtId() { return priorityDebtId; }
+    public void setPriorityDebtId(UUID id) { this.priorityDebtId = id; }
+
     public FinancialProfile() {}
 
     @PrePersist

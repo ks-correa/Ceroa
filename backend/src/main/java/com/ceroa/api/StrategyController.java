@@ -30,6 +30,13 @@ public class StrategyController {
         return service.updateActiveStrategy(effectiveStrategy);
     }
 
+    public record PriorityRequest(java.util.UUID debtId) {}
+
+    @PutMapping("/priority")
+    public StrategyResponse updatePriority(@RequestBody PriorityRequest body) {
+        return service.updatePriority(body.debtId());
+    }
+
     @GetMapping("/comparison")
     public StrategyComparisonDto getComparison() {
         return service.getComparison();

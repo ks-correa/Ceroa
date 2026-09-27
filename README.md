@@ -70,80 +70,71 @@ Detalle de deuda, pagos, vencimientos, notificaciones y suscripción son flujos 
 
 ## Requisitos previos
 
-- Java 21.
-- Node.js 20 o superior y npm.
-- Docker Desktop o un PostgreSQL 17 accesible.
+- Java 21 y Node.js 20 o superior con npm para ejecutar sin Docker.
+- Docker Desktop para ejecutar frontend/backend con Compose (opcional).
+- Proyecto Supabase Cloud y credenciales PostgreSQL Direct o Session Pooler.
 
-No es necesario instalar Maven globalmente: el backend incluye Maven Wrapper.
+## Configuración y ejecución con Supabase
 
-## Variables de entorno
+El backend mantiene JPA/Hibernate y Flyway V1–V14, y agrega V15 para credenciales
+e idempotencia de automatizaciones. El perfil `supabase` usa SSL,
+un pool limitado y el esquema privado `ceroa`. El Compose principal ejecuta
+frontend/backend sin PostgreSQL local. No requiere SDK ni API keys de Supabase.
 
-Usa [.env.example](.env.example) como referencia. No guardes secretos reales en Git.
+El análisis, plan, configuración manual, transferencia de datos y comprobaciones
+están en [docs/SUPABASE.md](docs/SUPABASE.md). La conexión real fue verificada el
+26 de septiembre de 2026 con PostgreSQL local detenido. Las credenciales permanecen
+en `.env` privado; no hay secretos en el ejemplo.
 
-Variables activas en esta fase:
-
-| Variable | Uso | Valor local predeterminado |
-|---|---|---|
-| `POSTGRES_DB` | Base creada por Docker | `ceroa` |
-| `POSTGRES_USER` | Usuario de PostgreSQL | `ceroa` |
-| `POSTGRES_PASSWORD` | Contraseña local | `ceroa_dev` |
-| `POSTGRES_PORT` | Puerto publicado | `5432` |
-| `DB_URL` | JDBC del backend | `jdbc:postgresql://localhost:5432/ceroa` |
-| `DB_USERNAME` | Usuario JDBC | `ceroa` |
-| `DB_PASSWORD` | Contraseña JDBC | `ceroa_dev` |
-| `SERVER_PORT` | Puerto del backend | `8080` |
-| `FRONTEND_URL` | Origen permitido por CORS | `http://localhost:3000` |
-| `SESSION_DAYS` | Duración de la sesión persistente | `30` |
-| `SESSION_SECURE_COOKIE` | Exige HTTPS para la cookie (activar en producción) | `false` |
-| `VITE_API_URL` | Base URL REST | `http://localhost:8080/api/v1` |
-
-Google, Microsoft, Mercado Pago y Telegram están declarados en el ejemplo para fases posteriores, sin credenciales.
-
-## Ejecución local
-
-Desde la raíz del proyecto:
-
-### 1. PostgreSQL
+1. Crear `.env` desde [.env.example](.env.example) solo si no existe.
+2. Completar `DB_URL` JDBC con el host/puerto/base exactos de **Connect**,
+   `DB_USERNAME` y `DB_PASSWORD` de la base. Mantener `SPRING_PROFILES_ACTIVE=supabase`.
+3. Mantener `ceroa` fuera de la Data API; Flyway crea sus tablas al arrancar.
+4. Ejecutar desde la raíz:
 
 ```powershell
-Copy-Item .env.example .env
-docker compose up -d postgres
-docker compose ps
+docker compose config --quiet
+docker compose up -d --build backend frontend
+docker compose logs --tail 100 backend
 ```
 
-Flyway crea el esquema automáticamente al iniciar el backend. Para detener PostgreSQL conservando los datos:
+No sobrescribir un `.env` existente. No compartir la salida de `docker compose config`
+sin `--quiet`, porque puede revelar credenciales. La configuración no mueve los datos
+locales automáticamente. El procedimiento opcional de transferencia está en la guía.
 
-```powershell
-docker compose stop postgres
-```
+Sin Docker, ejecutar desde `backend` `.\mvnw.cmd spring-boot:run`; importa `../.env`.
+Desde `frontend`, crear `.env.local` desde su ejemplo si no existe y ejecutar
+`npm ci` y `npm run dev`. React sigue llamando a Spring Boot mediante `VITE_API_URL`.
 
-### 2. Backend
+- Aplicación: `http://localhost:3000`
+- API: `http://localhost:8080/api/v1`
+- Swagger: `http://localhost:8080/swagger-ui.html`
+- OpenAPI: `http://localhost:8080/v3/api-docs`
 
-En otra terminal:
+| Variable | Uso |
+|---|---|
+| `SPRING_PROFILES_ACTIVE` | `supabase` para nube; `local` para la opción local |
+| `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` | Conexión JDBC obligatoria, sin fallback localhost |
+| `DB_SCHEMA` | `ceroa` en perfil Supabase, compartido por Flyway, Hibernate y JDBC |
+| `DB_POOL_MAX_SIZE`, `DB_POOL_MIN_IDLE` | 5 y 1 por instancia por defecto |
+| `SERVER_PORT` | Puerto backend; en Compose controla el puerto publicado |
+| `FRONTEND_URL` | Origen exacto permitido por CORS |
+| `SESSION_DAYS`, `SESSION_SECURE_COOKIE` | Duración de sesión y cookie HTTPS |
+| `VITE_API_URL` | URL REST de Spring Boot, nunca de Supabase |
 
-```powershell
-cd backend
-.\mvnw.cmd spring-boot:run
-```
+Para desarrollo con base local, usar explícitamente el archivo independiente
+`docker compose -f docker-compose.local.yml up -d --build`. Sus variables
+`POSTGRES_DB/USER/PASSWORD/PORT` son solo locales. No combinar los dos Compose como overrides.
+Los volúmenes locales se conservan; para Maven local se deben proporcionar las variables JDBC.
 
-API: `http://localhost:8080/api/v1`
-
-Swagger UI: `http://localhost:8080/swagger-ui.html`
-
-OpenAPI JSON: `http://localhost:8080/v3/api-docs`
-
-### 3. Frontend
-
-En otra terminal:
-
-```powershell
-cd frontend
-Copy-Item .env.example .env.local
-npm install
-npm run dev
-```
-
-Aplicación: `http://localhost:3000`
+n8n puede utilizar las APIs de automatización con credenciales por usuario, caducidad,
+revocación, permisos e idempotencia. Se gestionan en Perfil → Automatizaciones.
+La configuración y workflows importables están en [docs/N8N.md](docs/N8N.md).
+Para empezar con n8n local, ejecutar
+`docker compose -f docker-compose.yml -f docker-compose.n8n.yml up -d n8n` y abrir
+`http://localhost:5678`. Crear la cuenta local y configurar Bearer Auth siguiendo la guía.
+RAG/pgvector y memoria usarán un esquema auxiliar con un rol independiente sin acceso
+al esquema `ceroa`; sus modelos y credenciales se configurarán aparte.
 
 ## Endpoints implementados
 
@@ -190,6 +181,13 @@ La comparación Bola de Nieve/Avalancha y el orden de prioridad se calculan en e
 Los pagos se validan como valores positivos y fechas no futuras. Crear, editar o eliminar un pago recalcula el saldo de la deuda dentro de una transacción. Eliminar una deuda elimina sus pagos asociados. El backend bloquea una tercera deuda cuando el usuario tiene Plan Cero.
 
 ## Datos de demostración
+
+El asistente web RA-N8N-001 está integrado para consultas por texto y audio por cada
+usuario autenticado. Su configuración, pruebas y límites están en
+[docs/RA-N8N-001.md](docs/RA-N8N-001.md). El canal Telegram necesita todavía crear
+el bot, configurar HTTPS y verificar la vinculación de cuentas. Los demás requerimientos
+de n8n permanecen independientes y con el estado documentado en [docs/N8N.md](docs/N8N.md).
+
 
 Flyway carga una cuenta y una cartera editable para probar el sistema sin capturar todo desde cero:
 

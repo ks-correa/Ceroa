@@ -56,7 +56,7 @@ public class StrategyService {
 
         List<Debt> allDebts = debtRepository.findAllByUserIdOrderByCreatedAtDesc(user.getId());
 
-        return strategyEngine.execute(allDebts, activeStrategy, plan, budget);
+        return strategyEngine.execute(allDebts, activeStrategy, plan, budget, profile != null ? profile.getPriorityDebtId() : null);
     }
 
     @Transactional
@@ -89,6 +89,27 @@ public class StrategyService {
         return getActiveStrategy();
     }
 
+    @Transactional
+    public StrategyResponse updatePriority(UUID debtId) {
+        UUID userId = currentUser.id();
+        if (debtId != null) {
+            Debt debt = debtRepository.findAllByUserIdOrderByCreatedAtDesc(userId).stream()
+                    .filter(d -> d.getId().equals(debtId)).findFirst()
+                    .orElseThrow(() -> new BusinessRuleException("INVALID_PRIORITY_DEBT", "Selecciona una deuda propia con saldo pendiente."));
+            if (debt.getCurrentBalance() == null || debt.getCurrentBalance().signum() <= 0) {
+                throw new BusinessRuleException("INVALID_PRIORITY_DEBT", "La deuda seleccionada ya no tiene saldo pendiente.");
+            }
+        }
+        FinancialProfile profile = profileRepository.findByUserId(userId).orElse(null);
+        if (profile == null) {
+            updateActiveStrategy(StrategyType.SNOWBALL);
+            profile = profileRepository.findByUserId(userId).orElseThrow();
+        }
+        profile.setPriorityDebtId(debtId);
+        profileRepository.save(profile);
+        return getActiveStrategy();
+    }
+
     @Transactional(readOnly = true)
     public StrategyComparisonDto getComparison() {
         User user = currentUser.entity();
@@ -116,7 +137,7 @@ public class StrategyService {
                 : (profile != null && profile.getActiveStrategy() != null ? profile.getActiveStrategy() : StrategyType.SNOWBALL);
 
         // Para DashboardService (EP-08), comparamos Snowball y Avalanche en modo PLUS sobre todas las deudas
-        StrategyResponse plusResult = strategyEngine.execute(allDebts, effectiveStrategy, UserPlan.PLUS, budget);
+        StrategyResponse plusResult = strategyEngine.execute(allDebts, effectiveStrategy, UserPlan.PLUS, budget, requestedStrategy == null && profile != null ? profile.getPriorityDebtId() : null);
         StrategyComparisonDto comp = plusResult.comparison();
 
         StrategyStatsResponse snowballStats;

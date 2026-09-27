@@ -1,0 +1,213 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Ceroa RA-N8N-002 draft v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "draft",
+    "evidence",
+    "warnings"
+  ],
+  "properties": {
+    "draft": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "entity",
+        "categoryLabel",
+        "accountNumber",
+        "notes",
+        "originalAmount",
+        "currentBalance",
+        "interestRate",
+        "monthlyPayment",
+        "minimumPayment",
+        "dueDateDay",
+        "termRemainingMonths",
+        "nextDueDate",
+        "disbursementDate",
+        "type",
+        "rateType",
+        "color",
+        "details"
+      ],
+      "properties": {
+        "name": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "entity": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "categoryLabel": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "accountNumber": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "notes": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "originalAmount": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "currentBalance": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "interestRate": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "monthlyPayment": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "minimumPayment": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "dueDateDay": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "termRemainingMonths": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "nextDueDate": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "disbursementDate": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date"
+        },
+        "type": {
+          "enum": [
+            "credit_card",
+            "personal_loan",
+            "mortgage",
+            "auto_loan",
+            "student_loan",
+            "retail_credit",
+            "installment_purchase",
+            "overdue_bill",
+            "family_loan",
+            "other",
+            null
+          ]
+        },
+        "rateType": {
+          "enum": [
+            "EA",
+            "MV",
+            "NAMV",
+            "INDEXED",
+            "IBR_MARGIN",
+            "IPC_MARGIN",
+            "UVR_MARGIN",
+            "NONE",
+            null
+          ]
+        },
+        "color": {
+          "type": "null",
+          "description": "User preference; never inferred from document."
+        },
+        "details": {
+          "type": "null",
+          "description": "Type-specific extraction requires a separate approved schema."
+        }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "field",
+          "quote",
+          "location"
+        ],
+        "properties": {
+          "field": {
+            "enum": [
+              "name",
+              "entity",
+              "categoryLabel",
+              "accountNumber",
+              "notes",
+              "originalAmount",
+              "currentBalance",
+              "interestRate",
+              "monthlyPayment",
+              "minimumPayment",
+              "dueDateDay",
+              "termRemainingMonths",
+              "nextDueDate",
+              "disbursementDate",
+              "type",
+              "rateType",
+              "color",
+              "details"
+            ]
+          },
+          "quote": {
+            "type": "string",
+            "minLength": 1
+          },
+          "location": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

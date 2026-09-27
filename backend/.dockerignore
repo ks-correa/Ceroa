@@ -1,0 +1,8 @@
+target
+.git
+.vscode
+.mvn
+mvnw
+mvnw.cmd
+.env*
+!.env.example

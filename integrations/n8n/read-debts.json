@@ -1,0 +1,15 @@
+{
+  "id": "ceroaReadDebts001",
+  "name": "Ceroa - Consultar deudas por API",
+  "active": false,
+  "nodes": [
+    { "id": "manual", "name": "Ejecutar manualmente", "type": "n8n-nodes-base.manualTrigger", "typeVersion": 1, "position": [0, 0], "parameters": {} },
+    { "id": "config", "name": "Configurar backend", "type": "n8n-nodes-base.set", "typeVersion": 3.4, "position": [240, 0], "parameters": { "assignments": { "assignments": [{ "id": "backend", "name": "backendUrl", "value": "http://backend:8080", "type": "string" }] }, "options": {} } },
+    { "id": "debts", "name": "Consultar deudas", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2, "position": [480, 0], "parameters": { "url": "={{ $json.backendUrl + '/api/v1/automation/debts' }}", "authentication": "genericCredentialType", "genericAuthType": "httpBearerAuth", "options": { "timeout": 30000 } } }
+  ],
+  "connections": {
+    "Ejecutar manualmente": { "main": [[{ "node": "Configurar backend", "type": "main", "index": 0 }]] },
+    "Configurar backend": { "main": [[{ "node": "Consultar deudas", "type": "main", "index": 0 }]] }
+  },
+  "settings": { "executionOrder": "v1", "saveDataSuccessExecution": "none", "saveDataErrorExecution": "none", "saveManualExecutions": false }
+}

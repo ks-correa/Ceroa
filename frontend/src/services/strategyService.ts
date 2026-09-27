@@ -14,8 +14,14 @@ export const strategyService = {
   },
 
   async updateActiveStrategy(strategy: StrategyType): Promise<StrategyResponse> {
-    return apiRequest<StrategyResponse>(`/strategies/active?strategy=${strategy}`, {
+    return apiRequest<StrategyResponse>(`/strategies/active?strategy=${strategy.toUpperCase()}`, {
       method: 'PUT'
+    });
+  },
+
+  async updatePriority(debtId: string | null): Promise<StrategyResponse> {
+    return apiRequest<StrategyResponse>('/strategies/priority', {
+      method: 'PUT', body: JSON.stringify({ debtId })
     });
   },
 
