@@ -126,6 +126,8 @@ La base de datos de Ceroa se aloja exclusivamente en Supabase.
 n8n puede utilizar las APIs de automatización con credenciales por usuario, caducidad,
 revocación, permisos e idempotencia. Se gestionan en Perfil → Automatizaciones.
 La configuración y workflows importables están en [docs/N8N.md](docs/N8N.md).
+RA-N8N-004 programa recordatorios y resúmenes por Telegram con consentimiento separado
+en Perfil, Ceroa Plus y estados persistentes en Supabase: [guía](docs/RA-N8N-004.md).
 Para empezar con n8n local, ejecutar
 `docker compose -f docker-compose.yml -f docker-compose.n8n.yml up -d n8n` y abrir
 `http://localhost:5678`. Crear la cuenta local y configurar Bearer Auth siguiendo la guía.

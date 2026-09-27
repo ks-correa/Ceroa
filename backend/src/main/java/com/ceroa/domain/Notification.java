@@ -7,7 +7,7 @@ import java.time.OffsetDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "notifications", indexes = {
+@Table(name = "notifications", uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "event_key"}), indexes = {
         @Index(name = "idx_notifications_user_id", columnList = "user_id"),
         @Index(name = "idx_notifications_user_read", columnList = "user_id, read"),
         @Index(name = "idx_notifications_user_event_key", columnList = "user_id, event_key"),

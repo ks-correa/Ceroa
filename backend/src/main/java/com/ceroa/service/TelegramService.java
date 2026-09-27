@@ -17,6 +17,7 @@ import java.util.*;
 /** Telegram identities are accepted only from the authenticated n8n worker, never from the model. */
 @Service
 public class TelegramService {
+    @org.springframework.beans.factory.annotation.Autowired(required=false) private com.ceroa.repository.ScheduledDeliveryRepository scheduledDeliveries;
     public record Status(boolean enabled, boolean linked, String botUsername, OffsetDateTime linkedAt) {}
     public record Invitation(String url, OffsetDateTime expiresAt) {}
     public record Update(long updateId,long senderId,long chatId,boolean privateChat,String text,String audio,String mime) {}
@@ -60,7 +61,7 @@ public class TelegramService {
         });
     }
     public void unlink() {
-        tx.executeWithoutResult(s->{ current.entityForUpdate(); links.deleteById(current.id()); });
+        tx.executeWithoutResult(s->{ current.entityForUpdate(); links.deleteById(current.id()); if(scheduledDeliveries!=null)scheduledDeliveries.invalidateUser(current.id()); });
     }
     private boolean privateIdentity(Update u) { return u.privateChat && u.senderId>0 && u.chatId==u.senderId && u.updateId>=0; }
     private TelegramLink binding(Update u) {
@@ -131,7 +132,7 @@ public class TelegramService {
         if(text.equals("/desvincular")) {
             tx.executeWithoutResult(s->{ users.findByIdForUpdate(link.userId);
                 var fresh=links.findById(link.userId).orElse(null);
-                if(fresh!=null && Objects.equals(fresh.senderId,u.senderId) && Objects.equals(fresh.linkedAt,link.linkedAt)) links.deleteById(link.userId);
+                if(fresh!=null && Objects.equals(fresh.senderId,u.senderId) && Objects.equals(fresh.linkedAt,link.linkedAt)){links.deleteById(link.userId);if(scheduledDeliveries!=null)scheduledDeliveries.invalidateUser(link.userId);}
             });
             return new Reply(true,u.chatId,"Cuenta desvinculada. Ya no puedo consultar tus datos desde Telegram.");
         }

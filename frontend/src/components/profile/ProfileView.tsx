@@ -18,6 +18,7 @@ import { PersonalInfoSection } from './PersonalInfoSection';
 import { SubscriptionStatusCard } from './SubscriptionStatusCard';
 import { AutomationSettings } from './AutomationSettings';
 import { TelegramSettings } from './TelegramSettings';
+import { ReminderSettings } from './ReminderSettings';
 import { CurrencyCode } from '../../types';
 
 export const ProfileView: React.FC = () => {
@@ -83,6 +84,7 @@ export const ProfileView: React.FC = () => {
 
           <AutomationSettings />
           <TelegramSettings />
+          <ReminderSettings />
 
           {/* Card 2: Preferencias (Page 9 & 15 of PDF) */}
           <div className="bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 rounded-3xl p-6 shadow-xs space-y-4">

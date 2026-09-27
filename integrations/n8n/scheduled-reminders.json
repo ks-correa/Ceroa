@@ -1,0 +1,571 @@
+{
+  "id": "ceroaReminders04",
+  "name": "RA-N8N-004 - Recordatorios y briefing autorizados",
+  "active": false,
+  "nodes": [
+    {
+      "id": "schedule",
+      "name": "Revisar cada cinco minutos",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 5
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "first",
+      "name": "Iniciar paginación",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        0
+      ],
+      "parameters": {
+        "jsCode": "return [{json:{page:0}}];"
+      }
+    },
+    {
+      "id": "scan",
+      "name": "Preparar eventos autorizados",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        440,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ \"http://backend:8080/api/v1/reminder-worker/scan?page=\" + $json.page }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 20000
+        }
+      }
+    },
+    {
+      "id": "more",
+      "name": "Hay más usuarios",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        660,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "more",
+              "leftValue": "={{ Boolean($json.hasMore) }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "next",
+      "name": "Avanzar página",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        -220
+      ],
+      "parameters": {
+        "jsCode": "return [{json:{page:$json.nextPage}}];"
+      }
+    },
+    {
+      "id": "candidates",
+      "name": "Consultar pendientes",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        880,
+        100
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "http://backend:8080/api/v1/reminder-worker/candidates",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 20000
+        }
+      }
+    },
+    {
+      "id": "filter",
+      "name": "Aceptar hitos del backend",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1100,
+        100
+      ],
+      "parameters": {
+        "jsCode": "return $input.all().flatMap(i=>Array.isArray(i.json)?i.json:[i.json]).filter(d=>d.kind==='BRIEFING'||d.kind==='REMINDER'&&['SEVEN_DAYS','THREE_DAYS','DUE_TODAY'].includes(d.milestone)).map(d=>({json:{id:d.id}}));"
+      }
+    },
+    {
+      "id": "loop",
+      "name": "Procesar una entrega",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1320,
+        100
+      ],
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      }
+    },
+    {
+      "id": "reserve",
+      "name": "Reservar entrega",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1540,
+        100
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ \"http://backend:8080/api/v1/reminder-worker/deliveries/\" + $json.id + \"/reserve\" }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {
+          "timeout": 20000
+        }
+      }
+    },
+    {
+      "id": "reserved",
+      "name": "Reserva obtenida",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1760,
+        100
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "reserved",
+              "leftValue": "={{ Boolean($json.reserved) }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "dispatch",
+      "name": "Revalidar antes de enviar",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1980,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ \"http://backend:8080/api/v1/reminder-worker/deliveries/\" + $json.id + \"/dispatch\" }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({token:$json.token}) }}",
+        "options": {
+          "timeout": 20000
+        }
+      }
+    },
+    {
+      "id": "allowed",
+      "name": "Envío autorizado",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2200,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "allowed",
+              "leftValue": "={{ Boolean($json.send) }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "escape",
+      "name": "Escapar texto canónico",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2420,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const d=$json;if(typeof d.text!=='string'||d.text.length>3500||!Number.isSafeInteger(d.chatId)||d.chatId<=0)throw new Error('Entrega incompatible');const text=d.text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');if(text.length>4096)throw new Error('Texto excede el canal');return [{json:{...d,text}}];"
+      }
+    },
+    {
+      "id": "send",
+      "name": "Entregar por Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2640,
+        0
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "={{ $json.chatId }}",
+        "text": "={{ $json.text }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML",
+          "disable_web_page_preview": true
+        }
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "success",
+      "name": "Guardar confirmación de Telegram",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2860,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const d=$('Revalidar antes de enviar').item.json;const messageId=$json.result?.message_id;if($json.ok!==true||!Number.isSafeInteger(messageId)||messageId<=0)throw new Error('Confirmación ambigua');return [{json:{id:d.id,token:d.token,result:'SENT',messageId}}];"
+      }
+    },
+    {
+      "id": "failure",
+      "name": "Clasificar fallo sin repetir envío",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2860,
+        260
+      ],
+      "parameters": {
+        "jsCode": "const d=$('Revalidar antes de enviar').item.json;const e=$json.error||{};const text=typeof e==='string'?e:String(e.description||e.message||'');const code=Number(e.httpCode||e.statusCode||e.context?.statusCode);const body=e.context?.data||e.context?.body||{};const rate=text.match(/^Too Many Requests: retry after ([0-9]+)$/i);const retryAfter=Number(body.parameters?.retry_after||e.parameters?.retry_after||rate?.[1]);let result='AMBIGUOUS',errorCode='UNKNOWN_TELEGRAM_RESULT';if((code===429||rate)&&Number.isInteger(retryAfter)&&retryAfter>0){result='RETRY';errorCode='RATE_LIMIT';}else if(code>=500&&code<600||/^(?:Internal Server Error|Service Unavailable|Bad Gateway)$/i.test(text)){result='RETRY';errorCode='TELEGRAM_5XX';}else if([400,401,403,404].includes(code)||/^(?:Forbidden: bot was blocked by the user|Forbidden: user is deactivated|Bad Request: chat not found|Unauthorized)$/i.test(text)){result='FAILED';errorCode='TELEGRAM_PERMANENT';}return [{json:{id:d.id,token:d.token,result,errorCode,...(errorCode==='RATE_LIMIT'?{retryAfter}:{})}}];"
+      }
+    },
+    {
+      "id": "outcome",
+      "name": "Registrar el mismo resultado",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3080,
+        100
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "={{ \"http://backend:8080/api/v1/reminder-worker/deliveries/\" + $json.id + \"/outcome\" }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({token:$json.token,result:$json.result,messageId:$json.messageId,retryAfter:$json.retryAfter,errorCode:$json.errorCode}) }}",
+        "options": {
+          "timeout": 20000
+        }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    }
+  ],
+  "connections": {
+    "Revisar cada cinco minutos": {
+      "main": [
+        [
+          {
+            "node": "Iniciar paginación",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Iniciar paginación": {
+      "main": [
+        [
+          {
+            "node": "Preparar eventos autorizados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar eventos autorizados": {
+      "main": [
+        [
+          {
+            "node": "Hay más usuarios",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hay más usuarios": {
+      "main": [
+        [
+          {
+            "node": "Avanzar página",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Consultar pendientes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Avanzar página": {
+      "main": [
+        [
+          {
+            "node": "Preparar eventos autorizados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Consultar pendientes": {
+      "main": [
+        [
+          {
+            "node": "Aceptar hitos del backend",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aceptar hitos del backend": {
+      "main": [
+        [
+          {
+            "node": "Procesar una entrega",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Procesar una entrega": {
+      "main": [
+        null,
+        [
+          {
+            "node": "Reservar entrega",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reservar entrega": {
+      "main": [
+        [
+          {
+            "node": "Reserva obtenida",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reserva obtenida": {
+      "main": [
+        [
+          {
+            "node": "Revalidar antes de enviar",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Procesar una entrega",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Revalidar antes de enviar": {
+      "main": [
+        [
+          {
+            "node": "Envío autorizado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Envío autorizado": {
+      "main": [
+        [
+          {
+            "node": "Escapar texto canónico",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Procesar una entrega",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Escapar texto canónico": {
+      "main": [
+        [
+          {
+            "node": "Entregar por Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Entregar por Telegram": {
+      "main": [
+        [
+          {
+            "node": "Guardar confirmación de Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Clasificar fallo sin repetir envío",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Guardar confirmación de Telegram": {
+      "main": [
+        [
+          {
+            "node": "Registrar el mismo resultado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clasificar fallo sin repetir envío": {
+      "main": [
+        [
+          {
+            "node": "Registrar el mismo resultado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Registrar el mismo resultado": {
+      "main": [
+        [
+          {
+            "node": "Procesar una entrega",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Bogota",
+    "executionTimeout": 240,
+    "saveDataSuccessExecution": "none",
+    "saveDataErrorExecution": "none",
+    "saveManualExecutions": false,
+    "errorWorkflow": "ceroaReminderError04"
+  }
+}

@@ -23,6 +23,7 @@ import java.util.UUID;
 @Service
 public class NotificationService {
     @org.springframework.beans.factory.annotation.Autowired(required = false) private PlanAccessService planAccess;
+    @org.springframework.beans.factory.annotation.Autowired(required = false) private com.ceroa.repository.UserRepository users;
 
     private final NotificationRepository notificationRepository;
     private final DebtRepository debtRepository;
@@ -136,7 +137,11 @@ public class NotificationService {
 
     @Transactional
     public void syncMilestoneNotifications(User user) {
-        LocalDate today = LocalDate.now(ZoneId.of("America/Bogota"));
+        syncMilestoneNotifications(user,LocalDate.now(ZoneId.of("America/Bogota")));
+    }
+    @Transactional
+    public void syncMilestoneNotifications(User user,LocalDate today) {
+        if (users != null) users.findByIdForUpdate(user.getId()).orElseThrow();
         List<UpcomingDueResponse> upcomingDues = upcomingDueService.getUpcomingDues(user.getId(), today);
 
         for (UpcomingDueResponse due : upcomingDues) {

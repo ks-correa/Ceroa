@@ -21,6 +21,7 @@ import java.util.UUID;
 @Service
 public class PaymentService {
     @org.springframework.beans.factory.annotation.Autowired(required = false) private MonthlyHistoryService monthlyHistory;
+    @org.springframework.beans.factory.annotation.Autowired(required = false) private com.ceroa.repository.ScheduledDeliveryRepository scheduledDeliveries;
     private final PaymentRepository paymentRepository;
     private final DebtRepository debtRepository;
     private final DebtService debtService;
@@ -55,6 +56,7 @@ public class PaymentService {
 
     @Transactional
     public PaymentResponse create(PaymentRequest request) {
+        currentUser.entityForUpdate();
         validateDate(request.date());
         validateAmountGreaterThanZero(request.amount());
         Debt debt = debtService.findEntity(request.debtId());
@@ -73,6 +75,7 @@ public class PaymentService {
         payment.setDebt(debt);
         apply(payment, request);
         Payment savedPayment = paymentRepository.save(payment);
+        if (scheduledDeliveries != null) scheduledDeliveries.invalidateDebt(debt.getId());
         if (monthlyHistory != null) monthlyHistory.observe(currentUser.id(), request.amount(), 1,
                 !wasPaid && debt.getStatus() == com.ceroa.domain.DebtStatus.PAID ? 1 : 0);
         return toResponse(savedPayment);
@@ -80,6 +83,7 @@ public class PaymentService {
 
     @Transactional
     public PaymentResponse update(UUID id, PaymentRequest request) {
+        currentUser.entityForUpdate();
         validateDate(request.date());
         validateAmountGreaterThanZero(request.amount());
         Payment payment = findEntity(id);
@@ -107,6 +111,7 @@ public class PaymentService {
         // 4. Actualizar movimiento
         apply(payment, request);
         Payment savedPayment = paymentRepository.save(payment);
+        if (scheduledDeliveries != null) scheduledDeliveries.invalidateDebt(debt.getId());
         if (monthlyHistory != null) monthlyHistory.observe(currentUser.id(), request.amount().subtract(previousAmount), 0,
                 (debt.getStatus() == com.ceroa.domain.DebtStatus.PAID ? 1 : 0) - (wasPaid ? 1 : 0));
         return toResponse(savedPayment);
@@ -114,6 +119,7 @@ public class PaymentService {
 
     @Transactional
     public PaymentMutationResponse delete(UUID id) {
+        currentUser.entityForUpdate();
         Payment payment = findEntity(id);
         Debt debt = payment.getDebt();
         if (monthlyHistory != null) monthlyHistory.baseline(currentUser.id());
@@ -125,6 +131,7 @@ public class PaymentService {
         debtRepository.save(debt);
 
         paymentRepository.delete(payment);
+        if (scheduledDeliveries != null) scheduledDeliveries.invalidateDebt(debt.getId());
         if (monthlyHistory != null) monthlyHistory.observe(currentUser.id(), oldAmount.negate(), -1,
                 (debt.getStatus() == com.ceroa.domain.DebtStatus.PAID ? 1 : 0) - (wasPaid ? 1 : 0));
         return new PaymentMutationResponse(

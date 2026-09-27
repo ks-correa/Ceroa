@@ -69,6 +69,9 @@ logging:
     org.hibernate.SQL: OFF
 
 ceroa:
+  reminders:
+    enabled: ${REMINDERS_ENABLED:false}
+    worker-key: ${REMINDERS_WORKER_KEY:}
   rag:
     enabled: ${RAG_ENABLED:false}
     db-url: ${RAG_DB_URL:}

@@ -23,6 +23,7 @@ import java.util.stream.Collectors;
 public class DebtService {
     @org.springframework.beans.factory.annotation.Autowired(required = false) private MonthlyHistoryService monthlyHistory;
     @org.springframework.beans.factory.annotation.Autowired(required = false) private PlanAccessService planAccess;
+    @org.springframework.beans.factory.annotation.Autowired(required = false) private com.ceroa.repository.ScheduledDeliveryRepository scheduledDeliveries;
 
     private final DebtRepository debtRepository;
     private final PaymentRepository paymentRepository;
@@ -93,6 +94,7 @@ public class DebtService {
 
     @Transactional
     public DebtResponse update(UUID id, DebtRequest request) {
+        currentUser.entityForUpdate();
         Debt debt = findEntity(id);
         if (request.type() != null && request.type() != debt.getType()) {
             throw new BusinessRuleException("IMMUTABLE_DEBT_TYPE", "No se permite cambiar el tipo de una obligación existente.");
@@ -101,13 +103,16 @@ public class DebtService {
         if (monthlyHistory != null) monthlyHistory.baseline(currentUser.id());
         apply(debt, request);
         Debt saved = debtRepository.save(debt);
+        if (scheduledDeliveries != null) scheduledDeliveries.invalidateDebt(debt.getId());
         if (monthlyHistory != null) monthlyHistory.observe(currentUser.id(), null, null, null);
         return toResponse(saved);
     }
 
     @Transactional
     public void delete(UUID id) {
+        currentUser.entityForUpdate();
         Debt debt = findEntity(id);
+        if (scheduledDeliveries != null) scheduledDeliveries.invalidateDebt(id);
         if (monthlyHistory != null) monthlyHistory.baseline(currentUser.id());
         if (notificationRepository != null) {
             notificationRepository.detachDebtReference(debt.getId());

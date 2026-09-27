@@ -47,7 +47,7 @@ class PostgresMigrationIntegrationTest {
     @Test void migrationsValidateAndRemainIdempotent() {
         assertThat(flyway.validateWithResult().validationSuccessful).isTrue();
         assertThat(flyway.info().pending()).isEmpty();
-        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("16");
+        assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("17");
         assertThat(flyway.migrate().migrationsExecuted).isZero();
     }
 
