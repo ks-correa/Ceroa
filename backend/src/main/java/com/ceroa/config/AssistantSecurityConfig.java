@@ -37,7 +37,8 @@ public class AssistantSecurityConfig {
         };
         return http.securityMatcher("/api/v1/assistant-tools/**").csrf(c->c.disable()).requestCache(c->c.disable()).logout(c->c.disable())
             .sessionManagement(s->s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(a->a.requestMatchers(HttpMethod.GET,"/api/v1/assistant-tools/**").hasAuthority("ASSISTANT_READ").anyRequest().denyAll())
+            .authorizeHttpRequests(a->a.requestMatchers(HttpMethod.GET,"/api/v1/assistant-tools/**").hasAuthority("ASSISTANT_READ")
+                .requestMatchers(HttpMethod.POST,"/api/v1/assistant-tools/requests/*/prepare","/api/v1/assistant-tools/requests/*/complete","/api/v1/assistant-tools/telegram/authorize","/api/v1/assistant-tools/telegram/updates","/api/v1/assistant-tools/telegram/delivery").hasAuthority("ASSISTANT_READ").anyRequest().denyAll())
             .exceptionHandling(e->e.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
             .addFilterBefore(filter,AuthorizationFilter.class).build();
     }

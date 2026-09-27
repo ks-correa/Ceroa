@@ -4,11 +4,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.Map;
 
-@RestControllerAdvice(assignableTypes=AssistantController.class)
+@RestControllerAdvice(assignableTypes={AssistantController.class,TelegramController.class})
 public class AssistantErrorAdvice {
     @ExceptionHandler({org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class,
         org.springframework.web.bind.MissingServletRequestParameterException.class,
-        org.springframework.http.converter.HttpMessageNotReadableException.class})
+        org.springframework.http.converter.HttpMessageNotReadableException.class, IllegalArgumentException.class, ArithmeticException.class})
     public ResponseEntity<Map<String,String>> input(Exception error) {
         return ResponseEntity.badRequest().body(Map.of("code","ASSISTANT_INVALID_INPUT","message","Revisa el mensaje, formato de audio o período solicitado."));
     }

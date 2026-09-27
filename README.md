@@ -182,10 +182,13 @@ Los pagos se validan como valores positivos y fechas no futuras. Crear, editar o
 
 ## Datos de demostración
 
-El asistente web RA-N8N-001 está integrado para consultas por texto y audio por cada
-usuario autenticado. Su configuración, pruebas y límites están en
-[docs/RA-N8N-001.md](docs/RA-N8N-001.md). El canal Telegram necesita todavía crear
-el bot, configurar HTTPS y verificar la vinculación de cuentas. Los demás requerimientos
+El asistente web RA-N8N-001 analiza preguntas por texto y audio, combina datos financieros
+y cálculos del backend y genera explicaciones para cada usuario autenticado. Su configuración, pruebas y límites están en
+[docs/RA-N8N-001.md](docs/RA-N8N-001.md). Telegram permite vincular una cuenta desde
+Perfil mediante un enlace de un solo uso y consultar por texto o voz en un chat privado.
+La prueba local usa `docker-compose.telegram-local.yml` y un túnel HTTPS temporal;
+ver instrucciones en la misma guía. RA-N8N-001 quedó completado y aceptado por el usuario
+el 27 de septiembre de 2026, tras confirmar el funcionamiento de Telegram. Los demás requerimientos
 de n8n permanecen independientes y con el estado documentado en [docs/N8N.md](docs/N8N.md).
 
 
@@ -217,7 +220,9 @@ npm run build
 
 ## Alcance pendiente
 
-OAuth2 con Google/Microsoft, recuperación de contraseña por correo, onboarding financiero guiado, simulador backend, suscripciones, Mercado Pago, Telegram y notificaciones persistentes pertenecen a fases posteriores. Los botones OAuth visibles no simulan acceso: informan que la integración aún no está habilitada.
+RA-N8N-002 está implementado para leer PDF con texto, DOCX y XLSX desde Registrar/Editar obligación > Leer documento financiero. Requiere consentimiento, revisión y guardado explícito; persiste mediante el backend en Supabase. Los documentos escaneados requieren registro manual (OCR no incluido). Configuración y límites: [docs/RA-N8N-002.md](docs/RA-N8N-002.md).
+
+OAuth2 con Google/Microsoft, recuperación de contraseña por correo, onboarding financiero guiado, simulador backend, suscripciones, Mercado Pago y notificaciones persistentes (incluidos avisos automáticos por Telegram) pertenecen a fases posteriores. Los botones OAuth visibles no simulan acceso: informan que la integración aún no está habilitada.
 # Registro y acceso (EP-02)
 
 Consulta [EP02.md](EP02.md) para la configuración de Google/Microsoft, migraciones, ejecución de pruebas y matrices de aceptación. La validación real con proveedores requiere credenciales externas.

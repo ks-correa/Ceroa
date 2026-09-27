@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Landmark, X, ShieldAlert, Sparkles, AlertCircle } from 'lucide-react';
+import { Landmark, X, ShieldAlert, Sparkles, AlertCircle, FileText, ChevronRight } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { CreateDebtPayload, DebtType } from '../../types';
 import {
@@ -13,6 +13,7 @@ import { RateSection } from '../debts/form/RateSection';
 import { PaymentAndDatesSection } from '../debts/form/PaymentAndDatesSection';
 import { TypeSpecificSection } from '../debts/form/TypeSpecificSection';
 import { ApiError } from '../../services/api';
+import { DocumentDebtReview } from '../debts/DocumentDebtReview';
 
 export const AddDebtModal: React.FC = () => {
   const {
@@ -23,7 +24,8 @@ export const AddDebtModal: React.FC = () => {
     debts,
     handleAddDebt,
     setIsSubscriptionModalOpen,
-    setCurrentScreen
+    setCurrentScreen,
+    refreshAllData
   } = useApp();
 
   const [form, setForm] = useState<DebtFormState>(() => getInitialFormForType('credit_card'));
@@ -31,9 +33,11 @@ export const AddDebtModal: React.FC = () => {
   const [generalError, setGeneralError] = useState<string | null>(null);
   const [isPlanCeroLimitReached, setIsPlanCeroLimitReached] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [readingDocument,setReadingDocument] = useState(false);
 
   useEffect(() => {
     if (!isAddDebtOpen) return;
+    setReadingDocument(false);
     const debt = debts.find((item) => item.id === editingDebtId);
     if (debt) {
       setForm({
@@ -285,15 +289,15 @@ export const AddDebtModal: React.FC = () => {
   return (
     <>
       <div
-        className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto"
+        className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4 bg-slate-900/60 backdrop-blur-xs"
         role="dialog"
         aria-modal="true"
         aria-labelledby="debt-modal-title"
       >
-        <div className="bg-white dark:bg-slate-900 rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 dark:border-slate-800 my-8">
+        <div className="flex max-h-[calc(100dvh-1rem)] sm:max-h-[calc(100dvh-2rem)] min-w-0 flex-col bg-white dark:bg-slate-900 rounded-2xl sm:rounded-3xl max-w-2xl w-full shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden">
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-4">
-            <div className="flex items-center gap-2.5">
+          <div className="flex shrink-0 items-center justify-between gap-3 border-b border-slate-100 dark:border-slate-800 px-4 py-4 sm:px-7 sm:py-5">
+            <div className="flex min-w-0 items-center gap-2.5">
               <div className="p-2 rounded-xl bg-teal-50 dark:bg-teal-950 text-teal-700 dark:text-cyan-400">
                 <Landmark className="w-5 h-5" />
               </div>
@@ -302,20 +306,23 @@ export const AddDebtModal: React.FC = () => {
                   {editingDebtId ? 'Editar obligación financiera' : 'Registrar obligación financiera'}
                 </h3>
                 <p className="text-xs text-slate-500 dark:text-slate-400">
-                  Ingresa únicamente los datos aplicables al tipo de deuda seleccionado.
+                  {readingDocument?'Carga, revisa y confirma los datos de tu documento.':'Ingresa únicamente los datos aplicables al tipo de deuda seleccionado.'}
                 </p>
               </div>
             </div>
             <button
               onClick={close}
               aria-label="Cerrar modal"
-              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:hover:bg-slate-800 dark:hover:text-slate-200"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* Form */}
+          <div className="min-h-0 overflow-y-auto overscroll-contain px-4 pb-5 sm:px-7 sm:pb-7">
+          {readingDocument ? <DocumentDebtReview debtId={editingDebtId} onCancel={()=>setReadingDocument(false)} onSaved={async()=>{await refreshAllData();close();}} /> : <>
+          <button type="button" className="mt-5 flex w-full items-center gap-3 rounded-2xl border border-teal-200 bg-teal-50/70 p-4 text-left text-teal-800 transition hover:bg-teal-100 dark:border-teal-900 dark:bg-teal-950/30 dark:text-cyan-300" onClick={()=>setReadingDocument(true)}><FileText className="h-6 w-6 shrink-0"/><span className="min-w-0 flex-1"><span className="block text-sm font-bold">Leer documento financiero</span><span className="mt-1 block text-xs font-normal opacity-80">Completa los datos desde un PDF, Word o Excel.</span></span><ChevronRight className="h-5 w-5 shrink-0"/></button>
           <form onSubmit={handleSubmit} className="mt-5 space-y-5">
             {generalError && (
               <div
@@ -409,6 +416,8 @@ export const AddDebtModal: React.FC = () => {
               </button>
             </div>
           </form>
+          </>}
+          </div>
         </div>
       </div>
 

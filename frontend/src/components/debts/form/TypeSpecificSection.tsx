@@ -7,13 +7,15 @@ interface TypeSpecificSectionProps {
   errors: Record<string, string>;
   onFieldChange: <K extends keyof DebtFormState>(key: K, value: DebtFormState[K]) => void;
   onDetailChange: (key: string, value: any) => void;
+  preserveUnknownDefaults?: boolean;
 }
 
 export const TypeSpecificSection: React.FC<TypeSpecificSectionProps> = ({
   form,
   errors,
   onFieldChange,
-  onDetailChange
+  onDetailChange,
+  preserveUnknownDefaults = false
 }) => {
   const inputClass = (hasError: boolean) =>
     `w-full px-3.5 py-2.5 text-xs bg-slate-50 dark:bg-slate-800 border ${
@@ -114,10 +116,11 @@ export const TypeSpecificSection: React.FC<TypeSpecificSectionProps> = ({
             </label>
             <select
               id="mortgage-modality-select"
-              value={String(form.details?.modality || 'PESOS')}
+              value={String(form.details?.modality || (preserveUnknownDefaults ? '' : 'PESOS'))}
               onChange={(e) => onDetailChange('modality', e.target.value)}
               className={inputClass(Boolean(errors.modality))}
             >
+              {preserveUnknownDefaults && <option value="">Selecciona modalidad</option>}
               <option value="PESOS">Pesos</option>
               <option value="UVR">UVR</option>
             </select>
@@ -182,7 +185,7 @@ export const TypeSpecificSection: React.FC<TypeSpecificSectionProps> = ({
 
   // 4. Crédito educativo (HU-028)
   if (form.type === 'student_loan') {
-    const stage = String(form.details?.stage || 'AMORTIZACION');
+    const stage = String(form.details?.stage || (preserveUnknownDefaults ? '' : 'AMORTIZACION'));
     const hasPaymentObligation = Boolean(form.details?.hasPaymentObligation ?? (stage === 'AMORTIZACION'));
 
     return (
@@ -207,6 +210,7 @@ export const TypeSpecificSection: React.FC<TypeSpecificSectionProps> = ({
               }}
               className={inputClass(Boolean(errors.stage))}
             >
+              {preserveUnknownDefaults && <option value="">Selecciona etapa</option>}
               <option value="ESTUDIO">Estudio (en época lectiva)</option>
               <option value="GRACIA">Gracia / período de espera</option>
               <option value="AMORTIZACION">Amortización (cobro de cuotas)</option>
@@ -334,10 +338,11 @@ export const TypeSpecificSection: React.FC<TypeSpecificSectionProps> = ({
               <select
                 id="penalty-rate-type-select"
                 aria-label="Tipo de tasa de mora"
-                value={String(form.details?.penaltyRateType || 'MV')}
+                value={String(form.details?.penaltyRateType || (preserveUnknownDefaults ? '' : 'MV'))}
                 onChange={(e) => onDetailChange('penaltyRateType', e.target.value)}
                 className={inputClass(false)}
               >
+                {preserveUnknownDefaults && <option value="">Selecciona modalidad</option>}
                 <option value="MV">M.V.</option>
                 <option value="EA">E.A.</option>
               </select>
@@ -390,10 +395,11 @@ export const TypeSpecificSection: React.FC<TypeSpecificSectionProps> = ({
                 </label>
                 <select
                   id="agreed-periodicity-select"
-                  value={String(form.details?.paymentPeriodicity || 'MENSUAL')}
+                  value={String(form.details?.paymentPeriodicity || (preserveUnknownDefaults ? '' : 'MENSUAL'))}
                   onChange={(e) => onDetailChange('paymentPeriodicity', e.target.value)}
                   className={inputClass(false)}
                 >
+                  {preserveUnknownDefaults && <option value="">Selecciona periodicidad</option>}
                   <option value="MENSUAL">Mensual</option>
                   <option value="QUINCENAL">Quincenal</option>
                   <option value="SEMANAL">Semanal</option>
@@ -473,12 +479,13 @@ export const TypeSpecificSection: React.FC<TypeSpecificSectionProps> = ({
                 </label>
                 <select
                   id="fam-periodicity-select"
-                  value={String(form.details?.periodicity || 'MENSUAL')}
+                  value={String(form.details?.periodicity || (preserveUnknownDefaults ? '' : 'MENSUAL'))}
                   onChange={(e) => onDetailChange('periodicity', e.target.value)}
                   className={inputClass(false)}
                 >
                   <option value="MENSUAL">Mensual</option>
                   <option value="QUINCENAL">Quincenal</option>
+                  {preserveUnknownDefaults && <option value="">Selecciona periodicidad</option>}
                   <option value="EVENTUAL">Sin periodicidad fija</option>
                 </select>
               </div>

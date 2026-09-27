@@ -61,7 +61,7 @@ export async function apiRequest<T>(path: string, init?: RequestInit): Promise<T
   try {
     const method = (init?.method || 'GET').toUpperCase();
     const headers = new Headers(init?.headers);
-    if (init?.body && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
+    if (init?.body && !(init.body instanceof FormData) && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json');
     if (!SAFE_HTTP_METHODS.has(method)) headers.set('X-XSRF-TOKEN', await getCsrfToken());
 
     response = await fetch(`${API_URL}${path}`, {

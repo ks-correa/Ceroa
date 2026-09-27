@@ -13,6 +13,11 @@ server:
         same-site: lax
 
 spring:
+  servlet:
+    multipart:
+      max-file-size: 8MB
+      max-request-size: 9MB
+      file-size-threshold: 9MB
   mail:
     host: ${MAIL_HOST:}
     port: ${MAIL_PORT:587}
@@ -64,6 +69,10 @@ logging:
     org.hibernate.SQL: OFF
 
 ceroa:
+  documents:
+    enabled: ${DOCUMENTS_ENABLED:false}
+    webhook-url: ${DOCUMENTS_WEBHOOK_URL:}
+    worker-key: ${DOCUMENTS_WORKER_KEY:}
   assistant:
     enabled: ${ASSISTANT_ENABLED:false}
     webhook-url: ${ASSISTANT_WEBHOOK_URL:}

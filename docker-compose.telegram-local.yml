@@ -1,0 +1,28 @@
+# URL temporal: publicar exclusivamente el webhook privado de Telegram.
+# Usar --env-file .env --env-file .env.telegram-local junto con los otros archivos compose.
+services:
+  backend:
+    environment:
+      CEROA_TELEGRAM_BOT_USERNAME: ${TELEGRAM_BOT_USERNAME:-}
+  n8n:
+    environment:
+      WEBHOOK_URL: ${TELEGRAM_PUBLIC_URL:-http://localhost:5678}/
+  telegram-proxy:
+    image: node:22-alpine@sha256:0a7108bf6c7bf5de370ffb1a3ed6be93d405b43ff159f681a8d18c0e2bc2e402
+    container_name: ceroa-telegram-proxy
+    restart: unless-stopped
+    command: ["node", "/app/telegram-proxy.mjs"]
+    environment:
+      TELEGRAM_WEBHOOK_PATH: ${TELEGRAM_WEBHOOK_PATH:?Configura .env.telegram-local}
+      TELEGRAM_WEBHOOK_SECRET: ${TELEGRAM_WEBHOOK_SECRET:?Configura .env.telegram-local}
+    volumes:
+      - ./integrations/n8n/telegram-proxy.mjs:/app/telegram-proxy.mjs:ro
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+  telegram-tunnel:
+    image: cloudflare/cloudflared@sha256:072c067d25ccbe61d46e18f0d0723255f2bb5304f7317caa95b27031520ff92c
+    container_name: ceroa-telegram-tunnel
+    restart: unless-stopped
+    command: ["tunnel", "--no-autoupdate", "--protocol", "http2", "--url", "http://telegram-proxy:8080"]
+    depends_on: [telegram-proxy]
