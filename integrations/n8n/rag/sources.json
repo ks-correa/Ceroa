@@ -1,4 +1,21 @@
 {
   "version": 1,
-  "sources": []
+  "sources": [
+    {
+      "path": "docs/knowledge/estrategias.md",
+      "title": "Estrategias de pago en Ceroa",
+      "version": "1",
+      "approved": true,
+      "approvedBy": "Usuario: instrucción explícita RA-N8N-003 del 2026-09-27",
+      "sha256": "cd48861a4b9b8844ee509fb3ce0ca54217d063620bf1bfaf7783aad4935ca4b7"
+    },
+    {
+      "path": "docs/knowledge/registro-y-consultas.md",
+      "title": "Registro y consultas en Ceroa",
+      "version": "1",
+      "approved": true,
+      "approvedBy": "Usuario: instrucción explícita RA-N8N-003 del 2026-09-27",
+      "sha256": "3295be84449dd69d637d816fbee73eb6b4ed6cb92cdbe6247452d2fc24282a3b"
+    }
+  ]
 }

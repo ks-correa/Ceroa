@@ -140,7 +140,8 @@ public class TelegramService {
         context.setAuthentication(new UsernamePasswordAuthenticationToken(link.userId.toString(),null,List.of()));
         SecurityContextHolder.setContext(context);
         try {
-            String answer=assistant.message(text,u.audio,u.mime).answer();
+            if(text.equals("/nuevo")){assistant.forget(AssistantService.Channel.telegram);return hold(link,"Conversación reiniciada. Puedes enviar tu nueva consulta.");}
+            String answer=assistant.message(text,u.audio,u.mime,AssistantService.Channel.telegram).answer();
             var fresh=binding(u);
             if(fresh==null || !fresh.userId.equals(link.userId) || !fresh.linkedAt.equals(link.linkedAt)) return new Reply(false,0,"");
             return hold(fresh,answer);

@@ -157,17 +157,14 @@ de prueba, registrar un pago y repetir EXACTAMENTE el evento; verificar mismo id
 pago, mismo resultado y un único impacto en saldo. Revocar la credencial y comprobar
 401. Nunca probar duplicados sobre pagos financieros reales.
 
-## RAG/pgvector y memoria después
+## RAG/pgvector y memoria
 
-Se pueden conectar desde n8n a Supabase con otro usuario PostgreSQL y otro esquema,
-por ejemplo `n8n_aux`, que no tenga USAGE ni permisos sobre `ceroa`. Esas credenciales
-serían exclusivamente auxiliares. Antes de crear tablas vectoriales se debe elegir
-proveedor/modelo de embeddings y dimensión; no inventar una dimensión incompatible.
-También se necesita elegir proveedor/modelo de chat y configurar sus API keys
-privadamente en n8n. Esa configuración aún no existe en el repositorio.
-Sus tablas/migraciones no deben quedar en Flyway de negocio ni permitir acceso a
-credenciales, saldos, pagos o perfiles financieros por SQL. Las herramientas de un
-agente para finanzas deben llamar a los endpoints Spring Boot con alcance de usuario.
+RA-N8N-003 está implementado en `n8n_aux` de Supabase con Gemini Embeddings y dimensión
+768 verificada. El indexador administrativo escribe únicamente documentos aprobados;
+el consultor utiliza otro rol de solo lectura. Ambos carecen de permisos sobre `ceroa`.
+Los auxiliares se provisionan fuera de Flyway de negocio. Finanzas se consultan por
+las herramientas GET fijas del backend y memoria/corpus permanecen separados.
+Instalación, fuentes, calibración y pruebas: [RA-N8N-003](RA-N8N-003.md).
 
 ## Cambios de base y despliegue
 

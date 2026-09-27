@@ -4,6 +4,14 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { AssistantFab } from './AssistantFab';
 import { apiRequest } from '../../services/api';
 vi.mock('../../services/api', () => ({ apiRequest: vi.fn() }));
+it('starts a new conversation only after the backend forgets the previous context',async()=>{
+  vi.mocked(apiRequest).mockResolvedValueOnce({answer:'Respuesta anterior'}).mockResolvedValueOnce(undefined);
+  render(<AssistantFab/>);fireEvent.click(screen.getByRole('button',{name:'Abrir asistente financiero'}));
+  fireEvent.change(screen.getByRole('textbox'),{target:{value:'Mi pregunta'}});fireEvent.click(screen.getByRole('button',{name:'Enviar pregunta'}));
+  await screen.findByText('Respuesta anterior');fireEvent.click(screen.getByRole('button',{name:'Nueva conversación'}));
+  await waitFor(()=>expect(screen.queryByText('Respuesta anterior')).toBeNull());
+  expect(apiRequest).toHaveBeenCalledWith('/assistant/conversation',{method:'DELETE'});
+});
 it('sends captured audio using the main send button', async () => {
   const createObjectURL = vi.fn((_blob: Blob) => 'blob:recorded-audio');
   const revokeObjectURL = vi.fn();

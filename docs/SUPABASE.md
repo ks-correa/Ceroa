@@ -272,3 +272,7 @@ rol n8n independiente con permisos exclusivamente auxiliares. Nunca entregar a n
 el usuario postgres/JDBC de Ceroa ni conceder permisos sobre `ceroa`. Sus migraciones
 deben quedar separadas de Flyway de negocio. No se instala pgvector ni se crean tablas
 auxiliares durante esta migración.
+
+RA-N8N-003 provisionó posteriormente `n8n_aux` y pgvector con roles de indexación y
+lectura independientes, sin acceso financiero. La memoria es efímera y no se almacena
+en ese corpus. Instalación y estado actual: [RA-N8N-003.md](RA-N8N-003.md).

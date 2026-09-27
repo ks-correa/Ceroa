@@ -69,6 +69,13 @@ logging:
     org.hibernate.SQL: OFF
 
 ceroa:
+  rag:
+    enabled: ${RAG_ENABLED:false}
+    db-url: ${RAG_DB_URL:}
+    db-username: ${RAG_DB_USERNAME:}
+    db-password: ${RAG_DB_PASSWORD:}
+    embedding-webhook-url: ${RAG_EMBEDDING_WEBHOOK_URL:}
+    worker-key: ${RAG_WORKER_KEY:}
   documents:
     enabled: ${DOCUMENTS_ENABLED:false}
     webhook-url: ${DOCUMENTS_WEBHOOK_URL:}

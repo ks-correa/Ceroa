@@ -17,6 +17,10 @@ import java.math.BigDecimal;
 /** Ephemeral user-bound evidence contexts. Model responses never authorize financial writes. */
 @Service
 public class AssistantService {
+    public enum Channel { web, telegram }
+    private record Audience(UUID user,Channel channel) {}
+    private record Conversation(UUID user,Channel channel,UUID id) {}
+    public record DocumentEvidence(String status,Map<String,RagVectorStore.Chunk> sources) {}
     public enum Intent { debts, highest_interest, upcoming, payments, strategy, progress, write_request, unknown }
     public record Reply(String answer, String intent) {}
     private static final ZoneId ZONE = ZoneId.of("America/Bogota");
@@ -27,13 +31,18 @@ public class AssistantService {
         final Map<String,AssistantAnalysisService.Fact> facts=new LinkedHashMap<>();
         final Map<String,AssistantAnalysisService.Evidence> cache=new HashMap<>();
         String question;
+        String previousQuestion;
         int toolCalls;
+        int documentCalls;
+        final Map<String,RagVectorStore.Chunk> documents=new LinkedHashMap<>();
+        RagRetrievalService.Retrieval retrieval;
         Job(UUID user) { this.user = user; }
     }
     private record Turn(String question,String answer) {}
-    private record Context(Reply reply, List<Turn> turns, Instant expires) {}
+    private record Context(String intent, List<Turn> turns, Instant expires) {}
     private final Map<UUID, Job> jobs = new ConcurrentHashMap<>();
-    private final Map<UUID, Context> history = new ConcurrentHashMap<>();
+    private final Map<Conversation, Context> history = new ConcurrentHashMap<>();
+    private final Map<Audience,UUID> conversations = new ConcurrentHashMap<>();
     private final Map<UUID, List<Instant>> requests = new HashMap<>();
     private final CurrentUserService current;
     private final DebtService debts; private final PaymentService payments;
@@ -42,27 +51,37 @@ public class AssistantService {
     private final ObjectMapper json;
     private final RateNormalizationService rates;
     private final AssistantAnalysisService analysis;
+    private final RagRetrievalService rag;
     private final String webhook, key;
     private final boolean enabled;
     public AssistantService(CurrentUserService current, DebtService debts, PaymentService payments,
         UpcomingDueService dues, StrategyService strategies, MonthlyProgressService monthly,
-        DashboardService dashboard, ObjectMapper json, RateNormalizationService rates, AssistantAnalysisService analysis,
+        DashboardService dashboard, ObjectMapper json, RateNormalizationService rates, AssistantAnalysisService analysis, RagRetrievalService rag,
         @Value("${ceroa.assistant.enabled:false}") boolean enabled,
         @Value("${ceroa.assistant.webhook-url:}") String webhook,
         @Value("${ceroa.assistant.worker-key:}") String key) {
         this.current=current; this.debts=debts; this.payments=payments; this.dues=dues;
         this.strategies=strategies; this.monthly=monthly; this.dashboard=dashboard;
-        this.json=json; this.rates=rates; this.analysis=analysis; this.enabled=enabled; this.webhook=webhook; this.key=key;
+        this.json=json; this.rates=rates; this.analysis=analysis; this.rag=rag; this.enabled=enabled; this.webhook=webhook; this.key=key;
     }
     public Reply message(String message, String audio, String mime) {
+        return message(message,audio,mime,Channel.web);
+    }
+    public void forget(Channel channel){
+        var audience=new Audience(current.id(),channel);var id=conversations.remove(audience);
+        if(id!=null)history.remove(new Conversation(audience.user,channel,id));
+    }
+    public Reply message(String message, String audio, String mime,Channel channel) {
         if (!enabled || webhook.isBlank() || key.length()<32) throw unavailable();
         var user=current.entity();
         if (!user.isActive()) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         UUID userId=user.getId();
+        var audience=new Audience(userId,channel);
         boolean hasText=message!=null && !message.isBlank(), hasAudio=audio!=null && !audio.isBlank();
         if (hasText==hasAudio || (hasText && message.length()>2000)) throw new IllegalArgumentException();
         if (hasAudio) validateAudio(audio,mime);
         UUID id=UUID.randomUUID(); var job=start(userId,id);
+        var conversation=new Conversation(userId,channel,conversations.computeIfAbsent(audience,a->UUID.randomUUID()));
         job.question=hasText?message:"";
         try {
             LocalDate now=LocalDate.now(ZONE);
@@ -70,8 +89,10 @@ public class AssistantService {
             input.put("requestId",id.toString()); input.put("message",hasText?message:"");
             input.put("audio",hasAudio?audio:""); input.put("mime",hasAudio?mime:"");
             input.put("year",now.getYear()); input.put("month",now.getMonthValue());
-            var context=history.get(userId);
-            input.put("previousIntent",context!=null && context.expires.isAfter(Instant.now())?context.reply.intent:"");
+            var context=history.get(conversation);
+            job.previousQuestion=context!=null&&!context.turns.isEmpty()?context.turns.get(context.turns.size()-1).question:"";
+            input.put("ragEnabled",rag.enabled());
+            input.put("previousIntent",context!=null && context.expires.isAfter(Instant.now())?context.intent:"");
             input.put("conversation",context!=null && context.expires.isAfter(Instant.now())?context.turns:List.of());
             var request=HttpRequest.newBuilder(URI.create(webhook)).timeout(Duration.ofSeconds(150))
                 .header("Content-Type","application/json").header("X-Ceroa-Assistant",key)
@@ -80,11 +101,11 @@ public class AssistantService {
             var response=client.send(request,HttpResponse.BodyHandlers.discarding());
             if (response.statusCode()!=200 || job.result==null) throw unavailable();
             List<Turn> turns=new ArrayList<>(context!=null && context.expires.isAfter(Instant.now())?context.turns:List.of());
-            turns.add(new Turn(job.question,job.result.answer));
+            turns.add(new Turn(contextOnly(job.question),contextOnly(job.result.answer)));
             if(turns.size()>3) turns=new ArrayList<>(turns.subList(turns.size()-3,turns.size()));
             synchronized(this) {
-                if(history.size()>=100 && !history.containsKey(userId)) history.keySet().stream().findFirst().ifPresent(history::remove);
-                history.put(userId,new Context(job.result,List.copyOf(turns),Instant.now().plusSeconds(300)));
+                if(history.size()>=100 && !history.containsKey(conversation)) history.keySet().stream().findFirst().ifPresent(history::remove);
+                history.put(conversation,new Context(job.result.intent,List.copyOf(turns),Instant.now().plusSeconds(300)));
             }
             return job.result;
         } catch (InterruptedException e) { Thread.currentThread().interrupt(); throw unavailable();
@@ -107,6 +128,11 @@ public class AssistantService {
             } finally { SecurityContextHolder.setContext(previous); }
         }
     }
+    private String contextOnly(String text){
+        if(java.util.regex.Pattern.compile("(?iu)\\b(password|contrase[nñ]a|credenciales|secreto|api[ _-]?key|bot[ _-]?token)\\b").matcher(text).find())return "[turno omitido: credenciales no se conservan]";
+        int sources=text.indexOf("\n\nFuentes:");if(sources>=0)text=text.substring(0,sources);
+        return text.replaceAll("\\p{N}+(?:[.,/\\-]\\p{N}+)*","[dato anterior: consultar de nuevo]");
+    }
     public AssistantAnalysisService.Evidence data(UUID id,AssistantAnalysisService.Dataset dataset,int year,int month,int offset) {
         return withJob(id,job->{
             String source=dataset+"/"+year+"/"+month+"/"+offset;
@@ -123,10 +149,50 @@ public class AssistantService {
         });
     }
     public Reply complete(UUID id,String answer,String transcript) {
+        return complete(id,answer,transcript,null,List.of());
+    }
+    public DocumentEvidence documents(UUID id,String query) {
+        return withJob(id,job->{
+            if(query==null||query.isBlank()||query.length()>4000)throw new IllegalArgumentException();
+            if(job.question==null||job.question.isBlank())throw new IllegalArgumentException("Falta preparar la pregunta");
+            if(++job.documentCalls>2)throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS);
+            // Anchor retrieval to the actual turn. The model cannot broaden an unsupported
+            // question into a generic product query to obtain unrelated citations.
+            String grounded=contextOnly(job.question);
+            if(job.previousQuestion!=null&&!job.previousQuestion.isBlank()&&java.util.regex.Pattern.compile("(?iu)\\b(eso|esa|ese|esas|esos|aquella|aquello)\\b|cu[aá]l (?:estoy|uso|tengo)").matcher(grounded).find())
+                grounded="Contexto de la pregunta anterior: "+job.previousQuestion.substring(0,Math.min(1800,job.previousQuestion.length()))+"\nPregunta actual: "+grounded;
+            var result=rag.search(grounded);
+            // A new snapshot replaces all earlier sources, rather than mixing versions.
+            if(job.retrieval!=null&&!Objects.equals(job.retrieval.snapshot(),result.snapshot()))job.documents.clear();
+            job.retrieval=result;
+            var added=new LinkedHashMap<String,RagVectorStore.Chunk>();
+            for(var chunk:result.chunks()){
+                String ref=job.documents.entrySet().stream().filter(e->e.getValue().chunkId().equals(chunk.chunkId())).map(Map.Entry::getKey).findFirst().orElse("d"+(job.documents.size()+1));
+                job.documents.put(ref,chunk);added.put(ref,chunk);
+            }
+            return new DocumentEvidence(result.status(),Map.copyOf(added));
+        });
+    }
+    public Reply complete(UUID id,String answer,String transcript,String mode,List<String> sources) {
+        final List<String> citations=sources==null?List.of():List.copyOf(sources);
         return withJob(id,job->{
             if(transcript==null || transcript.isBlank() || transcript.length()>2000) throw new IllegalArgumentException();
             if(!job.question.isEmpty() && !job.question.equals(transcript)) throw new IllegalArgumentException();
-            String resolved=analysis.resolve(job.facts,answer);
+            String resolved;
+            if(rag.enabled()) {
+                if(!Set.of("documentary","personal","mixed").contains(mode==null?"":mode)||citations.size()>8||new HashSet<>(citations).size()!=citations.size())throw new IllegalArgumentException();
+                if(!mode.equals("personal")&&job.documentCalls==0)throw new IllegalArgumentException("Falta consultar documentación");
+                var used=new ArrayList<RagVectorStore.Chunk>();
+                for(String ref:citations){var chunk=job.documents.get(ref);if(chunk==null)throw new IllegalArgumentException("Fuente no recuperada");used.add(chunk);}
+                boolean current=!used.isEmpty()&&rag.current(job.retrieval,used.stream().map(RagVectorStore.Chunk::chunkId).toList());
+                if(mode.equals("documentary")&&(!current||answer!=null&&answer.contains("No tengo información aprobada suficiente")))resolved=RagRetrievalService.ABSTENTION;
+                else {
+                    if(!used.isEmpty()&&!current)throw new IllegalArgumentException("Fuentes retiradas; vuelve a consultar");
+                    resolved=analysis.resolve(job.facts,answer);
+                    if(current)resolved+="\n\nFuentes:\n"+used.stream().map(c->"• "+c.title()+" (versión "+c.version()+", fragmento "+c.chunkId().substring(0,12)+")").distinct().collect(java.util.stream.Collectors.joining("\n"));
+                    else if(mode.equals("mixed"))resolved+="\n\n"+RagRetrievalService.ABSTENTION;
+                }
+            }else resolved=analysis.resolve(job.facts,answer);
             job.question=transcript; job.result=new Reply(resolved,"analysis"); return job.result;
         });
     }
@@ -159,6 +225,8 @@ public class AssistantService {
         Instant now=Instant.now();
         jobs.entrySet().removeIf(e->e.getValue().expires.isBefore(now));
         history.entrySet().removeIf(e->e.getValue().expires.isBefore(now));
+        conversations.entrySet().removeIf(e->history.keySet().stream().noneMatch(c->c.user.equals(e.getKey().user)&&c.channel==e.getKey().channel&&c.id.equals(e.getValue()))
+            && jobs.values().stream().noneMatch(j->j.user.equals(e.getKey().user)));
         requests.values().forEach(v->v.removeIf(t->t.isBefore(now.minusSeconds(60))));
         requests.entrySet().removeIf(e->e.getValue().isEmpty());
         var times=requests.computeIfAbsent(user,u->new ArrayList<>());

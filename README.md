@@ -133,8 +133,10 @@ La configuración y workflows importables están en [docs/N8N.md](docs/N8N.md).
 Para empezar con n8n local, ejecutar
 `docker compose -f docker-compose.yml -f docker-compose.n8n.yml up -d n8n` y abrir
 `http://localhost:5678`. Crear la cuenta local y configurar Bearer Auth siguiendo la guía.
-RAG/pgvector y memoria usarán un esquema auxiliar con un rol independiente sin acceso
-al esquema `ceroa`; sus modelos y credenciales se configurarán aparte.
+RA-N8N-003 está activo con documentación aprobada en PGVector/Supabase, roles auxiliares
+sin acceso a `ceroa` y memoria de contexto separada por usuario, canal y conversación.
+Los datos personales se consultan mediante las APIs GET del backend. Configuración,
+corpus y verificación: [docs/RA-N8N-003.md](docs/RA-N8N-003.md).
 
 ## Endpoints implementados
 

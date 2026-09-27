@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { MessageCircle, Mic, X, Send } from 'lucide-react';
+import { MessageCircle, Mic, X, Send, RotateCcw } from 'lucide-react';
 import { apiRequest } from '../../services/api';
 
 type ChatMessage = { role: 'user' | 'assistant'; text: string; audio?: Blob };
@@ -190,9 +190,16 @@ export function AssistantFab() {
     recordingAttempt.current++; starting.current = false; setStartingRecording(false);
     setRecording(false); setOpen(false);
   }
+  async function resetConversation() {
+    if(busy||recording||startingRecording)return;
+    setBusy(true);setError('');
+    try{await apiRequest('/assistant/conversation',{method:'DELETE'});if(alive.current){generation.current++;setMessages([]);setText('');setAudioDraft(null);}}
+    catch(cause){if(alive.current)setError(cause instanceof Error?cause.message:'No pude iniciar otra conversación.');}
+    finally{if(alive.current)setBusy(false);}
+  }
   return <div className="fixed bottom-20 right-4 lg:bottom-6 z-40">
     {open && <section aria-label="Asistente financiero" className="mb-3 flex max-h-[70vh] w-[calc(100vw-2rem)] max-w-sm flex-col rounded-2xl border bg-white dark:bg-slate-900 shadow-xl">
-      <div className="flex items-center justify-between border-b p-4"><h2 className="font-semibold">Asistente de Ceroa</h2><button type="button" aria-label="Cerrar asistente" onClick={close}><X size={20} /></button></div>
+      <div className="flex items-center justify-between gap-2 border-b p-4"><h2 className="font-semibold">Asistente de Ceroa</h2><div className="flex items-center gap-1"><button type="button" aria-label="Nueva conversación" title="Nueva conversación" disabled={busy||recording||startingRecording} className="flex h-10 w-10 items-center justify-center rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 disabled:opacity-40" onClick={()=>void resetConversation()}><RotateCcw size={18}/></button><button type="button" className="flex h-10 w-10 items-center justify-center" aria-label="Cerrar asistente" onClick={close}><X size={20} /></button></div></div>
       <p className="px-4 pt-3 text-sm text-slate-500">Analiza tus finanzas y compara opciones. Gemini procesa tus preguntas, audio y los datos financieros necesarios para responder. Las sugerencias no realizan cambios en tu cuenta.</p>
       <div role="log" aria-live="polite" className="min-h-24 overflow-y-auto p-4 space-y-3">
         {messages.map((m, i) => <div key={i} className={`whitespace-pre-wrap rounded-lg p-3 text-sm ${m.role === 'user' ? 'bg-teal-50 dark:bg-teal-950' : 'bg-slate-100 dark:bg-slate-800'}`}><strong>{m.role === 'user' ? 'Tú: ' : 'Ceroa: '}</strong>{m.audio ? <ChatAudio blob={m.audio} /> : m.text}</div>)}

@@ -1,0 +1,139 @@
+{
+  "id": "ceroaRagIndex03",
+  "name": "RA-N8N-003 - Indexación administrativa aprobada",
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Bogota",
+    "saveDataSuccessExecution": "none",
+    "saveDataErrorExecution": "none",
+    "saveManualExecutions": false,
+    "executionTimeout": 120
+  },
+  "nodes": [
+    {
+      "id": "manual",
+      "name": "Indexar por administración",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "source",
+      "name": "Fuentes aprobadas",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const chunks=[{\"pageContent\":\"# Estrategias de pago en Ceroa\\n\\n## Bola de Nieve\\n\\nBola de Nieve prioriza las obligaciones pendientes con menor saldo actual. Su objetivo práctico es concentrar el esfuerzo adicional en cerrar cuentas pequeñas. El orden por saldo no significa que esa deuda tenga la tasa más alta ni que esta estrategia genere el menor costo de intereses.\\n\\n## Avalancha\\n\\nAvalancha prioriza las obligaciones por su tasa de interés comparable, de mayor a menor. Ceroa normaliza las tasas a una base anual para evitar comparar directamente una tasa mensual con una anual. Tener la tasa más alta es distinto de tener el saldo más alto o el mayor monto estimado de intereses.\\n\\nSi falta una tasa o una obligación utiliza un índice cuyo valor no está disponible, Ceroa no puede confirmar el orden global por tasa. No se considera una tasa ausente como cero ni como ausencia de intereses.\\n\\n## Presupuesto, vencimientos y prioridad manual\\n\\nEl presupuesto disponible para deudas es el monto que el usuario asigna a sus obligaciones. Es distinto del ingreso menos gastos esenciales. Antes de destinar pagos adicionales, deben revisarse las cuotas o pagos mínimos exigibles, los vencimientos y la capacidad disponible.\\n\\nUna priori\",\"metadata\":{\"approved\":true,\"source\":\"docs/knowledge/estrategias.md\",\"title\":\"Estrategias de pago en Ceroa\",\"version\":\"1\",\"sourceHash\":\"cd48861a4b9b8844ee509fb3ce0ca54217d063620bf1bfaf7783aad4935ca4b7\",\"chunkIndex\":0,\"chunkId\":\"417a03229fa2c6cf942942dc9155ce56031f30b44ebf1a1989224e76ed62855a\"}},{\"pageContent\":\"nes. Es distinto del ingreso menos gastos esenciales. Antes de destinar pagos adicionales, deben revisarse las cuotas o pagos mínimos exigibles, los vencimientos y la capacidad disponible.\\n\\nUna prioridad manual puede modificar la primera obligación atendida. La estrategia seleccionada, la prioridad actual, los saldos y los vencimientos de una persona deben consultarse en los datos actuales de su cuenta; esta guía no contiene información personal.\\n\\n## Proyecciones\\n\\nLas proyecciones de intereses y fechas son estimaciones sujetas a los datos y supuestos del cálculo. Si el backend indica que no hay una proyección disponible, no se deben prometer ahorros, plazos ni fechas de liquidación. La comparación detallada está sujeta a los permisos del plan de la cuenta.\\n\\nEsta guía explica el funcionamiento del producto; no establece una estrategia ideal para todas las personas.\",\"metadata\":{\"approved\":true,\"source\":\"docs/knowledge/estrategias.md\",\"title\":\"Estrategias de pago en Ceroa\",\"version\":\"1\",\"sourceHash\":\"cd48861a4b9b8844ee509fb3ce0ca54217d063620bf1bfaf7783aad4935ca4b7\",\"chunkIndex\":1,\"chunkId\":\"b75403771ea870b1140b81248fb767fa6dbd9328fdaa73fc7c9765c67c2b0f7a\"}},{\"pageContent\":\"# Registro y consultas en Ceroa\\n\\n## Datos de una obligación\\n\\nSaldo actual, monto original, cuota mensual y pago mínimo son conceptos distintos. El saldo actual representa lo pendiente registrado; el monto original corresponde al valor inicial o cupo según el tipo de obligación. La cuota mensual y el pago mínimo deben verificarse según el documento y el tipo de deuda.\\n\\nUna tasa debe incluir su modalidad: efectiva anual, mes vencido, nominal anual mes vencido u otra modalidad admitida. No se debe asignar cero ni «sin intereses» cuando la tasa sea desconocida.\\n\\nLa fecha del próximo vencimiento identifica un pago específico. No demuestra por sí sola que todos los pagos mensuales vencen en ese mismo día.\\n\\n## Lectura de documentos\\n\\nEn Registrar o Editar obligación, la opción Leer documento financiero acepta PDF con texto, Word DOCX y Excel XLSX, hasta ocho megabytes. Para Excel se selecciona explícitamente una hoja. Los PDF escaneados y las fotografías no tienen OCR habilitado y requieren continuar con el formulario manual.\\n\\nLa lectura requiere autorización para enviar el texto al modelo. Devuelve propuestas, citas y advertencias, sin guardar automáticamente. El usuario revisa, corrige, \",\"metadata\":{\"approved\":true,\"source\":\"docs/knowledge/registro-y-consultas.md\",\"title\":\"Registro y consultas en Ceroa\",\"version\":\"1\",\"sourceHash\":\"3295be84449dd69d637d816fbee73eb6b4ed6cb92cdbe6247452d2fc24282a3b\",\"chunkIndex\":0,\"chunkId\":\"2841f90a7b7c78da9312a2e38d02b77410c4035b2847c7631ad6aec53421e07c\"}},{\"pageContent\":\"ntinuar con el formulario manual.\\n\\nLa lectura requiere autorización para enviar el texto al modelo. Devuelve propuestas, citas y advertencias, sin guardar automáticamente. El usuario revisa, corrige, confirma y guarda con el formulario. Al editar, las propuestas se aplican explícitamente y los valores existentes se conservan ante datos desconocidos. Cancelar no cambia la deuda.\\n\\n## Consultas personales y asistente\\n\\nEl asistente consulta la cuenta autenticada desde la web. En Telegram se requiere una vinculación privada vigente. La documentación general no autoriza el acceso a los datos personales de otra cuenta.\\n\\nSaldos, pagos, vencimientos, estrategia activa y progreso mensual deben obtenerse nuevamente del backend para cada pregunta personal. Una respuesta anterior, la memoria de conversación o una guía documental no demuestran el estado financiero actual.\\n\\nEl asistente permite leer datos y explicar alternativas. No registra pagos ni cambia deudas o estrategias por una conversación: esos cambios requieren los formularios y confirmaciones de Ceroa. La vinculación de Telegram no implica que existan recordatorios automáticos de vencimientos.\",\"metadata\":{\"approved\":true,\"source\":\"docs/knowledge/registro-y-consultas.md\",\"title\":\"Registro y consultas en Ceroa\",\"version\":\"1\",\"sourceHash\":\"3295be84449dd69d637d816fbee73eb6b4ed6cb92cdbe6247452d2fc24282a3b\",\"chunkIndex\":1,\"chunkId\":\"1c4ccc361ae48df3a254a17f885acad33f3cf3d5c622d0e040e478acf5ed6494\"}}];if(!chunks.length)throw new Error('No hay fuentes aprobadas. Revisar manifiesto y regenerar el flujo.');return chunks.map(c=>({json:{...c,snapshot:'da9520daeab31486105962d5fb4686d9331dd58d808c71f03b26fec848c181de',text:c.pageContent,title:c.metadata.title,task:'RETRIEVAL_DOCUMENT'}}));"
+      }
+    },
+    {
+      "id": "embed",
+      "name": "Embedding de documentos",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        480,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googlePalmApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({model:\"models/gemini-embedding-001\",content:{parts:[{text:$json.text}]},taskType:$json.task,outputDimensionality:768,...($json.title?{title:$json.title}:{})}) }}",
+        "options": {
+          "timeout": 20000
+        }
+      }
+    },
+    {
+      "id": "values",
+      "name": "Preparar vector y procedencia",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        720,
+        0
+      ],
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const c=$('Fuentes aprobadas').item.json;const values=$json.embedding?.values;if(!Array.isArray(values)||values.length!==768||values.some(v=>!Number.isFinite(v)))throw new Error('Vector incompatible');const norm=Math.sqrt(values.reduce((s,v)=>s+v*v,0));if(!Number.isFinite(norm)||norm<=0)throw new Error('Vector vacío');return {json:{snapshot:c.snapshot,chunkId:c.metadata.chunkId,source:c.metadata.source,title:c.metadata.title,version:c.metadata.version,hash:c.metadata.sourceHash,content:c.pageContent,embedding:'['+values.map(v=>v/norm).join(',')+']'}};"
+      }
+    },
+    {
+      "id": "insert",
+      "name": "Guardar solo en esquema auxiliar",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        960,
+        0
+      ],
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO n8n_aux.rag_chunks(snapshot,chunk_id,source,title,version,source_hash,content,approved,embedding) VALUES ($1,$2,$3,$4,$5,$6,$7,true,$8::extensions.vector) ON CONFLICT(snapshot,chunk_id) DO UPDATE SET source=excluded.source,title=excluded.title,version=excluded.version,source_hash=excluded.source_hash,content=excluded.content,approved=true,embedding=excluded.embedding",
+        "options": {
+          "queryBatching": "transaction",
+          "queryReplacement": "={{ [$json.snapshot,$json.chunkId,$json.source,$json.title,$json.version,$json.hash,$json.content,$json.embedding] }}"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Indexar por administración": {
+      "main": [
+        [
+          {
+            "node": "Fuentes aprobadas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fuentes aprobadas": {
+      "main": [
+        [
+          {
+            "node": "Embedding de documentos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embedding de documentos": {
+      "main": [
+        [
+          {
+            "node": "Preparar vector y procedencia",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar vector y procedencia": {
+      "main": [
+        [
+          {
+            "node": "Guardar solo en esquema auxiliar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

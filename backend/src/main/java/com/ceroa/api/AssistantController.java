@@ -31,7 +31,13 @@ public class AssistantController {
         @RequestParam AssistantAnalysisService.Operation operation,@RequestParam List<String> refs) {
         return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(service.calculate(id,operation,refs));
     }
-    public record Completion(String answer,String transcript) {}
+    public record Completion(String answer,String transcript,String mode,List<String> sources) {}
+    @GetMapping("/api/v1/assistant-tools/requests/{id}/documents")
+    public ResponseEntity<AssistantService.DocumentEvidence> documents(@PathVariable UUID id,@RequestParam String query){
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(service.documents(id,query));
+    }
+    @DeleteMapping("/api/v1/assistant/conversation")
+    public ResponseEntity<Void> forget(){service.forget(AssistantService.Channel.web);return ResponseEntity.noContent().build();}
     public record Preparation(String transcript) {}
     @PostMapping("/api/v1/assistant-tools/requests/{id}/prepare")
     public ResponseEntity<AssistantAnalysisService.Evidence> prepare(@PathVariable UUID id,@RequestBody Preparation body) {
@@ -39,6 +45,6 @@ public class AssistantController {
     }
     @PostMapping("/api/v1/assistant-tools/requests/{id}/complete")
     public ResponseEntity<AssistantService.Reply> complete(@PathVariable UUID id,@RequestBody Completion body) {
-        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(service.complete(id,body.answer,body.transcript));
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(service.complete(id,body.answer,body.transcript,body.mode,body.sources));
     }
 }

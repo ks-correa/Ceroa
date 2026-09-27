@@ -1,0 +1,100 @@
+{
+  "snapshot" : "da9520daeab31486105962d5fb4686d9331dd58d808c71f03b26fec848c181de",
+  "model" : "gemini-embedding-001",
+  "dimensions" : 768,
+  "cases" : [ {
+    "question" : "¿Qué es la estrategia Bola de Nieve en Ceroa?",
+    "positive" : true,
+    "source" : "docs/knowledge/estrategias.md",
+    "score" : 0.789488030106544,
+    "expectedSource" : "docs/knowledge/estrategias.md",
+    "expectedSourceScore" : 0.789488030106544,
+    "accepted" : true
+  }, {
+    "question" : "¿Qué es Avalancha y cómo prioriza las deudas?",
+    "positive" : true,
+    "source" : "docs/knowledge/estrategias.md",
+    "score" : 0.752473011465491,
+    "expectedSource" : "docs/knowledge/estrategias.md",
+    "expectedSourceScore" : 0.752473011465491,
+    "accepted" : true
+  }, {
+    "question" : "¿Una tasa mensual se compara directamente con una anual?",
+    "positive" : true,
+    "source" : "docs/knowledge/registro-y-consultas.md",
+    "score" : 0.607082307338715,
+    "expectedSource" : "docs/knowledge/estrategias.md",
+    "expectedSourceScore" : 0.577939510345459,
+    "accepted" : true
+  }, {
+    "question" : "¿Cuáles formatos puedo subir para leer un documento financiero?",
+    "positive" : true,
+    "source" : "docs/knowledge/registro-y-consultas.md",
+    "score" : 0.663899818891277,
+    "expectedSource" : "docs/knowledge/registro-y-consultas.md",
+    "expectedSourceScore" : 0.663899818891277,
+    "accepted" : true
+  }, {
+    "question" : "¿La lectura de un documento guarda la deuda automáticamente?",
+    "positive" : true,
+    "source" : "docs/knowledge/registro-y-consultas.md",
+    "score" : 0.693004608154297,
+    "expectedSource" : "docs/knowledge/registro-y-consultas.md",
+    "expectedSourceScore" : 0.693004608154297,
+    "accepted" : true
+  }, {
+    "question" : "¿El próximo vencimiento demuestra un día de pago fijo cada mes?",
+    "positive" : true,
+    "source" : "docs/knowledge/estrategias.md",
+    "score" : 0.6042144298553467,
+    "expectedSource" : "docs/knowledge/registro-y-consultas.md",
+    "expectedSourceScore" : 0.603771448135376,
+    "accepted" : true
+  }, {
+    "question" : "¿Qué tiempo hará mañana en Bogotá?",
+    "positive" : false,
+    "source" : "docs/knowledge/estrategias.md",
+    "score" : 0.5030503869056702,
+    "expectedSource" : "",
+    "accepted" : false
+  }, {
+    "question" : "Dame una receta para hacer pan de chocolate.",
+    "positive" : false,
+    "source" : "docs/knowledge/registro-y-consultas.md",
+    "score" : 0.4835890079614227,
+    "expectedSource" : "",
+    "accepted" : false
+  }, {
+    "question" : "¿Quién ganó el campeonato mundial de fútbol?",
+    "positive" : false,
+    "source" : "docs/knowledge/registro-y-consultas.md",
+    "score" : 0.4483477473258972,
+    "expectedSource" : "",
+    "accepted" : false
+  }, {
+    "question" : "¿Cuál es el precio actual de bitcoin?",
+    "positive" : false,
+    "source" : "docs/knowledge/estrategias.md",
+    "score" : 0.5264570116996765,
+    "expectedSource" : "",
+    "accepted" : false
+  }, {
+    "question" : "¿Cuál es la tasa de usura vigente hoy en Colombia?",
+    "positive" : false,
+    "source" : "docs/knowledge/registro-y-consultas.md",
+    "score" : 0.5318999290466309,
+    "expectedSource" : "",
+    "accepted" : false
+  }, {
+    "question" : "¿Qué aseguradora cubre daños por terremoto?",
+    "positive" : false,
+    "source" : "docs/knowledge/estrategias.md",
+    "score" : 0.5160792162371158,
+    "expectedSource" : "",
+    "accepted" : false
+  } ],
+  "threshold" : 0.5418999290466309,
+  "maxNegative" : 0.5318999290466309,
+  "minRequiredPositive" : 0.577939510345459,
+  "ready" : true
+}
