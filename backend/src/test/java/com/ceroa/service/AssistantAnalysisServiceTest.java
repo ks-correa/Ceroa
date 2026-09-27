@@ -10,6 +10,21 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class AssistantAnalysisServiceTest {
     final AssistantAnalysisService service=new AssistantAnalysisService(new ObjectMapper(),null,null,null,null,null,null,null,null);
+    @Test void translatesStructuredLabelsWithoutChangingDebtNames() {
+        var facts=Map.of(
+            "f1",new AssistantAnalysisService.Fact("strategy/type",TextNode.valueOf("avalanche")),
+            "f2",new AssistantAnalysisService.Fact("debts/0/status",TextNode.valueOf("en_mora")),
+            "f3",new AssistantAnalysisService.Fact("debts/0/rateType",TextNode.valueOf("NONE")),
+            "f4",new AssistantAnalysisService.Fact("debts/0/name",TextNode.valueOf("avalanche")));
+        assertEquals("Avalancha; en mora; sin intereses; avalanche",service.resolve(facts,"{{f1}}; {{f2}}; {{f3}}; {{f4}}"));
+    }
+    @Test void removesRepeatedEquivalentRatesAfterEvidenceSubstitution() {
+        var facts=Map.of(
+            "f1",new AssistantAnalysisService.Fact("rate",DecimalNode.valueOf(new BigDecimal("28.7"))),
+            "f2",new AssistantAnalysisService.Fact("rate",DecimalNode.valueOf(BigDecimal.ZERO)),
+            "f3",new AssistantAnalysisService.Fact("rateType",TextNode.valueOf("NONE")));
+        assertEquals("28,7% EA; sin intereses",service.resolve(facts,"{{f1}}% EA (tasa comparable anual de {{f1}}% EA); sin intereses con una tasa del {{f2}}% {{f3}}"));
+    }
     @Test void resolvesExactDecimalFactsWithoutModelFormatting() {
         var facts=new LinkedHashMap<String,AssistantAnalysisService.Fact>();
         facts.put("f1",new AssistantAnalysisService.Fact("balance",DecimalNode.valueOf(new BigDecimal("15420000.00"))));

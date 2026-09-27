@@ -135,7 +135,7 @@ public class AssistantAnalysisService {
         while(matcher.find()) {
             Fact fact=facts.get(matcher.group(1));
             if(fact==null || fact.value().isNull()) throw new IllegalArgumentException();
-            String value=fact.value().isNumber()?displayNumber(fact):fact.value().asText();
+            String value=fact.value().isNumber()?displayNumber(fact):displayText(fact);
             matcher.appendReplacement(rendered,Matcher.quoteReplacement(value));
         }
         matcher.appendTail(rendered);
@@ -143,7 +143,23 @@ public class AssistantAnalysisService {
         if(prose.codePoints().anyMatch(Character::isDigit) || prose.contains("{{") || prose.contains("}}"))
             throw new IllegalArgumentException("Respuesta con cifras sin evidencia");
         if(rendered.length()>16000) throw new IllegalArgumentException("Respuesta demasiado extensa");
-        return rendered.toString();
+        return rendered.toString()
+            .replaceAll("(?i)([\\d.,]+%\\s*EA)\\s*\\((?:y una )?tasa (?:anual comparable|comparable anual) (?:de )?\\1\\)","$1")
+            .replaceAll("(?i)sin intereses con una tasa (?:del|de) 0% sin intereses","sin intereses")
+            .replaceAll("(?i)0% sin intereses","sin intereses");
+    }
+    private String displayText(Fact fact) {
+        String value=fact.value().asText();
+        // Translate structured labels only; preserve user-provided names verbatim.
+        if(fact.source().equals("name") || fact.source().endsWith("/name")) return value;
+        return switch(value) {
+            case "avalanche" -> "Avalancha";
+            case "snowball" -> "Bola de nieve";
+            case "manual" -> "prioridad manual";
+            case "en_mora" -> "en mora";
+            case "NONE" -> "sin intereses";
+            default -> value;
+        };
     }
     private String displayNumber(Fact fact) {
         BigDecimal value=fact.value().decimalValue().stripTrailingZeros();
