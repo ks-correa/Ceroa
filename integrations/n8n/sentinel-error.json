@@ -1,0 +1,50 @@
+{
+  "id": "ceroaSentinelError05",
+  "name": "RA-N8N-005 - Error operativo sin datos personales",
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "saveDataSuccessExecution": "none",
+    "saveDataErrorExecution": "none",
+    "saveManualExecutions": false
+  },
+  "nodes": [
+    {
+      "id": "error",
+      "name": "Recibir error operativo",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "safe",
+      "name": "Emitir diagnóstico mínimo",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        0
+      ],
+      "parameters": {
+        "jsCode": "console.warn('Ceroa RA-N8N-005: fallo operativo. Revisar el worker; no repetir envíos ambiguos.');return [{json:{component:'RA-N8N-005',status:'OPERATIONAL_FAILURE'}}];"
+      }
+    }
+  ],
+  "connections": {
+    "Recibir error operativo": {
+      "main": [
+        [
+          {
+            "node": "Emitir diagnóstico mínimo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

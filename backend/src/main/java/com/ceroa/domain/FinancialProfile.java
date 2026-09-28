@@ -72,4 +72,5 @@ public class FinancialProfile {
     public void setTotalDeclaredDebts(Integer totalDeclaredDebts) { this.totalDeclaredDebts = totalDeclaredDebts; }
     public StrategyType getActiveStrategy() { return activeStrategy; }
     public void setActiveStrategy(StrategyType activeStrategy) { this.activeStrategy = activeStrategy; }
+    public OffsetDateTime getUpdatedAt() { return updatedAt; }
 }

@@ -24,6 +24,7 @@ public class DebtService {
     @org.springframework.beans.factory.annotation.Autowired(required = false) private MonthlyHistoryService monthlyHistory;
     @org.springframework.beans.factory.annotation.Autowired(required = false) private PlanAccessService planAccess;
     @org.springframework.beans.factory.annotation.Autowired(required = false) private com.ceroa.repository.ScheduledDeliveryRepository scheduledDeliveries;
+    @org.springframework.beans.factory.annotation.Autowired(required = false) private SentinelVersionService sentinelVersions;
 
     private final DebtRepository debtRepository;
     private final PaymentRepository paymentRepository;
@@ -88,6 +89,7 @@ public class DebtService {
         debt.setUser(user);
         apply(debt, request);
         Debt saved = debtRepository.save(debt);
+        if(sentinelVersions!=null)sentinelVersions.mark(user.getId());
         if (monthlyHistory != null) monthlyHistory.observe(user.getId(), null, null, null);
         return toResponse(saved);
     }
@@ -103,6 +105,7 @@ public class DebtService {
         if (monthlyHistory != null) monthlyHistory.baseline(currentUser.id());
         apply(debt, request);
         Debt saved = debtRepository.save(debt);
+        if(sentinelVersions!=null)sentinelVersions.mark(currentUser.id());
         if (scheduledDeliveries != null) scheduledDeliveries.invalidateDebt(debt.getId());
         if (monthlyHistory != null) monthlyHistory.observe(currentUser.id(), null, null, null);
         return toResponse(saved);
@@ -119,6 +122,7 @@ public class DebtService {
         }
         paymentRepository.deleteAllByDebtId(debt.getId());
         debtRepository.delete(debt);
+        if(sentinelVersions!=null)sentinelVersions.mark(currentUser.id());
         if (monthlyHistory != null) monthlyHistory.observe(currentUser.id(), null, null, null);
     }
 

@@ -18,6 +18,7 @@ import java.math.RoundingMode;
 
 @Service
 public class FinancialProfileService {
+    @org.springframework.beans.factory.annotation.Autowired(required = false) private SentinelVersionService sentinelVersions;
     private final FinancialProfileRepository profileRepository;
     private final DebtRepository debtRepository;
     private final UserRepository userRepository;
@@ -46,6 +47,7 @@ public class FinancialProfileService {
 
     @Transactional
     public FinancialProfileResponse update(FinancialProfileRequest request) {
+        currentUser.entityForUpdate();
         validateBudget(request);
         FinancialProfile profile = profileRepository.findByUserId(currentUser.id())
                 .orElseGet(() -> {
@@ -58,11 +60,14 @@ public class FinancialProfileService {
         profile.setAvailableForDebts(request.availableMoney());
         profile.setTotalDeclaredDebts(request.totalDeclaredDebts());
         profile.setActiveStrategy(request.activeStrategy());
-        return toResponse(profileRepository.save(profile));
+        var saved=profileRepository.save(profile);
+        if(sentinelVersions!=null)sentinelVersions.mark(currentUser.id());
+        return toResponse(saved);
     }
 
     @Transactional
     public FinancialProfileResponse updateStrategy(StrategyType strategy) {
+        currentUser.entityForUpdate();
         if (strategy == null) {
             throw new BusinessRuleException("INVALID_STRATEGY", "Debe seleccionar una estrategia de pago válida.");
         }
@@ -80,7 +85,9 @@ public class FinancialProfileService {
                     return p;
                 });
         profile.setActiveStrategy(strategy);
-        return toResponse(profileRepository.save(profile));
+        var saved=profileRepository.save(profile);
+        if(sentinelVersions!=null)sentinelVersions.mark(currentUser.id());
+        return toResponse(saved);
     }
 
     @Transactional

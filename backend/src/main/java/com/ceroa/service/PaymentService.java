@@ -22,6 +22,7 @@ import java.util.UUID;
 public class PaymentService {
     @org.springframework.beans.factory.annotation.Autowired(required = false) private MonthlyHistoryService monthlyHistory;
     @org.springframework.beans.factory.annotation.Autowired(required = false) private com.ceroa.repository.ScheduledDeliveryRepository scheduledDeliveries;
+    @org.springframework.beans.factory.annotation.Autowired(required = false) private SentinelVersionService sentinelVersions;
     private final PaymentRepository paymentRepository;
     private final DebtRepository debtRepository;
     private final DebtService debtService;
@@ -75,6 +76,7 @@ public class PaymentService {
         payment.setDebt(debt);
         apply(payment, request);
         Payment savedPayment = paymentRepository.save(payment);
+        if(sentinelVersions!=null)sentinelVersions.mark(currentUser.id());
         if (scheduledDeliveries != null) scheduledDeliveries.invalidateDebt(debt.getId());
         if (monthlyHistory != null) monthlyHistory.observe(currentUser.id(), request.amount(), 1,
                 !wasPaid && debt.getStatus() == com.ceroa.domain.DebtStatus.PAID ? 1 : 0);
@@ -111,6 +113,7 @@ public class PaymentService {
         // 4. Actualizar movimiento
         apply(payment, request);
         Payment savedPayment = paymentRepository.save(payment);
+        if(sentinelVersions!=null)sentinelVersions.mark(currentUser.id());
         if (scheduledDeliveries != null) scheduledDeliveries.invalidateDebt(debt.getId());
         if (monthlyHistory != null) monthlyHistory.observe(currentUser.id(), request.amount().subtract(previousAmount), 0,
                 (debt.getStatus() == com.ceroa.domain.DebtStatus.PAID ? 1 : 0) - (wasPaid ? 1 : 0));
@@ -131,6 +134,7 @@ public class PaymentService {
         debtRepository.save(debt);
 
         paymentRepository.delete(payment);
+        if(sentinelVersions!=null)sentinelVersions.mark(currentUser.id());
         if (scheduledDeliveries != null) scheduledDeliveries.invalidateDebt(debt.getId());
         if (monthlyHistory != null) monthlyHistory.observe(currentUser.id(), oldAmount.negate(), -1,
                 (debt.getStatus() == com.ceroa.domain.DebtStatus.PAID ? 1 : 0) - (wasPaid ? 1 : 0));

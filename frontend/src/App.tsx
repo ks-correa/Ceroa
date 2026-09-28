@@ -18,6 +18,7 @@ import { InitialSetupWizard } from './components/onboarding/InitialSetupWizard';
 import { subscriptionService } from './services/subscriptionService';
 import type { PlanAccess } from './services/planService';
 import { AssistantFab } from './components/assistant/AssistantFab';
+import { SentinelFab } from './components/sentinel/SentinelFab';
 
 const AppContent: React.FC = () => {
   const {
@@ -95,6 +96,7 @@ const AppContent: React.FC = () => {
       </div>
       <BottomNav />
       <AssistantFab key={userProfile.id} />
+      <SentinelFab key={userProfile.id} />
       <NotificationsDrawer />
       <AsyncModals />
       {plusOfferOpen && !planAccess?.plusActive && <div className="fixed inset-0 z-50 bg-slate-900/60 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="plus-offer-title">

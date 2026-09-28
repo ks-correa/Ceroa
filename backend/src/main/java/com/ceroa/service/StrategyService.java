@@ -22,6 +22,7 @@ import java.util.UUID;
 
 @Service
 public class StrategyService {
+    @org.springframework.beans.factory.annotation.Autowired(required = false) private SentinelVersionService sentinelVersions;
     @org.springframework.beans.factory.annotation.Autowired(required = false) private PlanAccessService planAccess;
 
     private final DebtRepository debtRepository;
@@ -61,6 +62,7 @@ public class StrategyService {
 
     @Transactional
     public StrategyResponse updateActiveStrategy(StrategyType newStrategy) {
+        currentUser.entityForUpdate();
         if (newStrategy == null) {
             throw new BusinessRuleException("INVALID_STRATEGY", "Debe seleccionar una estrategia de pago válida (Bola de Nieve o Avalancha).");
         }
@@ -84,6 +86,7 @@ public class StrategyService {
 
         profile.setActiveStrategy(newStrategy);
         profileRepository.save(profile);
+        if(sentinelVersions!=null)sentinelVersions.mark(userId);
 
         // Recalcular y devolver representación vigente confirmada
         return getActiveStrategy();
@@ -91,6 +94,7 @@ public class StrategyService {
 
     @Transactional
     public StrategyResponse updatePriority(UUID debtId) {
+        currentUser.entityForUpdate();
         UUID userId = currentUser.id();
         if (debtId != null) {
             Debt debt = debtRepository.findAllByUserIdOrderByCreatedAtDesc(userId).stream()
@@ -107,6 +111,7 @@ public class StrategyService {
         }
         profile.setPriorityDebtId(debtId);
         profileRepository.save(profile);
+        if(sentinelVersions!=null)sentinelVersions.mark(userId);
         return getActiveStrategy();
     }
 
