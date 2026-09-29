@@ -32,13 +32,13 @@ export function SentinelFab() {
   const evaluation = overview?.evaluation;
   const latest = overview?.alerts[0];
   const canSimulate = overview?.canSimulate && evaluation?.condition === 'OVER_CAPACITY' && !!latest && !!debtId && !approval;
-  return <div className="fixed bottom-20 left-4 z-40 lg:bottom-6">
-    {open && <section role="dialog" aria-modal="false" aria-label="Centinela de capacidad de pago" className="mb-3 flex max-h-[72vh] w-[calc(100vw-2rem)] max-w-md flex-col overflow-hidden rounded-2xl border border-amber-200 bg-white shadow-xl dark:border-amber-900 dark:bg-slate-900">
-      <div className="flex items-center justify-between border-b p-4"><h2 className="font-semibold">Centinela de capacidad de pago</h2><button type="button" aria-label="Cerrar centinela" onClick={() => setOpen(false)}><X size={20} /></button></div>
-      <div className="space-y-4 overflow-y-auto p-4 text-sm">
+  return <div className="fixed bottom-40 right-4 z-40 flex flex-col items-end lg:bottom-24">
+    {open && <section role="dialog" aria-modal="false" aria-label="Centinela de capacidad de pago" className="mb-3 flex max-h-[min(68vh,620px)] w-[calc(100vw-2rem)] max-w-md flex-col overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-2xl shadow-slate-900/15 dark:border-slate-700 dark:bg-slate-900">
+      <div className="flex items-center justify-between gap-3 bg-gradient-to-r from-amber-700 to-orange-600 px-5 py-4 text-white"><div className="flex items-center gap-3"><span className="rounded-2xl bg-white/20 p-2"><ShieldAlert size={20} /></span><div><h2 className="font-semibold leading-tight">Centinela</h2><p className="text-xs text-amber-50">Capacidad de pago</p></div></div><button type="button" aria-label="Cerrar centinela" onClick={() => setOpen(false)} className="rounded-full p-2 transition-colors hover:bg-white/20 focus-visible:outline-2 focus-visible:outline-offset-2"><X size={20} /></button></div>
+      <div className="space-y-4 overflow-y-auto bg-slate-50/70 p-4 text-sm dark:bg-slate-950/30">
         <p>Compara los pagos exigibles registrados con tu presupuesto para deudas. La evaluación no modifica tu cuenta.</p>
         {!overview && !error && <p role="status">Cargando evaluación…</p>}
-        {evaluation && <div className={`rounded-xl p-4 ${evaluation.condition === 'OVER_CAPACITY' ? 'bg-amber-50 text-amber-950 dark:bg-amber-950 dark:text-amber-100' : 'bg-slate-100 dark:bg-slate-800'}`}>
+        {evaluation && <div className={`rounded-2xl border p-4 shadow-sm ${evaluation.condition === 'OVER_CAPACITY' ? 'border-amber-200 bg-amber-50 text-amber-950 dark:border-amber-800 dark:bg-amber-950 dark:text-amber-100' : 'border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800'}`}>
           <p className="font-semibold">{evaluation.condition === 'OVER_CAPACITY' ? 'Pagos registrados por encima del presupuesto' : evaluation.quality === 'INSUFFICIENT_DATA' ? 'Faltan datos para evaluar' : 'Pagos registrados dentro del presupuesto'}</p>
           <p className="mt-1">{evaluation.reason}</p>
           {evaluation.quality === 'COMPLETE' && <dl className="mt-3 grid grid-cols-2 gap-2"><div><dt>Presupuesto</dt><dd className="font-medium tabular-nums">{money(evaluation.budget)}</dd></div><div><dt>Pagos exigibles</dt><dd className="font-medium tabular-nums">{money(evaluation.requiredPayments)}</dd></div>{evaluation.condition === 'OVER_CAPACITY' && <div><dt>Diferencia</dt><dd className="font-medium tabular-nums">{money(evaluation.shortfall)}</dd></div>}</dl>}
@@ -52,6 +52,6 @@ export function SentinelFab() {
         {error && <p role="alert" className="text-red-700 dark:text-red-400">{error}</p>}
       </div>
     </section>}
-    <button type="button" aria-label="Abrir centinela de capacidad de pago" aria-expanded={open} onClick={() => { setOpen(value => !value); setError(''); }} className="flex items-center gap-2 rounded-full bg-amber-700 px-4 py-3 text-white shadow-lg"><ShieldAlert size={20} /><span className="hidden sm:inline">Centinela</span></button>
+    <button type="button" aria-label="Abrir centinela de capacidad de pago" aria-expanded={open} onClick={() => { setOpen(value => !value); setError(''); }} className="flex items-center gap-2 rounded-full bg-gradient-to-r from-amber-700 to-orange-600 px-4 py-3 text-white shadow-lg shadow-amber-900/20 transition-transform hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-600"><ShieldAlert size={20} /><span className="text-sm font-semibold">Centinela</span></button>
   </div>;
 }

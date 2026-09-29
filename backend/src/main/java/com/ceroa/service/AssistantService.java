@@ -17,6 +17,7 @@ import java.math.BigDecimal;
 /** Ephemeral user-bound evidence contexts. Model responses never authorize financial writes. */
 @Service
 public class AssistantService {
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AssistantService.class);
     public enum Channel { web, telegram }
     private record Audience(UUID user,Channel channel) {}
     private record Conversation(UUID user,Channel channel,UUID id) {}
@@ -175,7 +176,7 @@ public class AssistantService {
     }
     public Reply complete(UUID id,String answer,String transcript,String mode,List<String> sources) {
         final List<String> citations=sources==null?List.of():List.copyOf(sources);
-        return withJob(id,job->{
+        try { return withJob(id,job->{
             if(transcript==null || transcript.isBlank() || transcript.length()>2000) throw new IllegalArgumentException();
             if(!job.question.isEmpty() && !job.question.equals(transcript)) throw new IllegalArgumentException();
             String resolved;
@@ -194,7 +195,10 @@ public class AssistantService {
                 }
             }else resolved=analysis.resolve(job.facts,answer);
             job.question=transcript; job.result=new Reply(resolved,"analysis"); return job.result;
-        });
+        }); } catch (IllegalArgumentException error) {
+            log.warn("Assistant response validation rejected: {}", error.getMessage());
+            throw error;
+        }
     }
     public AssistantAnalysisService.Evidence prepare(UUID id,String transcript) {
         return withJob(id,job->{
