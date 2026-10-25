@@ -22,7 +22,7 @@ try{
  const cipher=new Cipher(settings,new CipherAes256GCM(),new CipherAes256CBC(),null);
  fs.writeFileSync('/tmp/ceroa-document-credential.json',JSON.stringify([{id:'ceroaDocumentKey02',name:'Ceroa Documentos',type:'httpHeaderAuth',data:cipher.encrypt({name:'X-Ceroa-Documents',value:body.workerKey})}]),{mode:0o600});
  const root='/usr/local/lib/node_modules/n8n/node_modules/.pnpm/';const folder=fs.readdirSync(root).find(n=>n.startsWith('sqlite3@'));const sqlite=require(root+folder+'/node_modules/sqlite3');const db=new sqlite.Database('/home/node/.n8n/database.sqlite');
- db.get('select nodes from workflow_entity where id=?',['ceroaAssistant01'],(e,row)=>{
+ db.get("SELECT nodes FROM workflow_entity WHERE id IN ('ceroaHybridQuery20','ceroaAssistant01') ORDER BY CASE id WHEN 'ceroaHybridQuery20' THEN 0 ELSE 1 END LIMIT 1",(e,row)=>{
   try{if(e||!row)throw new Error();const model=JSON.parse(row.nodes).find(n=>n.type.includes('lmChatGoogleGemini'));if(!model?.credentials?.googlePalmApi)throw new Error();
    const workflow=JSON.parse(fs.readFileSync('/opt/ceroa-workflows/document-ingestion.json','utf8'));
    for(const node of workflow.nodes){if(node.type.includes('lmChatGoogleGemini'))node.credentials=model.credentials;else if(node.parameters.authentication==='headerAuth'||node.type==='n8n-nodes-base.httpRequest')node.credentials={httpHeaderAuth:{id:'ceroaDocumentKey02',name:'Ceroa Documentos'}};}

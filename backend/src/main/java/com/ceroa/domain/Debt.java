@@ -64,6 +64,12 @@ public class Debt {
     @Column(name = "next_due_date")
     private LocalDate nextDueDate;
 
+    @Column(name = "payment_schedule_anchor")
+    private LocalDate paymentScheduleAnchor;
+
+    @Column(name = "payment_schedule_reset_at")
+    private OffsetDateTime paymentScheduleResetAt;
+
     @Column(name = "disbursement_date")
     private LocalDate disbursementDate;
 
@@ -134,6 +140,10 @@ public class Debt {
     public void setDueDateDay(Integer dueDateDay) { this.dueDateDay = dueDateDay; }
     public LocalDate getNextDueDate() { return nextDueDate; }
     public void setNextDueDate(LocalDate nextDueDate) { this.nextDueDate = nextDueDate; }
+    public LocalDate getPaymentScheduleAnchor() { return paymentScheduleAnchor; }
+    public void setPaymentScheduleAnchor(LocalDate date) { this.paymentScheduleAnchor = date; }
+    public OffsetDateTime getPaymentScheduleResetAt() { return paymentScheduleResetAt; }
+    public void setPaymentScheduleResetAt(OffsetDateTime date) { this.paymentScheduleResetAt = date; }
     public LocalDate getDisbursementDate() { return disbursementDate; }
     public void setDisbursementDate(LocalDate disbursementDate) { this.disbursementDate = disbursementDate; }
     public Integer getTermRemainingMonths() { return termRemainingMonths; }

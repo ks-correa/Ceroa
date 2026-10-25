@@ -151,6 +151,37 @@ class PaymentIntegrationTest {
     }
 
     @Test
+    void lateInstallmentClearsOverdueAndDeletingItRestoresTheDueDate() throws Exception {
+        UUID debtId = createDebtForUser(sessionA, "Cuota vencida", new BigDecimal("1000000"), new BigDecimal("1000000"));
+        LocalDate pastDue = LocalDate.now().minusDays(5);
+        Debt debt = debtRepository.findById(debtId).orElseThrow();
+        debt.setNextDueDate(pastDue);
+        debt.setPaymentScheduleAnchor(null);
+        debt.setStatus(DebtStatus.OVERDUE);
+        debtRepository.save(debt);
+
+        var payload = Map.of("debtId", debtId, "type", "monthly_fee", "amount", 100000,
+                "date", LocalDate.now().toString());
+        String result = mvc.perform(post("/api/v1/payments").with(csrf()).cookie(sessionA)
+                        .contentType("application/json").content(json.writeValueAsString(payload)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.debtStatus").value("al_dia"))
+                .andReturn().getResponse().getContentAsString();
+        Debt paidCycle = debtRepository.findById(debtId).orElseThrow();
+        assertThat(paidCycle.getNextDueDate()).isAfter(LocalDate.now());
+        assertThat(paidCycle.getStatus()).isEqualTo(DebtStatus.CURRENT);
+        mvc.perform(get("/api/v1/debts/" + debtId).cookie(sessionA))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.status").value("al_dia"));
+
+        UUID paymentId = UUID.fromString(json.readTree(result).get("id").asText());
+        mvc.perform(delete("/api/v1/payments/" + paymentId).with(csrf()).cookie(sessionA))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.debtStatus").value("en_mora"));
+        Debt restored = debtRepository.findById(debtId).orElseThrow();
+        assertThat(restored.getNextDueDate()).isEqualTo(pastDue);
+        assertThat(restored.getCurrentBalance()).isEqualByComparingTo("1000000");
+    }
+
+    @Test
     @DisplayName("HU-042: Pago total cancela la deuda y la marca como PAGADA")
     void testFullPaymentSetsDebtToPaid() throws Exception {
         UUID debtId = createDebtForUser(sessionA, "Préstamo Pequeño", BigDecimal.valueOf(250000), BigDecimal.valueOf(500000));

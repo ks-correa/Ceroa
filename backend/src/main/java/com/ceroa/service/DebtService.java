@@ -156,6 +156,11 @@ public class DebtService {
         debt.setMonthlyPayment(request.monthlyPayment() == null ? BigDecimal.ZERO : request.monthlyPayment());
         debt.setMinimumPayment(request.minimumPayment() == null ? BigDecimal.ZERO : request.minimumPayment());
         debt.setDueDateDay(request.dueDateDay());
+        if (!java.util.Objects.equals(debt.getNextDueDate(), request.nextDueDate())) {
+            debt.setPaymentScheduleAnchor(request.nextDueDate());
+            // Existing payments belong to the prior schedule when the due date is edited manually.
+            debt.setPaymentScheduleResetAt(debt.getId() == null ? null : java.time.OffsetDateTime.now());
+        }
         debt.setNextDueDate(request.nextDueDate());
         debt.setDisbursementDate(request.disbursementDate());
         debt.setTermRemainingMonths(request.termRemainingMonths());
@@ -201,11 +206,11 @@ public class DebtService {
         if (currentBalance != null && currentBalance.compareTo(BigDecimal.ZERO) == 0) {
             return DebtStatus.PAID;
         }
-        if (type == DebtType.OVERDUE_BILL) {
+        if (type == DebtType.OVERDUE_BILL && nextDueDate == null) {
             return DebtStatus.OVERDUE;
         }
         if (nextDueDate != null) {
-            LocalDate today = LocalDate.now();
+            LocalDate today = LocalDate.now(java.time.ZoneId.of("America/Bogota"));
             if (nextDueDate.isBefore(today)) {
                 return DebtStatus.OVERDUE;
             }
@@ -241,7 +246,7 @@ public class DebtService {
                 debt.getId(), debt.getName(), debt.getEntity(), debt.getType(), debt.getCategoryLabel(),
                 debt.getOriginalAmount(), debt.getCurrentBalance(), debt.getInterestRate(), debt.getRateType(),
                 debt.getMonthlyPayment(), debt.getMinimumPayment(), debt.getDueDateDay(), debt.getNextDueDate(),
-                debt.getDisbursementDate(), debt.getTermRemainingMonths(), debt.getAccountNumber(), debt.getStatus(),
+                debt.getDisbursementDate(), debt.getTermRemainingMonths(), debt.getAccountNumber(), calculateSystemStatus(debt),
                 debt.getNotes(), debt.getColor(), debt.getDetails(), paymentCount);
     }
 }

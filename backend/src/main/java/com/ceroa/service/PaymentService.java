@@ -70,12 +70,12 @@ public class PaymentService {
         boolean wasPaid = debt.getStatus() == com.ceroa.domain.DebtStatus.PAID;
 
         applyPaymentImpact(debt, request.amount());
-        debtRepository.save(debt);
 
         Payment payment = new Payment();
         payment.setDebt(debt);
         apply(payment, request);
         Payment savedPayment = paymentRepository.save(payment);
+        refreshPaymentSchedule(debt, savedPayment, null);
         if(sentinelVersions!=null)sentinelVersions.mark(currentUser.id());
         if (scheduledDeliveries != null) scheduledDeliveries.invalidateDebt(debt.getId());
         if (monthlyHistory != null) monthlyHistory.observe(currentUser.id(), request.amount(), 1,
@@ -108,11 +108,11 @@ public class PaymentService {
 
         // 3. Aplicar el nuevo efecto financiero
         applyPaymentImpact(debt, request.amount());
-        debtRepository.save(debt);
 
         // 4. Actualizar movimiento
         apply(payment, request);
         Payment savedPayment = paymentRepository.save(payment);
+        refreshPaymentSchedule(debt, savedPayment, null);
         if(sentinelVersions!=null)sentinelVersions.mark(currentUser.id());
         if (scheduledDeliveries != null) scheduledDeliveries.invalidateDebt(debt.getId());
         if (monthlyHistory != null) monthlyHistory.observe(currentUser.id(), request.amount().subtract(previousAmount), 0,
@@ -131,9 +131,9 @@ public class PaymentService {
 
         // Revertir exactamente el efecto confirmado del movimiento
         revertPaymentImpact(debt, oldAmount);
-        debtRepository.save(debt);
 
         paymentRepository.delete(payment);
+        refreshPaymentSchedule(debt, null, payment.getId());
         if(sentinelVersions!=null)sentinelVersions.mark(currentUser.id());
         if (scheduledDeliveries != null) scheduledDeliveries.invalidateDebt(debt.getId());
         if (monthlyHistory != null) monthlyHistory.observe(currentUser.id(), oldAmount.negate(), -1,
@@ -158,7 +158,6 @@ public class PaymentService {
             throw new BusinessRuleException("PAYMENT_EXCEEDS_BALANCE", "El pago no puede superar el saldo actual de la obligación.");
         }
         debt.setCurrentBalance(debt.getCurrentBalance().subtract(amount));
-        debtService.updateDebtStatus(debt);
     }
 
     /**
@@ -166,12 +165,24 @@ public class PaymentService {
      */
     private void revertPaymentImpact(Debt debt, BigDecimal amount) {
         debt.setCurrentBalance(debt.getCurrentBalance().add(amount));
-        debtService.updateDebtStatus(debt);
     }
 
     private Payment findEntity(UUID id) {
         return paymentRepository.findByIdAndDebtUserId(id, currentUser.id())
                 .orElseThrow(() -> new ResourceNotFoundException("Pago no encontrado"));
+    }
+
+    private void refreshPaymentSchedule(Debt debt, Payment replacement, UUID deletedId) {
+        List<Payment> payments = new java.util.ArrayList<>(paymentRepository
+                .findAllByDebtIdAndDebtUserIdOrderByDateDescCreatedAtDesc(debt.getId(), currentUser.id()));
+        if (deletedId != null) payments.removeIf(p -> deletedId.equals(p.getId()));
+        if (replacement != null) {
+            payments.removeIf(p -> p == replacement || replacement.getId() != null && replacement.getId().equals(p.getId()));
+            payments.add(replacement);
+        }
+        PaymentSchedule.recalculate(debt, payments);
+        debtService.updateDebtStatus(debt);
+        debtRepository.save(debt);
     }
 
     private void validateDate(LocalDate date) {

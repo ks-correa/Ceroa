@@ -6,7 +6,7 @@ const fs=require('fs');let input='';process.stdin.on('data',b=>input+=b);process
     const {Cipher}=require(dir+'cipher'),{CipherAes256CBC}=require(dir+'aes-256-cbc'),{CipherAes256GCM}=require(dir+'aes-256-gcm');
     const cipher=new Cipher(JSON.parse(fs.readFileSync('/home/node/.n8n/config','utf8')),new CipherAes256GCM(),new CipherAes256CBC(),null);
     const root='/usr/local/lib/node_modules/n8n/node_modules/.pnpm/';const sqlite=require(root+fs.readdirSync(root).find(x=>x.startsWith('sqlite3@'))+'/node_modules/sqlite3');db=new sqlite.Database('/home/node/.n8n/database.sqlite');
-    db.get('SELECT nodes FROM workflow_entity WHERE id=?',['ceroaAssistant01'],(e,row)=>{
+    db.get("SELECT nodes FROM workflow_entity WHERE id IN ('ceroaHybridQuery20','ceroaAssistant01') ORDER BY CASE id WHEN 'ceroaHybridQuery20' THEN 0 ELSE 1 END LIMIT 1",(e,row)=>{
       if(e||!row)return fail();const nodes=JSON.parse(row.nodes),model=nodes.find(n=>n.type.includes('lmChatGoogleGemini')),header=nodes.find(n=>n.type==='n8n-nodes-base.webhook').credentials;
       db.get('SELECT data FROM credentials_entity WHERE id=?',[model.credentials.googlePalmApi.id],(e,cred)=>{
         try{

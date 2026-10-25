@@ -5,10 +5,13 @@ target/
 coverage/
 test-results/
 playwright-report/
-.DS_Store
-*.log
 .env*
 !.env.example
-.idea/
-.vscode/
 tmp/
+/Ceroa/
+*.log
+*.dump
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+.DS_Store

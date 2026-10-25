@@ -30,7 +30,7 @@
         0
       ],
       "parameters": {
-        "jsCode": "const u=$input.first().json,m=u.message;\nif(!m||m.chat?.type!=='private'||m.from?.is_bot||!Number.isSafeInteger(m.from?.id)||m.from.id<=0||m.chat.id!==m.from.id||!Number.isSafeInteger(u.update_id)||u.update_id<0)return [];\nconst body={updateId:u.update_id,senderId:m.from.id,chatId:m.chat.id,privateChat:true,text:m.text||'',audio:'',mime:''};\nconst voice=m.voice;\nconst invalid=body.text.length>2000||voice&&(voice.duration>60||!voice.file_size||voice.file_size>4194304||voice.mime_type!=='audio/ogg')||!body.text&&!voice;\nreturn [{json:{body,isAudio:Boolean(voice&&!invalid),invalid:Boolean(invalid),fileId:voice?.file_id||''}}];"
+        "jsCode": "const u=$input.first().json,m=u.message;\nif(!m||m.chat?.type!=='private'||m.from?.is_bot||!Number.isSafeInteger(m.from?.id)||m.from.id<=0||m.chat.id!==m.from.id||!Number.isSafeInteger(u.update_id)||u.update_id<0)return [];\nconst voice=m.voice,document=m.document;\nconst body={updateId:u.update_id,senderId:m.from.id,chatId:m.chat.id,privateChat:true,text:document?(m.caption||''):(m.text||''),audio:'',mime:'',document:document?{fileName:document.file_name||'',mime:document.mime_type||'',data:''}:null};\nconst invalid=body.text.length>2000||voice&&(voice.duration>60||!voice.file_size||voice.file_size>4194304||voice.mime_type!=='audio/ogg')||document&&(!Number.isSafeInteger(document.file_size)||document.file_size<1||document.file_size>8388608||!document.file_id||!document.file_name||document.file_name.length>160||!(/\\.(pdf|docx|xlsx)$/i).test(document.file_name))||!body.text&&!voice&&!document||!!voice&&!!document;\nreturn [{json:{body,isAudio:Boolean(voice&&!invalid),isDocument:Boolean(document&&!invalid),hasFile:Boolean((voice||document)&&!invalid),invalid:Boolean(invalid),fileId:document?.file_id||voice?.file_id||''}}];"
       }
     },
     {
@@ -76,12 +76,12 @@
         -200
       ],
       "parameters": {
-        "jsCode": "const source=$('Validar chat privado').first().json; return [{json:{send:true,chatId:source.body.chatId,answer:'Envía un texto de hasta 2.000 caracteres o una nota de voz de hasta 60 segundos y 4 MB.'}}];"
+        "jsCode": "const source=$('Validar chat privado').first().json; return [{json:{send:true,chatId:source.body.chatId,answer:'Envía texto de hasta 2.000 caracteres, una nota de voz de hasta 60 segundos y 4 MB, o un archivo PDF, DOCX o XLSX de hasta 8 MB como documento. Para la biblioteca usa /ayuda. Las fotos sueltas no se indexan: envíalas dentro de un PDF.'}}];"
       }
     },
     {
-      "id": "Es nota de voz",
-      "name": "Es nota de voz",
+      "id": "Es archivo adjunto",
+      "name": "Es archivo adjunto",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
@@ -97,8 +97,8 @@
           },
           "conditions": [
             {
-              "id": "isAudio",
-              "leftValue": "={{ Boolean($json.isAudio) }}",
+              "id": "hasFile",
+              "leftValue": "={{ Boolean($json.hasFile) }}",
               "rightValue": true,
               "operator": {
                 "type": "boolean",
@@ -212,6 +212,83 @@
       ],
       "parameters": {
         "jsCode": "const body={...$('Validar chat privado').first().json.body};\nconst buffer=await this.helpers.getBinaryDataBuffer(0,'data');\nif(buffer.length<12||buffer.length>4194304||buffer.subarray(0,4).toString()!=='OggS') throw new Error('Audio no válido');\nbody.audio=buffer.toString('base64');body.mime='audio/ogg';return [{json:{body}}];"
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "media",
+      "name": "Preparar medio autorizado",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1240,
+        -100
+      ],
+      "parameters": {
+        "jsCode": "return [{json:$('Validar chat privado').first().json}];"
+      }
+    },
+    {
+      "id": "Es documento autorizado",
+      "name": "Es documento autorizado",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1420,
+        -180
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "isDocument",
+              "leftValue": "={{ Boolean($json.isDocument) }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "download-document",
+      "name": "Descargar documento autorizado",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1620,
+        -300
+      ],
+      "parameters": {
+        "resource": "file",
+        "operation": "get",
+        "fileId": "={{ $(\"Validar chat privado\").first().json.fileId }}",
+        "download": true
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "document",
+      "name": "Preparar documento",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1840,
+        -300
+      ],
+      "parameters": {
+        "jsCode": "const source=$('Validar chat privado').first().json;const buffer=await this.helpers.getBinaryDataBuffer(0,'data');if(buffer.length<1||buffer.length>8388608)throw new Error('Archivo fuera de límites');const body={...source.body,document:{...source.body.document,data:buffer.toString('base64')}};return [{json:{body}}];"
       },
       "onError": "continueErrorOutput"
     },
@@ -334,9 +411,121 @@
         "operation": "sendMessage",
         "chatId": "={{ $json.chatId }}",
         "text": "={{ $json.answer }}",
+        "replyMarkup": "replyKeyboard",
+        "replyKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "/documentos"
+                  },
+                  {
+                    "text": "/ayuda"
+                  }
+                ]
+              }
+            },
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "/autorizar_documentos"
+                  },
+                  {
+                    "text": "/cancelar_documento"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "replyKeyboardOptions": {
+          "resize_keyboard": true
+        },
         "additionalFields": {
           "appendAttribution": false,
           "parse_mode": "HTML"
+        }
+      }
+    },
+    {
+      "id": "outgoing",
+      "name": "Clasificar respuesta autorizada",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2150,
+        -180
+      ],
+      "parameters": {
+        "jsCode": "const r=$input.first().json;return [{json:{...r,hasDocument:Boolean(r.send&&r.attachment?.data)}}];"
+      }
+    },
+    {
+      "id": "Entregar archivo",
+      "name": "Entregar archivo",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2350,
+        -180
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "hasDocument",
+              "leftValue": "={{ Boolean($json.hasDocument) }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "binary",
+      "name": "Preparar original privado",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2550,
+        -300
+      ],
+      "parameters": {
+        "jsCode": "const r=$input.first().json,a=r.attachment;if(!r.send||!Number.isSafeInteger(r.chatId)||r.chatId<=0||!a||typeof a.data!=='string'||a.data.length>11184812||!(/\\.(pdf|docx|xlsx)$/i).test(a.fileName))return [];return [{json:{chatId:r.chatId,caption:String(r.answer||'Documento privado').slice(0,1000)},binary:{data:{data:a.data,mimeType:a.mime,fileName:a.fileName}}}];"
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "send-document",
+      "name": "Enviar original por Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2770,
+        -300
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "sendDocument",
+        "chatId": "={{ $json.chatId }}",
+        "binaryData": true,
+        "binaryPropertyName": "data",
+        "additionalFields": {
+          "caption": "={{ $json.caption }}"
         }
       }
     }
@@ -375,7 +564,7 @@
         ],
         [
           {
-            "node": "Es nota de voz",
+            "node": "Es archivo adjunto",
             "type": "main",
             "index": 0
           }
@@ -393,7 +582,7 @@
         ]
       ]
     },
-    "Es nota de voz": {
+    "Es archivo adjunto": {
       "main": [
         [
           {
@@ -433,7 +622,7 @@
       "main": [
         [
           {
-            "node": "Descargar voz autorizada",
+            "node": "Preparar medio autorizado",
             "type": "main",
             "index": 0
           }
@@ -441,6 +630,71 @@
         [
           {
             "node": "Indicar vinculación",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar medio autorizado": {
+      "main": [
+        [
+          {
+            "node": "Es documento autorizado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Es documento autorizado": {
+      "main": [
+        [
+          {
+            "node": "Descargar documento autorizado",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Descargar voz autorizada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Descargar documento autorizado": {
+      "main": [
+        [
+          {
+            "node": "Preparar documento",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Explicar fallo temporal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar documento": {
+      "main": [
+        [
+          {
+            "node": "Procesar con Ceroa",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Explicar fallo temporal",
             "type": "main",
             "index": 0
           }
@@ -523,7 +777,54 @@
       "main": [
         [
           {
+            "node": "Clasificar respuesta autorizada",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Explicar fallo temporal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clasificar respuesta autorizada": {
+      "main": [
+        [
+          {
+            "node": "Entregar archivo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Entregar archivo": {
+      "main": [
+        [
+          {
+            "node": "Preparar original privado",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
             "node": "Preparar respuesta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar original privado": {
+      "main": [
+        [
+          {
+            "node": "Enviar original por Telegram",
             "type": "main",
             "index": 0
           }

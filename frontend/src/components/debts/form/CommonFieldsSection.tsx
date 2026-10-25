@@ -1,6 +1,7 @@
 import React from 'react';
 import { DebtType } from '../../../types';
 import { DEBT_TYPES, DebtFormState } from './debtTypeSchemas';
+import { CategorySelect } from './CategorySelect';
 import { CreditCard, Landmark, Home, Car, GraduationCap, Store, ShoppingBag, AlertOctagon, Users, FileText } from 'lucide-react';
 
 interface CommonFieldsSectionProps {
@@ -80,6 +81,12 @@ export const CommonFieldsSection: React.FC<CommonFieldsSectionProps> = ({
         </p>
       </div>
 
+      <div>
+        <label htmlFor="debt-category-select" className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Categoría</label>
+        <CategorySelect id="debt-category-select" value={form.categoryLabel} className={inputClass(false)} onChange={value => onFieldChange('categoryLabel', value)} />
+        <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Elige una categoría para organizar esta obligación.</p>
+      </div>
+
       {/* 2. Nombre personalizado y Entidad / Acreedor */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
@@ -133,6 +140,7 @@ export const CommonFieldsSection: React.FC<CommonFieldsSectionProps> = ({
         </div>
       </div>
 
+      <p className="text-[11px] text-slate-500 dark:text-slate-400">Montos en pesos, sin símbolo $ ni separadores de miles. Ejemplo: 2500000 para $2.500.000.</p>
       {/* 3. Saldo actual y Monto Original / Cupo Total */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
@@ -146,7 +154,7 @@ export const CommonFieldsSection: React.FC<CommonFieldsSectionProps> = ({
             step="any"
             value={form.currentBalance || ''}
             onChange={(e) => onFieldChange('currentBalance', e.target.value === '' ? 0 : Number(e.target.value))}
-            placeholder="0"
+            placeholder="Ej. 2500000"
             aria-required="true"
             aria-invalid={Boolean(errors.currentBalance)}
             aria-describedby={errors.currentBalance ? 'debt-current-balance-error' : undefined}
@@ -176,7 +184,7 @@ export const CommonFieldsSection: React.FC<CommonFieldsSectionProps> = ({
                 e.target.value === '' ? (currentSchema.isOriginalAmountOptional ? undefined : 0) : Number(e.target.value)
               )
             }
-            placeholder={currentSchema.isOriginalAmountOptional ? 'Opcional si no se conoce' : '0'}
+            placeholder="Ej. 5000000"
             aria-required={!currentSchema.isOriginalAmountOptional}
             aria-invalid={Boolean(errors.originalAmount)}
             aria-describedby={errors.originalAmount ? 'debt-original-amount-error' : undefined}

@@ -51,6 +51,7 @@ public class Payment {
     void onUpdate() { updatedAt = OffsetDateTime.now(); }
 
     public UUID getId() { return id; }
+    public OffsetDateTime getCreatedAt() { return createdAt; }
     public void setId(UUID id) { this.id = id; }
     public Debt getDebt() { return debt; }
     public void setDebt(Debt debt) { this.debt = debt; }

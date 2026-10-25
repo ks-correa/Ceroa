@@ -1,5 +1,9 @@
 # Ceroa
 
+Biblioteca financiera y RAG: [estado actual V21, OCR con Gemini, historial y nodos Supabase](docs/RAG_V21_REPLACEMENT_OCR.md). Funcionalidad desplegada con Storage privado y cuatro workflows activos.
+
+La misma biblioteca está disponible desde Telegram: [carga, búsqueda, descargas, versiones y comandos](docs/TELEGRAM_DOCUMENT_LIBRARY.md).
+
 Ceroa es una aplicación web de bienestar financiero para registrar, organizar y dar seguimiento a obligaciones y pagos. No presta dinero, no refinancia deudas y no reemplaza a una entidad financiera.
 
 La aplicación conserva la experiencia React existente y agrega persistencia real para cuentas, sesiones, perfil personal y financiero, deudas, pagos y estrategia mediante una API Java y PostgreSQL.
@@ -11,7 +15,7 @@ React + TypeScript + Vite
           |
        REST API
           |
-Java 21 + Spring Boot
+Java 25 + Spring Boot
           |
 Spring Data JPA / Hibernate
           |
@@ -41,7 +45,7 @@ Detalle de deuda, pagos, vencimientos, notificaciones y suscripción son flujos 
 ## Stack
 
 - Frontend: React 19, TypeScript, Vite y Tailwind CSS 4.
-- Backend: Java 21, Spring Boot 3.5, Spring Web, Spring Data JPA, Hibernate, Validation y Spring Security.
+- Backend: Java 25, Spring Boot 3.5, Spring Web, Spring Data JPA, Hibernate, Validation y Spring Security.
 - Datos: PostgreSQL 17 y Flyway.
 - API: OpenAPI 3 y Swagger UI.
 - Pruebas backend: JUnit 5, Mockito y AssertJ.
@@ -70,7 +74,7 @@ Detalle de deuda, pagos, vencimientos, notificaciones y suscripción son flujos 
 
 ## Requisitos previos
 
-- Java 21 y Node.js 20 o superior con npm para ejecutar sin Docker.
+- Java 25 y Node.js 20 o superior con npm para ejecutar sin Docker.
 - Docker Desktop para ejecutar frontend/backend con Compose (opcional).
 - Proyecto Supabase Cloud y credenciales PostgreSQL Direct o Session Pooler.
 

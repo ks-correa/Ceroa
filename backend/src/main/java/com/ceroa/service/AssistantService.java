@@ -23,7 +23,9 @@ public class AssistantService {
     private record Conversation(UUID user,Channel channel,UUID id) {}
     public record DocumentEvidence(String status,Map<String,RagVectorStore.Chunk> sources) {}
     public enum Intent { debts, highest_interest, upcoming, payments, strategy, progress, write_request, unknown }
-    public record Reply(String answer, String intent) {}
+    public record Reply(String answer, String intent, List<com.ceroa.api.dto.DocumentContracts.Document> documents, UUID traceId) {
+        public Reply(String answer,String intent){this(answer,intent,List.of(),null);}
+    }
     private static final ZoneId ZONE = ZoneId.of("America/Bogota");
     private static final Set<String> AUDIO = Set.of("audio/webm", "audio/ogg", "audio/wav", "audio/mpeg", "audio/mp4");
     static class Job {
@@ -37,6 +39,10 @@ public class AssistantService {
         int documentCalls;
         final Map<String,RagVectorStore.Chunk> documents=new LinkedHashMap<>();
         RagRetrievalService.Retrieval retrieval;
+        com.ceroa.api.dto.DocumentContracts.Result libraryResult;
+        com.ceroa.api.dto.DocumentContracts.Intent libraryIntent;
+        int libraryCalls;
+        final Map<UUID,com.ceroa.api.dto.DocumentContracts.Document> libraryDocuments=new LinkedHashMap<>();
         Job(UUID user) { this.user = user; }
     }
     private record Turn(String question,String answer) {}
@@ -53,17 +59,18 @@ public class AssistantService {
     private final RateNormalizationService rates;
     private final AssistantAnalysisService analysis;
     private final RagRetrievalService rag;
+    private final DocumentLibraryService library;
     private final String webhook, key;
     private final boolean enabled;
     public AssistantService(CurrentUserService current, DebtService debts, PaymentService payments,
         UpcomingDueService dues, StrategyService strategies, MonthlyProgressService monthly,
-        DashboardService dashboard, ObjectMapper json, RateNormalizationService rates, AssistantAnalysisService analysis, RagRetrievalService rag,
+        DashboardService dashboard, ObjectMapper json, RateNormalizationService rates, AssistantAnalysisService analysis, RagRetrievalService rag, DocumentLibraryService library,
         @Value("${ceroa.assistant.enabled:false}") boolean enabled,
         @Value("${ceroa.assistant.webhook-url:}") String webhook,
         @Value("${ceroa.assistant.worker-key:}") String key) {
         this.current=current; this.debts=debts; this.payments=payments; this.dues=dues;
         this.strategies=strategies; this.monthly=monthly; this.dashboard=dashboard;
-        this.json=json; this.rates=rates; this.analysis=analysis; this.rag=rag; this.enabled=enabled; this.webhook=webhook; this.key=key;
+        this.json=json; this.rates=rates; this.analysis=analysis; this.rag=rag; this.library=library; this.enabled=enabled; this.webhook=webhook; this.key=key;
     }
     public Reply message(String message, String audio, String mime) {
         return message(message,audio,mime,Channel.web);
@@ -149,6 +156,22 @@ public class AssistantService {
             return analysis.calculate(job.facts,operation,refs);
         });
     }
+    public record LibraryEvidence(String status, AssistantAnalysisService.Evidence evidence) {}
+    public LibraryEvidence financialDocuments(UUID id,com.ceroa.api.dto.DocumentContracts.Query query) {
+        return withJob(id,job->{
+            if(++job.toolCalls>16||++job.libraryCalls>2)throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS);
+            var result=library.query(query);
+            job.libraryResult=result;
+            job.libraryIntent=query.intent();
+            for(var document:result.documents())job.libraryDocuments.put(document.id(),document);
+            com.fasterxml.jackson.databind.node.ObjectNode minimized=json.valueToTree(result);
+            minimized.path("documents").forEach(d->{if(d instanceof com.fasterxml.jackson.databind.node.ObjectNode doc)doc.remove("ownerId");});
+            var evidence=analysis.evidence(job.facts,minimized,"financialDocuments/"+result.traceId());
+            // Give the model one evidence representation, just like the established financial tools.
+            // Duplicating raw result fields encouraged literal dates/IDs outside the fID contract.
+            return new LibraryEvidence(result.evidenceStatus(),evidence);
+        });
+    }
     public Reply complete(UUID id,String answer,String transcript) {
         return complete(id,answer,transcript,null,List.of());
     }
@@ -180,7 +203,11 @@ public class AssistantService {
             if(transcript==null || transcript.isBlank() || transcript.length()>2000) throw new IllegalArgumentException();
             if(!job.question.isEmpty() && !job.question.equals(transcript)) throw new IllegalArgumentException();
             String resolved;
-            if(rag.enabled()) {
+            if(job.libraryResult!=null && job.libraryIntent==com.ceroa.api.dto.DocumentContracts.Intent.METADATA_SEARCH) {
+                // Metadata lists need no model-generated prose/citations. Only the authenticated,
+                // typed database results below become references; ignore proposed LLM citations.
+                resolved=job.libraryDocuments.isEmpty()?"No hay documentos que coincidan con los filtros consultados.":"Encontré documentos que coinciden con los filtros consultados. Revisa las referencias adjuntas.";
+            }else if(rag.enabled()) {
                 if(!Set.of("documentary","personal","mixed").contains(mode==null?"":mode)||citations.size()>8||new HashSet<>(citations).size()!=citations.size())throw new IllegalArgumentException();
                 if(!mode.equals("personal")&&job.documentCalls==0)throw new IllegalArgumentException("Falta consultar documentación");
                 var used=new ArrayList<RagVectorStore.Chunk>();
@@ -194,7 +221,17 @@ public class AssistantService {
                     else if(mode.equals("mixed"))resolved+="\n\n"+RagRetrievalService.ABSTENTION;
                 }
             }else resolved=analysis.resolve(job.facts,answer);
-            job.question=transcript; job.result=new Reply(resolved,"analysis"); return job.result;
+            job.question=transcript;
+            if(job.libraryResult!=null) {
+                var result=job.libraryResult;
+                // Revalidate grants and versions before returning evidence to either channel.
+                var documents=List.copyOf(job.libraryDocuments.values());
+                for(var d:documents){var fresh=library.get(d.id());if(fresh.version()!=d.version()||fresh.status().equals("DELETING"))throw new IllegalArgumentException("Documento modificado; consulta de nuevo");}
+                resolved+="\n\nFuentes documentales:\n"+documents.stream().map(d->"• "+d.documentType()+" · "+(d.financialEntity()==null?"Entidad no identificada":d.financialEntity())+" · "+d.id()).collect(java.util.stream.Collectors.joining("\n"));
+                if(Set.of("INSUFFICIENT","PARTIAL").contains(result.evidenceStatus()))resolved+="\nNo hay evidencia documental suficiente para responder.";
+                job.result=new Reply(resolved,"analysis",documents,result.traceId());
+            }else job.result=new Reply(resolved,"analysis");
+            return job.result;
         }); } catch (IllegalArgumentException error) {
             log.warn("Assistant response validation rejected: {}", error.getMessage());
             throw error;

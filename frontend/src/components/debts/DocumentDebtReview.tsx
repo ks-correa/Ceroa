@@ -3,6 +3,7 @@ import { UploadCloud, FileText, CheckCircle2, LoaderCircle, ShieldCheck, ArrowRi
 import { apiRequest } from '../../services/api';
 import { DebtFormState, DEBT_TYPES, RATE_OPTIONS } from './form/debtTypeSchemas';
 import { TypeSpecificSection } from './form/TypeSpecificSection';
+import { CategorySelect } from './form/CategorySelect';
 import { DebtType, RateType } from '../../types';
 
 export const DOCUMENT_FIELDS = [
@@ -14,6 +15,25 @@ export const DOCUMENT_FIELDS = [
   ['termRemainingMonths','Meses restantes','integer'],['accountNumber','Referencia de cuenta','text'],['notes','Notas','text']
 ] as const;
 type Field = typeof DOCUMENT_FIELDS[number][0];
+
+const FIELD_GUIDANCE: Record<Field, { example: string; help: string }> = {
+  name: { example: 'Ej. Tarjeta principal', help: 'Escribe un nombre para reconocer esta obligación.' },
+  entity: { example: 'Ej. Bancolombia', help: 'Nombre del banco, comercio o persona a quien debes.' },
+  type: { example: '', help: 'Selecciona el tipo de obligación que aparece en el documento.' },
+  categoryLabel: { example: '', help: 'Elige una de las categorías disponibles.' },
+  originalAmount: { example: 'Ej. 5000000', help: 'Monto inicial o cupo total en pesos, sin símbolo $ ni separadores de miles.' },
+  currentBalance: { example: 'Ej. 2500000', help: 'Lo que debes actualmente en pesos, sin símbolo $ ni separadores de miles.' },
+  interestRate: { example: 'Ej. 24.5', help: 'Escribe el porcentaje sin el signo %. Ejemplo: 24.5 equivale a 24,5 %.' },
+  rateType: { example: '', help: 'Elige la modalidad indicada en el documento, como E.A. o M.V.' },
+  monthlyPayment: { example: 'Ej. 350000', help: 'Valor de la cuota mensual en pesos, sin símbolo $ ni separadores de miles.' },
+  minimumPayment: { example: 'Ej. 95000', help: 'Monto mínimo exigido en el extracto, en pesos; no es el saldo total.' },
+  dueDateDay: { example: 'Ej. 15', help: 'Número del día del mes, del 1 al 31. Ejemplo: 15 significa pagar el día 15 de cada mes.' },
+  nextDueDate: { example: '', help: 'Selecciona la fecha completa del próximo pago. Ejemplo: 15 de noviembre de 2026.' },
+  disbursementDate: { example: '', help: 'Selecciona la fecha completa en que recibiste el préstamo. Ejemplo: 10 de marzo de 2025.' },
+  termRemainingMonths: { example: 'Ej. 24', help: 'Cantidad de meses que faltan para terminar de pagar; escribe un número entero.' },
+  accountNumber: { example: 'Ej. 1234567890', help: 'Referencia o número de la obligación tal como aparece en el documento.' },
+  notes: { example: 'Ej. La cuota incluye seguro de vida', help: 'Información adicional que quieras recordar (opcional).' },
+};
 type Evidence = {field:string;quote:string;location:string};
 type Extraction = {format:string;sheets:string[];requiresSheetSelection:boolean;draft:Record<string,string|number|null>|null;evidence:Evidence[];warnings:string[]};
 type Props = {debtId:string|null;onCancel:()=>void;onSaved:()=>Promise<void>};
@@ -87,20 +107,22 @@ export function DocumentDebtReview({debtId,onCancel,onSaved}:Props) {
             <label htmlFor={id} className="block text-sm font-semibold">{label}</label>
             <p className="text-xs text-slate-500">{edited.has(key)?'Revisado o corregido por ti':debtId?'Valor actual conservado':proposal===null?'Sin dato verificable':'Propuesta del documento'}</p>
             {debtId&&<><p className="text-xs">Actual: {display(original?.[key])||'Sin dato'} · Propuesta: {display(proposal)||'Sin dato'}</p>{proposal!==null&&proposal!==undefined&&key!=='type'&&<button type="button" disabled={busy} className="underline text-xs text-teal-700 dark:text-cyan-400" onClick={()=>change(key,display(proposal))}>Usar propuesta de {label}</button>}</>}
-            {kind==='type'||kind==='rate'?<select id={id} value={values[key]||''} disabled={busy||key==='type'&&!!debtId} required className="w-full border rounded p-2 bg-transparent" onChange={e=>{change(key,e.target.value);if(key==='type'){setDetails({});setValues(old=>({...old,categoryLabel:DEBT_TYPES.find(t=>t.value===e.target.value)?.category||''}));}}}><option value="">Sin dato: selecciona</option>{(kind==='type'?DEBT_TYPES:RATE_OPTIONS).map(option=><option key={option.value} value={option.value}>{option.label}</option>)}</select>:
-              <input id={id} type={kind==='integer'?'number':kind} step={kind==='integer'?'1':'any'} min={kind==='number'||kind==='integer'?0:undefined} max={key==='dueDateDay'?31:undefined} required={key==='name'||key==='currentBalance'} value={values[key]||''} disabled={busy} className="w-full border rounded p-2 bg-transparent" placeholder="Sin dato" onChange={e=>change(key,e.target.value)}/>}
+            {key==='categoryLabel'?<CategorySelect id={id} value={values[key]||''} disabled={busy} className="w-full border rounded p-2 bg-transparent" onChange={value=>change(key,value)}/>:
+              kind==='type'||kind==='rate'?<select id={id} value={values[key]||''} disabled={busy||key==='type'&&!!debtId} required aria-describedby={`${id}-help`} className="w-full border rounded p-2 bg-transparent" onChange={e=>{change(key,e.target.value);if(key==='type'){setDetails({});change('categoryLabel',DEBT_TYPES.find(t=>t.value===e.target.value)?.category||'');}}}><option value="">{kind==='type'?'Selecciona un tipo de obligación':'Selecciona una modalidad de tasa'}</option>{(kind==='type'?DEBT_TYPES:RATE_OPTIONS).map(option=><option key={option.value} value={option.value}>{option.label}</option>)}</select>:
+              <input id={id} type={kind==='integer'?'number':kind} step={kind==='integer'?'1':'any'} min={key==='dueDateDay'?1:kind==='number'||kind==='integer'?0:undefined} max={key==='dueDateDay'?31:undefined} required={key==='name'||key==='currentBalance'} value={values[key]||''} disabled={busy} aria-describedby={`${id}-help`} className="w-full border rounded p-2 bg-transparent" placeholder={FIELD_GUIDANCE[key].example} onChange={e=>change(key,e.target.value)}/>}
+            <p id={`${id}-help`} className="text-xs text-slate-500 dark:text-slate-400">{FIELD_GUIDANCE[key].help}</p>
             {proof.map((item,i)=><blockquote key={i} className="text-xs text-slate-600 dark:text-slate-300 border-l-2 pl-2 whitespace-pre-wrap">{item.quote}<span className="block text-slate-500">{item.location}</span></blockquote>)}
           </div>;
         })}
       </div>
       {type==='credit_card'&&<div className="grid sm:grid-cols-2 gap-4">
-        <label className="text-sm">Día de corte (si no ingresaste una fecha)<input type="number" min={1} max={31} value={display(details.statementDay)} className="block w-full border rounded p-2 bg-transparent" onChange={e=>changeDetail('statementDay',e.target.value?Number(e.target.value):null)}/></label>
-        <label className="text-sm">Fecha de corte<input type="date" value={display(details.statementDate)} className="block w-full border rounded p-2 bg-transparent" onChange={e=>changeDetail('statementDate',e.target.value||null)}/></label>
+        <label className="text-sm">Día de corte (si no ingresaste una fecha)<input type="number" min={1} max={31} placeholder="Ej. 20 (d?a del mes)" value={display(details.statementDay)} className="block w-full border rounded p-2 bg-transparent" onChange={e=>changeDetail('statementDay',e.target.value?Number(e.target.value):null)}/></label>
+        <label className="text-sm">Fecha de corte<input type="date" value={display(details.statementDate)} className="block w-full border rounded p-2 bg-transparent" onChange={e=>changeDetail('statementDate',e.target.value||null)}/><span className="block mt-1 text-xs text-slate-500">Selecciona la fecha completa. Ejemplo: 20 de octubre de 2026.</span></label>
       </div>}
       {(type==='retail_credit'||type==='installment_purchase')&&<div className="grid sm:grid-cols-2 gap-4">
-        <label className="text-sm">Total de cuotas<input type="number" min={1} step={1} required value={display(details.totalInstallments)} className="block w-full border rounded p-2 bg-transparent" onChange={e=>changeDetail('totalInstallments',e.target.value?Number(e.target.value):null)}/></label>
+        <label className="text-sm">Total de cuotas<input type="number" min={1} step={1} required placeholder="Ej. 36" value={display(details.totalInstallments)} className="block w-full border rounded p-2 bg-transparent" onChange={e=>changeDetail('totalInstallments',e.target.value?Number(e.target.value):null)}/></label>
         <label className="text-sm">Tipo de costo<select required value={display(details.costType)} className="block w-full border rounded p-2 bg-transparent" onChange={e=>changeDetail('costType',e.target.value)}><option value="">Selecciona el costo</option><option value="RATE">Tasa de interés</option><option value={type==='retail_credit'?'FEE':'FIXED_FEE'}>Costo fijo en COP</option></select></label>
-        {(details.costType==='FEE'||details.costType==='FIXED_FEE')&&<label className="text-sm">Costo fijo (COP)<input type="number" min={0.01} step="any" required value={display(details[type==='retail_credit'?'financialCost':'fixedFee'])} className="block w-full border rounded p-2 bg-transparent" onChange={e=>changeDetail(type==='retail_credit'?'financialCost':'fixedFee',e.target.value?Number(e.target.value):null)}/></label>}
+        {(details.costType==='FEE'||details.costType==='FIXED_FEE')&&<label className="text-sm">Costo fijo (COP)<input type="number" min={0.01} step="any" required placeholder="Ej. 45000" value={display(details[type==='retail_credit'?'financialCost':'fixedFee'])} className="block w-full border rounded p-2 bg-transparent" onChange={e=>changeDetail(type==='retail_credit'?'financialCost':'fixedFee',e.target.value?Number(e.target.value):null)}/></label>}
       </div>}
       {type&&<><p className="text-xs text-slate-500">Los detalles específicos no se extraen automáticamente: completa los aplicables a tu obligación.</p><TypeSpecificSection preserveUnknownDefaults form={form} errors={{}} onFieldChange={(key,value)=>{if(key in values)change(key as Field,display(value));}} onDetailChange={changeDetail}/></>}
       <label className="flex gap-2 text-sm"><input type="checkbox" checked={reviewed} disabled={busy} onChange={e=>setReviewed(e.target.checked)}/>Revisé los valores y quiero {debtId?'actualizar':'guardar'} esta obligación en Ceroa.</label>

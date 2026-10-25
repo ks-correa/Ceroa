@@ -69,6 +69,15 @@ logging:
     org.hibernate.SQL: OFF
 
 ceroa:
+  library:
+    enabled: ${DOCUMENT_LIBRARY_ENABLED:false}
+    worker-key: ${DOCUMENT_LIBRARY_WORKER_KEY:}
+    storage-url: ${DOCUMENT_LIBRARY_STORAGE_URL:}
+    storage-key: ${DOCUMENT_LIBRARY_STORAGE_KEY:}
+    bucket: ${DOCUMENT_LIBRARY_BUCKET:financial-documents}
+    ingestion-webhook-url: ${DOCUMENT_LIBRARY_INGESTION_WEBHOOK_URL:}
+    ocr-url: ${DOCUMENT_LIBRARY_OCR_URL:}
+    ocr-key: ${DOCUMENT_LIBRARY_OCR_KEY:}
   sentinel:
     enabled: ${SENTINEL_ENABLED:false}
     worker-key: ${SENTINEL_WORKER_KEY:}

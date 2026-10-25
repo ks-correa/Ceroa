@@ -19,10 +19,13 @@ try {
   node integrations/n8n/build-telegram-workflow.mjs
   if ($LASTEXITCODE -ne 0) { throw 'No se pudo generar el flujo de Telegram.' }
   $export = Join-Path $env:TEMP 'ceroa-current-assistant.json'
-  docker exec ceroa-n8n n8n export:workflow --id=ceroaAssistant01 --output=/tmp/ceroa-current-assistant.json
+  docker exec ceroa-n8n n8n export:workflow --all --output=/tmp/ceroa-current-assistant.json
   if ($LASTEXITCODE -ne 0) { throw 'No se pudo leer el flujo del asistente.' }
   docker cp ceroa-n8n:/tmp/ceroa-current-assistant.json $export
-  $assistant = @((Get-Content -LiteralPath $export -Raw -Encoding UTF8 | ConvertFrom-Json))[0]
+  $available = @(Get-Content -LiteralPath $export -Raw -Encoding UTF8 | ConvertFrom-Json)
+  $assistant = $available | Where-Object id -eq 'ceroaHybridQuery20' | Select-Object -First 1
+  if (!$assistant) { $assistant = $available | Where-Object id -eq 'ceroaAssistant01' | Select-Object -First 1 }
+  if (!$assistant) { throw 'No se encontró un asistente instalado para reutilizar su credencial.' }
   $header = ($assistant.nodes | Where-Object { $_.credentials.httpHeaderAuth } | Select-Object -First 1).credentials
   if (!$header) { throw 'Falta la credencial Header Auth del asistente.' }
   $workflow = Get-Content integrations/n8n/assistant-telegram.json -Raw -Encoding UTF8 | ConvertFrom-Json

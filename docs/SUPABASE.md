@@ -18,7 +18,7 @@ credenciales privadas de `.env`. El backend utiliza Session Pooler y el esquema
 | `application.yml` | JDBC con defaults localhost/ceroa/ceroa_dev; import de `.env` relativo a backend | Credenciales obligatorias, sin fallback local; import configurable con `CEROA_ENV_FILE` |
 | `.env.example` | PostgreSQL local y credenciales de desarrollo | Perfil `supabase`, campos JDBC vacíos y pool de 5 conexiones |
 | Compose | Backend esperaba healthcheck de postgres y sobreescribía JDBC con host `postgres` | Compose principal solo backend/frontend; sin servicio de base local |
-| Dependencias | Spring Boot 3.5, Java 21, driver pgJDBC, Flyway core + PostgreSQL | Ninguna dependencia adicional |
+| Dependencias | Spring Boot 3.5, Java 25, driver pgJDBC, Flyway core + PostgreSQL | Ninguna dependencia adicional |
 | Flyway | V1–V14, SQL sin esquema explícito | Scripts intactos; esquema e historial aislados en `ceroa`; validate habilitado, baseline automático y clean deshabilitados |
 | Entidades | 10 tablas, UUID generados en Java, NUMERIC, TIMESTAMPTZ, JSONB, enums como texto, version de deuda | Sin cambios de mapeo; Hibernate sigue en `ddl-auto=validate`, con esquema predeterminado `ceroa` |
 | SQL JDBC | `MonthlyHistoryService` consulta tablas sin calificar | `currentSchema=ceroa` también dirige JDBC al esquema correcto |

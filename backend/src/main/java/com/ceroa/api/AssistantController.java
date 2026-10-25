@@ -32,6 +32,16 @@ public class AssistantController {
         return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(service.calculate(id,operation,refs));
     }
     public record Completion(String answer,String transcript,String mode,List<String> sources) {}
+    @GetMapping("/api/v1/assistant-tools/requests/{id}/financial-documents")
+    public ResponseEntity<AssistantService.LibraryEvidence> financialDocuments(@PathVariable UUID id,
+        @RequestParam com.ceroa.api.dto.DocumentContracts.Intent intent,@RequestParam(required=false) String question,
+        @RequestParam(required=false) com.ceroa.api.dto.DocumentContracts.Identification identificationType,
+        @RequestParam(required=false) com.ceroa.api.dto.DocumentContracts.Kind documentType,
+        @RequestParam(required=false) java.time.LocalDate periodFrom,@RequestParam(required=false) java.time.LocalDate periodToExclusive,
+        @RequestParam(defaultValue="0") int offset) {
+        var filters=new com.ceroa.api.dto.DocumentContracts.Filters(null,identificationType,documentType,null,periodFrom,periodToExclusive);
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(service.financialDocuments(id,new com.ceroa.api.dto.DocumentContracts.Query(intent,question,filters,offset,10)));
+    }
     @GetMapping("/api/v1/assistant-tools/requests/{id}/documents")
     public ResponseEntity<AssistantService.DocumentEvidence> documents(@PathVariable UUID id,@RequestParam String query){
         return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(service.documents(id,query));

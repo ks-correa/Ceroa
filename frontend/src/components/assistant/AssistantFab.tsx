@@ -1,8 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
 import { MessageCircle, Mic, X, Send, RotateCcw } from 'lucide-react';
 import { apiRequest } from '../../services/api';
+import { DocumentLibraryPanel } from './DocumentLibraryPanel';
+import { DocumentReferences } from './DocumentReferences';
+import type { FinancialDocument } from '../../services/documentLibraryService';
 
-type ChatMessage = { role: 'user' | 'assistant'; text: string; audio?: Blob };
+type ChatMessage = { role: 'user' | 'assistant'; text: string; audio?: Blob; documents?: FinancialDocument[] };
 const LIMIT = 4 * 1024 * 1024;
 function ChatAudio({ blob }: { blob: Blob }) {
   const [url, setUrl] = useState('');
@@ -14,6 +17,7 @@ function ChatAudio({ blob }: { blob: Blob }) {
   return <audio aria-label="Audio enviado" controls preload="metadata" src={url || undefined} className="mt-2 w-full" />;
 }
 export function AssistantFab() {
+  const [showDocuments, setShowDocuments] = useState(false);
   const [open, setOpen] = useState(false);
   const [text, setText] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -74,10 +78,10 @@ export function AssistantFab() {
       if (!alive.current || generation.current !== turn) return;
       setMessages(m => [...m, { role: 'user' as const, text: message || '', audio: blob }].slice(-20));
       setText('');
-      const result = await apiRequest<{ answer: string }>('/assistant/messages', {
+      const result = await apiRequest<{ answer: string; documents?: FinancialDocument[] }>('/assistant/messages', {
         method: 'POST', body: JSON.stringify(blob ? { audio, mime: blob.type.split(';')[0] } : { message })
       });
-      if (alive.current && generation.current === turn) setMessages(m => [...m, { role: 'assistant' as const, text: result.answer }].slice(-20));
+      if (alive.current && generation.current === turn) setMessages(m => [...m, { role: 'assistant' as const, text: result.answer, documents: result.documents }].slice(-20));
     } catch (cause) {
       if (alive.current && generation.current === turn) setError(cause instanceof Error ? cause.message : 'No pude procesar la consulta.');
     } finally { if (alive.current && generation.current === turn) setBusy(false); }
@@ -197,13 +201,15 @@ export function AssistantFab() {
     catch(cause){if(alive.current)setError(cause instanceof Error?cause.message:'No pude iniciar otra conversación.');}
     finally{if(alive.current)setBusy(false);}
   }
-  return <div className="fixed bottom-20 right-4 lg:bottom-6 z-40">
-    {open && <section aria-label="Asistente financiero" className="mb-3 flex max-h-[min(70vh,650px)] w-[calc(100vw-2rem)] max-w-sm flex-col overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-2xl shadow-slate-900/15 dark:border-slate-700 dark:bg-slate-900">
-      <div className="flex items-center justify-between gap-2 bg-gradient-to-r from-teal-800 to-cyan-700 px-4 py-3 text-white"><div className="flex items-center gap-3"><span className="rounded-2xl bg-white/20 p-2"><MessageCircle size={20} /></span><div><h2 className="font-semibold leading-tight">Asistente de Ceroa</h2><p className="text-xs text-teal-50">Tu espacio para resolver dudas</p></div></div><div className="flex items-center gap-1"><button type="button" aria-label="Nueva conversación" title="Nueva conversación" disabled={busy||recording||startingRecording} className="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-white/20 disabled:opacity-40" onClick={()=>void resetConversation()}><RotateCcw size={18}/></button><button type="button" className="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-white/20" aria-label="Cerrar asistente" onClick={close}><X size={20} /></button></div></div>
-      <p className="px-4 pt-3 text-sm text-slate-500">Analiza tus finanzas y compara opciones. Gemini procesa tus preguntas, audio y los datos financieros necesarios para responder. Las sugerencias no realizan cambios en tu cuenta.</p>
-      <div role="log" aria-live="polite" className="min-h-32 flex-1 space-y-3 overflow-y-auto bg-slate-50/80 p-4 dark:bg-slate-950/40">
+  return <div className="assistant-launcher fixed right-4 z-40">
+    {open && <section aria-label="Asistente financiero" className="floating-assistant-panel flex flex-col overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-2xl shadow-slate-900/15 dark:border-slate-700 dark:bg-slate-900">
+      <div className="flex shrink-0 items-center justify-between gap-2 bg-gradient-to-r from-teal-800 to-cyan-700 px-4 py-3 text-white"><div className="flex items-center gap-3"><span className="rounded-2xl bg-white/20 p-2"><MessageCircle size={20} /></span><div><h2 className="font-semibold leading-tight">Asistente de Ceroa</h2><p className="text-xs text-teal-50">Tu espacio para resolver dudas</p></div></div><div className="flex items-center gap-1"><button type="button" aria-label="Nueva conversación" title="Nueva conversación" disabled={busy||recording||startingRecording} className="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-white/20 disabled:opacity-40" onClick={()=>void resetConversation()}><RotateCcw size={18}/></button><button type="button" className="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-white/20" aria-label="Cerrar asistente" onClick={close}><X size={20} /></button></div></div>
+      <details className="shrink-0 border-b border-slate-100 px-4 py-2 text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400"><summary className="cursor-pointer py-1 font-medium">Sobre el asistente y tus datos</summary><p className="pb-2 pt-1 leading-relaxed">Analiza tus finanzas y compara opciones. Gemini procesa tus preguntas, audio y los datos financieros necesarios para responder. Las sugerencias no realizan cambios en tu cuenta.</p></details>
+      <div role="log" aria-live="polite" className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain [scrollbar-gutter:stable] bg-slate-50/80 p-4 dark:bg-slate-950/40">
+        <button type="button" aria-expanded={showDocuments} className="rounded-full border border-teal-200 bg-teal-50 px-3 py-2 text-xs font-semibold text-teal-800 transition-colors hover:bg-teal-100 dark:border-teal-800 dark:bg-teal-950 dark:text-teal-200" onClick={() => setShowDocuments(!showDocuments)}>{showDocuments ? 'Cerrar documentos' : 'Subir documento / Mis documentos'}</button>
+        {showDocuments && <DocumentLibraryPanel />}
         {messages.length === 0 && <p className="rounded-2xl border border-dashed border-slate-200 bg-white p-4 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">Escribe una pregunta para empezar la conversación.</p>}
-        {messages.map((m, i) => <div key={i} className={`max-w-[90%] whitespace-pre-wrap rounded-2xl p-3 text-sm shadow-sm ${m.role === 'user' ? 'ml-auto rounded-br-md bg-teal-700 text-white' : 'mr-auto rounded-bl-md border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800'}`}><strong className="mb-1 block text-xs opacity-75">{m.role === 'user' ? 'Tú' : 'Ceroa'}</strong>{m.audio ? <ChatAudio blob={m.audio} /> : m.text}</div>)}
+        {messages.map((m, i) => <div key={i} className={`max-w-[90%] whitespace-pre-wrap rounded-2xl p-3 text-sm shadow-sm ${m.role === 'user' ? 'ml-auto rounded-br-md bg-teal-700 text-white' : 'mr-auto rounded-bl-md border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800'}`}><strong className="mb-1 block text-xs opacity-75">{m.role === 'user' ? 'Tú' : 'Ceroa'}</strong>{m.audio ? <ChatAudio blob={m.audio} /> : m.text}{!!m.documents?.length && <DocumentReferences documents={m.documents} />}</div>)}
         {startingRecording && <p role="status">Esperando permiso del micrófono… Revisa la solicitud de permisos del navegador.</p>}
         {(recording || audioDraft) && <div className="rounded-xl bg-teal-50 p-3 dark:bg-teal-950">
           <div className="flex items-center gap-2 text-teal-800 dark:text-teal-200"><Mic size={20} className={recording ? 'animate-pulse' : ''} /><span role="status">{recording ? 'Escuchando…' : 'Audio listo para enviar'} {String(Math.floor(elapsed / 60)).padStart(2, '0')}:{String(elapsed % 60).padStart(2, '0')} / 01:00</span></div>
@@ -214,8 +220,8 @@ export function AssistantFab() {
         {busy && <p role="status">Consultando…</p>}
         {error && <p role="alert" className="text-red-700 dark:text-red-400">{error}</p>}
       </div>
-      <form className="space-y-2 border-t border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900" onSubmit={e => { e.preventDefault(); submit(); }}>
-        <div className="flex gap-2"><input ref={input} aria-label="Pregunta al asistente" maxLength={2000} value={text} onChange={e => setText(e.target.value)} disabled={busy || recording || startingRecording || !!audioDraft} placeholder="¿Cuál es mi estrategia activa?" className="min-w-0 flex-1 rounded border p-2 dark:bg-slate-800" /><button aria-label={recording || audioDraft ? "Enviar audio" : "Enviar pregunta"} disabled={busy || startingRecording || (!recording && !audioDraft && !text.trim())} className="rounded bg-teal-700 p-2 text-white disabled:opacity-50"><Send size={18} /></button></div>
+      <form className="shrink-0 space-y-2 border-t border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900" onSubmit={e => { e.preventDefault(); submit(); }}>
+        <div className="flex gap-2"><input ref={input} aria-label="Pregunta al asistente" maxLength={2000} value={text} onChange={e => setText(e.target.value)} disabled={busy || recording || startingRecording || !!audioDraft} placeholder="¿Cuál es mi estrategia activa?" className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm dark:border-slate-700 dark:bg-slate-800" /><button aria-label={recording || audioDraft ? "Enviar audio" : "Enviar pregunta"} disabled={busy || startingRecording || (!recording && !audioDraft && !text.trim())} className="shrink-0 rounded-xl bg-teal-700 p-2.5 text-white disabled:opacity-50"><Send size={18} /></button></div>
         <div className="flex items-center gap-3 text-sm"><button type="button" disabled={busy || startingRecording || recording || !!audioDraft} aria-label="Grabar audio" onClick={() => void record()} className="flex gap-1 items-center disabled:opacity-50"><Mic size={16} />Grabar</button>
           <label className="cursor-pointer">Adjuntar audio<input aria-label="Adjuntar audio" type="file" accept="audio/webm,audio/ogg,audio/wav,audio/mpeg,audio/mp4" className="sr-only" disabled={busy || recording || startingRecording || !!audioDraft} onChange={e => { const file = e.target.files?.[0]; if (file) void send(undefined, file); e.target.value = ''; }} /></label>
         </div>

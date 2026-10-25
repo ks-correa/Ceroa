@@ -10,4 +10,5 @@ public class TelegramLink {
     @Column(name="code_hash",unique=true,length=64) public String codeHash;
     @Column(name="code_expires_at") public OffsetDateTime codeExpiresAt;
     @Column(name="linked_at") public OffsetDateTime linkedAt;
+    @Column(name="document_consent_at") public OffsetDateTime documentConsentAt;
 }

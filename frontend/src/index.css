@@ -1,5 +1,43 @@
 @import "tailwindcss";
 
+/* Both launchers share a row; panels always sit above the controls and mobile navigation. */
+.assistant-launcher,
+.sentinel-launcher {
+  bottom: calc(5rem + env(safe-area-inset-bottom, 0px));
+}
+
+.floating-assistant-panel {
+  position: fixed;
+  right: 1rem;
+  bottom: calc(10rem + env(safe-area-inset-bottom, 0px));
+  width: min(26rem, calc(100vw - 2rem));
+  height: min(650px, calc(100dvh - 11rem - env(safe-area-inset-bottom, 0px)));
+  min-height: 0;
+}
+
+.document-library label {
+  display: block;
+  min-width: 0;
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+@layer components {
+  .document-field {
+    @apply mt-1 block min-w-0 w-full rounded-xl border border-slate-200 bg-slate-50 px-2 py-2 text-sm text-slate-800 transition-colors focus:border-teal-600 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100;
+    max-width: 100%;
+  }
+}
+
+@media (min-width: 1024px) {
+  .assistant-launcher,
+  .sentinel-launcher { bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px)); }
+  .floating-assistant-panel {
+    bottom: calc(7rem + env(safe-area-inset-bottom, 0px));
+    height: min(650px, calc(100dvh - 8rem - env(safe-area-inset-bottom, 0px)));
+  }
+}
+
 :where(button, input, a):focus-visible { outline: 3px solid #008fa6; outline-offset: 3px; }
 
 /* Tailwind 4 uses the operating-system media query by default. Ceroa's theme

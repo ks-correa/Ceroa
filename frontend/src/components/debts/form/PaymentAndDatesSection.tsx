@@ -37,6 +37,7 @@ export const PaymentAndDatesSection: React.FC<PaymentAndDatesSectionProps> = ({
 
   return (
     <div className="space-y-4">
+      <p className="text-[11px] text-slate-500 dark:text-slate-400">Montos en pesos, sin símbolo $ ni separadores de miles. Ejemplo: 95000 para $95.000.</p>
       {/* 1. Cuota mensual o Pago Mínimo */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {isCard ? (
@@ -51,7 +52,7 @@ export const PaymentAndDatesSection: React.FC<PaymentAndDatesSectionProps> = ({
               step="any"
               value={form.minimumPayment !== undefined ? form.minimumPayment : ''}
               onChange={(e) => onFieldChange('minimumPayment', Number(e.target.value))}
-              placeholder="0"
+              placeholder="Ej. 95000"
               aria-required="true"
               className={inputClass(Boolean(errors.minimumPayment))}
             />
@@ -71,7 +72,7 @@ export const PaymentAndDatesSection: React.FC<PaymentAndDatesSectionProps> = ({
               step="any"
               value={form.monthlyPayment || ''}
               onChange={(e) => onFieldChange('monthlyPayment', Number(e.target.value))}
-              placeholder="0"
+              placeholder="Ej. 350000"
               aria-required={!isFamilyOrOther}
               className={inputClass(Boolean(errors.monthlyPayment))}
             />
@@ -85,7 +86,7 @@ export const PaymentAndDatesSection: React.FC<PaymentAndDatesSectionProps> = ({
         {isCard && (
           <div>
             <label htmlFor="statement-day-input" className="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">
-              Día o fecha de corte *
+              Día de corte (1–31) o fecha completa *
             </label>
             <div className="grid grid-cols-2 gap-2">
               <input
@@ -99,11 +100,11 @@ export const PaymentAndDatesSection: React.FC<PaymentAndDatesSectionProps> = ({
                   onFieldChange('dueDateDay', day);
                   onDetailChange('statementDay', day);
                 }}
-                placeholder="Día (1-31)"
+                placeholder="Ej. 15 (día del mes)"
                 className={inputClass(Boolean(errors.statementDate))}
               />
               <input
-                id="statement-date-input"
+                aria-label="Fecha completa de corte" id="statement-date-input"
                 type="date"
                 value={form.details?.statementDate || ''}
                 onChange={(e) => onDetailChange('statementDate', e.target.value)}
@@ -137,6 +138,7 @@ export const PaymentAndDatesSection: React.FC<PaymentAndDatesSectionProps> = ({
               aria-required={!isFamilyOrOther}
               className={inputClass(Boolean(errors.nextDueDate))}
             />
+            <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Selecciona la fecha completa. Ejemplo: 15 de noviembre de 2026.</p>
             {errors.nextDueDate && (
               <p className="text-[11px] text-rose-500 mt-1">{errors.nextDueDate}</p>
             )}
@@ -203,6 +205,7 @@ export const PaymentAndDatesSection: React.FC<PaymentAndDatesSectionProps> = ({
                 onChange={(e) => onFieldChange('disbursementDate', e.target.value || undefined)}
                 className={inputClass(Boolean(errors.disbursementDate))}
               />
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1">Fecha en que recibiste el dinero. Ejemplo: 10 de marzo de 2025.</p>
               {errors.disbursementDate && (
                 <p className="text-[11px] text-rose-500 mt-1">{errors.disbursementDate}</p>
               )}

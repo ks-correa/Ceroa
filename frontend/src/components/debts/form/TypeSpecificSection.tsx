@@ -78,7 +78,7 @@ export const TypeSpecificSection: React.FC<TypeSpecificSectionProps> = ({
               min="0"
               value={form.details?.managementFee !== undefined ? form.details.managementFee : ''}
               onChange={(e) => onDetailChange('managementFee', e.target.value === '' ? undefined : Number(e.target.value))}
-              placeholder="0"
+              placeholder="Ej. 45000"
               className={inputClass(false)}
             />
           </div>
@@ -93,7 +93,7 @@ export const TypeSpecificSection: React.FC<TypeSpecificSectionProps> = ({
               min="0"
               value={form.details?.overdueBalance !== undefined ? form.details.overdueBalance : ''}
               onChange={(e) => onDetailChange('overdueBalance', e.target.value === '' ? undefined : Number(e.target.value))}
-              placeholder="0"
+              placeholder="Ej. 45000"
               className={inputClass(false)}
             />
           </div>
@@ -136,7 +136,7 @@ export const TypeSpecificSection: React.FC<TypeSpecificSectionProps> = ({
               min="0"
               value={form.details?.insuranceAmount !== undefined ? form.details.insuranceAmount : ''}
               onChange={(e) => onDetailChange('insuranceAmount', e.target.value === '' ? undefined : Number(e.target.value))}
-              placeholder="0"
+              placeholder="Ej. 45000"
               className={inputClass(false)}
             />
           </div>
@@ -151,7 +151,7 @@ export const TypeSpecificSection: React.FC<TypeSpecificSectionProps> = ({
               min="0"
               value={form.details?.overdueBalance !== undefined ? form.details.overdueBalance : ''}
               onChange={(e) => onDetailChange('overdueBalance', e.target.value === '' ? undefined : Number(e.target.value))}
-              placeholder="0"
+              placeholder="Ej. 45000"
               className={inputClass(false)}
             />
           </div>
@@ -247,7 +247,7 @@ export const TypeSpecificSection: React.FC<TypeSpecificSectionProps> = ({
                 min="0.01"
                 value={form.monthlyPayment || ''}
                 onChange={(e) => onFieldChange('monthlyPayment', Number(e.target.value))}
-                placeholder="0"
+                placeholder="Ej. 45000"
                 className={inputClass(Boolean(errors.monthlyPayment))}
               />
               {errors.monthlyPayment && (
@@ -315,7 +315,7 @@ export const TypeSpecificSection: React.FC<TypeSpecificSectionProps> = ({
               min="0"
               value={form.details?.collectionCosts !== undefined ? form.details.collectionCosts : ''}
               onChange={(e) => onDetailChange('collectionCosts', e.target.value === '' ? undefined : Number(e.target.value))}
-              placeholder="0"
+              placeholder="Ej. 45000"
               className={inputClass(false)}
             />
           </div>
@@ -384,7 +384,7 @@ export const TypeSpecificSection: React.FC<TypeSpecificSectionProps> = ({
                     onDetailChange('agreedPaymentAmount', val);
                     onFieldChange('monthlyPayment', val);
                   }}
-                  placeholder="0"
+                  placeholder="Ej. 45000"
                   className={inputClass(false)}
                 />
               </div>
@@ -468,7 +468,7 @@ export const TypeSpecificSection: React.FC<TypeSpecificSectionProps> = ({
                   min="0"
                   value={form.monthlyPayment || ''}
                   onChange={(e) => onFieldChange('monthlyPayment', Number(e.target.value))}
-                  placeholder="0"
+                  placeholder="Ej. 45000"
                   className={inputClass(false)}
                 />
               </div>
