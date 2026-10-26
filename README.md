@@ -98,7 +98,7 @@ en `.env` privado; no hay secretos en el ejemplo.
 
 ```powershell
 docker compose config --quiet
-docker compose up -d --build backend frontend
+docker compose up -d --build
 docker compose logs --tail 100 backend
 ```
 
@@ -132,9 +132,10 @@ revocación, permisos e idempotencia. Se gestionan en Perfil → Automatizacione
 La configuración y workflows importables están en [docs/N8N.md](docs/N8N.md).
 RA-N8N-004 programa recordatorios y resúmenes por Telegram con consentimiento separado
 en Perfil, Ceroa Plus y estados persistentes en Supabase: [guía](docs/RA-N8N-004.md).
-Para empezar con n8n local, ejecutar
-`docker compose -f docker-compose.yml -f docker-compose.n8n.yml up -d n8n` y abrir
-`http://localhost:5678`. Crear la cuenta local y configurar Bearer Auth siguiendo la guía.
+Al iniciar Ceroa con `docker compose up -d --build`, n8n arranca con la aplicación
+y publica los workflows operativos que ya estén instalados. El workflow de indexación
+administrativa sigue siendo manual. Abrir `http://localhost:5678` para crear la cuenta
+local y configurar Bearer Auth siguiendo la guía.
 RA-N8N-003 está activo con documentación aprobada en PGVector/Supabase, roles auxiliares
 sin acceso a `ceroa` y memoria de contexto separada por usuario, canal y conversación.
 Los datos personales se consultan mediante las APIs GET del backend. Configuración,
