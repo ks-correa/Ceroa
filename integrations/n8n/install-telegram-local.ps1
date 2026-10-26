@@ -58,7 +58,9 @@ db.all('select id from credentials_entity where type=? and name=?',['telegramApi
   docker cp $installed ceroa-n8n:/tmp/ceroa-telegram-installed.json
   docker exec ceroa-n8n n8n import:workflow --input=/tmp/ceroa-telegram-installed.json
   if ($LASTEXITCODE -ne 0) { throw 'No se pudo importar el flujo de Telegram.' }
-  $compose = @('compose','--env-file','.env','--env-file','.env.telegram-local','-f','docker-compose.yml','-f','docker-compose.n8n.yml','-f','docker-compose.n8n-sandbox.yml','-f','docker-compose.telegram-local.yml')
+  $compose = @('compose','--env-file','.env','--env-file','.env.telegram-local','-f','docker-compose.yml','-f','docker-compose.n8n.yml')
+  if (Test-Path '.env.n8n-sandbox') { $compose += @('-f','docker-compose.n8n-sandbox.yml') }
+  $compose += @('-f','docker-compose.telegram-local.yml')
   $ErrorActionPreference = 'Continue'
   & docker @compose up -d --no-deps backend frontend n8n telegram-proxy
   $ErrorActionPreference = 'Stop'

@@ -12,6 +12,16 @@ it('starts a new conversation only after the backend forgets the previous contex
   await waitFor(()=>expect(screen.queryByText('Respuesta anterior')).toBeNull());
   expect(apiRequest).toHaveBeenCalledWith('/assistant/conversation',{method:'DELETE'});
 });
+it('lets the user resize the chat in both directions', () => {
+  render(<AssistantFab />);
+  fireEvent.click(screen.getByRole('button',{name:'Abrir asistente financiero'}));
+  fireEvent.click(screen.getByText('Tamaño del chat'));
+  fireEvent.change(screen.getByLabelText('Ancho del chat'),{target:{value:'800'}});
+  fireEvent.change(screen.getByLabelText('Alto del chat'),{target:{value:'900'}});
+  const panel = screen.getByRole('region',{name:'Asistente financiero'}) as HTMLElement;
+  expect(panel.style.width).toBe('800px');
+  expect(panel.style.height).toBe('900px');
+});
 it('sends captured audio using the main send button', async () => {
   const createObjectURL = vi.fn((_blob: Blob) => 'blob:recorded-audio');
   const revokeObjectURL = vi.fn();
@@ -75,6 +85,24 @@ it('sends a question through the authenticated API and displays backend text lit
   expect(await screen.findByText(/not executable/)).toBeTruthy();
   expect(document.querySelector('script')).toBeNull();
   expect(localStorage.length).toBe(0);
+});
+it('keeps follow-up questions scoped to a selected indexed document', async () => {
+  vi.mocked(apiRequest).mockImplementation(async path => {
+    if(path === '/financial-documents/search')return {documents:[{id:'selected-doc',status:'INDEXED',documentType:'BANK_STATEMENT',financialEntity:'Banco de prueba',periodStart:'2026-09-01'}],sources:[]};
+    if(path === '/assistant/messages')return {answer:'Respuesta del archivo'};
+    throw new Error('Unexpected request');
+  });
+  render(<AssistantFab />);
+  fireEvent.click(screen.getByRole('button',{name:'Abrir asistente financiero'}));
+  fireEvent.click(screen.getByRole('button',{name:'Consultar archivos'}));
+  fireEvent.click(screen.getByRole('button',{name:'Ver mis documentos'}));
+  fireEvent.click(await screen.findByRole('button',{name:'Continuar conversación con este archivo'}));
+  expect(screen.getByText('Conversación enfocada en este archivo')).toBeTruthy();
+  fireEvent.change(screen.getByRole('textbox',{name:'Pregunta al asistente'}),{target:{value:'¿Qué movimientos contiene?'}});
+  fireEvent.click(screen.getByRole('button',{name:'Enviar pregunta'}));
+  await waitFor(()=>expect(apiRequest).toHaveBeenCalledWith('/assistant/messages',{method:'POST',body:JSON.stringify({message:'¿Qué movimientos contiene?',documentId:'selected-doc'})}));
+  fireEvent.click(screen.getByRole('button',{name:'Salir del archivo'}));
+  expect(screen.queryByText('Conversación enfocada en este archivo')).toBeNull();
 });
 it('shows a failed request without claiming success or exposing financial values', async () => {
   vi.mocked(apiRequest).mockRejectedValue(new Error('No pude consultar tu información.'));

@@ -10,10 +10,10 @@ import com.ceroa.service.AssistantAnalysisService;
 public class AssistantController {
     private final AssistantService service;
     public AssistantController(AssistantService service) { this.service=service; }
-    public record Message(String message,String audio,String mime) {}
+    public record Message(String message,String audio,String mime,UUID documentId) {}
     @PostMapping("/api/v1/assistant/messages")
     public ResponseEntity<AssistantService.Reply> message(@RequestBody Message body) {
-        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(service.message(body.message,body.audio,body.mime));
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(service.message(body.message,body.audio,body.mime,AssistantService.Channel.web,body.documentId));
     }
     @GetMapping("/api/v1/assistant-tools/requests/{id}/query")
     public ResponseEntity<AssistantService.Reply> query(@PathVariable UUID id,@RequestParam AssistantService.Intent intent,

@@ -12,6 +12,8 @@
   bottom: calc(10rem + env(safe-area-inset-bottom, 0px));
   width: min(26rem, calc(100vw - 2rem));
   height: min(650px, calc(100dvh - 11rem - env(safe-area-inset-bottom, 0px)));
+  max-width: calc(100vw - 2rem);
+  max-height: calc(100dvh - 11rem - env(safe-area-inset-bottom, 0px));
   min-height: 0;
 }
 
@@ -35,6 +37,7 @@
   .floating-assistant-panel {
     bottom: calc(7rem + env(safe-area-inset-bottom, 0px));
     height: min(650px, calc(100dvh - 8rem - env(safe-area-inset-bottom, 0px)));
+    max-height: calc(100dvh - 8rem - env(safe-area-inset-bottom, 0px));
   }
 }
 

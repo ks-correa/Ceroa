@@ -50,10 +50,10 @@ public class FinancialDocumentRepository {
     }
     private MapSqlParameterSource parameters(UUID actor,Filters f) {
         return new MapSqlParameterSource("actor",actor).addValue("owner",f.ownerId()).addValue("identification",f.identificationType()==null?null:f.identificationType().name())
-            .addValue("kind",f.documentType()==null?null:f.documentType().name()).addValue("entity",f.financialEntity()).addValue("from",f.periodFrom()).addValue("to",f.periodToExclusive());
+            .addValue("kind",f.documentType()==null?null:f.documentType().name()).addValue("entity",f.financialEntity()).addValue("from",f.periodFrom()).addValue("to",f.periodToExclusive()).addValue("document",f.documentId());
     }
     private String where(Filters f) {
-        return READ_SCOPE+" AND d.processing_status<>'DELETING'"+(f.ownerId()!=null?" AND d.owner_id=:owner":"")
+        return READ_SCOPE+" AND d.processing_status<>'DELETING'"+(f.ownerId()!=null?" AND d.owner_id=:owner":"")+(f.documentId()!=null?" AND d.id=:document":"")
             +(f.identificationType()!=null?" AND d.identification_type=:identification":"")+(f.documentType()!=null?" AND d.document_type=:kind":"")
             +(f.financialEntity()!=null?" AND d.financial_entity=:entity":"")
             +(f.periodFrom()!=null?" AND d.period_start < :to AND d.period_end > :from":"");
@@ -65,9 +65,13 @@ public class FinancialDocumentRepository {
         String similarity=vector==null?"0.0":"1-(c.embedding OPERATOR(extensions.<=>) CAST(:vector AS extensions.vector))";
         String lexical="ts_rank_cd(c.search_text,plainto_tsquery('spanish',:text))";
         String score=q.intent()==Intent.SEMANTIC_SEARCH?similarity:"(0.65*("+similarity+")+0.35*LEAST(1.0,"+lexical+"))";
-        String matches=vector==null?"c.search_text @@ plainto_tsquery('spanish',:text)":"("+similarity+") >= 0.55"+(q.intent()==Intent.SEMANTIC_SEARCH?"":" OR c.search_text @@ plainto_tsquery('spanish',:text)");
+        String matches=f.documentId()!=null?"true":vector==null?"c.search_text @@ plainto_tsquery('spanish',:text)":"("+similarity+") >= 0.55"+(q.intent()==Intent.SEMANTIC_SEARCH?"":" OR c.search_text @@ plainto_tsquery('spanish',:text)");
         return db.query("WITH authorized AS MATERIALIZED (SELECT c.* FROM document_chunks c JOIN financial_documents d ON d.id=c.document_id WHERE "+where(f)+" AND d.processing_status='INDEXED' AND c.document_version=d.document_version AND c.embedding_model=:model) SELECT c.*, "+score+" AS score FROM authorized c WHERE ("+matches+") ORDER BY score DESC,c.id LIMIT :limit OFFSET :offset",p,
             (r,n)->new Source(r.getObject("document_id",UUID.class),r.getObject("id",UUID.class),(Integer)r.getObject("page"),r.getString("location"),r.getString("content"),r.getDouble("score"),r.getInt("document_version")));
+    }
+    public List<String> indexedContent(UUID actor, UUID id) {
+        return db.query("SELECT c.content FROM document_chunks c JOIN financial_documents d ON d.id=c.document_id WHERE d.id=:id AND "+READ_SCOPE+" AND d.processing_status='INDEXED' AND c.document_version=d.document_version ORDER BY c.chunk_order",
+            Map.of("actor",actor,"id",id),(r,n)->r.getString(1));
     }
     public String storage(UUID id) { return db.queryForObject("SELECT storage_path FROM financial_documents WHERE id=:id",Map.of("id",id),String.class); }
     public String hash(UUID id){return db.queryForObject("SELECT content_hash FROM financial_documents WHERE id=:id",Map.of("id",id),String.class);}

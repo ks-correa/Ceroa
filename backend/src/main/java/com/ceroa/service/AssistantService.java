@@ -13,13 +13,14 @@ import java.time.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.math.BigDecimal;
+import java.util.regex.Pattern;
 
 /** Ephemeral user-bound evidence contexts. Model responses never authorize financial writes. */
 @Service
 public class AssistantService {
     private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AssistantService.class);
     public enum Channel { web, telegram }
-    private record Audience(UUID user,Channel channel) {}
+    private record Audience(UUID user,Channel channel,UUID document) {}
     private record Conversation(UUID user,Channel channel,UUID id) {}
     public record DocumentEvidence(String status,Map<String,RagVectorStore.Chunk> sources) {}
     public enum Intent { debts, highest_interest, upcoming, payments, strategy, progress, write_request, unknown }
@@ -35,6 +36,7 @@ public class AssistantService {
         final Map<String,AssistantAnalysisService.Evidence> cache=new HashMap<>();
         String question;
         String previousQuestion;
+        com.ceroa.api.dto.DocumentContracts.Document selectedDocument;
         int toolCalls;
         int documentCalls;
         final Map<String,RagVectorStore.Chunk> documents=new LinkedHashMap<>();
@@ -76,25 +78,44 @@ public class AssistantService {
         return message(message,audio,mime,Channel.web);
     }
     public void forget(Channel channel){
-        var audience=new Audience(current.id(),channel);var id=conversations.remove(audience);
-        if(id!=null)history.remove(new Conversation(audience.user,channel,id));
+        UUID user=current.id();
+        conversations.entrySet().removeIf(entry->{
+            if(!entry.getKey().user().equals(user)||entry.getKey().channel()!=channel)return false;
+            history.remove(new Conversation(user,channel,entry.getValue()));return true;
+        });
     }
     public Reply message(String message, String audio, String mime,Channel channel) {
+        return message(message,audio,mime,channel,null);
+    }
+    public Reply message(String message, String audio, String mime,Channel channel,UUID selectedDocumentId) {
         if (!enabled || webhook.isBlank() || key.length()<32) throw unavailable();
         var user=current.entity();
         if (!user.isActive()) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         UUID userId=user.getId();
-        var audience=new Audience(userId,channel);
+        var audience=new Audience(userId,channel,selectedDocumentId);
         boolean hasText=message!=null && !message.isBlank(), hasAudio=audio!=null && !audio.isBlank();
         if (hasText==hasAudio || (hasText && message.length()>2000)) throw new IllegalArgumentException();
         if (hasAudio) validateAudio(audio,mime);
+        com.ceroa.api.dto.DocumentContracts.Document selected=null;
+        if(selectedDocumentId!=null){
+            selected=library.get(selectedDocumentId);
+            if(!"INDEXED".equals(selected.status()))throw new IllegalArgumentException("El documento debe estar indexado antes de conversar sobre su contenido");
+        }
+        if (selected==null && hasText && message.trim().matches("(?iu)^(?:[¿?]\\s*)?(?:qué|que)\\s+(?:información\\s+)?(?:dice|contiene)\\s+(?:esto|este|esta)(?:\\s+documento)?[?.!\\s]*$"))
+            return new Reply("¿A cuál documento te refieres? Indica el nombre del archivo o selecciónalo en la biblioteca para poder describir su contenido.","analysis");
+        if (hasText && selected==null) {
+            Reply statement=statementQuestion(message);
+            if(statement!=null)return statement;
+        }
         UUID id=UUID.randomUUID(); var job=start(userId,id);
+        job.selectedDocument=selected;
         var conversation=new Conversation(userId,channel,conversations.computeIfAbsent(audience,a->UUID.randomUUID()));
         job.question=hasText?message:"";
         try {
             LocalDate now=LocalDate.now(ZONE);
             Map<String,Object> input=new LinkedHashMap<>();
             input.put("requestId",id.toString()); input.put("message",hasText?message:"");
+            if(selected!=null)input.put("selectedDocument",Map.of("id",selected.id().toString(),"type",selected.documentType(),"entity",selected.financialEntity()==null?"":selected.financialEntity()));
             input.put("audio",hasAudio?audio:""); input.put("mime",hasAudio?mime:"");
             input.put("year",now.getYear()); input.put("month",now.getMonthValue());
             var context=history.get(conversation);
@@ -121,6 +142,64 @@ public class AssistantService {
         } catch (Exception e) { throw unavailable();
         } finally { jobs.remove(id); }
     }
+    private Reply statementQuestion(String question) {
+        String normalized=question.toLowerCase(Locale.ROOT);
+        boolean movements=normalized.matches("(?s).*\\bmovimientos?\\b.*");
+        if(!movements&&!normalized.matches("(?s).*\\bextractos?\\b.*"))return null;
+        String[] months={"enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"};
+        int month=0;
+        for(int i=0;i<months.length;i++)if(Pattern.compile("(?iu)\\b"+months[i]+"\\b").matcher(question).find()){month=i+1;break;}
+        if(month==0)return null;
+        var yearMatch=Pattern.compile("\\b20\\d{2}\\b").matcher(question);
+        int year=yearMatch.find()?Integer.parseInt(yearMatch.group()):LocalDate.now(ZONE).getYear();
+        var start=LocalDate.of(year,month,1);var end=start.plusMonths(1);
+        com.ceroa.api.dto.DocumentContracts.Identification identification=null;
+        for(var value:com.ceroa.api.dto.DocumentContracts.Identification.values())
+            if(Pattern.compile("(?iu)\\b"+value.name()+"\\b").matcher(question).find()){identification=value;break;}
+        var filters=new com.ceroa.api.dto.DocumentContracts.Filters(null,identification,com.ceroa.api.dto.DocumentContracts.Kind.BANK_STATEMENT,null,start,end);
+        var found=new ArrayList<com.ceroa.api.dto.DocumentContracts.Document>();
+        for(int offset=0;offset<=10000;offset+=50){
+            var page=library.query(new com.ceroa.api.dto.DocumentContracts.Query(com.ceroa.api.dto.DocumentContracts.Intent.METADATA_SEARCH,null,filters,offset,50)).documents();
+            found.addAll(page);if(page.size()<50)break;
+        }
+        String upper=question.toUpperCase(Locale.ROOT);
+        if(upper.contains("BANCO "))found.removeIf(d->d.financialEntity()==null||!upper.contains(d.financialEntity().toUpperCase(Locale.ROOT)));
+        var heading="Extractos de "+months[month-1]+" de "+year+(identification==null?"":" con "+identification.name());
+        if(found.isEmpty())return new Reply("No encontré "+heading.toLowerCase(Locale.ROOT)+" que coincidan con esos filtros. Comprueba el período y el estado de los archivos en Consultar archivos.","analysis");
+        StringBuilder answer=new StringBuilder(heading+":\n");
+        for(var d:found.stream().limit(20).toList())answer.append("• ").append(d.financialEntity()==null?"Entidad sin identificar":d.financialEntity())
+            .append(" · ").append(d.periodStart()).append(" a ").append(d.periodEnd().minusDays(1))
+            .append(" · ").append(d.status().equals("INDEXED")?"listo para consultar":"requiere revisión").append(".\n");
+        if(found.size()>20)answer.append("Mostrando los primeros veinte archivos.\n");
+        if(movements){
+            int shown=0;
+            for(var d:found){
+                if(!d.status().equals("INDEXED"))continue;
+                var rows=library.indexedContent(d.id());
+                var lines=new LinkedHashSet<String>();
+                for(String content:rows)for(String line:content.split("\\R")){
+                    var match=Pattern.compile("^\\s*(\\d{2}/\\d{2}/\\d{4})\\s+(.+)$").matcher(line);
+                    if(!match.find()||match.group(2).matches("^\\d{2}/\\d{2}/\\d{4}.*"))continue;
+                    LocalDate movementDate;
+                    try{movementDate=LocalDate.parse(match.group(1),java.time.format.DateTimeFormatter.ofPattern("dd/MM/uuuu"));}
+                    catch(java.time.format.DateTimeParseException ignored){continue;}
+                    if(movementDate.isBefore(start)||!movementDate.isBefore(end))continue;
+                    var description=match.group(2).replaceFirst("\\s+[+-]?\\$.*$","").trim();
+                    var amount=Pattern.compile("[+-]?\\$[\\d.,]+|[+-]?\\$\\[NUMERO_PRIVADO\\]").matcher(match.group(2));
+                    String value=amount.find()&&!amount.group().contains("NUMERO_PRIVADO")?" · "+amount.group():"";
+                    if(!description.isBlank())lines.add(match.group(1)+" · "+description+value);
+                }
+                if(!lines.isEmpty()){
+                    answer.append("\nMovimientos del extracto de ").append(d.financialEntity()).append(":\n");
+                    for(String line:lines.stream().limit(30).toList()){answer.append("• ").append(line).append(".\n");shown++;}
+                }
+            }
+            if(shown==0)answer.append("\nNo hay movimientos legibles en los extractos indexados de este filtro.\n");
+            else answer.append("Algunos importes están protegidos y no aparecen en el índice; abre cada extracto para verificarlos.\n");
+        }
+        if(found.stream().anyMatch(d->!d.status().equals("INDEXED")))answer.append("Los archivos que requieren revisión no se usan para extraer movimientos.\n");
+        return new Reply(answer.toString().trim(),"analysis",List.copyOf(found),null);
+    }
     private <T> T withJob(UUID id,java.util.function.Function<Job,T> work) {
         var job=jobs.get(id);
         if(job==null || job.expires.isBefore(Instant.now())) throw new ResponseStatusException(HttpStatus.GONE);
@@ -143,6 +222,7 @@ public class AssistantService {
     }
     public AssistantAnalysisService.Evidence data(UUID id,AssistantAnalysisService.Dataset dataset,int year,int month,int offset) {
         return withJob(id,job->{
+            if(job.selectedDocument!=null)throw new IllegalArgumentException("Consulta limitada al documento seleccionado");
             String source=dataset+"/"+year+"/"+month+"/"+offset;
             if(job.cache.containsKey(source)) return job.cache.get(source);
             if(++job.toolCalls>16) throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS);
@@ -152,24 +232,43 @@ public class AssistantService {
     }
     public AssistantAnalysisService.Evidence calculate(UUID id,AssistantAnalysisService.Operation operation,List<String> refs) {
         return withJob(id,job->{
+            if(job.selectedDocument!=null)throw new IllegalArgumentException("Consulta limitada al documento seleccionado");
             if(++job.toolCalls>16) throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS);
             return analysis.calculate(job.facts,operation,refs);
         });
     }
-    public record LibraryEvidence(String status, AssistantAnalysisService.Evidence evidence) {}
+    public record LibrarySnippet(UUID documentId,Integer page,String content) {}
+    public record LibraryEvidence(String status, AssistantAnalysisService.Evidence evidence,List<LibrarySnippet> snippets) {}
     public LibraryEvidence financialDocuments(UUID id,com.ceroa.api.dto.DocumentContracts.Query query) {
         return withJob(id,job->{
             if(++job.toolCalls>16||++job.libraryCalls>2)throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS);
-            var result=library.query(query);
+            var effective=query;
+            if(job.selectedDocument!=null){
+                var selected=job.selectedDocument;
+                var filters=new com.ceroa.api.dto.DocumentContracts.Filters(null,null,null,null,null,null,selected.id());
+                var intent=effective.intent()==com.ceroa.api.dto.DocumentContracts.Intent.METADATA_SEARCH?com.ceroa.api.dto.DocumentContracts.Intent.HYBRID_SEARCH:effective.intent();
+                if(intent==com.ceroa.api.dto.DocumentContracts.Intent.STRUCTURED_QUERY||intent==com.ceroa.api.dto.DocumentContracts.Intent.COMBINED_QUERY)
+                    intent=com.ceroa.api.dto.DocumentContracts.Intent.HYBRID_SEARCH;
+                effective=new com.ceroa.api.dto.DocumentContracts.Query(intent,job.question,filters,0,10);
+            }
+            var result=library.query(effective);
             job.libraryResult=result;
-            job.libraryIntent=query.intent();
+            job.libraryIntent=effective.intent();
             for(var document:result.documents())job.libraryDocuments.put(document.id(),document);
             com.fasterxml.jackson.databind.node.ObjectNode minimized=json.valueToTree(result);
             minimized.path("documents").forEach(d->{if(d instanceof com.fasterxml.jackson.databind.node.ObjectNode doc)doc.remove("ownerId");});
+            minimized.remove("sources");
+            var values=minimized.putArray("documentValues");
+            var seen=new LinkedHashSet<String>();
+            var literal=Pattern.compile("\\b\\d{4}-\\d{2}-\\d{2}\\b|\\b\\d{2}/\\d{2}/\\d{4}\\b|[+-]?\\$[\\d.,]+|\\b\\d+(?:[.,]\\d+)?\\s*%|\\b\\d+\\s+cuotas?\\b",Pattern.CASE_INSENSITIVE|Pattern.UNICODE_CASE);
+            for(var source:result.sources()){
+                var match=literal.matcher(source.content());
+                while(match.find()&&seen.size()<80)if(seen.add(match.group()))values.addObject().put("documentId",source.documentId().toString()).put("literal",match.group());
+            }
             var evidence=analysis.evidence(job.facts,minimized,"financialDocuments/"+result.traceId());
             // Give the model one evidence representation, just like the established financial tools.
             // Duplicating raw result fields encouraged literal dates/IDs outside the fID contract.
-            return new LibraryEvidence(result.evidenceStatus(),evidence);
+            return new LibraryEvidence(result.evidenceStatus(),evidence,result.sources().stream().map(source->new LibrarySnippet(source.documentId(),source.page(),source.content())).toList());
         });
     }
     public Reply complete(UUID id,String answer,String transcript) {
@@ -177,6 +276,7 @@ public class AssistantService {
     }
     public DocumentEvidence documents(UUID id,String query) {
         return withJob(id,job->{
+            if(job.selectedDocument!=null)throw new IllegalArgumentException("Consulta limitada al documento seleccionado");
             if(query==null||query.isBlank()||query.length()>4000)throw new IllegalArgumentException();
             if(job.question==null||job.question.isBlank())throw new IllegalArgumentException("Falta preparar la pregunta");
             if(++job.documentCalls>2)throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS);
@@ -203,10 +303,21 @@ public class AssistantService {
             if(transcript==null || transcript.isBlank() || transcript.length()>2000) throw new IllegalArgumentException();
             if(!job.question.isEmpty() && !job.question.equals(transcript)) throw new IllegalArgumentException();
             String resolved;
-            if(job.libraryResult!=null && job.libraryIntent==com.ceroa.api.dto.DocumentContracts.Intent.METADATA_SEARCH) {
+            if(job.selectedDocument!=null) {
+                var selected=library.get(job.selectedDocument.id());
+                if(!selected.status().equals("INDEXED")||selected.version()!=job.selectedDocument.version())throw new IllegalArgumentException("Documento modificado; consulta de nuevo");
+                resolved=job.libraryResult==null||job.libraryResult.sources().isEmpty()
+                    ?"No encontré fragmentos indexados de este archivo para responder con evidencia."
+                    :analysis.resolve(job.facts,answer);
+                job.libraryDocuments.clear();job.libraryDocuments.put(selected.id(),selected);
+            }else if(job.libraryResult!=null && job.libraryIntent==com.ceroa.api.dto.DocumentContracts.Intent.METADATA_SEARCH) {
                 // Metadata lists need no model-generated prose/citations. Only the authenticated,
                 // typed database results below become references; ignore proposed LLM citations.
                 resolved=job.libraryDocuments.isEmpty()?"No hay documentos que coincidan con los filtros consultados.":"Encontré documentos que coinciden con los filtros consultados. Revisa las referencias adjuntas.";
+            }else if(job.libraryResult!=null) {
+                // Private documents are already authorized by the library. Public RAG
+                // citations from the model must not turn a private follow-up into a 400.
+                resolved=analysis.resolve(job.facts,answer);
             }else if(rag.enabled()) {
                 if(!Set.of("documentary","personal","mixed").contains(mode==null?"":mode)||citations.size()>8||new HashSet<>(citations).size()!=citations.size())throw new IllegalArgumentException();
                 if(!mode.equals("personal")&&job.documentCalls==0)throw new IllegalArgumentException("Falta consultar documentación");
@@ -227,10 +338,10 @@ public class AssistantService {
                 // Revalidate grants and versions before returning evidence to either channel.
                 var documents=List.copyOf(job.libraryDocuments.values());
                 for(var d:documents){var fresh=library.get(d.id());if(fresh.version()!=d.version()||fresh.status().equals("DELETING"))throw new IllegalArgumentException("Documento modificado; consulta de nuevo");}
-                resolved+="\n\nFuentes documentales:\n"+documents.stream().map(d->"• "+d.documentType()+" · "+(d.financialEntity()==null?"Entidad no identificada":d.financialEntity())+" · "+d.id()).collect(java.util.stream.Collectors.joining("\n"));
+                if(!documents.isEmpty())resolved+="\n\nFuentes documentales:\n"+documents.stream().map(d->"• "+d.documentType()+" · "+(d.financialEntity()==null?"Entidad no identificada":d.financialEntity())+" · "+d.id()).collect(java.util.stream.Collectors.joining("\n"));
                 if(Set.of("INSUFFICIENT","PARTIAL").contains(result.evidenceStatus()))resolved+="\nNo hay evidencia documental suficiente para responder.";
                 job.result=new Reply(resolved,"analysis",documents,result.traceId());
-            }else job.result=new Reply(resolved,"analysis");
+            }else job.result=job.selectedDocument==null?new Reply(resolved,"analysis"):new Reply(resolved,"analysis",List.of(job.selectedDocument),null);
             return job.result;
         }); } catch (IllegalArgumentException error) {
             log.warn("Assistant response validation rejected: {}", error.getMessage());

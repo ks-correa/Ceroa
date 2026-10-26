@@ -150,6 +150,10 @@ public class DocumentLibraryService {
         if(textOnly)message="Recuperación textual: el proveedor semántico no está disponible. "+message;
         return new Result(message,data,f,sources,documents,status,trace,elapsed);
     }
+    public List<String> indexedContent(UUID id) {
+        UUID reader=actor();limit(reader);
+        return repo.indexedContent(reader,id);
+    }
     public List<Map<String,Object>> audit(int offset){UUID actor=actor();if(offset<0||offset>10000)throw new IllegalArgumentException();return repo.audit(actor,offset);}
     static Metadata metadata(Document d){return new Metadata(d.identificationType()==null?null:Identification.valueOf(d.identificationType()),Kind.valueOf(d.documentType()),d.financialEntity(),d.periodStart(),d.periodEnd(),d.issuedAt(),null);}
     public Optional<Work> claim() {

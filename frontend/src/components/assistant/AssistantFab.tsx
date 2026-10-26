@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { MessageCircle, Mic, X, Send, RotateCcw } from 'lucide-react';
 import { apiRequest } from '../../services/api';
-import { DocumentLibraryPanel } from './DocumentLibraryPanel';
+import { DocumentLibraryPanel, type DocumentView } from './DocumentLibraryPanel';
 import { DocumentReferences } from './DocumentReferences';
 import type { FinancialDocument } from '../../services/documentLibraryService';
 
@@ -17,7 +17,10 @@ function ChatAudio({ blob }: { blob: Blob }) {
   return <audio aria-label="Audio enviado" controls preload="metadata" src={url || undefined} className="mt-2 w-full" />;
 }
 export function AssistantFab() {
-  const [showDocuments, setShowDocuments] = useState(false);
+  const [documentView, setDocumentView] = useState<DocumentView | null>(null);
+  const [selectedDocument, setSelectedDocument] = useState<FinancialDocument | null>(null);
+  const [chatWidth, setChatWidth] = useState(416);
+  const [chatHeight, setChatHeight] = useState(650);
   const [open, setOpen] = useState(false);
   const [text, setText] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -79,7 +82,7 @@ export function AssistantFab() {
       setMessages(m => [...m, { role: 'user' as const, text: message || '', audio: blob }].slice(-20));
       setText('');
       const result = await apiRequest<{ answer: string; documents?: FinancialDocument[] }>('/assistant/messages', {
-        method: 'POST', body: JSON.stringify(blob ? { audio, mime: blob.type.split(';')[0] } : { message })
+        method: 'POST', body: JSON.stringify(blob ? { audio, mime: blob.type.split(';')[0], ...(selectedDocument ? { documentId: selectedDocument.id } : {}) } : { message, ...(selectedDocument ? { documentId: selectedDocument.id } : {}) })
       });
       if (alive.current && generation.current === turn) setMessages(m => [...m, { role: 'assistant' as const, text: result.answer, documents: result.documents }].slice(-20));
     } catch (cause) {
@@ -197,17 +200,19 @@ export function AssistantFab() {
   async function resetConversation() {
     if(busy||recording||startingRecording)return;
     setBusy(true);setError('');
-    try{await apiRequest('/assistant/conversation',{method:'DELETE'});if(alive.current){generation.current++;setMessages([]);setText('');setAudioDraft(null);}}
+    try{await apiRequest('/assistant/conversation',{method:'DELETE'});if(alive.current){generation.current++;setMessages([]);setText('');setAudioDraft(null);setSelectedDocument(null);}}
     catch(cause){if(alive.current)setError(cause instanceof Error?cause.message:'No pude iniciar otra conversación.');}
     finally{if(alive.current)setBusy(false);}
   }
   return <div className="assistant-launcher fixed right-4 z-40">
-    {open && <section aria-label="Asistente financiero" className="floating-assistant-panel flex flex-col overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-2xl shadow-slate-900/15 dark:border-slate-700 dark:bg-slate-900">
+    {open && <section aria-label="Asistente financiero" style={{ width: chatWidth, height: chatHeight }} className="floating-assistant-panel flex flex-col overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-2xl shadow-slate-900/15 dark:border-slate-700 dark:bg-slate-900">
       <div className="flex shrink-0 items-center justify-between gap-2 bg-gradient-to-r from-teal-800 to-cyan-700 px-4 py-3 text-white"><div className="flex items-center gap-3"><span className="rounded-2xl bg-white/20 p-2"><MessageCircle size={20} /></span><div><h2 className="font-semibold leading-tight">Asistente de Ceroa</h2><p className="text-xs text-teal-50">Tu espacio para resolver dudas</p></div></div><div className="flex items-center gap-1"><button type="button" aria-label="Nueva conversación" title="Nueva conversación" disabled={busy||recording||startingRecording} className="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-white/20 disabled:opacity-40" onClick={()=>void resetConversation()}><RotateCcw size={18}/></button><button type="button" className="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-white/20" aria-label="Cerrar asistente" onClick={close}><X size={20} /></button></div></div>
+      <details className="shrink-0 border-b border-slate-100 px-4 py-2 text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400"><summary className="cursor-pointer py-1 font-medium">Tamaño del chat</summary><div className="grid grid-cols-2 gap-3 pb-2"><label>Ancho<input aria-label="Ancho del chat" type="range" min="320" max="1000" step="20" value={chatWidth} onChange={e => setChatWidth(Number(e.target.value))} className="block w-full" /></label><label>Alto<input aria-label="Alto del chat" type="range" min="360" max="1000" step="20" value={chatHeight} onChange={e => setChatHeight(Number(e.target.value))} className="block w-full" /></label></div></details>
       <details className="shrink-0 border-b border-slate-100 px-4 py-2 text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400"><summary className="cursor-pointer py-1 font-medium">Sobre el asistente y tus datos</summary><p className="pb-2 pt-1 leading-relaxed">Analiza tus finanzas y compara opciones. Gemini procesa tus preguntas, audio y los datos financieros necesarios para responder. Las sugerencias no realizan cambios en tu cuenta.</p></details>
       <div role="log" aria-live="polite" className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain [scrollbar-gutter:stable] bg-slate-50/80 p-4 dark:bg-slate-950/40">
-        <button type="button" aria-expanded={showDocuments} className="rounded-full border border-teal-200 bg-teal-50 px-3 py-2 text-xs font-semibold text-teal-800 transition-colors hover:bg-teal-100 dark:border-teal-800 dark:bg-teal-950 dark:text-teal-200" onClick={() => setShowDocuments(!showDocuments)}>{showDocuments ? 'Cerrar documentos' : 'Subir documento / Mis documentos'}</button>
-        {showDocuments && <DocumentLibraryPanel />}
+        <nav aria-label="Acciones de documentos" className="flex flex-wrap gap-2">{([{view:'upload',label:'Subir archivo'},{view:'search',label:'Consultar archivos'},{view:'review',label:'Revisar archivos'}] as const).map(item => <button key={item.view} type="button" aria-pressed={documentView === item.view} className={`rounded-full border px-3 py-2 text-xs font-semibold transition-colors ${documentView === item.view ? 'border-teal-700 bg-teal-700 text-white' : 'border-teal-200 bg-teal-50 text-teal-800 hover:bg-teal-100 dark:border-teal-800 dark:bg-teal-950 dark:text-teal-200'}`} onClick={() => setDocumentView(documentView === item.view ? null : item.view)}>{item.label}</button>)}</nav>
+        {selectedDocument && <div className="rounded-xl border border-teal-300 bg-teal-50 p-3 text-sm dark:border-teal-700 dark:bg-teal-950"><p className="font-semibold">Conversación enfocada en este archivo</p><p className="truncate">{selectedDocument.financialEntity || 'Documento'} · {selectedDocument.documentType} · {selectedDocument.periodStart || 'Sin período'}</p><button type="button" className="mt-1 text-xs font-semibold underline" onClick={() => {generation.current++;setSelectedDocument(null);setMessages([]);setText('');}}>Salir del archivo</button></div>}
+        {documentView && <DocumentLibraryPanel view={documentView} onDiscuss={document => { if(busy||recording||startingRecording)return;generation.current++;setSelectedDocument(document);setMessages([]);setText('');setDocumentView(null);input.current?.focus(); }} />}
         {messages.length === 0 && <p className="rounded-2xl border border-dashed border-slate-200 bg-white p-4 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">Escribe una pregunta para empezar la conversación.</p>}
         {messages.map((m, i) => <div key={i} className={`max-w-[90%] whitespace-pre-wrap rounded-2xl p-3 text-sm shadow-sm ${m.role === 'user' ? 'ml-auto rounded-br-md bg-teal-700 text-white' : 'mr-auto rounded-bl-md border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800'}`}><strong className="mb-1 block text-xs opacity-75">{m.role === 'user' ? 'Tú' : 'Ceroa'}</strong>{m.audio ? <ChatAudio blob={m.audio} /> : m.text}{!!m.documents?.length && <DocumentReferences documents={m.documents} />}</div>)}
         {startingRecording && <p role="status">Esperando permiso del micrófono… Revisa la solicitud de permisos del navegador.</p>}

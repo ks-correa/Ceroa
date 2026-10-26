@@ -74,6 +74,18 @@ class HybridDocumentIntegrationTest {
         return service.upload(new MockMultipartFile("file","synthetic.docx","application/vnd.openxmlformats-officedocument.wordprocessingml.document",DocumentTextExtractorTest.word(text+" "+UUID.randomUUID())),metadata(type,month),true);
     }
     Query query(Intent intent,Identification type){return new Query(intent,"intereses cobrados",new Filters(null,type,Kind.BANK_STATEMENT,null,LocalDate.of(2026,9,1),LocalDate.of(2026,11,1)),0,20);}
+    @Test void selectedDocumentSearchNeverReturnsAnotherIndexedFile()throws Exception {
+        var selected=upload(Identification.CC,9,"Intereses cobrados en el primer archivo");index();
+        var other=upload(Identification.CC,9,"Intereses cobrados en el segundo archivo");index();
+        var filters=new Filters(null,null,null,null,null,null,selected.id());
+        var result=service.query(new Query(Intent.HYBRID_SEARCH,"intereses cobrados",filters,0,10));
+        assertThat(result.documents()).extracting(Document::id).containsExactly(selected.id());
+        assertThat(result.sources()).allMatch(source->source.documentId().equals(selected.id()));
+        assertThat(result.sources()).isNotEmpty();
+        as(b);
+        assertThat(service.query(new Query(Intent.HYBRID_SEARCH,"intereses cobrados",filters,0,10)).sources()).isEmpty();
+        as(a);service.delete(selected.id());service.delete(other.id());
+    }
     List<Double> vector(){var v=new ArrayList<Double>(Collections.nCopies(768,0.0));v.set(0,1.0);return v;}
     String vectorString(){return "["+String.join(",",vector().stream().map(Object::toString).toList())+"]";}
     Completion completion(Work work){var vectors=new ArrayList<Vector>();for(int i=0;i<work.chunks().size();i++)vectors.add(new Vector(i,vector()));return new Completion(work.attempt(),work.model(),vectors,List.of());}

@@ -37,6 +37,7 @@ export interface DocumentResult {
 export const documentLibraryService = {
   search: (query: DocumentQuery) => apiRequest<DocumentResult>('/financial-documents/search', { method: 'POST', body: JSON.stringify(query) }),
   get: (id: string) => apiRequest<FinancialDocument>(`/financial-documents/${id}`),
+  jobs: (id: string) => apiRequest<{status: string; errorCode: string | null}[]>(`/financial-documents/${id}/jobs`),
   upload: (file: File, metadata: DocumentMetadata | null, consent: boolean, sheet?: string) => {
     const body = new FormData(); body.append('file', file);
     if (metadata) body.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));

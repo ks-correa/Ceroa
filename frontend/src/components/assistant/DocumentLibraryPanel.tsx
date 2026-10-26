@@ -7,7 +7,19 @@ import { DocumentVersionManager } from './DocumentVersionManager';
 const kinds = [{value:'BANK_STATEMENT',label:'Extracto bancario'},{value:'PAYMENT_RECEIPT',label:'Comprobante de pago'},{value:'LOAN_AGREEMENT',label:'Contrato de crédito'},{value:'OTHER',label:'Otro documento'}] as const;
 const blankMetadata: DocumentMetadata = {identificationType:null,documentType:'OTHER',financialEntity:null,periodStart:null,periodEnd:null,issuedAt:null,debtId:null};
 
-export function DocumentLibraryPanel() {
+export type DocumentView = 'upload' | 'search' | 'review';
+
+function missingFields(document: FinancialDocument): string[] {
+  const missing: string[] = [];
+  if (!document.identificationType) missing.push('tipo de identificación');
+  if (document.documentType === 'BANK_STATEMENT') {
+    if (!document.periodStart) missing.push('inicio del período');
+    if (!document.periodEnd) missing.push('fin del período');
+  }
+  return missing;
+}
+
+export function DocumentLibraryPanel({ view = 'upload', onDiscuss }: { view?: DocumentView; onDiscuss?: (document: FinancialDocument) => void }) {
   const { result, busy, error, run, search } = useDocumentLibrary();
   const [identification, setIdentification] = useState('');
   const [kind, setKind] = useState<DocumentKind | ''>('');
@@ -25,8 +37,36 @@ export function DocumentLibraryPanel() {
   const [editing, setEditing] = useState<string | null>(null);
   const [edit, setEdit] = useState<DocumentMetadata>(blankMetadata);
   const [offset, setOffset] = useState(0);
+  const [reviewDocuments, setReviewDocuments] = useState<FinancialDocument[]>([]);
+  const [reviewLoading, setReviewLoading] = useState(false);
+  const [reviewError, setReviewError] = useState('');
+  const [reviewReasons, setReviewReasons] = useState<Record<string, string>>({});
   const query = (page: number): DocumentQuery => ({ intent: question.trim() ? 'HYBRID_SEARCH' : 'METADATA_SEARCH', question, offset: page, limit: 10, filters: { identificationType: (identification || undefined) as IdentificationType | undefined, documentType: kind || undefined, financialEntity: entity || undefined, periodFrom: from || undefined, periodToExclusive: to || undefined } });
   const processing = !!uploaded && ['PENDING','PROCESSING'].includes(uploaded.status);
+  useEffect(() => {
+    if (view !== 'review') return;
+    let active = true;
+    setReviewLoading(true); setReviewError('');
+    (async () => {
+      try {
+        const found: FinancialDocument[] = [];
+        for (let page = 0; page <= 10000; page += 50) {
+          const result = await documentLibraryService.search({ intent: 'METADATA_SEARCH', filters: {}, offset: page, limit: 50 });
+          found.push(...result.documents.filter(document => document.status === 'REVIEW_REQUIRED'));
+          if (result.documents.length < 50) break;
+        }
+        if (!active) return;
+        setReviewDocuments(found);
+        const reasons = await Promise.all(found.map(async document => {
+          try { const jobs = await documentLibraryService.jobs(document.id); return [document.id, jobs[0]?.errorCode || ''] as const; }
+          catch { return [document.id, ''] as const; }
+        }));
+        if (active) setReviewReasons(Object.fromEntries(reasons));
+      } catch (cause) { if (active) setReviewError(cause instanceof Error ? cause.message : 'No se pudieron consultar los documentos pendientes.'); }
+      finally { if (active) setReviewLoading(false); }
+    })();
+    return () => { active = false; };
+  }, [view, uploaded?.id, uploaded?.status, editing]);
   useEffect(() => {
     if (!uploaded || !['PENDING','PROCESSING'].includes(uploaded.status)) return;
     let active = true; let timer: ReturnType<typeof setTimeout>; let attempts = 0;
@@ -58,7 +98,7 @@ export function DocumentLibraryPanel() {
     setEdit({identificationType:document.identificationType,documentType:document.documentType,financialEntity:document.financialEntity,periodStart:document.periodStart,periodEnd:document.periodEnd,issuedAt:document.issuedAt,debtId:null});
   }
   return <section aria-label="Biblioteca documental" className="document-library space-y-4 rounded-2xl border border-slate-200 bg-white p-3 text-sm shadow-sm dark:border-slate-700 dark:bg-slate-900">
-    <section aria-label="Subir documento" className="space-y-3 rounded-xl border border-teal-200 bg-teal-50/60 p-3 dark:border-teal-800 dark:bg-teal-950/30">
+    {view === 'upload' && <section aria-label="Subir documento" className="space-y-3 rounded-xl border border-teal-200 bg-teal-50/60 p-3 dark:border-teal-800 dark:bg-teal-950/30">
       <h3 className="font-semibold text-teal-800 dark:text-teal-200">Subir documento</h3>
       <p className="text-xs">Selecciona tu archivo. La IA lo lee y extrae el tipo de documento, identificación, entidad y fechas que encuentre. No necesitas completar metadatos.</p>
       <input ref={fileInput} aria-label="Archivo financiero" className="sr-only" type="file" accept=".pdf,.docx,.xlsx" disabled={busy} onChange={e => { setFile(e.target.files?.[0] || null); setSheet(''); setStatus(''); }} />
@@ -70,13 +110,14 @@ export function DocumentLibraryPanel() {
       <button type="button" className="w-full rounded-xl bg-teal-700 px-3 py-2 font-semibold text-white hover:bg-teal-800 disabled:opacity-50" disabled={busy} onClick={() => {if(!file){fileInput.current?.click();return;}if(!consent){setStatus('Marca la autorización para subir y analizar el documento seleccionado.');return;}void upload();}}>{busy && file ? 'Subiendo documento…' : 'Subir documento'}</button>
       <p className="text-xs text-slate-500">{!file ? 'Pulsa Subir documento para elegir el archivo de tu equipo.' : !consent ? 'Marca la autorización y pulsa Subir documento.' : 'Todo listo. Pulsa Subir documento para iniciar el análisis.'}</p>
       <p className="text-xs text-slate-500">Los documentos no registran deudas ni pagos automáticamente.</p>
-    </section>
-    {uploaded && <section aria-label="Estado del documento" className="space-y-2 rounded-xl border border-slate-200 p-3 dark:border-slate-700">
-      <p role="status">{processing ? 'Leyendo documento y extrayendo metadatos…' : uploaded.status === 'INDEXED' ? 'Documento listo para consultar.' : uploaded.status === 'REVIEW_REQUIRED' ? 'Documento recibido. Algunos datos o la lectura requieren revisión.' : 'No se pudo completar el análisis. Puedes volver a procesarlo desde tus documentos.'}</p>
+    </section>}
+    {view === 'upload' && uploaded && <section aria-label="Estado del documento" className="space-y-2 rounded-xl border border-slate-200 p-3 dark:border-slate-700">
+      <p role="status">{processing ? 'Leyendo documento y extrayendo metadatos…' : uploaded.status === 'INDEXED' ? 'Documento listo para consultar.' : uploaded.status === 'REVIEW_REQUIRED' ? 'Requiere revisión: confirma los datos pendientes para que el asistente pueda consultarlo.' : 'No se pudo completar el análisis. Puedes volver a procesarlo desde tus documentos.'}</p>
+      {uploaded.status === 'REVIEW_REQUIRED' && <p className="text-xs text-amber-800 dark:text-amber-200">{missingFields(uploaded).length ? `Falta confirmar: ${missingFields(uploaded).join(', ')}.` : 'La lectura del archivo necesita comprobarse. Revisa los datos extraídos o vuelve a procesarlo.'} Hasta entonces, el asistente no utilizará su contenido como fuente indexada.</p>}
       {!processing && <><dl className="grid grid-cols-2 gap-2 text-xs"><div><dt>Identificación</dt><dd>{uploaded.identificationType || 'No encontrada'}</dd></div><div><dt>Documento</dt><dd>{kinds.find(k=>k.value===uploaded.documentType)?.label}</dd></div><div><dt>Entidad</dt><dd>{uploaded.financialEntity || 'No encontrada'}</dd></div><div><dt>Periodo</dt><dd>{uploaded.periodStart || 'Sin identificar'} / {uploaded.periodEnd || 'Sin identificar'} (fin exclusivo)</dd></div></dl><button type="button" className="text-xs underline" onClick={()=>review(uploaded)}>Corregir datos extraídos</button></>}
       {pollError && <p role="alert" className="text-xs text-amber-700">{pollError}</p>}
     </section>}
-    <section aria-label="Buscar documentos" className="space-y-3 border-t border-slate-200 pt-3 dark:border-slate-700">
+    {view === 'search' && <section aria-label="Buscar documentos" className="space-y-3 border-t border-slate-200 pt-3 dark:border-slate-700">
       <h3 className="font-semibold">Buscar en mis documentos</h3>
       <label className="block">Buscar en el contenido<input className="document-field" maxLength={2000} value={question} onChange={e => setQuestion(e.target.value)} placeholder="Por ejemplo: intereses cobrados" /></label>
       <details><summary className="cursor-pointer text-xs font-medium">Filtrar por metadatos y fechas</summary>
@@ -89,7 +130,20 @@ export function DocumentLibraryPanel() {
         </div>
       </details>
       <div className="flex flex-wrap gap-3"><button type="button" className="rounded-lg bg-teal-700 px-3 py-2 text-white" disabled={busy} onClick={() => { setOffset(0); void search(query(0)); }}>Buscar documentos</button><button type="button" className="text-xs underline" disabled={busy} onClick={() => {setOffset(0);setIdentification('');setKind('');setEntity('');setFrom('');setTo('');setQuestion('');void search({intent:'METADATA_SEARCH',filters:{},offset:0,limit:10});}}>Ver mis documentos</button></div>
-    </section>
+    </section>}
+    {view === 'review' && <section aria-label="Documentos que requieren revisión" className="space-y-3">
+      <h3 className="font-semibold">Documentos que requieren revisión</h3>
+      <p className="text-xs text-slate-600 dark:text-slate-300">El archivo se recibió, pero falta confirmar información necesaria o revisar su lectura. Mientras tenga este estado, el asistente no buscará en su contenido. Corregir los datos inicia una nueva indexación.</p>
+      {reviewLoading && <p role="status">Buscando documentos pendientes…</p>}
+      {reviewError && <p role="alert" className="text-red-700">{reviewError}</p>}
+      {!reviewLoading && !reviewError && reviewDocuments.length === 0 && <p>No tienes documentos pendientes de revisión.</p>}
+      {reviewDocuments.map(document => <article key={document.id} className="space-y-2 rounded-xl border border-amber-300 bg-amber-50 p-3 dark:border-amber-700 dark:bg-amber-950/30">
+        <p className="font-semibold">{kinds.find(kind => kind.value === document.documentType)?.label || 'Documento'} · {document.financialEntity || 'Entidad sin identificar'}</p>
+        <p className="text-xs">{missingFields(document).length ? `Falta confirmar: ${missingFields(document).join(', ')}.` : reviewReasons[document.id] === 'OCR_NOT_CONFIGURED' ? 'No se pudo leer el PDF escaneado.' : reviewReasons[document.id] === 'SHEET_SELECTION_REQUIRED' ? 'Selecciona la hoja del archivo XLSX y vuelve a subirlo.' : 'Revisa la lectura y los datos extraídos.'}</p>
+        <button type="button" className="rounded-lg bg-amber-700 px-3 py-2 text-xs font-semibold text-white" onClick={() => review(document)}>Revisar y corregir</button>
+        <button type="button" className="ml-3 text-xs underline" disabled={busy} onClick={() => void run(async () => { const saved = await documentLibraryService.reprocess(document.id); setUploaded(saved); })}>Volver a procesar</button>
+      </article>)}
+    </section>}
     {editing && <section aria-label="Corregir metadatos" className="space-y-3 rounded-xl border border-slate-200 p-3 dark:border-slate-700">
       <h3 className="font-semibold">Corregir datos extraídos</h3><p className="text-xs">Solo es necesario si quieres corregir o completar lo que se encontró.</p>
       <div className="grid grid-cols-2 gap-3">
@@ -100,9 +154,9 @@ export function DocumentLibraryPanel() {
       </div><button type="button" disabled={busy} className="underline" onClick={()=>void saveMetadata()}>Guardar correcciones</button><button type="button" className="ml-3 underline" onClick={()=>setEditing(null)}>Cancelar</button>
     </section>}
     {busy && <p role="status">Procesando solicitud…</p>}{error && <p role="alert" className="text-red-700">{error}</p>}{status && <p role="status">{status}</p>}
-    {result && <>
+    {view === 'search' && result && <>
       {!result.documents.length && <p>No se encontraron documentos con estos filtros.</p>}
-      <DocumentReferences documents={result.documents} />
+      <DocumentReferences documents={result.documents} onDiscuss={onDiscuss} />
       {result.documents.map(document => <div key={document.id} className="flex flex-wrap gap-3 text-xs">
         <DocumentVersionManager document={document} onChanged={()=>search(query(offset))}/>
         <button type="button" className="underline" onClick={() => review(document)}>Corregir metadatos · {document.financialEntity || 'Documento'}</button>

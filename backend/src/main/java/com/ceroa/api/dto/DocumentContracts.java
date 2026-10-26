@@ -20,12 +20,16 @@ public final class DocumentContracts {
     }
     // ownerId is a requested filter, never an identity. A grant is still required by the repository.
     public record Filters(UUID ownerId, Identification identificationType, Kind documentType,
-        @Size(max=160) String financialEntity, LocalDate periodFrom, LocalDate periodToExclusive) {
+        @Size(max=160) String financialEntity, LocalDate periodFrom, LocalDate periodToExclusive, UUID documentId) {
+        public Filters(UUID ownerId, Identification identificationType, Kind documentType,
+            String financialEntity, LocalDate periodFrom, LocalDate periodToExclusive) {
+            this(ownerId,identificationType,documentType,financialEntity,periodFrom,periodToExclusive,null);
+        }
         public void validate() {
             if ((periodFrom == null) != (periodToExclusive == null) || periodFrom != null && !periodToExclusive.isAfter(periodFrom))
                 throw new IllegalArgumentException("Selecciona un intervalo completo");
         }
-        public static Filters empty() { return new Filters(null,null,null,null,null,null); }
+        public static Filters empty() { return new Filters(null,null,null,null,null,null,null); }
     }
     public record Query(@NotNull Intent intent, @Size(max=2000) String question,
         @Valid Filters filters, @Min(0) @Max(10000) int offset, @Min(1) @Max(50) int limit) {}

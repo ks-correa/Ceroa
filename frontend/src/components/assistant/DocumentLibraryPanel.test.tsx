@@ -4,12 +4,12 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { DocumentLibraryPanel } from './DocumentLibraryPanel';
 import { DocumentReferences } from './DocumentReferences';
 import { documentLibraryService, type FinancialDocument } from '../../services/documentLibraryService';
-vi.mock('../../services/documentLibraryService', async importOriginal => ({ ...await importOriginal<typeof import('../../services/documentLibraryService')>(), documentLibraryService: { get:vi.fn(),search: vi.fn(), upload: vi.fn(), download: vi.fn(), update: vi.fn(), proposals: vi.fn(), reprocess: vi.fn(), remove: vi.fn(),versions:vi.fn(),replace:vi.fn(),downloadVersion:vi.fn() } }));
+vi.mock('../../services/documentLibraryService', async importOriginal => ({ ...await importOriginal<typeof import('../../services/documentLibraryService')>(), documentLibraryService: { get:vi.fn(),jobs:vi.fn(),search: vi.fn(), upload: vi.fn(), download: vi.fn(), update: vi.fn(), proposals: vi.fn(), reprocess: vi.fn(), remove: vi.fn(),versions:vi.fn(),replace:vi.fn(),downloadVersion:vi.fn() } }));
 beforeEach(() => { cleanup(); vi.clearAllMocks(); });
 describe('Document library', () => {
   it('sends exact identification and exclusive dates and presents an empty result honestly', async () => {
     vi.mocked(documentLibraryService.search).mockResolvedValue({ documents: [], sources: [], verifiedData: null, generatedText: '', evidenceStatus: 'INSUFFICIENT', appliedFilters: {}, traceId: 'trace-test', elapsedMs: 12 });
-    render(<DocumentLibraryPanel />);
+    render(<DocumentLibraryPanel view="search" />);
     fireEvent.click(screen.getByText('Filtrar por metadatos y fechas'));
     fireEvent.change(screen.getByLabelText('Tipo de identificación documental'), { target: { value: 'CC' } });
     fireEvent.change(screen.getByLabelText('Inicio del periodo'), { target: { value: '2026-09-01' } });
@@ -20,7 +20,7 @@ describe('Document library', () => {
   });
   it('shows service errors without fabricating documents', async () => {
     vi.mocked(documentLibraryService.search).mockRejectedValue(new Error('Biblioteca pendiente de configurar'));
-    render(<DocumentLibraryPanel />); fireEvent.click(screen.getByText('Buscar documentos'));
+    render(<DocumentLibraryPanel view="search" />); fireEvent.click(screen.getByText('Buscar documentos'));
     expect((await screen.findByRole('alert')).textContent).toContain('pendiente de configurar');
   });
   it('keeps the upload button usable after consent and opens the file picker', () => {
@@ -50,7 +50,7 @@ describe('Document library', () => {
   });
   it('lists all document kinds by default instead of hiding receipts and contracts', async () => {
     vi.mocked(documentLibraryService.search).mockResolvedValue({documents:[],sources:[],traceId:'t'} as never);
-    render(<DocumentLibraryPanel />);
+    render(<DocumentLibraryPanel view="search" />);
     fireEvent.click(screen.getByText('Ver mis documentos'));
     await waitFor(()=>expect(documentLibraryService.search).toHaveBeenCalledWith({intent:'METADATA_SEARCH',filters:{},offset:0,limit:10}));
   });
@@ -61,5 +61,18 @@ describe('Document library', () => {
     fireEvent.click(screen.getByText('Preparar descarga autorizada'));
     await waitFor(() => expect(screen.getByRole('link').getAttribute('href')).toBe('http://localhost:8080/api/v1/financial-documents/synthetic-id/content?ticket=synthetic'));
     expect(documentLibraryService.download).toHaveBeenCalledWith('synthetic-id');
+  });
+  it('marks a pending review in document references', () => {
+    render(<DocumentReferences documents={[{id:'pending',documentType:'BANK_STATEMENT',status:'REVIEW_REQUIRED'} as FinancialDocument]} />);
+    expect(screen.getByText(/Requiere revisión/)).toBeTruthy();
+    expect(screen.getByText(/Revisar archivos/)).toBeTruthy();
+  });
+  it('explains why a document needs review and lets the user correct it', async () => {
+    vi.mocked(documentLibraryService.search).mockResolvedValue({documents:[{id:'pending',status:'REVIEW_REQUIRED',documentType:'BANK_STATEMENT',financialEntity:'Banco de prueba',identificationType:null,periodStart:'2026-09-01',periodEnd:'2026-10-01'} as FinancialDocument],sources:[]} as never);
+    vi.mocked(documentLibraryService.jobs).mockResolvedValue([]);
+    render(<DocumentLibraryPanel view="review" />);
+    expect(await screen.findByText(/Falta confirmar: tipo de identificación/)).toBeTruthy();
+    fireEvent.click(screen.getByRole('button',{name:'Revisar y corregir'}));
+    expect(screen.getByRole('region',{name:'Corregir metadatos'})).toBeTruthy();
   });
 });
