@@ -75,4 +75,20 @@ describe('Document library', () => {
     fireEvent.click(screen.getByRole('button',{name:'Revisar y corregir'}));
     expect(screen.getByRole('region',{name:'Corregir metadatos'})).toBeTruthy();
   });
+  it('distinguishes review documents with the same type and entity', async () => {
+    vi.mocked(documentLibraryService.search).mockResolvedValue({documents:[
+      {id:'abc12345-first',status:'REVIEW_REQUIRED',documentType:'BANK_STATEMENT',financialEntity:'Banco de prueba',identificationType:'CC',periodStart:'2026-09-01',periodEnd:'2026-10-01',issuedAt:'2026-10-02',uploadedAt:'2026-10-26T14:00:00Z'},
+      {id:'xyz98765-second',status:'REVIEW_REQUIRED',documentType:'BANK_STATEMENT',financialEntity:'Banco de prueba',identificationType:'CC',periodStart:'2026-09-01',periodEnd:'2026-10-01',issuedAt:'2026-10-03',uploadedAt:'2026-10-27T14:00:00Z'},
+    ] as FinancialDocument[],sources:[]} as never);
+    vi.mocked(documentLibraryService.jobs).mockResolvedValue([]);
+    render(<DocumentLibraryPanel view="review" />);
+    expect((await screen.findAllByText('Extracto bancario · Banco de prueba')).length).toBe(2);
+    expect(screen.getAllByText('01/09/2026 al 30/09/2026')).toHaveLength(2);
+    expect(screen.getByText('02/10/2026')).toBeTruthy();
+    expect(screen.getByText('03/10/2026')).toBeTruthy();
+    expect(screen.getByText('abc12345')).toBeTruthy();
+    expect(screen.getByText('xyz98765')).toBeTruthy();
+    expect(screen.getByText(/26\/10\/2026, 9:00/)).toBeTruthy();
+    expect(screen.getByText(/27\/10\/2026, 9:00/)).toBeTruthy();
+  });
 });

@@ -7,7 +7,7 @@ import java.util.*;
 
 public final class DocumentContracts {
     private DocumentContracts() {}
-    public enum Intent { METADATA_SEARCH, STRUCTURED_QUERY, SEMANTIC_SEARCH, HYBRID_SEARCH, COMBINED_QUERY }
+    public enum Intent { METADATA_SEARCH, STRUCTURED_QUERY, SEMANTIC_SEARCH, HYBRID_SEARCH, COMBINED_QUERY, PERIOD_ANALYSIS }
     public enum Identification { CC, CE, TI, NIT, PASSPORT, OTHER }
     public enum Kind { BANK_STATEMENT, PAYMENT_RECEIPT, LOAN_AGREEMENT, OTHER }
     public record Metadata(Identification identificationType, @NotNull Kind documentType,

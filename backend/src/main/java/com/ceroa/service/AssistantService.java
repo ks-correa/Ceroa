@@ -44,6 +44,7 @@ public class AssistantService {
         com.ceroa.api.dto.DocumentContracts.Result libraryResult;
         com.ceroa.api.dto.DocumentContracts.Intent libraryIntent;
         int libraryCalls;
+        boolean hadContentSearch;
         final Map<UUID,com.ceroa.api.dto.DocumentContracts.Document> libraryDocuments=new LinkedHashMap<>();
         Job(UUID user) { this.user = user; }
     }
@@ -104,8 +105,7 @@ public class AssistantService {
         if (selected==null && hasText && message.trim().matches("(?iu)^(?:[¿?]\\s*)?(?:qué|que)\\s+(?:información\\s+)?(?:dice|contiene)\\s+(?:esto|este|esta)(?:\\s+documento)?[?.!\\s]*$"))
             return new Reply("¿A cuál documento te refieres? Indica el nombre del archivo o selecciónalo en la biblioteca para poder describir su contenido.","analysis");
         if (hasText && selected==null) {
-            Reply statement=statementQuestion(message);
-            if(statement!=null)return statement;
+            if(isDebtListQuestion(message))return new Reply(render(Intent.debts,null,null),Intent.debts.name());
         }
         UUID id=UUID.randomUUID(); var job=start(userId,id);
         job.selectedDocument=selected;
@@ -142,63 +142,21 @@ public class AssistantService {
         } catch (Exception e) { throw unavailable();
         } finally { jobs.remove(id); }
     }
-    private Reply statementQuestion(String question) {
-        String normalized=question.toLowerCase(Locale.ROOT);
-        boolean movements=normalized.matches("(?s).*\\bmovimientos?\\b.*");
-        if(!movements&&!normalized.matches("(?s).*\\bextractos?\\b.*"))return null;
-        String[] months={"enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"};
-        int month=0;
-        for(int i=0;i<months.length;i++)if(Pattern.compile("(?iu)\\b"+months[i]+"\\b").matcher(question).find()){month=i+1;break;}
-        if(month==0)return null;
-        var yearMatch=Pattern.compile("\\b20\\d{2}\\b").matcher(question);
-        int year=yearMatch.find()?Integer.parseInt(yearMatch.group()):LocalDate.now(ZONE).getYear();
-        var start=LocalDate.of(year,month,1);var end=start.plusMonths(1);
-        com.ceroa.api.dto.DocumentContracts.Identification identification=null;
-        for(var value:com.ceroa.api.dto.DocumentContracts.Identification.values())
-            if(Pattern.compile("(?iu)\\b"+value.name()+"\\b").matcher(question).find()){identification=value;break;}
-        var filters=new com.ceroa.api.dto.DocumentContracts.Filters(null,identification,com.ceroa.api.dto.DocumentContracts.Kind.BANK_STATEMENT,null,start,end);
-        var found=new ArrayList<com.ceroa.api.dto.DocumentContracts.Document>();
-        for(int offset=0;offset<=10000;offset+=50){
-            var page=library.query(new com.ceroa.api.dto.DocumentContracts.Query(com.ceroa.api.dto.DocumentContracts.Intent.METADATA_SEARCH,null,filters,offset,50)).documents();
-            found.addAll(page);if(page.size()<50)break;
-        }
-        String upper=question.toUpperCase(Locale.ROOT);
-        if(upper.contains("BANCO "))found.removeIf(d->d.financialEntity()==null||!upper.contains(d.financialEntity().toUpperCase(Locale.ROOT)));
-        var heading="Extractos de "+months[month-1]+" de "+year+(identification==null?"":" con "+identification.name());
-        if(found.isEmpty())return new Reply("No encontré "+heading.toLowerCase(Locale.ROOT)+" que coincidan con esos filtros. Comprueba el período y el estado de los archivos en Consultar archivos.","analysis");
-        StringBuilder answer=new StringBuilder(heading+":\n");
-        for(var d:found.stream().limit(20).toList())answer.append("• ").append(d.financialEntity()==null?"Entidad sin identificar":d.financialEntity())
-            .append(" · ").append(d.periodStart()).append(" a ").append(d.periodEnd().minusDays(1))
-            .append(" · ").append(d.status().equals("INDEXED")?"listo para consultar":"requiere revisión").append(".\n");
-        if(found.size()>20)answer.append("Mostrando los primeros veinte archivos.\n");
-        if(movements){
-            int shown=0;
-            for(var d:found){
-                if(!d.status().equals("INDEXED"))continue;
-                var rows=library.indexedContent(d.id());
-                var lines=new LinkedHashSet<String>();
-                for(String content:rows)for(String line:content.split("\\R")){
-                    var match=Pattern.compile("^\\s*(\\d{2}/\\d{2}/\\d{4})\\s+(.+)$").matcher(line);
-                    if(!match.find()||match.group(2).matches("^\\d{2}/\\d{2}/\\d{4}.*"))continue;
-                    LocalDate movementDate;
-                    try{movementDate=LocalDate.parse(match.group(1),java.time.format.DateTimeFormatter.ofPattern("dd/MM/uuuu"));}
-                    catch(java.time.format.DateTimeParseException ignored){continue;}
-                    if(movementDate.isBefore(start)||!movementDate.isBefore(end))continue;
-                    var description=match.group(2).replaceFirst("\\s+[+-]?\\$.*$","").trim();
-                    var amount=Pattern.compile("[+-]?\\$[\\d.,]+|[+-]?\\$\\[NUMERO_PRIVADO\\]").matcher(match.group(2));
-                    String value=amount.find()&&!amount.group().contains("NUMERO_PRIVADO")?" · "+amount.group():"";
-                    if(!description.isBlank())lines.add(match.group(1)+" · "+description+value);
-                }
-                if(!lines.isEmpty()){
-                    answer.append("\nMovimientos del extracto de ").append(d.financialEntity()).append(":\n");
-                    for(String line:lines.stream().limit(30).toList()){answer.append("• ").append(line).append(".\n");shown++;}
-                }
-            }
-            if(shown==0)answer.append("\nNo hay movimientos legibles en los extractos indexados de este filtro.\n");
-            else answer.append("Algunos importes están protegidos y no aparecen en el índice; abre cada extracto para verificarlos.\n");
-        }
-        if(found.stream().anyMatch(d->!d.status().equals("INDEXED")))answer.append("Los archivos que requieren revisión no se usan para extraer movimientos.\n");
-        return new Reply(answer.toString().trim(),"analysis",List.copyOf(found),null);
+    private boolean isDebtListQuestion(String question) {
+        String plain=java.text.Normalizer.normalize(question.toLowerCase(Locale.ROOT),java.text.Normalizer.Form.NFD)
+            .replaceAll("\\p{M}","").replaceAll("[^a-z ]"," ").trim().replaceAll("\\s+"," ");
+        return plain.matches("(?:que deudas tengo|cuales son mis deudas|que deudas tengo registradas|muestrame mis deudas|dime que deudas tengo|lista mis deudas|listar mis deudas)");
+    }
+    private String selectedMetadataSummary(com.ceroa.api.dto.DocumentContracts.Document selected) {
+        String type=switch(selected.documentType()) {
+            case "BANK_STATEMENT" -> "extracto bancario";
+            case "PAYMENT_RECEIPT" -> "comprobante de pago";
+            case "LOAN_AGREEMENT" -> "contrato de crédito";
+            default -> "documento financiero";
+        };
+        String period=selected.periodStart()!=null&&selected.periodEnd()!=null
+            ?" El período registrado va del "+selected.periodStart()+" al "+selected.periodEnd().minusDays(1)+".":"";
+        return "Los metadatos indican que es un "+type+(selected.financialEntity()==null?"":" de "+selected.financialEntity())+"."+period;
     }
     private <T> T withJob(UUID id,java.util.function.Function<Job,T> work) {
         var job=jobs.get(id);
@@ -241,35 +199,74 @@ public class AssistantService {
     public record LibraryEvidence(String status, AssistantAnalysisService.Evidence evidence,List<LibrarySnippet> snippets) {}
     public LibraryEvidence financialDocuments(UUID id,com.ceroa.api.dto.DocumentContracts.Query query) {
         return withJob(id,job->{
-            if(++job.toolCalls>16||++job.libraryCalls>2)throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS);
+            if(++job.toolCalls>16||++job.libraryCalls>6)throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS);
             var effective=query;
             if(job.selectedDocument!=null){
                 var selected=job.selectedDocument;
                 var filters=new com.ceroa.api.dto.DocumentContracts.Filters(null,null,null,null,null,null,selected.id());
                 var intent=effective.intent()==com.ceroa.api.dto.DocumentContracts.Intent.METADATA_SEARCH?com.ceroa.api.dto.DocumentContracts.Intent.HYBRID_SEARCH:effective.intent();
-                if(intent==com.ceroa.api.dto.DocumentContracts.Intent.STRUCTURED_QUERY||intent==com.ceroa.api.dto.DocumentContracts.Intent.COMBINED_QUERY)
+                if(intent==com.ceroa.api.dto.DocumentContracts.Intent.STRUCTURED_QUERY||intent==com.ceroa.api.dto.DocumentContracts.Intent.COMBINED_QUERY||intent==com.ceroa.api.dto.DocumentContracts.Intent.PERIOD_ANALYSIS)
                     intent=com.ceroa.api.dto.DocumentContracts.Intent.HYBRID_SEARCH;
                 effective=new com.ceroa.api.dto.DocumentContracts.Query(intent,job.question,filters,0,10);
             }
             var result=library.query(effective);
             job.libraryResult=result;
             job.libraryIntent=effective.intent();
+            if(effective.intent()!=com.ceroa.api.dto.DocumentContracts.Intent.METADATA_SEARCH)job.hadContentSearch=true;
             for(var document:result.documents())job.libraryDocuments.put(document.id(),document);
             com.fasterxml.jackson.databind.node.ObjectNode minimized=json.valueToTree(result);
             minimized.path("documents").forEach(d->{if(d instanceof com.fasterxml.jackson.databind.node.ObjectNode doc)doc.remove("ownerId");});
+            if(job.selectedDocument!=null) {
+                var selected=library.get(job.selectedDocument.id());
+                if(!selected.status().equals("INDEXED")||selected.version()!=job.selectedDocument.version())throw new IllegalArgumentException("Documento modificado; consulta de nuevo");
+                var metadata=minimized.putObject("selectedDocumentMetadata");
+                metadata.put("financialEntity",selected.financialEntity());metadata.put("documentType",selected.documentType());
+                metadata.put("identificationType",selected.identificationType());
+                if(selected.periodStart()!=null)metadata.put("periodStart",selected.periodStart().toString());
+                if(selected.periodEnd()!=null)metadata.put("periodEndExclusive",selected.periodEnd().toString());
+                if(selected.issuedAt()!=null)metadata.put("issuedAt",selected.issuedAt().toString());
+            }
             minimized.remove("sources");
             var values=minimized.putArray("documentValues");
-            var seen=new LinkedHashSet<String>();
-            var literal=Pattern.compile("\\b\\d{4}-\\d{2}-\\d{2}\\b|\\b\\d{2}/\\d{2}/\\d{4}\\b|[+-]?\\$[\\d.,]+|\\b\\d+(?:[.,]\\d+)?\\s*%|\\b\\d+\\s+cuotas?\\b",Pattern.CASE_INSENSITIVE|Pattern.UNICODE_CASE);
+            var literal=Pattern.compile("\\b\\d{4}-\\d{2}-\\d{2}\\b|\\b\\d{2}/\\d{2}/\\d{4}\\b|[+-]?\\$[\\d.,]+|\\b\\d+(?:[.,]\\d+)?\\s*%|\\b\\d{1,3}(?:\\.\\d{3})+(?:,\\d+)?\\s*(?:COP|pesos)\\b|\\b\\d+\\s+cuotas?\\b",Pattern.CASE_INSENSITIVE|Pattern.UNICODE_CASE);
+            var labeled=Pattern.compile("(?iu)\\b(?:pagos?|pagad[oa]s?|abonos?|intereses?|tasa)\\b[^\\d\\n]{0,35}([+-]?\\d+(?:[.,]\\d+)?)");
             for(var source:result.sources()){
+                var captured=new ArrayList<int[]>();
                 var match=literal.matcher(source.content());
-                while(match.find()&&seen.size()<80)if(seen.add(match.group()))values.addObject().put("documentId",source.documentId().toString()).put("literal",match.group());
+                while(match.find()&&values.size()<250){
+                    captured.add(new int[]{match.start(),match.end()});
+                    var value=values.addObject();value.put("documentId",source.documentId().toString());
+                    if(source.page()!=null)value.put("page",source.page());
+                    value.put("literal",match.group());
+                    if(match.group().contains("$")||match.group().matches("(?iu).*\\b(?:COP|pesos)\\b.*")||match.group().contains("%")){
+                        BigDecimal number=documentNumber(match.group());if(number!=null)value.put("numericValue",number);
+                    }
+                }
+                var nearby=labeled.matcher(source.content());
+                while(nearby.find()&&values.size()<250){
+                    if(captured.stream().anyMatch(span->span[0]<=nearby.start(1)&&nearby.end(1)<=span[1]))continue;
+                    String raw=nearby.group(1);
+                    if(raw.matches("\\d{4}")&&nearby.end(1)<source.content().length()&&source.content().charAt(nearby.end(1))=='-')continue;
+                    var value=values.addObject();value.put("documentId",source.documentId().toString());
+                    if(source.page()!=null)value.put("page",source.page());
+                    value.put("literal",raw);value.put("kindHint",nearby.group().toLowerCase(Locale.ROOT).startsWith("tasa")?"rate":"amount");
+                    if(!raw.matches("-?\\d+[,.-]\\d{3}" )||raw.contains(".")){
+                        BigDecimal number=documentNumber(raw);if(number!=null)value.put("numericValue",number);
+                    }
+                }
             }
             var evidence=analysis.evidence(job.facts,minimized,"financialDocuments/"+result.traceId());
             // Give the model one evidence representation, just like the established financial tools.
             // Duplicating raw result fields encouraged literal dates/IDs outside the fID contract.
             return new LibraryEvidence(result.evidenceStatus(),evidence,result.sources().stream().map(source->new LibrarySnippet(source.documentId(),source.page(),source.content())).toList());
         });
+    }
+    private BigDecimal documentNumber(String literal) {
+        String value=literal.replaceAll("[^0-9,.-]","");
+        if(value.isEmpty())return null;
+        if(value.matches("-?\\d{1,3}(?:\\.\\d{3})+(?:,\\d+)?"))value=value.replace(".","").replace(',','.');
+        else if(value.indexOf(',')>=0&&value.indexOf('.')<0)value=value.replace(',','.');
+        try{return new BigDecimal(value);}catch(NumberFormatException ignored){return null;}
     }
     public Reply complete(UUID id,String answer,String transcript) {
         return complete(id,answer,transcript,null,List.of());
@@ -307,10 +304,10 @@ public class AssistantService {
                 var selected=library.get(job.selectedDocument.id());
                 if(!selected.status().equals("INDEXED")||selected.version()!=job.selectedDocument.version())throw new IllegalArgumentException("Documento modificado; consulta de nuevo");
                 resolved=job.libraryResult==null||job.libraryResult.sources().isEmpty()
-                    ?"No encontré fragmentos indexados de este archivo para responder con evidencia."
+                    ?"No encontré fragmentos indexados de este archivo para confirmar ese dato. "+selectedMetadataSummary(selected)
                     :analysis.resolve(job.facts,answer);
                 job.libraryDocuments.clear();job.libraryDocuments.put(selected.id(),selected);
-            }else if(job.libraryResult!=null && job.libraryIntent==com.ceroa.api.dto.DocumentContracts.Intent.METADATA_SEARCH) {
+            }else if(job.libraryResult!=null && job.libraryIntent==com.ceroa.api.dto.DocumentContracts.Intent.METADATA_SEARCH && !job.hadContentSearch) {
                 // Metadata lists need no model-generated prose/citations. Only the authenticated,
                 // typed database results below become references; ignore proposed LLM citations.
                 resolved=job.libraryDocuments.isEmpty()?"No hay documentos que coincidan con los filtros consultados.":"Encontré documentos que coinciden con los filtros consultados. Revisa las referencias adjuntas.";

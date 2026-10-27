@@ -73,6 +73,10 @@ public class FinancialDocumentRepository {
         return db.query("SELECT c.content FROM document_chunks c JOIN financial_documents d ON d.id=c.document_id WHERE d.id=:id AND "+READ_SCOPE+" AND d.processing_status='INDEXED' AND c.document_version=d.document_version ORDER BY c.chunk_order",
             Map.of("actor",actor,"id",id),(r,n)->r.getString(1));
     }
+    public List<Source> indexedSources(UUID actor,UUID id) {
+        return db.query("SELECT c.* FROM document_chunks c JOIN financial_documents d ON d.id=c.document_id WHERE d.id=:id AND "+READ_SCOPE+" AND d.processing_status='INDEXED' AND c.document_version=d.document_version ORDER BY c.chunk_order",
+            Map.of("actor",actor,"id",id),(r,n)->new Source(r.getObject("document_id",UUID.class),r.getObject("id",UUID.class),(Integer)r.getObject("page"),r.getString("location"),r.getString("content"),0,r.getInt("document_version")));
+    }
     public String storage(UUID id) { return db.queryForObject("SELECT storage_path FROM financial_documents WHERE id=:id",Map.of("id",id),String.class); }
     public String hash(UUID id){return db.queryForObject("SELECT content_hash FROM financial_documents WHERE id=:id",Map.of("id",id),String.class);}
     public void archive(UUID id){db.update("INSERT INTO financial_document_versions(document_id,document_version,storage_path,content_hash,content_type,metadata_snapshot) SELECT id,document_version,storage_path,content_hash,content_type,jsonb_build_object('identificationType',identification_type,'documentType',document_type,'financialEntity',financial_entity,'periodStart',period_start,'periodEnd',period_end,'issuedAt',issued_at,'metadata',metadata) FROM financial_documents WHERE id=:id",Map.of("id",id));}

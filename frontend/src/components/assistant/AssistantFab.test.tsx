@@ -101,8 +101,12 @@ it('keeps follow-up questions scoped to a selected indexed document', async () =
   fireEvent.change(screen.getByRole('textbox',{name:'Pregunta al asistente'}),{target:{value:'¿Qué movimientos contiene?'}});
   fireEvent.click(screen.getByRole('button',{name:'Enviar pregunta'}));
   await waitFor(()=>expect(apiRequest).toHaveBeenCalledWith('/assistant/messages',{method:'POST',body:JSON.stringify({message:'¿Qué movimientos contiene?',documentId:'selected-doc'})}));
-  fireEvent.click(screen.getByRole('button',{name:'Salir del archivo'}));
+  fireEvent.click(screen.getByRole('button',{name:'Analizar varios extractos'}));
   expect(screen.queryByText('Conversación enfocada en este archivo')).toBeNull();
+  expect((screen.getByRole('textbox',{name:'Pregunta al asistente'}) as HTMLTextAreaElement).value).toContain('septiembre de 2026');
+  fireEvent.change(screen.getByRole('textbox',{name:'Pregunta al asistente'}),{target:{value:'Analiza todos mis extractos de septiembre de 2026: ¿cuánto pagué?'}});
+  fireEvent.click(screen.getByRole('button',{name:'Enviar pregunta'}));
+  await waitFor(()=>expect(apiRequest).toHaveBeenCalledWith('/assistant/messages',{method:'POST',body:JSON.stringify({message:'Analiza todos mis extractos de septiembre de 2026: ¿cuánto pagué?'})}));
 });
 it('shows a failed request without claiming success or exposing financial values', async () => {
   vi.mocked(apiRequest).mockRejectedValue(new Error('No pude consultar tu información.'));

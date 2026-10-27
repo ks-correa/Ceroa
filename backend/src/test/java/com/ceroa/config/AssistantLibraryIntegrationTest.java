@@ -25,6 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest @AutoConfigureMockMvc
 class AssistantLibraryIntegrationTest {
     static final String KEY="library-assistant-fixture-worker-key-32-characters";
+    static final String MONTH_QUESTION="Teniendo en cuenta los extractos de septiembre de 2026 quiero revisar qu? pagos realic?, movimientos relevantes y tasas";
     static final ObjectMapper JSON=new ObjectMapper();static HttpServer stub;static MockMvc callback;
     @Autowired MockMvc mvc;@Autowired UserRepository users;
     @MockitoBean DocumentLibraryService library;
@@ -36,9 +37,25 @@ class AssistantLibraryIntegrationTest {
                 var body=JSON.readTree(exchange.getRequestBody());String id=body.path("requestId").asText(),question=body.path("message").asText();
                 String base="/api/v1/assistant-tools/requests/"+id;
                 callback.perform(post(base+"/prepare").header("X-Ceroa-Assistant",KEY).contentType("application/json").content(JSON.writeValueAsString(Map.of("transcript",question)))).andExpect(status().isOk());
-                for(int i=0;i<(question.startsWith("two")?2:1);i++)callback.perform(get(base+"/financial-documents").header("X-Ceroa-Assistant",KEY).param("intent",question.equals("semantic")?"SEMANTIC_SEARCH":"METADATA_SEARCH").param("question",question))
-                    .andExpect(status().isOk()).andExpect(jsonPath("$.status").value("AVAILABLE")).andExpect(jsonPath("$.evidence.facts").isMap()).andExpect(jsonPath("$.result").doesNotExist());
-                callback.perform(post(base+"/complete").header("X-Ceroa-Assistant",KEY).contentType("application/json").content(JSON.writeValueAsString(Map.of("transcript",question,"answer","Encontré un extracto de 2026.","mode","personal","sources",List.of("d1")))) )
+                var response=callback.perform(get(base+"/financial-documents").header("X-Ceroa-Assistant",KEY)
+                    .param("intent",question.equals("semantic")?"SEMANTIC_SEARCH":question.equals(MONTH_QUESTION)?"PERIOD_ANALYSIS":"METADATA_SEARCH")
+                    .param("question",question).param("documentType",question.equals("metadata-filter")||question.equals(MONTH_QUESTION)?"BANK_STATEMENT":"")
+                    .param("periodFrom",question.equals("metadata-filter")||question.equals(MONTH_QUESTION)?"2026-09-01":"")
+                    .param("periodToExclusive",question.equals("metadata-filter")||question.equals(MONTH_QUESTION)?"2026-10-01":""))
+                    .andExpect(status().isOk()).andExpect(jsonPath("$.status").value("AVAILABLE")).andExpect(jsonPath("$.evidence.facts").isMap()).andReturn().getResponse().getContentAsString();
+                if(question.startsWith("two"))callback.perform(get(base+"/financial-documents").header("X-Ceroa-Assistant",KEY).param("intent","METADATA_SEARCH").param("question",question)).andExpect(status().isOk());
+                String answer=question.equals("que tasa tengo?")?"La tasa indicada es 2,5%.":"Encontré un extracto de 2026.";
+                if(question.equals(MONTH_QUESTION)){
+                    var facts=JSON.readTree(response).path("evidence").path("facts");var refs=new ArrayList<String>();
+                    facts.fields().forEachRemaining(entry->{if(entry.getValue().path("source").asText().endsWith("/numericValue"))refs.add(entry.getKey());});
+                    org.junit.jupiter.api.Assertions.assertEquals(2,refs.size());
+                    var calculated=callback.perform(get(base+"/calculate").header("X-Ceroa-Assistant",KEY).param("operation","add").param("refs",String.join(",",refs)))
+                        .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+                    callback.perform(get(base+"/financial-documents").header("X-Ceroa-Assistant",KEY).param("intent","METADATA_SEARCH").param("question","recibos relacionados"))
+                        .andExpect(status().isOk());
+                    String total=JSON.readTree(calculated).path("facts").fieldNames().next();answer="Pagos confirmados: {{"+total+"}}.";
+                }
+                callback.perform(post(base+"/complete").header("X-Ceroa-Assistant",KEY).contentType("application/json").content(JSON.writeValueAsString(Map.of("transcript",question,"answer",answer,"mode","personal","sources",List.of("d1")))) )
                     .andExpect(question.equals("semantic")?status().isBadRequest():question.equals("two-revoked")?status().isNotFound():status().isOk());
                 exchange.sendResponseHeaders(200,0);exchange.getResponseBody().write("{}".getBytes());
             }catch(Exception e){exchange.sendResponseHeaders(500,-1);}finally{exchange.close();}
@@ -53,6 +70,57 @@ class AssistantLibraryIntegrationTest {
     @Test void metadataListingDiscardsInvalidModelNumbersAndUsesAuthorizedDatabaseEvidence()throws Exception {
         mvc.perform(post("/api/v1/assistant/messages").with(user(actor.toString())).with(csrf()).contentType("application/json").content("{\"message\":\"metadata\"}"))
             .andExpect(status().isOk()).andExpect(jsonPath("$.answer").value(org.hamcrest.Matchers.startsWith("Encontré documentos que coinciden con los filtros consultados."))).andExpect(jsonPath("$.documents[0].id").value(docId.toString()));
+    }
+    @Test void selectedFileRateQuestionUsesOnlyThatFileAndAcceptsItsExactEvidence()throws Exception {
+        var source=new Source(docId,UUID.randomUUID(),1,"page 1","Tasa indicada: 2,5%",0.9,1);
+        doAnswer(call->{
+            Query query=call.getArgument(0);
+            org.junit.jupiter.api.Assertions.assertEquals(docId,query.filters().documentId());
+            org.junit.jupiter.api.Assertions.assertEquals(Intent.HYBRID_SEARCH,query.intent());
+            return new Result("Resultados disponibles.",null,query.filters(),List.of(source),List.of(library.get(docId)),"AVAILABLE",UUID.randomUUID(),1);
+        }).when(library).query(any());
+        mvc.perform(post("/api/v1/assistant/messages").with(user(actor.toString())).with(csrf()).contentType("application/json")
+            .content(JSON.writeValueAsString(Map.of("message","que tasa tengo?","documentId",docId.toString()))))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.answer").value(org.hamcrest.Matchers.containsString("2,5%")));
+    }
+    @Test void selectedFileWithoutMatchingChunksReturnsVerifiedMetadataInsteadOfAnError()throws Exception {
+        mvc.perform(post("/api/v1/assistant/messages").with(user(actor.toString())).with(csrf()).contentType("application/json")
+            .content(JSON.writeValueAsString(Map.of("message","fecha documento","documentId",docId.toString()))))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.answer").value(org.hamcrest.Matchers.containsString("extracto bancario")))
+            .andExpect(jsonPath("$.answer").value(org.hamcrest.Matchers.containsString("2026-09-01")));
+    }
+    @Test void metadataFiltersReachPrivateLibraryAndReturnMatchingReference()throws Exception {
+        doAnswer(call->{
+            Query query=call.getArgument(0);
+            org.junit.jupiter.api.Assertions.assertEquals(Intent.METADATA_SEARCH,query.intent());
+            org.junit.jupiter.api.Assertions.assertEquals(Kind.BANK_STATEMENT,query.filters().documentType());
+            org.junit.jupiter.api.Assertions.assertEquals(LocalDate.of(2026,9,1),query.filters().periodFrom());
+            org.junit.jupiter.api.Assertions.assertEquals(LocalDate.of(2026,10,1),query.filters().periodToExclusive());
+            return new Result("Resultados disponibles.",null,query.filters(),List.of(),List.of(library.get(docId)),"AVAILABLE",UUID.randomUUID(),1);
+        }).when(library).query(any());
+        mvc.perform(post("/api/v1/assistant/messages").with(user(actor.toString())).with(csrf()).contentType("application/json")
+            .content("{\"message\":\"metadata-filter\"}"))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.documents[0].id").value(docId.toString()));
+    }
+    @Test void periodAnalysisCombinesTwoAuthorizedStatementsWithBackendArithmetic()throws Exception {
+        UUID second=UUID.randomUUID();
+        var other=new Document(second,actor,"CC","BANK_STATEMENT","Otro banco",LocalDate.of(2026,9,1),LocalDate.of(2026,10,1),null,"INDEXED",1,OffsetDateTime.now());
+        when(library.get(second)).thenReturn(other);
+        doAnswer(call->{
+            Query query=call.getArgument(0);
+            if(query.intent()==Intent.METADATA_SEARCH)
+                return new Result("Recibos consultados",null,query.filters(),List.of(),List.of(other),"AVAILABLE",UUID.randomUUID(),1);
+            org.junit.jupiter.api.Assertions.assertEquals(Intent.PERIOD_ANALYSIS,query.intent());
+            org.junit.jupiter.api.Assertions.assertEquals(Kind.BANK_STATEMENT,query.filters().documentType());
+            org.junit.jupiter.api.Assertions.assertEquals(LocalDate.of(2026,9,1),query.filters().periodFrom());
+            var sources=List.of(new Source(docId,UUID.randomUUID(),1,"page 1","Pago $100.000",0,1),
+                new Source(second,UUID.randomUUID(),1,"page 1","Pago 50000",0,1));
+            return new Result("Cobertura completa",Map.of("complete",true,"hasMoreDocuments",false),query.filters(),sources,List.of(library.get(docId),other),"AVAILABLE",UUID.randomUUID(),1);
+        }).when(library).query(any());
+        mvc.perform(post("/api/v1/assistant/messages").with(user(actor.toString())).with(csrf()).contentType("application/json")
+            .content(JSON.writeValueAsString(Map.of("message",MONTH_QUESTION))))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.answer").value(org.hamcrest.Matchers.containsString("150.000")))
+            .andExpect(jsonPath("$.documents.length()").value(2));
     }
     @Test void semanticExplanationsStillRejectUnsupportedModelNumbers()throws Exception {
         mvc.perform(post("/api/v1/assistant/messages").with(user(actor.toString())).with(csrf()).contentType("application/json").content("{\"message\":\"semantic\"}"))

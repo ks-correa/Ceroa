@@ -127,6 +127,28 @@ public class DocumentLibraryService {
         boolean textOnly=false;
         var sources=List.<Source>of();var documents=List.<Document>of();
         if(q.intent()==Intent.METADATA_SEARCH) documents=repo.search(actor,f,q.offset(),q.limit());
+        else if(q.intent()==Intent.PERIOD_ANALYSIS) {
+            if(f.periodFrom()==null||f.periodToExclusive()==null||f.documentId()!=null)throw new IllegalArgumentException("Indica un período para analizar varios archivos");
+            var page=repo.search(actor,f,q.offset(),q.limit()+1);
+            boolean more=page.size()>q.limit();documents=page.stream().limit(q.limit()).toList();
+            var gathered=new ArrayList<Source>();int characters=0;boolean truncated=more;
+            for(var document:documents) {
+                if(!"INDEXED".equals(document.status())){truncated=true;continue;}
+                for(var source:repo.indexedSources(actor,document.id())) {
+                    if(characters+source.content().length()>90000){truncated=true;continue;}
+                    gathered.add(source);characters+=source.content().length();
+                }
+            }
+            sources=List.copyOf(gathered);
+            var coverage=Map.of("documentsOnPage",documents.size(),"indexedSources",sources.size(),"hasMoreDocuments",more,
+                "nextOffset",q.offset()+documents.size(),"complete",!truncated);
+            UUID trace=UUID.randomUUID();long elapsed=(System.nanoTime()-start)/1_000_000;
+            try{repo.audit(trace,actor,q.intent(),json.writeValueAsString(f),documents.size(),elapsed);}catch(com.fasterxml.jackson.core.JsonProcessingException e){throw new IllegalStateException(e);}
+            String status=documents.isEmpty()?"INSUFFICIENT":truncated?"PARTIAL":"AVAILABLE";
+            String message=documents.isEmpty()?"No encontré documentos para el período indicado.":truncated
+                ?"La cobertura es parcial: hay más documentos, archivos sin índice o contenido fuera del límite. No afirmes un total del período.":"Contenido de todos los documentos de esta página disponible para analizar; verifica cada movimiento antes de sumarlo.";
+            return new Result(message,coverage,f,sources,documents,status,trace,elapsed);
+        }
         else if(q.intent()!=Intent.STRUCTURED_QUERY) {
             if(q.question()==null||q.question().isBlank())throw new IllegalArgumentException();
             String vector=null;

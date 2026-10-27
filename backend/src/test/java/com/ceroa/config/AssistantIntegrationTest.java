@@ -115,6 +115,9 @@ class AssistantIntegrationTest {
         mvc.perform(post(base+"updates").header("X-Ceroa-Assistant",KEY).contentType("application/json")
             .content(JSON.writeValueAsString(Map.of("updateId",System.nanoTime(),"senderId",sender,"chatId",sender,"privateChat",true,"text","/start "+code))))
             .andExpect(status().isOk());
+        mvc.perform(post(base+"updates").header("X-Ceroa-Assistant",KEY).contentType("application/json")
+            .content(JSON.writeValueAsString(Map.of("updateId",System.nanoTime(),"senderId",sender,"chatId",sender,"privateChat",true,"text","¿Qué deudas tengo?"))))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.answer").value(org.hamcrest.Matchers.containsString("Telegram owner debt")));
         var response=mvc.perform(post(base+"updates").header("X-Ceroa-Assistant",KEY).contentType("application/json")
             .content(JSON.writeValueAsString(Map.of("updateId",System.nanoTime(),"senderId",sender,"chatId",sender,"privateChat",true,"text","analysis","userId",UUID.randomUUID()))))
             .andExpect(status().isOk()).andExpect(jsonPath("$.answer").value(org.hamcrest.Matchers.containsString("Telegram owner debt")))

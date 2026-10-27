@@ -131,6 +131,7 @@ public class AssistantAnalysisService {
     /** Substitute only facts emitted for this request. Reject unsupported numerical claims. */
     public String resolve(Map<String,Fact> facts,String answer) {
         if(answer==null || answer.isBlank() || answer.length()>12000) throw new IllegalArgumentException();
+        answer=groundExactLiterals(facts,answer.replaceAll("(?m)^(\\s*)\\d+[.)]\\s+","$1• "));
         var matcher=REFERENCE.matcher(answer); StringBuffer rendered=new StringBuffer();
         while(matcher.find()) {
             Fact fact=facts.get(matcher.group(1));
@@ -147,6 +148,45 @@ public class AssistantAnalysisService {
             .replaceAll("(?i)([\\d.,]+%\\s*EA)\\s*\\((?:y una )?tasa (?:anual comparable|comparable anual) (?:de )?\\1\\)","$1")
             .replaceAll("(?i)sin intereses con una tasa (?:del|de) 0% sin intereses","sin intereses")
             .replaceAll("(?i)0% sin intereses","sin intereses");
+    }
+    private String groundExactLiterals(Map<String,Fact> facts,String answer) {
+        var literals=new ArrayList<Map.Entry<String,String>>();
+        for(var entry:facts.entrySet()) {
+            var fact=entry.getValue();
+            if(fact.value().isNull()||fact.source().matches("(?i).*(?:/id|/documentId|/chunkId|/ownerId)$"))continue;
+            var candidates=new LinkedHashSet<String>();
+            if(fact.value().isNumber()) {
+                candidates.add(displayNumber(fact));
+                candidates.add(fact.value().asText());
+            } else if(fact.value().isTextual()) {
+                String value=fact.value().asText();candidates.add(value);
+                if(value.matches("\\d+(?:[.,]\\d+)?\\s*%")) {
+                    String compact=value.replace(" ","");
+                    candidates.add(compact.replace(',','.'));
+                    candidates.add(compact.replace('.',','));
+                    candidates.add(compact.replace("%"," %"));
+                }
+            }
+            for(String candidate:candidates)
+                if(candidate.length()>=2&&candidate.length()<=120&&!candidate.matches("f[1-9][0-9]*")&&candidate.codePoints().anyMatch(Character::isDigit))
+                    literals.add(Map.entry(candidate,entry.getKey()));
+        }
+        literals.sort(Comparator.comparingInt((Map.Entry<String,String> literal)->literal.getKey().length()).reversed());
+        var references=REFERENCE.matcher(answer);var grounded=new StringBuilder();int cursor=0;
+        while(references.find()) {
+            grounded.append(groundProse(answer.substring(cursor,references.start()),literals));
+            grounded.append(references.group());cursor=references.end();
+        }
+        grounded.append(groundProse(answer.substring(cursor),literals));
+        return grounded.toString();
+    }
+    private String groundProse(String prose,List<Map.Entry<String,String>> literals) {
+        String result=prose;
+        for(var literal:literals) {
+            result=Pattern.compile("(?<![\\p{L}\\p{N}])"+Pattern.quote(literal.getKey())+"(?![\\p{L}\\p{N}])")
+                .matcher(result).replaceAll(Matcher.quoteReplacement("{{"+literal.getValue()+"}}"));
+        }
+        return result;
     }
     private String displayText(Fact fact) {
         String value=fact.value().asText();

@@ -16,6 +16,15 @@ test('agent-controlled filter values cannot change tool host/path or insert an o
   const url=new URL(new Function('$fromAI','$',`return (${expr});`)((name)=>name==='intent'?'METADATA_SEARCH':'https://attacker.invalid/?ownerId=foreign&sql=DELETE',()=>({first:()=>({json:{requestId:'fixed-context'}})})));
   assert.equal(url.origin,'http://backend:8080');assert.equal(url.pathname,'/api/v1/assistant-tools/requests/fixed-context/financial-documents');assert.equal(url.searchParams.has('ownerId'),false);assert.equal(url.searchParams.has('sql'),false);
 });
+test('monthly document analysis requests coverage and backend arithmetic',async()=>{
+  const w=JSON.parse(await readFile(new URL('hybrid-rag-query.json',import.meta.url),'utf8'));
+  const agent=w.nodes.find(n=>n.name==='Analizar finanzas');
+  const tool=w.nodes.find(n=>n.name==='Consultar documentos financieros');
+  assert.match(agent.parameters.options.systemMessage,/PERIOD_ANALYSIS/);
+  assert.match(agent.parameters.options.systemMessage,/Calcular con evidencia/);
+  assert.match(tool.parameters.url,/nextOffset|offset/);
+  assert.ok(agent.parameters.options.maxIterations>=10);
+});
 test('OCR builds a complete provider request without embedding nested schemas in inline expressions',async()=>{
   const w=JSON.parse(await readFile(new URL('hybrid-rag-ocr.json',import.meta.url),'utf8'));
   const config={id:'financial-library-v1',embedding_model:'gemini-embedding-001',dimensions:768,schema_version:21,max_file_bytes:8388608,max_pages:25};

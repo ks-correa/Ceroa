@@ -6,6 +6,18 @@ import { DocumentVersionManager } from './DocumentVersionManager';
 
 const kinds = [{value:'BANK_STATEMENT',label:'Extracto bancario'},{value:'PAYMENT_RECEIPT',label:'Comprobante de pago'},{value:'LOAN_AGREEMENT',label:'Contrato de crédito'},{value:'OTHER',label:'Otro documento'}] as const;
 const blankMetadata: DocumentMetadata = {identificationType:null,documentType:'OTHER',financialEntity:null,periodStart:null,periodEnd:null,issuedAt:null,debtId:null};
+const displayDate = (value: string | null) => value ? value.slice(0,10).split('-').reverse().join('/') : null;
+const periodEndDate = (value: string | null) => {
+  if (!value) return null;
+  const date = new Date(`${value.slice(0,10)}T12:00:00Z`);
+  if (Number.isNaN(date.getTime())) return null;
+  date.setUTCDate(date.getUTCDate()-1);
+  return displayDate(date.toISOString());
+};
+const uploadedDate = (value: string) => {
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? 'Fecha no disponible' : new Intl.DateTimeFormat('es-CO',{dateStyle:'medium',timeStyle:'short',timeZone:'America/Bogota'}).format(date);
+};
 
 export type DocumentView = 'upload' | 'search' | 'review';
 
@@ -139,6 +151,12 @@ export function DocumentLibraryPanel({ view = 'upload', onDiscuss }: { view?: Do
       {!reviewLoading && !reviewError && reviewDocuments.length === 0 && <p>No tienes documentos pendientes de revisión.</p>}
       {reviewDocuments.map(document => <article key={document.id} className="space-y-2 rounded-xl border border-amber-300 bg-amber-50 p-3 dark:border-amber-700 dark:bg-amber-950/30">
         <p className="font-semibold">{kinds.find(kind => kind.value === document.documentType)?.label || 'Documento'} · {document.financialEntity || 'Entidad sin identificar'}</p>
+        <dl className="grid grid-cols-1 gap-x-4 gap-y-1 text-xs sm:grid-cols-2">
+          <div><dt className="font-semibold">Período del archivo</dt><dd>{displayDate(document.periodStart) || 'Sin identificar'}{document.periodEnd ? ` al ${periodEndDate(document.periodEnd) || 'Sin identificar'}` : ''}</dd></div>
+          <div><dt className="font-semibold">Fecha de emisión</dt><dd>{displayDate(document.issuedAt) || 'Sin identificar'}</dd></div>
+          <div><dt className="font-semibold">Subido a Ceroa</dt><dd>{uploadedDate(document.uploadedAt)}</dd></div>
+          <div><dt className="font-semibold">Referencia del archivo</dt><dd className="font-mono">{document.id.slice(0,8)}</dd></div>
+        </dl>
         <p className="text-xs">{missingFields(document).length ? `Falta confirmar: ${missingFields(document).join(', ')}.` : reviewReasons[document.id] === 'OCR_NOT_CONFIGURED' ? 'No se pudo leer el PDF escaneado.' : reviewReasons[document.id] === 'SHEET_SELECTION_REQUIRED' ? 'Selecciona la hoja del archivo XLSX y vuelve a subirlo.' : 'Revisa la lectura y los datos extraídos.'}</p>
         <button type="button" className="rounded-lg bg-amber-700 px-3 py-2 text-xs font-semibold text-white" onClick={() => review(document)}>Revisar y corregir</button>
         <button type="button" className="ml-3 text-xs underline" disabled={busy} onClick={() => void run(async () => { const saved = await documentLibraryService.reprocess(document.id); setUploaded(saved); })}>Volver a procesar</button>

@@ -34,6 +34,16 @@ class AssistantAnalysisServiceTest {
         assertThrows(IllegalArgumentException.class,()->service.resolve(facts,"Saldo {{f3}}"));
         assertThrows(IllegalArgumentException.class,()->service.resolve(facts,"Saldo {{balance}}"));
     }
+    @Test void groundsExactDocumentLiteralsAndListMarkersButRejectsInventedNumbers() {
+        var facts=new LinkedHashMap<String,AssistantAnalysisService.Fact>();
+        facts.put("f1",new AssistantAnalysisService.Fact("financialDocuments/documentValues/0/literal",TextNode.valueOf("2,5%")));
+        facts.put("f2",new AssistantAnalysisService.Fact("financialDocuments/documents/0/periodStart",TextNode.valueOf("2026-08-01")));
+        assertEquals("La tasa indicada es 2,5% en el documento del 2026-08-01.",
+            service.resolve(facts,"La tasa indicada es 2,5% en el documento del 2026-08-01."));
+        assertEquals("• Tasa indicada: 2,5%.",service.resolve(facts,"1. Tasa indicada: 2,5%."));
+        assertEquals("La tasa indicada es 2,5%.",service.resolve(facts,"La tasa indicada es 2.5%."));
+        assertThrows(IllegalArgumentException.class,()->service.resolve(facts,"La tasa es 8,9%."));
+    }
     @Test void separatesThousandsAndPreservesFractionsDatesAndYears() {
         var facts=new LinkedHashMap<String,AssistantAnalysisService.Fact>();
         facts.put("f1",new AssistantAnalysisService.Fact("amount",DecimalNode.valueOf(new BigDecimal("200000.50"))));
