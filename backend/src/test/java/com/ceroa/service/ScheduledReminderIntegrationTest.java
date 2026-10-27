@@ -83,8 +83,9 @@ class ScheduledReminderIntegrationTest {
     }
     @Test void consentAndPlusRevocationAreCheckedBeforeDispatch(){
         debt(7);service.scan(0);var d=first();var r=service.reserve(d.id);owner.setPlan(UserPlan.CERO);users.saveAndFlush(owner);assertFalse(service.dispatch(d.id,r.token()).send());
-        assertThrows(org.springframework.web.server.ResponseStatusException.class,()->service.save(new ScheduledReminderService.SettingsRequest(true,true,"WEEKLY",8)));
-        assertFalse(service.settings().plus());service.save(new ScheduledReminderService.SettingsRequest(false,false,"WEEKLY",8));assertFalse(service.settings().reminders());
+        service.save(new ScheduledReminderService.SettingsRequest(true,true,"WEEKLY",8,5));
+        assertFalse(service.settings().plus());assertTrue(service.settings().reminders());assertEquals(5,service.settings().weeklyDay());
+        service.scan(0);assertEquals("INVALIDATED",deliveries.findById(d.id).orElseThrow().status);
     }
     @Test void separateWorkerCredentialSessionCsrfAndNoFinancialAuthority() throws Exception {
         SecurityContextHolder.clearContext();
@@ -99,6 +100,13 @@ class ScheduledReminderIntegrationTest {
         service.save(new ScheduledReminderService.SettingsRequest(true,true,"MONTHLY",8));service.scan(0);service.scan(0);
         var rows=deliveries.findAllByUserIdOrderByCreatedAtDesc(owner.getId(),org.springframework.data.domain.PageRequest.of(0,50));assertEquals(2,rows.size());
         var briefing=rows.stream().filter(d->d.kind.equals("BRIEFING")).findFirst().orElseThrow();var r=service.reserve(briefing.id);var send=service.dispatch(briefing.id,r.token());assertTrue(send.send());assertTrue(send.text().contains("200.000"));assertFalse(send.text().contains("avalanche"));
+    }
+    @Test void weeklyBriefingUsesSelectedWeekday(){
+        int selected=date.getDayOfWeek().plus(1).getValue();
+        service.save(new ScheduledReminderService.SettingsRequest(false,true,"WEEKLY",8,selected));
+        service.scan(0);assertTrue(deliveries.findAllByUserIdOrderByCreatedAtDesc(owner.getId(),org.springframework.data.domain.PageRequest.of(0,50)).isEmpty());
+        service.useClock(Clock.fixed(instant.plusSeconds(86400),ZONE));service.scan(0);
+        assertEquals("BRIEFING",first().kind);
     }
     @Test void lateEventsExpireAndRetryLimitStopsAutomaticDelivery(){
         debt(7);service.scan(0);var d=first();

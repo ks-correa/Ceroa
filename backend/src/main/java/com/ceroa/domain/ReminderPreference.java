@@ -9,6 +9,7 @@ public class ReminderPreference {
     @Column(nullable=false) public boolean briefing;
     @Column(nullable=false,length=10) public String cadence="WEEKLY";
     @Column(name="delivery_hour",nullable=false) public int hour=8;
+    @Column(name="weekly_day",nullable=false) public int weeklyDay=1;
     @Column(name="consent_linked_at") public OffsetDateTime consentLinkedAt;
     @Column(name="updated_at",nullable=false) public OffsetDateTime updatedAt;
 }

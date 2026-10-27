@@ -50,8 +50,10 @@ public class ScheduledReminderService {
     void useClock(Clock clock){this.clock=clock;}
     private OffsetDateTime now(){return OffsetDateTime.now(clock);}
     private LocalDate today(){return LocalDate.now(clock.withZone(ZONE));}
-    public record Settings(boolean enabled,boolean linked,boolean plus,boolean reminders,boolean briefing,String cadence,int hour,String timezone) {}
-    public record SettingsRequest(boolean reminders,boolean briefing,String cadence,int hour) {}
+    public record Settings(boolean enabled,boolean linked,boolean plus,boolean reminders,boolean briefing,String cadence,int hour,int weeklyDay,String timezone) {}
+    public record SettingsRequest(boolean reminders,boolean briefing,String cadence,int hour,int weeklyDay) {
+        public SettingsRequest(boolean reminders,boolean briefing,String cadence,int hour){this(reminders,briefing,cadence,hour,1);}
+    }
     public record DeliveryStatus(UUID id,UUID notificationId,String kind,String status,int attempts,OffsetDateTime sentAt,String lastError) {}
     public record ScanResult(int processed,boolean hasMore,int nextPage) {}
     public record Candidate(UUID id,String kind,String milestone) {}
@@ -61,15 +63,15 @@ public class ScheduledReminderService {
     public Settings settings(){
         var user=current.entity();var link=links.findById(user.getId()).orElse(null);var pref=preferences.findById(user.getId()).orElse(null);
         boolean valid=consented(pref,link);
-        return new Settings(enabled,validLink(link),plans.entitled(user),valid&&pref.reminders,valid&&pref.briefing,pref==null?"WEEKLY":pref.cadence,pref==null?8:pref.hour,ZONE.getId());
+        return new Settings(enabled,validLink(link),plans.entitled(user),valid&&pref.reminders,valid&&pref.briefing,pref==null?"WEEKLY":pref.cadence,pref==null?8:pref.hour,pref==null?1:pref.weeklyDay,ZONE.getId());
     }
     public Settings save(SettingsRequest request){
-        if(request==null||request.hour<0||request.hour>23||!Set.of("WEEKLY","MONTHLY").contains(request.cadence))throw new IllegalArgumentException();
+        if(request==null||request.hour<0||request.hour>23||request.weeklyDay<1||request.weeklyDay>7||!Set.of("WEEKLY","MONTHLY").contains(request.cadence))throw new IllegalArgumentException();
         tx.executeWithoutResult(s->{
             var user=current.entityForUpdate();var link=links.findById(user.getId()).orElse(null);
-            if((request.reminders||request.briefing)&&(!enabled||!user.isActive()||!plans.entitled(user)||!validLink(link)))throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Vincula Telegram y activa Ceroa Plus para autorizar los envíos.");
+            if((request.reminders||request.briefing)&&(!enabled||!user.isActive()||!validLink(link)))throw new ResponseStatusException(HttpStatus.FORBIDDEN,"Vincula Telegram para autorizar los envíos.");
             var pref=preferences.findById(user.getId()).orElseGet(ReminderPreference::new);
-            pref.userId=user.getId();pref.reminders=request.reminders;pref.briefing=request.briefing;pref.cadence=request.cadence;pref.hour=request.hour;
+            pref.userId=user.getId();pref.reminders=request.reminders;pref.briefing=request.briefing;pref.cadence=request.cadence;pref.hour=request.hour;pref.weeklyDay=request.weeklyDay;
             pref.consentLinkedAt=validLink(link)?link.linkedAt:null;pref.updatedAt=now();preferences.save(pref);
             deliveries.invalidateUser(user.getId());
         });
@@ -96,7 +98,7 @@ public class ScheduledReminderService {
                 var notification=notifications.findByUserIdAndEventKey(locked.getId(),key).orElseThrow();
                 create(locked,notification,"REMINDER",due,key,link);
             }
-            boolean briefingDay="WEEKLY".equals(pref.cadence)?today().getDayOfWeek()==DayOfWeek.MONDAY:today().getDayOfMonth()==1;
+            boolean briefingDay="WEEKLY".equals(pref.cadence)?today().getDayOfWeek().getValue()==pref.weeklyDay:today().getDayOfMonth()==1;
             if(briefingDay&&eligible(locked,pref,link,"BRIEFING")){
                 String key="BRIEFING:"+pref.cadence+":"+today();
                 if(!deliveries.existsByUserIdAndEventKey(locked.getId(),key)){

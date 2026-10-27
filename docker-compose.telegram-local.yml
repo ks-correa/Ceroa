@@ -1,9 +1,6 @@
 # URL temporal: publicar exclusivamente el webhook privado de Telegram.
 # Usar --env-file .env --env-file .env.telegram-local junto con los otros archivos compose.
 services:
-  backend:
-    environment:
-      CEROA_TELEGRAM_BOT_USERNAME: ${TELEGRAM_BOT_USERNAME:-}
   n8n:
     environment:
       N8N_WEBHOOK_URL: ${TELEGRAM_PUBLIC_URL:-http://localhost:5678}/
