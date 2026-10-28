@@ -25,6 +25,33 @@ test('monthly document analysis requests coverage and backend arithmetic',async(
   assert.match(tool.parameters.url,/nextOffset|offset/);
   assert.ok(agent.parameters.options.maxIterations>=10);
 });
+test('text and transcribed audio preserve question and selected document scope',async()=>{
+  const w=JSON.parse(await readFile(new URL('hybrid-rag-query.json',import.meta.url),'utf8'));
+  const code=w.nodes.find(n=>n.name==='Preparar texto').parameters.jsCode;
+  const source={requestId:'00000000-0000-4000-8000-000000000001',year:2026,month:10,selectedDocument:{id:'selected-file'},conversation:[]};
+  const run=(body,input)=>new Function('$','$input',code)(()=>({first:()=>({json:{body}})}),{first:()=>({json:input})})[0].json;
+  const question='Según mis extractos de agosto, qué pagos realicé y a qué tasas';
+  assert.deepEqual(run({...source,message:question},{}),run({...source,audio:'synthetic'}, {candidates:[{content:{parts:[{text:question}]}}]}));
+  assert.throws(()=>run({...source,audio:'synthetic'},{candidates:[]}));
+});
+test('unsupported drafts get one correction using existing evidence, without looping the agent',async()=>{
+  const w=JSON.parse(await readFile(new URL('hybrid-rag-query.json',import.meta.url),'utf8'));
+  assert.equal(w.connections['Validar respuesta'].main[0][0].node,'Revisar borrador con evidencia');
+  assert.match(w.nodes.find(n=>n.name==='Revisar borrador con evidencia').parameters.url,/\/review/);
+  const branches=w.connections['Borrador respaldado'].main;
+  assert.equal(branches[0][0].node,'Validar evidencia en Spring Boot');
+  const repair=branches[1][0].node;
+  for(const connections of Object.values(w.connections))for(const branch of connections.ai_tool??[])assert.ok(branch.every(link=>link.node!==repair));
+  assert.equal(w.connections[repair].main[0][0].node,'Validar respuesta corregida');
+  assert.equal(w.connections['Validar respuesta corregida'].main[0][0].node,'Validar evidencia en Spring Boot');
+  const validate=w.nodes.find(n=>n.name==='Validar respuesta corregida').parameters.jsCode;
+  const response={answer:'Pago {{f1}}.',mode:'personal',sources:[]};
+  for(const json of [response,{text:response},{output:response}]){
+    const result=new Function('$input','$',validate)({first:()=>({json})},()=>({first:()=>({json:{requestId:'request',message:'pagos de agosto'}})}));
+    assert.equal(result[0].json.answer,response.answer);assert.equal(result[0].json.transcript,'pagos de agosto');
+  }
+  assert.match(w.nodes.find(n=>n.name==='Analizar finanzas').parameters.options.systemMessage,/each requested month separately/);
+});
 test('OCR builds a complete provider request without embedding nested schemas in inline expressions',async()=>{
   const w=JSON.parse(await readFile(new URL('hybrid-rag-ocr.json',import.meta.url),'utf8'));
   const config={id:'financial-library-v1',embedding_model:'gemini-embedding-001',dimensions:768,schema_version:21,max_file_bytes:8388608,max_pages:25};

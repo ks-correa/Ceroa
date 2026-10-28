@@ -57,4 +57,8 @@ public class AssistantController {
     public ResponseEntity<AssistantService.Reply> complete(@PathVariable UUID id,@RequestBody Completion body) {
         return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(service.complete(id,body.answer,body.transcript,body.mode,body.sources));
     }
+    @PostMapping("/api/v1/assistant-tools/requests/{id}/review")
+    public ResponseEntity<AssistantService.DraftReview> review(@PathVariable UUID id,@RequestBody Completion body) {
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(service.review(id,body.answer,body.transcript,body.mode,body.sources));
+    }
 }

@@ -45,6 +45,7 @@ public class AssistantService {
         com.ceroa.api.dto.DocumentContracts.Intent libraryIntent;
         int libraryCalls;
         boolean hadContentSearch;
+        final Map<com.ceroa.api.dto.DocumentContracts.Filters,NavigableMap<Integer,com.ceroa.api.dto.DocumentContracts.Result>> periodPages=new HashMap<>();
         final Map<UUID,com.ceroa.api.dto.DocumentContracts.Document> libraryDocuments=new LinkedHashMap<>();
         Job(UUID user) { this.user = user; }
     }
@@ -127,10 +128,20 @@ public class AssistantService {
                 .header("Content-Type","application/json").header("X-Ceroa-Assistant",key)
                 .POST(HttpRequest.BodyPublishers.ofString(json.writeValueAsString(input))).build();
             var client=HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).connectTimeout(Duration.ofSeconds(5)).build();
-            var response=client.send(request,HttpResponse.BodyHandlers.discarding());
-            if (response.statusCode()!=200 || job.result==null) throw unavailable();
+            var response=client.send(request,HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode()!=200 || job.result==null) {
+                log.warn("Assistant workflow unavailable: status={}, prepared={}, toolCalls={}, libraryCalls={}, audio={}",
+                    response.statusCode(),!job.question.isBlank(),job.toolCalls,job.libraryCalls,hasAudio);
+                try {
+                    var diagnostic=json.readTree(response.body());
+                    String stage=diagnostic.path("stage").asText("unknown");
+                    String category=diagnostic.path("category").asText("unknown");
+                    if(stage.matches("[a-z0-9-]{1,80}")&&category.matches("[A-Z_]{1,30}"))log.warn("Assistant workflow failure: stage={}, category={}",stage,category);
+                }catch(Exception ignored){/* Do not log provider payloads or user data. */}
+                throw unavailable();
+            }
             List<Turn> turns=new ArrayList<>(context!=null && context.expires.isAfter(Instant.now())?context.turns:List.of());
-            turns.add(new Turn(contextOnly(job.question),contextOnly(job.result.answer)));
+            turns.add(new Turn(questionContext(job.question),contextOnly(job.result.answer)));
             if(turns.size()>3) turns=new ArrayList<>(turns.subList(turns.size()-3,turns.size()));
             synchronized(this) {
                 if(history.size()>=100 && !history.containsKey(conversation)) history.keySet().stream().findFirst().ifPresent(history::remove);
@@ -178,6 +189,10 @@ public class AssistantService {
         int sources=text.indexOf("\n\nFuentes:");if(sources>=0)text=text.substring(0,sources);
         return text.replaceAll("\\p{N}+(?:[.,/\\-]\\p{N}+)*","[dato anterior: consultar de nuevo]");
     }
+    private String questionContext(String question) {
+        // Keep the requested period for follow-ups; it is user context, never financial evidence.
+        return contextOnly(question).startsWith("[turno omitido:")?contextOnly(question):question;
+    }
     public AssistantAnalysisService.Evidence data(UUID id,AssistantAnalysisService.Dataset dataset,int year,int month,int offset) {
         return withJob(id,job->{
             if(job.selectedDocument!=null)throw new IllegalArgumentException("Consulta limitada al documento seleccionado");
@@ -210,12 +225,21 @@ public class AssistantService {
                 effective=new com.ceroa.api.dto.DocumentContracts.Query(intent,job.question,filters,0,10);
             }
             var result=library.query(effective);
+            if(effective.intent()==com.ceroa.api.dto.DocumentContracts.Intent.PERIOD_ANALYSIS)
+                job.periodPages.computeIfAbsent(effective.filters(),f->new TreeMap<>()).put(effective.offset(),result);
             job.libraryResult=result;
             job.libraryIntent=effective.intent();
             if(effective.intent()!=com.ceroa.api.dto.DocumentContracts.Intent.METADATA_SEARCH)job.hadContentSearch=true;
             for(var document:result.documents())job.libraryDocuments.put(document.id(),document);
             com.fasterxml.jackson.databind.node.ObjectNode minimized=json.valueToTree(result);
-            minimized.path("documents").forEach(d->{if(d instanceof com.fasterxml.jackson.databind.node.ObjectNode doc)doc.remove("ownerId");});
+            minimized.path("documents").forEach(d->{if(d instanceof com.fasterxml.jackson.databind.node.ObjectNode doc){
+                doc.remove("ownerId");
+                if(doc.path("periodStart").isTextual()){
+                    var date=LocalDate.parse(doc.path("periodStart").asText());
+                    doc.put("periodYear",date.getYear());doc.put("periodMonth",date.getMonthValue());
+                }
+                if(doc.path("periodEnd").isTextual())doc.put("periodEndInclusive",LocalDate.parse(doc.path("periodEnd").asText()).minusDays(1).toString());
+            }});
             if(job.selectedDocument!=null) {
                 var selected=library.get(job.selectedDocument.id());
                 if(!selected.status().equals("INDEXED")||selected.version()!=job.selectedDocument.version())throw new IllegalArgumentException("Documento modificado; consulta de nuevo");
@@ -238,6 +262,10 @@ public class AssistantService {
                     var value=values.addObject();value.put("documentId",source.documentId().toString());
                     if(source.page()!=null)value.put("page",source.page());
                     value.put("literal",match.group());
+                    int lineStart=source.content().lastIndexOf('\n',match.start())+1;
+                    int lineEnd=source.content().indexOf('\n',match.end());
+                    if(lineEnd<0)lineEnd=source.content().length();
+                    value.put("context",source.content().substring(lineStart,Math.min(lineEnd,lineStart+300)));
                     if(match.group().contains("$")||match.group().matches("(?iu).*\\b(?:COP|pesos)\\b.*")||match.group().contains("%")){
                         BigDecimal number=documentNumber(match.group());if(number!=null)value.put("numericValue",number);
                     }
@@ -250,6 +278,7 @@ public class AssistantService {
                     var value=values.addObject();value.put("documentId",source.documentId().toString());
                     if(source.page()!=null)value.put("page",source.page());
                     value.put("literal",raw);value.put("kindHint",nearby.group().toLowerCase(Locale.ROOT).startsWith("tasa")?"rate":"amount");
+                    value.put("context",nearby.group());
                     if(!raw.matches("-?\\d+[,.-]\\d{3}" )||raw.contains(".")){
                         BigDecimal number=documentNumber(raw);if(number!=null)value.put("numericValue",number);
                     }
@@ -270,6 +299,36 @@ public class AssistantService {
     }
     public Reply complete(UUID id,String answer,String transcript) {
         return complete(id,answer,transcript,null,List.of());
+    }
+    private boolean incompletePeriods(Job job) {
+        for(var pages:job.periodPages.values()) {
+            int expected=0;boolean more=true;
+            for(var entry:pages.entrySet()) {
+                if(entry.getKey()!=expected||!(entry.getValue().verifiedData() instanceof Map<?,?> coverage))return true;
+                if(Boolean.TRUE.equals(coverage.get("contentTruncated"))||coverage.get("documentsWithoutContent") instanceof Number missing&&missing.intValue()>0)return true;
+                expected+=entry.getValue().documents().size();
+                more=Boolean.TRUE.equals(coverage.get("hasMoreDocuments"));
+            }
+            if(more)return true;
+        }
+        return false;
+    }
+    public record DraftReview(UUID requestId,String answer,String transcript,String mode,List<String> sources,
+                              boolean valid,String feedback,Map<String,AssistantAnalysisService.Fact> facts) {}
+    public DraftReview review(UUID id,String answer,String transcript,String mode,List<String> sources) {
+        return withJob(id,job->{
+            if(transcript==null||!transcript.equals(job.question))throw new IllegalArgumentException("La transcripción no coincide con la pregunta preparada");
+            boolean valid=true;String feedback="";
+            try {
+                if(!(job.libraryIntent==com.ceroa.api.dto.DocumentContracts.Intent.METADATA_SEARCH&&!job.hadContentSearch))
+                    analysis.resolve(job.facts,answer);
+            }catch(IllegalArgumentException error){
+                valid=false;feedback=error.getMessage();
+            }
+            // Request-bound facts only. Corrections cannot read another account or perform writes.
+            return new DraftReview(id,answer,transcript,mode,sources==null?List.of():List.copyOf(sources),valid,feedback,
+                valid?Map.of():Map.copyOf(job.facts));
+        });
     }
     public DocumentEvidence documents(UUID id,String query) {
         return withJob(id,job->{
@@ -297,8 +356,8 @@ public class AssistantService {
     public Reply complete(UUID id,String answer,String transcript,String mode,List<String> sources) {
         final List<String> citations=sources==null?List.of():List.copyOf(sources);
         try { return withJob(id,job->{
-            if(transcript==null || transcript.isBlank() || transcript.length()>2000) throw new IllegalArgumentException();
-            if(!job.question.isEmpty() && !job.question.equals(transcript)) throw new IllegalArgumentException();
+            if(transcript==null || transcript.isBlank() || transcript.length()>2000) throw new IllegalArgumentException("Transcripción vacía o demasiado extensa");
+            if(!job.question.isEmpty() && !job.question.equals(transcript)) throw new IllegalArgumentException("La transcripción no coincide con la pregunta preparada");
             String resolved;
             if(job.selectedDocument!=null) {
                 var selected=library.get(job.selectedDocument.id());
@@ -336,12 +395,13 @@ public class AssistantService {
                 var documents=List.copyOf(job.libraryDocuments.values());
                 for(var d:documents){var fresh=library.get(d.id());if(fresh.version()!=d.version()||fresh.status().equals("DELETING"))throw new IllegalArgumentException("Documento modificado; consulta de nuevo");}
                 if(!documents.isEmpty())resolved+="\n\nFuentes documentales:\n"+documents.stream().map(d->"• "+d.documentType()+" · "+(d.financialEntity()==null?"Entidad no identificada":d.financialEntity())+" · "+d.id()).collect(java.util.stream.Collectors.joining("\n"));
-                if(Set.of("INSUFFICIENT","PARTIAL").contains(result.evidenceStatus()))resolved+="\nNo hay evidencia documental suficiente para responder.";
+                if(incompletePeriods(job))resolved+="\nLa comparación es parcial: faltan páginas de resultados o contenido legible de algunos archivos. No se puede confirmar un total completo del período.";
+                else if(job.periodPages.isEmpty()&&Set.of("INSUFFICIENT","PARTIAL").contains(result.evidenceStatus()))resolved+="\nLa evidencia de esta búsqueda es parcial o insuficiente; los hallazgos anteriores se limitan a las fuentes disponibles.";
                 job.result=new Reply(resolved,"analysis",documents,result.traceId());
             }else job.result=job.selectedDocument==null?new Reply(resolved,"analysis"):new Reply(resolved,"analysis",List.of(job.selectedDocument),null);
             return job.result;
         }); } catch (IllegalArgumentException error) {
-            log.warn("Assistant response validation rejected: {}", error.getMessage());
+            log.warn("Assistant response validation rejected: {}", error.getClass().getSimpleName());
             throw error;
         }
     }
@@ -367,6 +427,7 @@ public class AssistantService {
                 } catch(NumberFormatException e) { /* Ambiguous inputs are not usable arithmetic evidence. */ }
             }
             values.put("percentScale",100); values.put("monthsPerYear",12);
+            values.put("currentYear",LocalDate.now(ZONE).getYear());
             var evidence=analysis.evidence(job.facts,values,"inputs"); job.cache.put("inputs",evidence); return evidence;
         });
     }

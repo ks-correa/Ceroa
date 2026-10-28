@@ -6,10 +6,14 @@ import java.util.Map;
 
 @RestControllerAdvice(assignableTypes={AssistantController.class,TelegramController.class})
 public class AssistantErrorAdvice {
+    private static final org.slf4j.Logger log=org.slf4j.LoggerFactory.getLogger(AssistantErrorAdvice.class);
     @ExceptionHandler({org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class,
         org.springframework.web.bind.MissingServletRequestParameterException.class,
         org.springframework.http.converter.HttpMessageNotReadableException.class, IllegalArgumentException.class, ArithmeticException.class})
-    public ResponseEntity<Map<String,String>> input(Exception error) {
+    public ResponseEntity<Map<String,String>> input(Exception error,jakarta.servlet.http.HttpServletRequest request) {
+        var location=java.util.Arrays.stream(error.getStackTrace()).filter(frame->frame.getClassName().startsWith("com.ceroa.")).findFirst().orElse(null);
+        String stage=request.getRequestURI().substring(request.getRequestURI().lastIndexOf('/')+1);
+        log.warn("Assistant input rejected: stage={}, type={}, location={}",stage,error.getClass().getSimpleName(),location);
         return ResponseEntity.badRequest().body(Map.of("code","ASSISTANT_INVALID_INPUT","message","Revisa el mensaje, formato de audio o período solicitado."));
     }
     @ExceptionHandler(ResponseStatusException.class)

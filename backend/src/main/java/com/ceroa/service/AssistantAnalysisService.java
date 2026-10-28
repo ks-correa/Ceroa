@@ -106,7 +106,7 @@ public class AssistantAnalysisService {
         if (node.isObject()) node.fields().forEachRemaining(e->flatten(all,added,e.getValue(),path+"/"+e.getKey()));
         else if (node.isArray()) { for(int i=0;i<node.size();i++) flatten(all,added,node.get(i),path+"/"+i); }
         else {
-            if(all.size()>=4000) throw new IllegalArgumentException("Demasiados datos para una consulta");
+            if(all.size()>=12000) throw new IllegalArgumentException("Demasiados datos para una consulta; reduce el período o la cantidad de archivos");
             String id="f"+(all.size()+1); Fact fact=new Fact(path,node.deepCopy()); all.put(id,fact); added.put(id,fact);
         }
     }
@@ -135,14 +135,17 @@ public class AssistantAnalysisService {
         var matcher=REFERENCE.matcher(answer); StringBuffer rendered=new StringBuffer();
         while(matcher.find()) {
             Fact fact=facts.get(matcher.group(1));
-            if(fact==null || fact.value().isNull()) throw new IllegalArgumentException();
+            if(fact==null || fact.value().isNull()) throw new IllegalArgumentException("Referencia de evidencia inexistente o sin valor: "+matcher.group(1));
+            if(fact.source().matches("(?i).*/(?:id|documentId|chunkId|ownerId)$"))throw new IllegalArgumentException("Un identificador interno no respalda una cifra: "+matcher.group(1));
             String value=fact.value().isNumber()?displayNumber(fact):displayText(fact);
             matcher.appendReplacement(rendered,Matcher.quoteReplacement(value));
         }
         matcher.appendTail(rendered);
         String prose=REFERENCE.matcher(answer).replaceAll("");
-        if(prose.codePoints().anyMatch(Character::isDigit) || prose.contains("{{") || prose.contains("}}"))
-            throw new IllegalArgumentException("Respuesta con cifras sin evidencia");
+        if(prose.codePoints().anyMatch(Character::isDigit) || prose.contains("{{") || prose.contains("}}")) {
+            var unsupported=Pattern.compile("\\d+(?:[.,/\\-]\\d+)*").matcher(prose).results().map(java.util.regex.MatchResult::group).distinct().limit(20).toList();
+            throw new IllegalArgumentException("Respuesta con cifras sin evidencia. Sustituye u omite estos literales: "+unsupported+". No uses números de lista ni años literales; usa los hechos actuales con {{fID}}.");
+        }
         if(rendered.length()>16000) throw new IllegalArgumentException("Respuesta demasiado extensa");
         return rendered.toString()
             .replaceAll("(?i)([\\d.,]+%\\s*EA)\\s*\\((?:y una )?tasa (?:anual comparable|comparable anual) (?:de )?\\1\\)","$1")
@@ -203,7 +206,7 @@ public class AssistantAnalysisService {
     }
     private String displayNumber(Fact fact) {
         BigDecimal value=fact.value().decimalValue().stripTrailingZeros();
-        if(fact.source().equals("year") || fact.source().endsWith("/year")) return value.toPlainString();
+        if(fact.source().matches("(?i)(?:.*/)?(?:year|currentYear|periodYear)")) return value.toPlainString();
         DecimalFormatSymbols symbols=new DecimalFormatSymbols(Locale.forLanguageTag("es-CO"));
         symbols.setGroupingSeparator('.'); symbols.setDecimalSeparator(',');
         DecimalFormat format=new DecimalFormat("#,##0",symbols);

@@ -54,6 +54,14 @@ class AssistantAnalysisServiceTest {
         assertEquals("200.000,5; 28,7%; 2026; 2026-09-27; -1.250.000,12345678",
             service.resolve(facts,"{{f1}}; {{f2}}%; {{f3}}; {{f4}}; {{f5}}"));
     }
+    @Test void calendarYearsAreNotRenderedAsGroupedMoneyAndInternalIdsAreNotEvidence() {
+        var facts=Map.of(
+            "f1",new AssistantAnalysisService.Fact("inputs/currentYear",DecimalNode.valueOf(new BigDecimal("2026"))),
+            "f2",new AssistantAnalysisService.Fact("financialDocuments/documents/0/periodYear",DecimalNode.valueOf(new BigDecimal("2025"))),
+            "f3",new AssistantAnalysisService.Fact("financialDocuments/documents/0/documentId",TextNode.valueOf("123456")));
+        assertEquals("Comparación de 2026 y 2025.",service.resolve(facts,"Comparación de {{f1}} y {{f2}}."));
+        assertThrows(IllegalArgumentException.class,()->service.resolve(facts,"El pago es {{f3}}."));
+    }
     @Test void exactArithmeticCannotAcceptFabricatedOrTextOperands() {
         var facts=new LinkedHashMap<String,AssistantAnalysisService.Fact>();
         facts.put("f1",new AssistantAnalysisService.Fact("budget",DecimalNode.valueOf(new BigDecimal("800000.10"))));

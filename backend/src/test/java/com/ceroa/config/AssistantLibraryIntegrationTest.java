@@ -37,6 +37,25 @@ class AssistantLibraryIntegrationTest {
                 var body=JSON.readTree(exchange.getRequestBody());String id=body.path("requestId").asText(),question=body.path("message").asText();
                 String base="/api/v1/assistant-tools/requests/"+id;
                 callback.perform(post(base+"/prepare").header("X-Ceroa-Assistant",KEY).contentType("application/json").content(JSON.writeValueAsString(Map.of("transcript",question)))).andExpect(status().isOk());
+                if(question.equals("compare-periods")){
+                    var paymentRefs=new ArrayList<String>();
+                    for(int month:new int[]{8,9}){
+                        var response=callback.perform(get(base+"/financial-documents").header("X-Ceroa-Assistant",KEY)
+                            .param("intent","PERIOD_ANALYSIS").param("question","pagos y tasas").param("documentType","BANK_STATEMENT")
+                            .param("periodFrom",LocalDate.of(2026,month,1).toString()).param("periodToExclusive",LocalDate.of(2026,month+1,1).toString()))
+                            .andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+                        JSON.readTree(response).path("evidence").path("facts").fields().forEachRemaining(entry->{
+                            if(entry.getValue().path("source").asText().endsWith("/documentValues/0/numericValue"))paymentRefs.add(entry.getKey());
+                        });
+                    }
+                    var delta=callback.perform(get(base+"/calculate").header("X-Ceroa-Assistant",KEY).param("operation","subtract")
+                        .param("refs",paymentRefs.get(1)+","+paymentRefs.get(0))).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+                    String result=JSON.readTree(delta).path("facts").fieldNames().next();
+                    callback.perform(post(base+"/complete").header("X-Ceroa-Assistant",KEY).contentType("application/json")
+                        .content(JSON.writeValueAsString(Map.of("transcript",question,"answer","En agosto pagaste {{"+paymentRefs.get(0)+"}} y en septiembre {{"+paymentRefs.get(1)+"}}. La diferencia es {{"+result+"}}.","mode","personal","sources",List.of()))))
+                        .andExpect(status().isOk());
+                    exchange.sendResponseHeaders(200,0);exchange.getResponseBody().write("{}".getBytes());return;
+                }
                 var response=callback.perform(get(base+"/financial-documents").header("X-Ceroa-Assistant",KEY)
                     .param("intent",question.equals("semantic")?"SEMANTIC_SEARCH":question.equals(MONTH_QUESTION)?"PERIOD_ANALYSIS":"METADATA_SEARCH")
                     .param("question",question).param("documentType",question.equals("metadata-filter")||question.equals(MONTH_QUESTION)?"BANK_STATEMENT":"")
@@ -120,6 +139,22 @@ class AssistantLibraryIntegrationTest {
         mvc.perform(post("/api/v1/assistant/messages").with(user(actor.toString())).with(csrf()).contentType("application/json")
             .content(JSON.writeValueAsString(Map.of("message",MONTH_QUESTION))))
             .andExpect(status().isOk()).andExpect(jsonPath("$.answer").value(org.hamcrest.Matchers.containsString("150.000")))
+            .andExpect(jsonPath("$.documents.length()").value(2));
+    }
+    @Test void comparesPaymentsFromDifferentMonthsAndKeepsBothDocumentReferences()throws Exception {
+        UUID augustId=UUID.randomUUID();
+        var august=new Document(augustId,actor,"CC","BANK_STATEMENT","Banco sintético",LocalDate.of(2026,8,1),LocalDate.of(2026,9,1),null,"INDEXED",1,OffsetDateTime.now());
+        when(library.get(augustId)).thenReturn(august);
+        doAnswer(call->{
+            Query query=call.getArgument(0);org.junit.jupiter.api.Assertions.assertEquals(Intent.PERIOD_ANALYSIS,query.intent());
+            boolean first=query.filters().periodFrom().getMonthValue()==8;
+            var document=first?august:library.get(docId);
+            var source=new Source(document.id(),UUID.randomUUID(),1,"page 1",first?"Pago $100.000\nTasa 2%":"Pago $150.000\nTasa 2,5%",0,1);
+            return new Result("Cobertura completa",Map.of("complete",true,"hasMoreDocuments",false,"documentsWithoutContent",0),query.filters(),List.of(source),List.of(document),"AVAILABLE",UUID.randomUUID(),1);
+        }).when(library).query(any());
+        mvc.perform(post("/api/v1/assistant/messages").with(user(actor.toString())).with(csrf()).contentType("application/json").content("{\"message\":\"compare-periods\"}"))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.answer").value(org.hamcrest.Matchers.containsString("La diferencia es 50.000")))
+            .andExpect(jsonPath("$.answer").value(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("comparación es parcial"))))
             .andExpect(jsonPath("$.documents.length()").value(2));
     }
     @Test void semanticExplanationsStillRejectUnsupportedModelNumbers()throws Exception {

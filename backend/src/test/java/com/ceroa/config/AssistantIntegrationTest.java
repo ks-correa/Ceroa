@@ -35,6 +35,7 @@ class AssistantIntegrationTest {
             try {
                 var body=JSON.readTree(exchange.getRequestBody()); lastJob=body.path("requestId").asText();
                 String message=body.path("message").asText();
+                if(!body.path("audio").asText().isBlank())message="analysis-audio";
                 lastConversation=body.path("conversation").toString();
                 if(message.startsWith("analysis")) {
                     String base="/api/v1/assistant-tools/requests/"+lastJob;
@@ -65,6 +66,19 @@ class AssistantIntegrationTest {
                     }
                     if(message.equals("analysis-invalid")) answer="Tu saldo es 999999.";
                     if(message.equals("analysis-forged-ref")) answer="Tu saldo es {{f999999}}.";
+                    if(message.equals("analysis-audio")||message.equals("analysis-repair")){
+                        var review=callback.perform(post(base+"/review").header("X-Ceroa-Assistant",KEY).contentType("application/json")
+                            .content(JSON.writeValueAsString(Map.of("answer","Saldo {{f999999}}.","transcript",message,"mode","personal","sources",List.of()))))
+                            .andExpect(status().isOk()).andExpect(jsonPath("$.valid").value(false))
+                            .andExpect(jsonPath("$.feedback").value(org.hamcrest.Matchers.containsString("f999999")))
+                            .andExpect(jsonPath("$.facts").isMap()).andReturn();
+                        callback.perform(post(base+"/review").header("X-Ceroa-Assistant",KEY).contentType("application/json")
+                            .content(JSON.writeValueAsString(Map.of("answer",answer,"transcript",message,"mode","personal","sources",List.of()))))
+                            .andExpect(status().isOk()).andExpect(jsonPath("$.valid").value(true)).andExpect(jsonPath("$.facts").isEmpty());
+                        callback.perform(post(base+"/review").header("X-Ceroa-Assistant",KEY).contentType("application/json")
+                            .content(JSON.writeValueAsString(Map.of("answer",answer,"transcript","different transcript"))))
+                            .andExpect(status().isBadRequest());
+                    }
                     var complete=callback.perform(post(base+"/complete").header("X-Ceroa-Assistant",KEY).contentType("application/json")
                         .content(JSON.writeValueAsString(Map.of("answer",answer,"transcript",message))));
                     complete.andExpect(message.equals("analysis-invalid") || message.equals("analysis-forged-ref") ? status().isBadRequest() : status().isOk());
@@ -213,6 +227,26 @@ class AssistantIntegrationTest {
     @Test void invalidAudioIsRejectedBeforeCallingWorkflow() throws Exception {
         mvc.perform(post("/api/v1/assistant/messages").with(user(owner)).with(csrf()).contentType("application/json").content("{\"audio\":\"invalid\",\"mime\":\"audio/wav\"}"))
             .andExpect(status().isBadRequest());
+    }
+    @Test void preparedAudioUsesTheSameEvidenceAndCorrectionContractAsText() throws Exception {
+        debt(owner,"Préstamo de prueba",300);
+        byte[] wav=new byte[44];System.arraycopy("RIFF".getBytes(),0,wav,0,4);System.arraycopy("WAVE".getBytes(),0,wav,8,4);
+        mvc.perform(post("/api/v1/assistant/messages").with(user(owner)).with(csrf()).contentType("application/json")
+            .content(JSON.writeValueAsString(Map.of("audio",Base64.getEncoder().encodeToString(wav),"mime","audio/wav"))))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.answer").value(org.hamcrest.Matchers.containsString("300")));
+    }
+    @Test void invalidDraftCanBeCorrectedWithoutReissuingFinancialReads() throws Exception {
+        debt(owner,"Préstamo de prueba",300);
+        mvc.perform(post("/api/v1/assistant/messages").with(user(owner)).with(csrf()).contentType("application/json")
+            .content("{\"message\":\"analysis-repair\"}"))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.answer").value(org.hamcrest.Matchers.containsString("300")));
+    }
+    @Test void followupKeepsTheRequestedYearWithoutTreatingOldAnswersAsFreshEvidence() throws Exception {
+        mvc.perform(post("/api/v1/assistant/messages").with(user(owner)).with(csrf()).contentType("application/json")
+            .content("{\"message\":\"analysis septiembre de 2025\"}")).andExpect(status().isOk());
+        mvc.perform(post("/api/v1/assistant/messages").with(user(owner)).with(csrf()).contentType("application/json")
+            .content("{\"message\":\"analysis compara con agosto\"}")).andExpect(status().isOk());
+        org.junit.jupiter.api.Assertions.assertTrue(lastConversation.contains("septiembre de 2025"));
     }
     @Test void disabledAccountAndArbitraryToolsAreRejected() throws Exception {
         var account=users.findById(UUID.fromString(owner)).orElseThrow();account.setActive(false);users.saveAndFlush(account);
