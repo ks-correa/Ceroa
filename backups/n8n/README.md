@@ -1,5 +1,26 @@
 # Respaldo privado de n8n
 
+## Exportación actual verificada
+
+`ceroa-n8n-live-2026-11-04.ceroa` es el respaldo recomendado, exportado
+directamente desde n8n 2.45.4 en Docker el 4 de noviembre de 2026.
+Contiene 15 credenciales, 13 workflows (11 activos en origen), la configuración
+de cifrado y los `.env` locales. Todas las referencias de credenciales de los
+workflows existen en la exportación. Incluye `workflows-inactive.json` para
+restaurar sin activar automáticamente las automatizaciones.
+
+Usa la misma clave externa indicada abajo. En el comando de descifrado,
+sustituye el nombre del archivo de entrada por
+`backups/n8n/ceroa-n8n-live-2026-11-04.ceroa`.
+Importa primero `credentials-readable.json` y después
+`workflows-inactive.json`. Verifica las conexiones antes de activar.
+No ejecutes el mismo bot de Telegram en dos instancias a la vez.
+La copia no corrige la conexión a Supabase: durante la revisión el backend
+se reiniciaba porque el proveedor rechazaba el tenant/usuario configurado.
+No es una copia completa de la base de datos.
+
+## Copia histórica de archivos locales
+
 `ceroa-n8n-2026-11-04.ceroa` contiene un ZIP cifrado con AES-256-GCM
 y una clave aleatoria de 256 bits. La herramienta comprueba el descifrado
 antes de guardar el respaldo.
