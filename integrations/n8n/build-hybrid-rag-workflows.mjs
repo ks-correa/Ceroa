@@ -1,10 +1,10 @@
 import { readFile, writeFile } from 'node:fs/promises';
 
-// Compatible with installed n8n 2.40.7; no embedded credentials or execution data.
+// Portable workflow definitions; no embedded credentials or execution data.
 const settings = { executionOrder: 'v1', timezone: 'America/Bogota', executionTimeout: 240, saveDataSuccessExecution: 'none', saveDataErrorExecution: 'none', saveManualExecutions: false };
 const auth = { authentication: 'genericCredentialType', genericAuthType: 'httpHeaderAuth' };
 const backend = 'http://backend:8080/api/v1';
-const configurationNode=(position)=>({id:'supabase-config',name:'Supabase · Configuración del índice',type:'n8n-nodes-base.supabase',typeVersion:1,position,parameters:{operation:'getAll',tableId:'ceroa_rag_configuration',returnAll:false,limit:1,filterType:'string',filterString:'id=eq.financial-library-v1'}});
+const configurationNode=(position)=>({id:'supabase-config',name:'Supabase · Configuración del índice',type:'n8n-nodes-base.supabase',typeVersion:1,position,retryOnFail:true,maxTries:3,waitBetweenTries:1500,parameters:{operation:'getAll',tableId:'ceroa_rag_configuration',returnAll:false,limit:1,filterType:'string',filterString:'id=eq.financial-library-v1'}});
 const configurationCheck=`const c=$json;if(c.id!=='financial-library-v1'||c.embedding_model!=='gemini-embedding-001'||c.dimensions!==768||c.schema_version!==21||c.max_file_bytes!==8388608||c.max_pages!==25)throw new Error('Índice Supabase incompatible');`;
 const proposalSchema = { type: 'object', additionalProperties: false, required: ['proposals'], properties: { proposals: { type: 'array', maxItems: 6, items: { type: 'object', additionalProperties: false, required: ['field', 'value', 'quote', 'location'], properties: { field: { type: 'string', enum: ['identificationType', 'documentType', 'financialEntity', 'periodStart', 'periodEnd', 'issuedAt'] }, value: { type: 'string', maxLength: 160 }, quote: { type: 'string', maxLength: 500 }, location: { type: 'string', maxLength: 200 } } } } } };
 function ingestion(scheduled) {
@@ -67,11 +67,9 @@ assistant.nodes.push({ id: 'financial-docs-tool', name: 'Consultar documentos fi
   url: `={{ '${backend}/assistant-tools/requests/' + $('Preparar texto').first().json.requestId + '/financial-documents?' + Object.entries({${queryString}}).filter(([k,v])=>v!=='').map(([k,v])=>encodeURIComponent(k)+'='+encodeURIComponent(v)).join('&') }}`, options: { timeout: 40000 }
 } });
 assistant.connections['Consultar documentos financieros'] = { ai_tool: [[{ node: 'Analizar finanzas', type: 'ai_tool', index: 0 }]] };
-assistant.nodes.push(configurationNode([500,-250]),{id:'supabase-check',name:'Verificar índice y conservar solicitud',type:'n8n-nodes-base.code',typeVersion:2,position:[730,-250],parameters:{jsCode:configurationCheck+`return [{json:$('Preparar texto').first().json}];`}});
-assistant.connections['Preparar texto'].main[0]=[{node:'Supabase · Configuración del índice',type:'main',index:0}];
-assistant.connections['Supabase · Configuración del índice']={main:[[{node:'Verificar índice y conservar solicitud',type:'main',index:0}],[{node:'Responder fallo seguro',type:'main',index:0}]]};
-assistant.nodes.find(n=>n.id==='supabase-config').onError='continueErrorOutput';
-assistant.connections['Verificar índice y conservar solicitud']={main:[[{node:'Preparar contexto en Spring Boot',type:'main',index:0}],[{node:'Responder fallo seguro',type:'main',index:0}]]};assistant.nodes.find(n=>n.id==='supabase-check').onError='continueErrorOutput';
+// Reading the assistant must not depend on the administrative index-configuration gateway.
+// Financial document authorization and evidence checks still happen in Spring Boot.
+assistant.connections['Preparar texto'].main[0]=[{node:'Preparar contexto en Spring Boot',type:'main',index:0}];
 agent.parameters.options.systemMessage += '\nCROSS-PERIOD QUESTIONS: Audio is transcribed into the same question field and must use the same tools as text. For comparisons, retrieve PERIOD_ANALYSIS for each requested month separately, including every offset page. Correlate by institution, documentary period and explicit account/product labels; never assume two files describe the same account merely because the bank is the same. Compare confirmed payments, interest, balances and rate time bases separately; use backend subtraction for changes and addition for totals. Distinguish uploadedAt (when uploaded) from periodStart (statement month). documentsOnPage is a page count, not necessarily the total. Cite each period and institution and state missing or partial coverage without discarding the evidence that is available. User questions in conversation preserve the requested month/year but prior responses are not fresh evidence. Do not ask users to select a single file for a multi-file question. A single-file selection remains restricted to that file.';
 const completion=assistant.nodes.find(n=>n.name==='Validar evidencia en Spring Boot');
 const review={id:'review-evidence',name:'Revisar borrador con evidencia',type:'n8n-nodes-base.httpRequest',typeVersion:4.2,position:[1450,0],onError:'continueErrorOutput',parameters:{...structuredClone(completion.parameters),url:completion.parameters.url.replace('/complete','/review')}};

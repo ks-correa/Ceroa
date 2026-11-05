@@ -15,4 +15,7 @@ tmp/
 *.sqlite
 *.sqlite-shm
 *.sqlite-wal
+# Private backup keys and decrypted restore output.
+*.key
+/backups/n8n/restored/
 .DS_Store

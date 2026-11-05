@@ -60,7 +60,12 @@ class AssistantAnalysisServiceTest {
             "f2",new AssistantAnalysisService.Fact("financialDocuments/documents/0/periodYear",DecimalNode.valueOf(new BigDecimal("2025"))),
             "f3",new AssistantAnalysisService.Fact("financialDocuments/documents/0/documentId",TextNode.valueOf("123456")));
         assertEquals("Comparación de 2026 y 2025.",service.resolve(facts,"Comparación de {{f1}} y {{f2}}."));
-        assertThrows(IllegalArgumentException.class,()->service.resolve(facts,"El pago es {{f3}}."));
+        assertEquals("El documento es [referencia interna omitida].",service.resolve(facts,"El documento es {{f3}}."));
+    }
+    @Test void finalFallbackKeepsVerifiedFactsAndMasksUnsupportedNumbers() {
+        var facts=Map.of("f1",new AssistantAnalysisService.Fact("financialDocuments/documentValues/0/literal",TextNode.valueOf("2,5%")));
+        assertEquals("Tasa confirmada: 2,5%. Otro valor: [dato sin evidencia]. Referencia: [dato sin evidencia].\n\nAlgunas cifras o referencias no pudieron verificarse y se omitieron.",
+            service.resolveConservatively(facts,"Tasa confirmada: {{f1}}. Otro valor: 9,9%. Referencia: {{f99}}."));
     }
     @Test void exactArithmeticCannotAcceptFabricatedOrTextOperands() {
         var facts=new LinkedHashMap<String,AssistantAnalysisService.Fact>();

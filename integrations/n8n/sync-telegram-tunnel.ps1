@@ -19,7 +19,16 @@ try {
   # Register first, preserving queued messages before n8n checks its trigger on restart.
   docker exec -e "N8N_WEBHOOK_URL=$url/" ceroa-n8n node /opt/ceroa-workflows/sync-telegram-webhook.cjs --apply
   if ($LASTEXITCODE -ne 0) { throw 'No se pudo sincronizar Telegram.' }
-  docker compose --env-file .env --env-file .env.telegram-local -f docker-compose.yml -f docker-compose.n8n.yml -f docker-compose.n8n-sandbox.yml -f docker-compose.telegram-local.yml up -d --no-deps n8n
+  $compose = @('compose','--env-file','.env','--env-file','.env.telegram-local','-f','docker-compose.yml','-f','docker-compose.n8n.yml')
+  if (Test-Path '.env.n8n-sandbox') { $compose += @('-f','docker-compose.n8n-sandbox.yml') }
+  $compose += @('-f','docker-compose.telegram-local.yml','up','-d','--no-deps','n8n')
+  & docker @compose
   if ($LASTEXITCODE -ne 0) { throw 'No se pudo actualizar la URL de n8n.' }
+  $ready = $false
+  for ($attempt = 0; $attempt -lt 90; $attempt++) {
+    if ((docker inspect ceroa-n8n --format '{{.State.Health.Status}}') -eq 'healthy') { $ready = $true; break }
+    Start-Sleep -Seconds 1
+  }
+  if (!$ready) { throw 'n8n no inició correctamente tras actualizar su URL.' }
   Write-Output 'Telegram apunta al túnel actual. No se descartaron mensajes pendientes.'
 } finally { Pop-Location }

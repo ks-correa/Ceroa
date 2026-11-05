@@ -360,39 +360,6 @@
       }
     },
     {
-      "id": "supabase-config",
-      "name": "Supabase · Configuración del índice",
-      "type": "n8n-nodes-base.supabase",
-      "typeVersion": 1,
-      "position": [
-        500,
-        -250
-      ],
-      "parameters": {
-        "operation": "getAll",
-        "tableId": "ceroa_rag_configuration",
-        "returnAll": false,
-        "limit": 1,
-        "filterType": "string",
-        "filterString": "id=eq.financial-library-v1"
-      },
-      "onError": "continueErrorOutput"
-    },
-    {
-      "id": "supabase-check",
-      "name": "Verificar índice y conservar solicitud",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        730,
-        -250
-      ],
-      "parameters": {
-        "jsCode": "const c=$json;if(c.id!=='financial-library-v1'||c.embedding_model!=='gemini-embedding-001'||c.dimensions!==768||c.schema_version!==21||c.max_file_bytes!==8388608||c.max_pages!==25)throw new Error('Índice Supabase incompatible');return [{json:$('Preparar texto').first().json}];"
-      },
-      "onError": "continueErrorOutput"
-    },
-    {
       "id": "review-evidence",
       "name": "Revisar borrador con evidencia",
       "type": "n8n-nodes-base.httpRequest",
@@ -589,40 +556,6 @@
       }
     },
     {
-      "id": "failure-supabase-config",
-      "name": "Fallo · Supabase · Configuración del índice",
-      "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1.4,
-      "position": [
-        2300,
-        500
-      ],
-      "parameters": {
-        "respondWith": "json",
-        "responseBody": "={{ JSON.stringify({available:false,stage:\"supabase-config\",category:/format|parse|schema|structured/i.test(JSON.stringify($json.error??$json))?'FORMAT':/rate limit|quota|429/i.test(JSON.stringify($json.error??$json))?'PROVIDER_LIMIT':'OTHER'}) }}",
-        "options": {
-          "responseCode": 503
-        }
-      }
-    },
-    {
-      "id": "failure-supabase-check",
-      "name": "Fallo · Verificar índice y conservar solicitud",
-      "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1.4,
-      "position": [
-        2300,
-        500
-      ],
-      "parameters": {
-        "respondWith": "json",
-        "responseBody": "={{ JSON.stringify({available:false,stage:\"supabase-check\",category:/format|parse|schema|structured/i.test(JSON.stringify($json.error??$json))?'FORMAT':/rate limit|quota|429/i.test(JSON.stringify($json.error??$json))?'PROVIDER_LIMIT':'OTHER'}) }}",
-        "options": {
-          "responseCode": 503
-        }
-      }
-    },
-    {
       "id": "failure-review-evidence",
       "name": "Fallo · Revisar borrador con evidencia",
       "type": "n8n-nodes-base.respondToWebhook",
@@ -726,7 +659,7 @@
       "main": [
         [
           {
-            "node": "Supabase · Configuración del índice",
+            "node": "Preparar contexto en Spring Boot",
             "type": "main",
             "index": 0
           }
@@ -883,42 +816,6 @@
           {
             "node": "Analizar finanzas",
             "type": "ai_tool",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Supabase · Configuración del índice": {
-      "main": [
-        [
-          {
-            "node": "Verificar índice y conservar solicitud",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Fallo · Supabase · Configuración del índice",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Verificar índice y conservar solicitud": {
-      "main": [
-        [
-          {
-            "node": "Preparar contexto en Spring Boot",
-            "type": "main",
-            "index": 0
-          }
-        ],
-        [
-          {
-            "node": "Fallo · Verificar índice y conservar solicitud",
-            "type": "main",
             "index": 0
           }
         ]

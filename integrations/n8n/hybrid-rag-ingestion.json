@@ -225,6 +225,9 @@
         150,
         -180
       ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 1500,
       "parameters": {
         "operation": "getAll",
         "tableId": "ceroa_rag_configuration",

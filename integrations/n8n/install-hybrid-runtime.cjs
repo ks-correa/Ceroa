@@ -11,6 +11,7 @@ process.stdin.on('end',()=>{
     const dir='/usr/local/lib/node_modules/n8n/node_modules/n8n-core/dist/encryption/';
     const {Cipher}=require(dir+'cipher'),{CipherAes256CBC}=require(dir+'aes-256-cbc'),{CipherAes256GCM}=require(dir+'aes-256-gcm');
     const cipher=new Cipher(JSON.parse(fs.readFileSync('/home/node/.n8n/config','utf8')),new CipherAes256GCM(),new CipherAes256CBC(),null);
+    const encrypt=data=>typeof cipher.encryptWithInstanceKey==='function'?cipher.encryptWithInstanceKey(data):cipher.encrypt(data);
     db=new sqlite.Database('/home/node/.n8n/database.sqlite',sqlite.OPEN_READONLY);
     db.get("SELECT nodes FROM workflow_entity WHERE id IN ('ceroaHybridQuery20','ceroaAssistantRag03') ORDER BY CASE id WHEN 'ceroaHybridQuery20' THEN 0 ELSE 1 END LIMIT 1",(e,row)=>{
       try {
@@ -20,9 +21,9 @@ process.stdin.on('end',()=>{
         const header=existing.find(n=>n.type==='n8n-nodes-base.webhook').credentials;
         if(!model?.credentials?.googlePalmApi||!header?.httpHeaderAuth)throw Error('Existing associations missing');
         fs.writeFileSync('/tmp/ceroa-hybrid-credentials.json',JSON.stringify([
-          {id:'ceroaLibraryWorker20',name:'Ceroa biblioteca privada',type:'httpHeaderAuth',data:cipher.encrypt({name:'X-Ceroa-Library',value:values.workerKey})},
-          {id:'ceroaLibraryOcr21',name:'Ceroa OCR privado',type:'httpHeaderAuth',data:cipher.encrypt({name:'X-Ceroa-Ocr',value:values.workerKey})},
-          {id:'ceroaSupabaseGateway21',name:'Ceroa Supabase · Gateway restringido',type:'supabaseApi',data:cipher.encrypt({host:'http://backend:8080/api/v1/library-supabase',serviceRole:values.workerKey})}
+          {id:'ceroaLibraryWorker20',name:'Ceroa biblioteca privada',type:'httpHeaderAuth',data:encrypt({name:'X-Ceroa-Library',value:values.workerKey})},
+          {id:'ceroaLibraryOcr21',name:'Ceroa OCR privado',type:'httpHeaderAuth',data:encrypt({name:'X-Ceroa-Ocr',value:values.workerKey})},
+          {id:'ceroaSupabaseGateway21',name:'Ceroa Supabase · Gateway restringido',type:'supabaseApi',data:encrypt({host:'http://backend:8080/api/v1/library-supabase',serviceRole:values.workerKey})}
         ]),{mode:0o600});
         for(const file of ['hybrid-rag-ingestion','hybrid-rag-sync','hybrid-rag-query','hybrid-rag-ocr']) {
           const w=JSON.parse(fs.readFileSync('/opt/ceroa-workflows/'+file+'.json','utf8'));

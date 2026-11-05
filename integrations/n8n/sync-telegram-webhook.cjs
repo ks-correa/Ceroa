@@ -1,4 +1,4 @@
-﻿// Trusted local maintenance, run inside n8n. No credentials or messages are printed.
+// Trusted local maintenance, run inside n8n. No credentials or messages are printed.
 // Updates only the existing published bot's webhook, without dropping pending updates.
 const fs=require('fs');
 const root='/usr/local/lib/node_modules/n8n/node_modules/.pnpm/';
@@ -19,12 +19,14 @@ const get=(sql,args=[])=>new Promise((resolve,reject)=>db.get(sql,args,(e,r)=>e?
     const cipher=new Cipher(JSON.parse(fs.readFileSync('/home/node/.n8n/config','utf8')),new CipherAes256GCM(),new CipherAes256CBC(),null);
     const row=await get('SELECT data FROM credentials_entity WHERE id=?',[trigger.credentials.telegramApi.id]);
     if(!row)throw Error('No se encontro la credencial Telegram publicada.');
-    const credentials=JSON.parse(cipher.decrypt(row.data));
+    const decrypt=data=>typeof cipher.decryptWithInstanceKey==='function'?cipher.decryptWithInstanceKey(data):cipher.decrypt(data);
+    const decoded=decrypt(row.data);
+    const credentials=typeof decoded==='string'?JSON.parse(decoded):decoded;
     async function api(method,body) {
       let response;
       for(let attempt=0;attempt<4;attempt++) {
         try {response=await fetch('https://api.telegram.org/bot'+credentials.accessToken+'/'+method,{
-          method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body||{}),signal:AbortSignal.timeout(10000)});break;}
+          method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body||{}),signal:AbortSignal.timeout(20000)});break;}
         catch(error) {
           if(attempt===3)throw Error('Telegram no responde; conectividad '+(error.cause?.code||error.name||'unavailable')+'.');
           await new Promise(resolve=>setTimeout(resolve,500*(attempt+1)));
@@ -47,7 +49,7 @@ const get=(sql,args=[])=>new Promise((resolve,reject)=>db.get(sql,args,(e,r)=>e?
     if(matches&&process.argv.includes('--probe')) {
       const secret=('ceroaTelegram01_'+trigger.id).replace(/[^a-zA-Z0-9_\-]/g,'');
       // No message/chat payload: checks transport without sending a bot message.
-      const probe=await fetch(url,{method:'POST',headers:{'content-type':'application/json','x-telegram-bot-api-secret-token':secret},body:JSON.stringify({update_id:0}),signal:AbortSignal.timeout(15000)});
+      const probe=await fetch(url,{method:'POST',headers:{'content-type':'application/json','x-telegram-bot-api-secret-token':secret},body:JSON.stringify({update_id:0}),signal:AbortSignal.timeout(20000)});
       console.log(JSON.stringify({telegramTransportHttp:probe.status}));
       if(!probe.ok)process.exitCode=1;
     }

@@ -136,7 +136,10 @@ public class AssistantAnalysisService {
         while(matcher.find()) {
             Fact fact=facts.get(matcher.group(1));
             if(fact==null || fact.value().isNull()) throw new IllegalArgumentException("Referencia de evidencia inexistente o sin valor: "+matcher.group(1));
-            if(fact.source().matches("(?i).*/(?:id|documentId|chunkId|ownerId)$"))throw new IllegalArgumentException("Un identificador interno no respalda una cifra: "+matcher.group(1));
+            if(fact.source().matches("(?i).*/(?:id|documentId|chunkId|ownerId)$")) {
+                matcher.appendReplacement(rendered,Matcher.quoteReplacement("[referencia interna omitida]"));
+                continue;
+            }
             String value=fact.value().isNumber()?displayNumber(fact):displayText(fact);
             matcher.appendReplacement(rendered,Matcher.quoteReplacement(value));
         }
@@ -151,6 +154,29 @@ public class AssistantAnalysisService {
             .replaceAll("(?i)([\\d.,]+%\\s*EA)\\s*\\((?:y una )?tasa (?:anual comparable|comparable anual) (?:de )?\\1\\)","$1")
             .replaceAll("(?i)sin intereses con una tasa (?:del|de) 0% sin intereses","sin intereses")
             .replaceAll("(?i)0% sin intereses","sin intereses");
+    }
+    /** Final fallback after model repair: preserve supported facts without displaying unsupported numbers. */
+    public String resolveConservatively(Map<String,Fact> facts,String answer) {
+        if(answer==null||answer.isBlank()||answer.length()>12000)throw new IllegalArgumentException();
+        String grounded=groundExactLiterals(facts,answer.replaceAll("(?m)^(\\s*)\\d+[.)]\\s+","$1• "));
+        var references=REFERENCE.matcher(grounded);
+        var safe=new StringBuilder();int cursor=0;boolean omitted=false;
+        while(references.find()) {
+            String prose=grounded.substring(cursor,references.start());
+            String cleaned=prose.replaceAll("\\{\\{[^{}]*\\}\\}","[dato sin evidencia]")
+                .replaceAll("[$]?\\p{N}+(?:[.,/\\-]\\p{N}+)*%?","[dato sin evidencia]");
+            omitted|=!cleaned.equals(prose);safe.append(cleaned);
+            Fact fact=facts.get(references.group(1));
+            if(fact==null||fact.value().isNull()) {safe.append("[dato sin evidencia]");omitted=true;}
+            else safe.append(references.group());
+            cursor=references.end();
+        }
+        String tail=grounded.substring(cursor);
+        String cleaned=tail.replaceAll("\\{\\{[^{}]*\\}\\}","[dato sin evidencia]")
+            .replaceAll("[$]?\\p{N}+(?:[.,/\\-]\\p{N}+)*%?","[dato sin evidencia]");
+        omitted|=!cleaned.equals(tail);safe.append(cleaned);
+        String resolved=resolve(facts,safe.toString());
+        return omitted?resolved+"\n\nAlgunas cifras o referencias no pudieron verificarse y se omitieron.":resolved;
     }
     private String groundExactLiterals(Map<String,Fact> facts,String answer) {
         var literals=new ArrayList<Map.Entry<String,String>>();

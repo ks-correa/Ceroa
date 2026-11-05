@@ -150,7 +150,10 @@ public class AssistantService {
             return job.result;
         } catch (InterruptedException e) { Thread.currentThread().interrupt(); throw unavailable();
         } catch (ResponseStatusException e) { throw e;
-        } catch (Exception e) { throw unavailable();
+        } catch (Exception e) {
+            log.warn("Assistant request failed before workflow completion: type={}, cause={}",
+                e.getClass().getSimpleName(),e.getCause()==null?"none":e.getCause().getClass().getSimpleName());
+            throw unavailable();
         } finally { jobs.remove(id); }
     }
     private boolean isDebtListQuestion(String question) {
@@ -300,6 +303,13 @@ public class AssistantService {
     public Reply complete(UUID id,String answer,String transcript) {
         return complete(id,answer,transcript,null,List.of());
     }
+    private String finalizeAnswer(Job job,String answer) {
+        try {return analysis.resolve(job.facts,answer);}
+        catch(IllegalArgumentException error) {
+            log.warn("Assistant final answer required conservative numeric grounding: type={}",error.getClass().getSimpleName());
+            return analysis.resolveConservatively(job.facts,answer);
+        }
+    }
     private boolean incompletePeriods(Job job) {
         for(var pages:job.periodPages.values()) {
             int expected=0;boolean more=true;
@@ -364,7 +374,7 @@ public class AssistantService {
                 if(!selected.status().equals("INDEXED")||selected.version()!=job.selectedDocument.version())throw new IllegalArgumentException("Documento modificado; consulta de nuevo");
                 resolved=job.libraryResult==null||job.libraryResult.sources().isEmpty()
                     ?"No encontré fragmentos indexados de este archivo para confirmar ese dato. "+selectedMetadataSummary(selected)
-                    :analysis.resolve(job.facts,answer);
+                    :finalizeAnswer(job,answer);
                 job.libraryDocuments.clear();job.libraryDocuments.put(selected.id(),selected);
             }else if(job.libraryResult!=null && job.libraryIntent==com.ceroa.api.dto.DocumentContracts.Intent.METADATA_SEARCH && !job.hadContentSearch) {
                 // Metadata lists need no model-generated prose/citations. Only the authenticated,
@@ -373,7 +383,7 @@ public class AssistantService {
             }else if(job.libraryResult!=null) {
                 // Private documents are already authorized by the library. Public RAG
                 // citations from the model must not turn a private follow-up into a 400.
-                resolved=analysis.resolve(job.facts,answer);
+                resolved=finalizeAnswer(job,answer);
             }else if(rag.enabled()) {
                 if(!Set.of("documentary","personal","mixed").contains(mode==null?"":mode)||citations.size()>8||new HashSet<>(citations).size()!=citations.size())throw new IllegalArgumentException();
                 if(!mode.equals("personal")&&job.documentCalls==0)throw new IllegalArgumentException("Falta consultar documentación");
@@ -383,11 +393,11 @@ public class AssistantService {
                 if(mode.equals("documentary")&&(!current||answer!=null&&answer.contains("No tengo información aprobada suficiente")))resolved=RagRetrievalService.ABSTENTION;
                 else {
                     if(!used.isEmpty()&&!current)throw new IllegalArgumentException("Fuentes retiradas; vuelve a consultar");
-                    resolved=analysis.resolve(job.facts,answer);
+                    resolved=finalizeAnswer(job,answer);
                     if(current)resolved+="\n\nFuentes:\n"+used.stream().map(c->"• "+c.title()+" (versión "+c.version()+", fragmento "+c.chunkId().substring(0,12)+")").distinct().collect(java.util.stream.Collectors.joining("\n"));
                     else if(mode.equals("mixed"))resolved+="\n\n"+RagRetrievalService.ABSTENTION;
                 }
-            }else resolved=analysis.resolve(job.facts,answer);
+            }else resolved=finalizeAnswer(job,answer);
             job.question=transcript;
             if(job.libraryResult!=null) {
                 var result=job.libraryResult;
