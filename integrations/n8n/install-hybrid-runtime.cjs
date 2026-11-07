@@ -25,7 +25,7 @@ process.stdin.on('end',()=>{
           {id:'ceroaLibraryOcr21',name:'Ceroa OCR privado',type:'httpHeaderAuth',data:encrypt({name:'X-Ceroa-Ocr',value:values.workerKey})},
           {id:'ceroaSupabaseGateway21',name:'Ceroa Supabase · Gateway restringido',type:'supabaseApi',data:encrypt({host:'http://backend:8080/api/v1/library-supabase',serviceRole:values.workerKey})}
         ]),{mode:0o600});
-        for(const file of ['hybrid-rag-ingestion','hybrid-rag-sync','hybrid-rag-query','hybrid-rag-ocr']) {
+        for(const file of ['document-processor','hybrid-rag-ingestion','hybrid-rag-sync','hybrid-rag-query','hybrid-rag-ocr']) {
           const w=JSON.parse(fs.readFileSync('/opt/ceroa-workflows/'+file+'.json','utf8'));
           w.active=false;
           for(const n of w.nodes) {

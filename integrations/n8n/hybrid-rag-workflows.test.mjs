@@ -1,13 +1,13 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-const files=['hybrid-rag-ingestion.json','hybrid-rag-sync.json','hybrid-rag-query.json','hybrid-rag-ocr.json'];
+const files=['hybrid-rag-ingestion.json','hybrid-rag-sync.json','document-processor.json','hybrid-rag-query.json','hybrid-rag-ocr.json'];
 for(const file of files)test(`${file}: private, importable contract and valid connections`,async()=>{
   const w=JSON.parse(await readFile(new URL(file,import.meta.url),'utf8'));
   assert.equal(w.active,false);assert.equal(w.settings.saveDataSuccessExecution,'none');assert.equal(w.settings.saveDataErrorExecution,'none');
   const names=new Set(w.nodes.map(n=>n.name));assert.equal(names.size,w.nodes.length);
-  if(file!=='hybrid-rag-query.json')assert.ok(w.nodes.some(n=>n.type==='n8n-nodes-base.supabase'&&n.parameters.tableId==='ceroa_rag_configuration'));
-  else {assert.ok(!w.nodes.some(n=>n.type==='n8n-nodes-base.supabase'));assert.equal(w.connections['Preparar texto'].main[0][0].node,'Preparar contexto en Spring Boot');}
+  if(['document-processor.json','hybrid-rag-ocr.json'].includes(file))assert.ok(w.nodes.some(n=>n.type==='n8n-nodes-base.supabase'&&n.parameters.tableId==='ceroa_rag_configuration'));
+  if(file==='hybrid-rag-query.json'){assert.ok(!w.nodes.some(n=>n.type==='n8n-nodes-base.supabase'));assert.equal(w.connections['Preparar texto'].main[0][0].node,'Preparar contexto en Spring Boot');}
   for(const n of w.nodes){assert.equal(n.credentials,undefined);assert.ok(!n.type.includes('postgres'));if(n.parameters.jsCode)new Function(n.parameters.jsCode);if(n.type==='n8n-nodes-base.webhook')assert.equal(n.parameters.authentication,'headerAuth');}
   for(const [source,outputs] of Object.entries(w.connections)){assert.ok(names.has(source));for(const branches of Object.values(outputs))for(const branch of branches)for(const link of branch)assert.ok(names.has(link.node));}
 });

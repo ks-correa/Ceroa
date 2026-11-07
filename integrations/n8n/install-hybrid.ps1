@@ -19,7 +19,7 @@ try {
  if($LASTEXITCODE -ne 0){throw 'No se pudieron preparar las credenciales'}
  docker exec ceroa-n8n n8n import:credentials --input=/tmp/ceroa-hybrid-credentials.json
  if($LASTEXITCODE -ne 0){throw 'No se pudo importar la credencial cifrada'}
- foreach($workflow in @('hybrid-rag-ingestion','hybrid-rag-sync','hybrid-rag-query','hybrid-rag-ocr')){
+ foreach($workflow in @('document-processor','hybrid-rag-ingestion','hybrid-rag-sync','hybrid-rag-query','hybrid-rag-ocr')){
   docker exec ceroa-n8n n8n import:workflow --input=/tmp/ceroa-$workflow-installed.json
   if($LASTEXITCODE -ne 0){throw 'No se pudo importar un workflow'}
  }
