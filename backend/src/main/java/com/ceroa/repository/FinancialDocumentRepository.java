@@ -11,7 +11,8 @@ import java.util.*;
 @Repository
 public class FinancialDocumentRepository {
     private final NamedParameterJdbcTemplate db;
-    public FinancialDocumentRepository(javax.sql.DataSource source) { db=new NamedParameterJdbcTemplate(source); }
+    private final DocumentFactRepository facts;
+    public FinancialDocumentRepository(javax.sql.DataSource source) { db=new NamedParameterJdbcTemplate(source);facts=new DocumentFactRepository(source); }
     private static final RowMapper<Document> DOCUMENT=(r,n)->new Document(r.getObject("id",UUID.class),r.getObject("owner_id",UUID.class),
         r.getString("identification_type"),r.getString("document_type"),r.getString("financial_entity"),
         r.getObject("period_start",LocalDate.class),r.getObject("period_end",LocalDate.class),r.getObject("issued_at",LocalDate.class),
@@ -118,6 +119,38 @@ public class FinancialDocumentRepository {
     public void insertChunk(UUID doc,int version,UUID id,int order,Part part,String vector,String model) {
         db.update("INSERT INTO document_chunks(id,document_id,chunk_order,page,location,content,embedding,embedding_model,document_version) VALUES(:id,:doc,:order,:page,:location,:text,CAST(:vector AS extensions.vector),:model,:version)",
             new MapSqlParameterSource("id",id).addValue("doc",doc).addValue("order",order).addValue("page",part.page()).addValue("location",part.location()).addValue("text",part.text()).addValue("vector",vector).addValue("model",model).addValue("version",version));
+        facts.persist(new Source(doc,id,part.page(),part.location(),part.text(),0,version));
+    }
+    public List<com.ceroa.api.dto.DocumentFactContracts.Fact> financialFacts(UUID actor,List<UUID> ids){return facts.read(actor,ids);}
+    public void backfillFacts(UUID actor,UUID id){
+        var d=get(actor,id,false,true);var sources=indexedSources(actor,id);
+        db.update("DELETE FROM document_financial_facts WHERE document_id=:id AND document_version=:version",Map.of("id",id,"version",d.version()));
+        for(var source:sources)facts.persist(source);markFinancialFacts(id,d.version());
+    }
+    public void markFinancialFacts(UUID id,int version){
+        db.update("UPDATE financial_documents SET metadata=metadata||jsonb_build_object('factsExtraction',jsonb_build_object('extractorVersion',CAST(:extractor AS integer),'documentVersion',CAST(:version AS integer))) WHERE id=:id AND document_version=:version",Map.of("id",id,"version",version,"extractor",com.ceroa.service.DocumentFactExtractor.VERSION));
+    }
+    public void ensureFinancialFacts(UUID actor,List<UUID> ids){
+        if(ids.isEmpty())return;if(ids.size()>50)throw new IllegalArgumentException();
+        // Called in a transaction. Stable lock ordering protects replacements while
+        // deriving facts once from already indexed chunks, including zero-fact runs.
+        var missing=db.query("SELECT d.id,d.document_version FROM financial_documents d WHERE d.id IN (:ids) AND "+READ_SCOPE+" AND d.processing_status='INDEXED' AND (COALESCE(d.metadata#>>'{factsExtraction,extractorVersion}','')<>:extractor OR COALESCE(d.metadata#>>'{factsExtraction,documentVersion}','')<>CAST(d.document_version AS text)) ORDER BY d.id FOR UPDATE OF d",Map.of("actor",actor,"ids",ids,"extractor",Integer.toString(com.ceroa.service.DocumentFactExtractor.VERSION)),(r,n)->Map.entry(r.getObject("id",UUID.class),r.getInt("document_version")));
+        if(missing.isEmpty())return;
+        db.update("DELETE FROM document_financial_facts f USING financial_documents d WHERE f.document_id=d.id AND f.document_version=d.document_version AND d.id IN (:ids)",Map.of("ids",missing.stream().map(Map.Entry::getKey).toList()));
+        for(var source:indexedSourcesBatch(actor,missing.stream().map(Map.Entry::getKey).toList()))facts.persist(source);
+        for(var entry:missing)markFinancialFacts(entry.getKey(),entry.getValue());
+    }
+    public Map<UUID,UUID> factDebtLinks(UUID actor,List<UUID> ids){
+        if(ids.isEmpty())return Map.of();if(ids.size()>50)throw new IllegalArgumentException();
+        var result=new HashMap<UUID,UUID>();
+        db.query("SELECT d.id,d.debt_id FROM financial_documents d WHERE d.id IN (:ids) AND "+READ_SCOPE+" AND d.debt_id IS NOT NULL",Map.of("actor",actor,"ids",ids),(org.springframework.jdbc.core.RowCallbackHandler)r->result.put(r.getObject("id",UUID.class),r.getObject("debt_id",UUID.class)));
+        return Map.copyOf(result);
+    }
+    public boolean currentDocuments(UUID actor,List<Document> expected){
+        if(expected.isEmpty())return true;if(expected.size()>50)throw new IllegalArgumentException();
+        var versions=new HashMap<UUID,Integer>();var statuses=new HashMap<UUID,String>();
+        db.query("SELECT d.id,d.document_version,d.processing_status FROM financial_documents d WHERE d.id IN (:ids) AND "+READ_SCOPE+" AND d.processing_status<>'DELETING'",Map.of("actor",actor,"ids",expected.stream().map(Document::id).toList()),(org.springframework.jdbc.core.RowCallbackHandler)r->{UUID id=r.getObject("id",UUID.class);versions.put(id,r.getInt("document_version"));statuses.put(id,r.getString("processing_status"));});
+        return expected.stream().allMatch(d->Objects.equals(versions.get(d.id()),d.version())&&Objects.equals(statuses.get(d.id()),d.status()));
     }
     public void finish(Job j,String status,String error) {
         db.update("UPDATE document_processing_jobs SET status=:status,error_code=:error,payload=NULL,lease_until=NULL,updated_at=now() WHERE id=:id",new MapSqlParameterSource("id",j.id()).addValue("status",status).addValue("error",error));status(j.documentId(),status);

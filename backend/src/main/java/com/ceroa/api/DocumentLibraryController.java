@@ -39,6 +39,7 @@ public class DocumentLibraryController {
     }
     @PutMapping("/api/v1/financial-documents/{id}/metadata") public ResponseEntity<Document> update(@PathVariable UUID id,@Valid @RequestBody Metadata metadata){return ok(service.update(id,metadata));}
     @PostMapping("/api/v1/financial-documents/{id}/reprocess") public ResponseEntity<Document> reprocess(@PathVariable UUID id){return ok(service.reprocess(id));}
+    @PostMapping("/api/v1/financial-documents/{id}/facts/rebuild") public ResponseEntity<Void> rebuildFacts(@PathVariable UUID id){service.rebuildFacts(id);return ResponseEntity.noContent().build();}
     @DeleteMapping("/api/v1/financial-documents/{id}") public ResponseEntity<Void> delete(@PathVariable UUID id){service.delete(id);return ResponseEntity.noContent().build();}
     @GetMapping("/api/v1/financial-documents/audit") public ResponseEntity<List<Map<String,Object>>> audit(@RequestParam(defaultValue="0")int offset){return ok(service.audit(offset));}
     @PostMapping("/api/v1/library-tools/claim") public ResponseEntity<Work> claim(){return service.claim().map(this::ok).orElseGet(()->ResponseEntity.noContent().build());}

@@ -90,7 +90,7 @@ class HybridDocumentIntegrationTest {
     String vectorString(){return "["+String.join(",",vector().stream().map(Object::toString).toList())+"]";}
     Completion completion(Work work){var vectors=new ArrayList<Vector>();for(int i=0;i<work.chunks().size();i++)vectors.add(new Vector(i,vector()));return new Completion(work.attempt(),work.model(),vectors,List.of());}
     void index(){var w=service.claim().orElseThrow();service.complete(w.jobId(),completion(w));}
-    @Test void realMigrationsAreValidAndIdempotent(){assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("22");assertThat(flyway.validateWithResult().validationSuccessful).isTrue();assertThat(flyway.migrate().migrationsExecuted).isZero();}
+    @Test void realMigrationsAreValidAndIdempotent(){assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("25");assertThat(flyway.validateWithResult().validationSuccessful).isTrue();assertThat(flyway.migrate().migrationsExecuted).isZero();}
     long bindTelegram(UUID user){long sender=TELEGRAM_SEQUENCE.incrementAndGet();var link=new TelegramLink();link.userId=user;link.senderId=sender;link.chatId=sender;link.linkedAt=OffsetDateTime.now();telegramLinks.saveAndFlush(link);return sender;}
     TelegramService.Reply telegram(long sender,String text,TelegramService.Attachment file){return telegram.update(new TelegramService.Update(TELEGRAM_SEQUENCE.incrementAndGet(),sender,sender,true,text,null,null,file));}
     TelegramService.Attachment telegramFile(String text)throws Exception{return new TelegramService.Attachment("synthetic.docx","application/vnd.openxmlformats-officedocument.wordprocessingml.document",Base64.getEncoder().encodeToString(DocumentTextExtractorTest.word(text+" "+UUID.randomUUID())));}
@@ -164,7 +164,7 @@ class HybridDocumentIntegrationTest {
         db.update("DELETE FROM document_access_grants WHERE actor_id=?",admin);assertThat(service.query(query(Intent.SEMANTIC_SEARCH,Identification.CC)).sources()).isEmpty();
     }
     @Test void duplicateUpdateDeleteAndObsoleteCallbacksKeepIndexConsistent()throws Exception {
-        var file=new MockMultipartFile("file","same.docx","application/vnd.openxmlformats-officedocument.wordprocessingml.document",DocumentTextExtractorTest.word("Intereses cobrados 1234567890"));
+        var file=new MockMultipartFile("file","same.docx","application/vnd.openxmlformats-officedocument.wordprocessingml.document",DocumentTextExtractorTest.word("Intereses cobrados\nCuenta 1234567890"));
         var d=service.upload(file,metadata(Identification.CC,9),true);assertThat(service.upload(file,metadata(Identification.CC,9),true).id()).isEqualTo(d.id());
         var w=service.claim().orElseThrow();assertThat(w.chunks()).allSatisfy(p->assertThat(p.text()).doesNotContain("1234567890"));
         service.complete(w.jobId(),completion(w));service.complete(w.jobId(),completion(w));
@@ -277,5 +277,58 @@ class HybridDocumentIntegrationTest {
         mvc.perform(get("/api/v1/library-supabase/rest/v1/financial_documents").header("apikey","hybrid-test-worker-key-at-least-32-characters")).andExpect(status().isForbidden());
         mvc.perform(post("/api/v1/library-supabase/rest/v1/ceroa_rag_configuration").header("apikey","hybrid-test-worker-key-at-least-32-characters").contentType("application/json").content("{}")).andExpect(status().isForbidden());
         mvc.perform(get("/api/v1/library-supabase/rest/v1/ceroa_rag_configuration").with(user(a.toString()))).andExpect(status().isForbidden());
+    }
+    @Test void financialFactsPersistWithEvidenceAndCannotCrossOwnersOrVersions()throws Exception {
+        var file=new MockMultipartFile("file","facts.docx","application/vnd.openxmlformats-officedocument.wordprocessingml.document",DocumentTextExtractorTest.word("Cabecera\nSaldo: COP 1234,56\nTasa: 2,5% EM\nFin"));
+        var d=service.upload(file,metadata(Identification.CC,8),true);index();
+        var facts=documents.financialFacts(a,List.of(d.id()));
+        assertThat(facts).isNotEmpty();assertThat(facts).allMatch(f->f.documentVersion()==1&&f.validationStatus().equals("VERIFIED"));
+        assertThat(documents.financialFacts(b,List.of(d.id()))).isEmpty();
+        // Simulate a pre-upgrade indexed document: derive once from indexed text,
+        // never original files, embeddings or a model.
+        db.update("DELETE FROM document_financial_facts WHERE document_id=?",d.id());
+        db.update("UPDATE financial_documents SET metadata=metadata-'factsExtraction' WHERE id=?",d.id());
+        org.mockito.Mockito.clearInvocations(storage,embeddings);
+        var factQuery=new Query(Intent.FACT_ANALYSIS,"saldo",new Filters(null,null,null,null,null,null,d.id()),0,10);
+        assertThat(service.query(factQuery).evidenceStatus()).isEqualTo("AVAILABLE");
+        var firstIds=documents.financialFacts(a,List.of(d.id())).stream().map(f->f.id()).toList();
+        assertThat(service.query(factQuery).evidenceStatus()).isEqualTo("AVAILABLE");
+        assertThat(documents.financialFacts(a,List.of(d.id())).stream().map(f->f.id()).toList()).isEqualTo(firstIds);
+        verify(storage,never()).read(anyString());verify(embeddings,never()).embed(anyString());
+        long before=db.queryForObject("SELECT count(*) FROM document_financial_facts WHERE document_id=?",Long.class,d.id());
+        service.rebuildFacts(d.id());assertThat(db.queryForObject("SELECT count(*) FROM document_financial_facts WHERE document_id=?",Long.class,d.id())).isEqualTo(before);
+        db.update("UPDATE document_financial_facts SET quote='invented' WHERE document_id=?",d.id());
+        assertThat(documents.financialFacts(a,List.of(d.id()))).isEmpty();
+        service.update(d.id(),metadata(Identification.CC,9));
+        assertThat(db.queryForObject("SELECT count(*) FROM document_financial_facts WHERE document_id=?",Long.class,d.id())).isZero();
+    }
+    @Test void recordComparableDocumentFactRetrievalMeasurements()throws Exception {
+        var debt=new Debt();debt.setUser(users.findById(a).orElseThrow());debt.setName("Synthetic benchmark obligation");debt.setEntity("Banco sintético");debt.setType(DebtType.CREDIT_CARD);debt.setCategoryLabel("Tarjeta");debt.setCurrentBalance(new java.math.BigDecimal("1000"));debt.setRateType(RateType.EA);debt=debts.saveAndFlush(debt);
+        var fixtures=new ArrayList<Document>();
+        for(int month=7;month<=9;month++){
+            var base=metadata(Identification.CC,month);var linked=new Metadata(base.identificationType(),base.documentType(),base.financialEntity(),base.periodStart(),base.periodEnd(),null,debt.getId());
+            String text="Cabecera\nSaldo: COP "+(2000-month*100)+"\n"+"Condiciones del documento sintético sin datos personales ni instrucciones.\n".repeat(80);
+            var file=new MockMultipartFile("file","benchmark.docx","application/vnd.openxmlformats-officedocument.wordprocessingml.document",DocumentTextExtractorTest.word(text));
+            var d=service.upload(file,linked,true);index();fixtures.add(service.get(d.id()));
+        }
+        var mapper=new com.fasterxml.jackson.databind.ObjectMapper().findAndRegisterModules();var results=new ArrayList<Map<String,Object>>();
+        for(int size:new int[]{1,2,3}){
+            var selected=fixtures.subList(0,size);var ids=selected.stream().map(Document::id).toList();var links=documents.factDebtLinks(a,ids);
+            var before=new ArrayList<Double>();var after=new ArrayList<Double>();int beforeBytes=0,afterBytes=0;
+            for(int sample=-20;sample<100;sample++){
+                long started=System.nanoTime();var sources=documents.indexedSourcesBatch(a,ids);
+                var extracted=sources.stream().flatMap(s->DocumentFactExtractor.extract(s).stream()).collect(java.util.stream.Collectors.toMap(f->f.documentId()+"|"+f.kind()+"|"+f.quote(),f->f,(x,y)->x));
+                var baseline=DocumentFactAnalysis.analyze(selected,List.copyOf(extracted.values()),links,com.ceroa.api.dto.DocumentFactContracts.Kind.BALANCE);
+                byte[] baselineJson=mapper.writeValueAsBytes(Map.of("sources",sources,"analysis",baseline));double baselineMs=(System.nanoTime()-started)/1_000_000.0;
+                started=System.nanoTime();var persisted=DocumentFactAnalysis.analyze(selected,documents.financialFacts(a,ids),links,com.ceroa.api.dto.DocumentFactContracts.Kind.BALANCE);
+                byte[] persistedJson=mapper.writeValueAsBytes(persisted);double persistedMs=(System.nanoTime()-started)/1_000_000.0;
+                assertThat(persisted.complete()).isTrue();assertThat(persisted.comparisons()).hasSize(baseline.comparisons().size());
+                assertThat(persisted.comparisons().stream().map(c->c.delta().stripTrailingZeros()).toList()).isEqualTo(baseline.comparisons().stream().map(c->c.delta().stripTrailingZeros()).toList());
+                if(sample>=0){before.add(baselineMs);after.add(persistedMs);beforeBytes=baselineJson.length;afterBytes=persistedJson.length;}
+            }
+            before.sort(Double::compare);after.sort(Double::compare);
+            results.add(Map.of("scenario",size==1?"single_statement":size==2?"two_periods":"three_statements","samples",100,"warmup",20,"documents",size,"onDemand",Map.of("p50Ms",before.get(49),"p95Ms",before.get(94),"jsonBytes",beforeBytes,"databaseReads",1),"persisted",Map.of("p50Ms",after.get(49),"p95Ms",after.get(94),"jsonBytes",afterBytes,"databaseReads",1)));
+        }
+        mapper.writerWithDefaultPrettyPrinter().writeValue(java.nio.file.Path.of("target/document-fact-benchmark.json").toFile(),Map.of("capturedAt",Instant.now().toString(),"scope","Isolated PostgreSQL warm batch retrieval + deterministic analysis + JSON serialization. Both routes use one batch read, the same extractor and fixtures. Excludes HTTP, n8n and models; not end-to-end latency.","llmCalls",0,"scenarios",results));
     }
 }

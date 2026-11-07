@@ -126,6 +126,19 @@ public class DocumentLibraryService {
         UUID actor=actor();limit(actor);long start=System.nanoTime();Filters f=q.filters()==null?Filters.empty():q.filters();f.validate();
         boolean textOnly=false;
         var sources=List.<Source>of();var documents=List.<Document>of();
+        if(q.intent()==Intent.FACT_ANALYSIS){
+            var page=repo.search(actor,f,q.offset(),q.limit()+1);boolean more=page.size()>q.limit();
+            documents=page.stream().limit(q.limit()).toList();var ids=documents.stream().map(Document::id).toList();
+            tx.executeWithoutResult(s->repo.ensureFinancialFacts(actor,ids));
+            var stored=repo.financialFacts(actor,ids);
+            var facts=DocumentFactAnalysis.analyze(documents,stored.stream().limit(1000).toList(),repo.factDebtLinks(actor,ids),DocumentFactAnalysis.requestedKind(q.question()));
+            boolean complete=q.offset()==0&&!more&&stored.size()<=1000&&facts.complete();
+            var data=Map.of("analysis",facts,"hasMoreDocuments",more,"nextOffset",q.offset()+documents.size(),"complete",complete,
+                "factsTruncated",stored.size()>1000,"periodSource","DOCUMENT_METADATA","canonicalPayments",false);
+            UUID trace=UUID.randomUUID();long elapsed=(System.nanoTime()-start)/1_000_000;
+            try{repo.audit(trace,actor,q.intent(),json.writeValueAsString(f),documents.size(),elapsed);}catch(com.fasterxml.jackson.core.JsonProcessingException e){throw new IllegalStateException(e);}
+            return new Result(complete?"Hechos documentales y operaciones verificadas; no representan pagos registrados.":"Evidencia estructurada parcial: consulta los fragmentos o solicita el dato faltante; no afirmes totales completos.",data,f,List.of(),documents,documents.isEmpty()?"INSUFFICIENT":complete?"AVAILABLE":"PARTIAL",trace,elapsed);
+        }
         if(q.intent()==Intent.METADATA_SEARCH) documents=repo.search(actor,f,q.offset(),q.limit());
         else if(q.intent()==Intent.PERIOD_ANALYSIS) {
             if(f.periodFrom()==null||f.periodToExclusive()==null||f.documentId()!=null)throw new IllegalArgumentException("Indica un período para analizar varios archivos");
@@ -182,6 +195,20 @@ public class DocumentLibraryService {
         UUID reader=actor();limit(reader);
         return repo.indexedContent(reader,id);
     }
+    public void rebuildFacts(UUID id){
+        UUID reader=actor();limit(reader);
+        tx.executeWithoutResult(s->{var d=repo.get(reader,id,false,true);if(!d.status().equals("INDEXED"))throw new IllegalArgumentException("Documento sin índice vigente");repo.backfillFacts(reader,id);});
+    }
+    public void assertCurrent(Collection<Document> documents){
+        var list=List.copyOf(documents);
+        if(list.isEmpty())return;
+        UUID reader=actor();
+        // Revalidation is separate from retrieval and never recalculates embeddings.
+        for(int offset=0;offset<list.size();offset+=50){
+            var page=list.subList(offset,Math.min(offset+50,list.size()));
+            if(!repo.currentDocuments(reader,page))throw new ResponseStatusException(HttpStatus.CONFLICT,"Documento o autorización modificados; consulta de nuevo");
+        }
+    }
     public List<Map<String,Object>> audit(int offset){UUID actor=actor();if(offset<0||offset>10000)throw new IllegalArgumentException();return repo.audit(actor,offset);}
     static Metadata metadata(Document d){return new Metadata(d.identificationType()==null?null:Identification.valueOf(d.identificationType()),Kind.valueOf(d.documentType()),d.financialEntity(),d.periodStart(),d.periodEnd(),d.issuedAt(),null);}
     public Optional<Work> claim() {
@@ -199,7 +226,7 @@ public class DocumentLibraryService {
                 // Owner's exact identification is removed in addition to conservative numeric redaction.
                 String identification=ownerIdentification(d.ownerId());
                 for(var segment:extracted.segments()) {
-                    String text=privacy.redact(segment.text(),identification);Integer page=null;
+                    String text="\n"+privacy.redact(segment.text(),identification)+"\n";Integer page=null;
                     var number=java.util.regex.Pattern.compile("(?iu)p.gina (\\d+)").matcher(segment.location());if(number.find())page=Integer.valueOf(number.group(1));
                     for(int i=0;i<text.length();i+=1600) {parts.add(new Part(text.substring(i,Math.min(text.length(),i+1800)),segment.location(),page));if(parts.size()>120)throw new IllegalArgumentException();}
                 }
@@ -233,6 +260,7 @@ public class DocumentLibraryService {
                     repo.insertChunk(d.id(),d.version(),UUID.randomUUID(),v.order(),work.chunks().get(v.order()),vector,completion.model());
                 }
                 Metadata effective=metadata(d);
+                repo.markFinancialFacts(d.id(),d.version());
                 if(repo.automaticMetadata(d.id())){effective=DocumentMetadataInference.merge(effective,proposed);repo.inferredMetadata(d.id(),effective);}
                 boolean missingMetadata=effective.identificationType()==null || effective.documentType()==Kind.BANK_STATEMENT&&(effective.periodStart()==null||effective.periodEnd()==null);
                 repo.finish(j,missingMetadata?"REVIEW_REQUIRED":"INDEXED",null);
