@@ -1,5 +1,6 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { shareDocumentProcessor } from './document-processor.mjs';
+import { extendDocumentQuery } from './extend-document-query.mjs';
 
 // Portable workflow definitions; no embedded credentials or execution data.
 const settings = { executionOrder: 'v1', timezone: 'America/Bogota', executionTimeout: 240, saveDataSuccessExecution: 'none', saveDataErrorExecution: 'none', saveManualExecutions: false };
@@ -118,7 +119,7 @@ for(const [i,n] of ocr.nodes.filter(n=>['supabase-config','ocr-validate','ocr-ge
  n.onError='continueErrorOutput';ocr.connections[n.name].main[1]=[{node:name,type:'main',index:0}];
 }
 const shared=shareDocumentProcessor(ingestion(false),ingestion(true));
-for (const [name, workflow] of [['hybrid-rag-ingestion.json', shared.adapters[0]], ['hybrid-rag-sync.json', shared.adapters[1]], ['document-processor.json',shared.worker], ['hybrid-rag-query.json', assistant],['hybrid-rag-ocr.json',ocr]]) {
+for (const [name, workflow] of [['hybrid-rag-ingestion.json', shared.adapters[0]], ['hybrid-rag-sync.json', shared.adapters[1]], ['document-processor.json',shared.worker], ['hybrid-rag-query.json', extendDocumentQuery(assistant)],['hybrid-rag-ocr.json',ocr]]) {
   await writeFile(new URL(name, import.meta.url), JSON.stringify(workflow, null, 2) + '\n');
 }
 console.log('Prepared four inactive workflows with native Supabase configuration checks and Gemini OCR.');

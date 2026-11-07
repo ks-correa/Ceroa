@@ -22,6 +22,7 @@ public class AssistantService {
     public enum Channel { web, telegram }
     private record Audience(UUID user,Channel channel,UUID document) {}
     private record Conversation(UUID user,Channel channel,UUID id) {}
+    private record CachedLibrary(com.ceroa.api.dto.DocumentContracts.Result result,com.ceroa.api.dto.DocumentContracts.Intent intent,LibraryEvidence response) {}
     public record DocumentEvidence(String status,Map<String,RagVectorStore.Chunk> sources) {}
     public enum Intent { debts, highest_interest, upcoming, payments, strategy, progress, write_request, unknown }
     public record Reply(String answer, String intent, List<com.ceroa.api.dto.DocumentContracts.Document> documents, UUID traceId) {
@@ -47,6 +48,10 @@ public class AssistantService {
         boolean hadContentSearch;
         final Map<com.ceroa.api.dto.DocumentContracts.Filters,NavigableMap<Integer,com.ceroa.api.dto.DocumentContracts.Result>> periodPages=new HashMap<>();
         final Map<UUID,com.ceroa.api.dto.DocumentContracts.Document> libraryDocuments=new LinkedHashMap<>();
+        final Map<com.ceroa.api.dto.DocumentContracts.Query,CachedLibrary> libraryCache=new HashMap<>();
+        AssistantTrace metrics;
+        AgentContracts.Budget budget;
+        int retrievedContextCharacters;
         Job(UUID user) { this.user = user; }
     }
     private record Turn(String question,String answer) {}
@@ -106,9 +111,12 @@ public class AssistantService {
         if (selected==null && hasText && message.trim().matches("(?iu)^(?:[¿?]\\s*)?(?:qué|que)\\s+(?:información\\s+)?(?:dice|contiene)\\s+(?:esto|este|esta)(?:\\s+documento)?[?.!\\s]*$"))
             return new Reply("¿A cuál documento te refieres? Indica el nombre del archivo o selecciónalo en la biblioteca para poder describir su contenido.","analysis");
         if (hasText && selected==null) {
-            if(isDebtListQuestion(message))return new Reply(render(Intent.debts,null,null),Intent.debts.name());
+            if(isDebtListQuestion(message)){
+                var metrics=new AssistantTrace(UUID.randomUUID());try{return new Reply(render(Intent.debts,null,null),Intent.debts.name());}finally{metrics.log(log,json,"DETERMINISTIC");}
+            }
         }
         UUID id=UUID.randomUUID(); var job=start(userId,id);
+        job.metrics=new AssistantTrace(id);job.budget=AgentContracts.budget(hasAudio?AgentContracts.Intent.COMPOSITE:AgentContracts.intent(message,selected!=null));
         job.selectedDocument=selected;
         var conversation=new Conversation(userId,channel,conversations.computeIfAbsent(audience,a->UUID.randomUUID()));
         job.question=hasText?message:"";
@@ -116,6 +124,7 @@ public class AssistantService {
             LocalDate now=LocalDate.now(ZONE);
             Map<String,Object> input=new LinkedHashMap<>();
             input.put("requestId",id.toString()); input.put("message",hasText?message:"");
+            input.put("executionBudget",job.budget);
             if(selected!=null)input.put("selectedDocument",Map.of("id",selected.id().toString(),"type",selected.documentType(),"entity",selected.financialEntity()==null?"":selected.financialEntity()));
             input.put("audio",hasAudio?audio:""); input.put("mime",hasAudio?mime:"");
             input.put("year",now.getYear()); input.put("month",now.getMonthValue());
@@ -124,11 +133,13 @@ public class AssistantService {
             input.put("ragEnabled",rag.enabled());
             input.put("previousIntent",context!=null && context.expires.isAfter(Instant.now())?context.intent:"");
             input.put("conversation",context!=null && context.expires.isAfter(Instant.now())?context.turns:List.of());
-            var request=HttpRequest.newBuilder(URI.create(webhook)).timeout(Duration.ofSeconds(150))
+            var request=HttpRequest.newBuilder(URI.create(webhook)).timeout(Duration.ofMillis(job.budget.deadlineMs()))
                 .header("Content-Type","application/json").header("X-Ceroa-Assistant",key)
                 .POST(HttpRequest.BodyPublishers.ofString(json.writeValueAsString(input))).build();
             var client=HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).connectTimeout(Duration.ofSeconds(5)).build();
-            var response=client.send(request,HttpResponse.BodyHandlers.ofString());
+            long workflowStart=System.nanoTime();
+            HttpResponse<String> response;
+            try{response=client.send(request,HttpResponse.BodyHandlers.ofString());}finally{job.metrics.stage("n8nRoundTrip",System.nanoTime()-workflowStart);}
             if (response.statusCode()!=200 || job.result==null) {
                 log.warn("Assistant workflow unavailable: status={}, prepared={}, toolCalls={}, libraryCalls={}, audio={}",
                     response.statusCode(),!job.question.isBlank(),job.toolCalls,job.libraryCalls,hasAudio);
@@ -154,7 +165,7 @@ public class AssistantService {
             log.warn("Assistant request failed before workflow completion: type={}, cause={}",
                 e.getClass().getSimpleName(),e.getCause()==null?"none":e.getCause().getClass().getSimpleName());
             throw unavailable();
-        } finally { jobs.remove(id); }
+        } finally {job.metrics.log(log,json,AgentContracts.intent(job.question,job.selectedDocument!=null).name());jobs.remove(id); }
     }
     private boolean isDebtListQuestion(String question) {
         String plain=java.text.Normalizer.normalize(question.toLowerCase(Locale.ROOT),java.text.Normalizer.Form.NFD)
@@ -173,6 +184,9 @@ public class AssistantService {
         return "Los metadatos indican que es un "+type+(selected.financialEntity()==null?"":" de "+selected.financialEntity())+"."+period;
     }
     private <T> T withJob(UUID id,java.util.function.Function<Job,T> work) {
+        return withJob(id,"backendTools",work);
+    }
+    private <T> T withJob(UUID id,String stage,java.util.function.Function<Job,T> work) {
         var job=jobs.get(id);
         if(job==null || job.expires.isBefore(Instant.now())) throw new ResponseStatusException(HttpStatus.GONE);
         synchronized(job) {
@@ -181,10 +195,12 @@ public class AssistantService {
             var context=SecurityContextHolder.createEmptyContext();
             context.setAuthentication(new UsernamePasswordAuthenticationToken(job.user.toString(),null,List.of()));
             SecurityContextHolder.setContext(context);
+            long toolStart=System.nanoTime();
             try {
                 if(!current.entity().isActive()) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
                 return work.apply(job);
-            } finally { SecurityContextHolder.setContext(previous); }
+            }catch(RuntimeException e){if(job.metrics!=null)job.metrics.error();throw e;}
+            finally {if(job.metrics!=null){long elapsed=System.nanoTime()-toolStart;job.metrics.stage("backendTools",elapsed);if(!stage.equals("backendTools"))job.metrics.stage(stage,elapsed);}SecurityContextHolder.setContext(previous); }
         }
     }
     private String contextOnly(String text){
@@ -197,27 +213,26 @@ public class AssistantService {
         return contextOnly(question).startsWith("[turno omitido:")?contextOnly(question):question;
     }
     public AssistantAnalysisService.Evidence data(UUID id,AssistantAnalysisService.Dataset dataset,int year,int month,int offset) {
-        return withJob(id,job->{
+        return withJob(id,"financialData",job->{
             if(job.selectedDocument!=null)throw new IllegalArgumentException("Consulta limitada al documento seleccionado");
             String source=dataset+"/"+year+"/"+month+"/"+offset;
-            if(job.cache.containsKey(source)) return job.cache.get(source);
-            if(++job.toolCalls>16) throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS);
+            if(job.cache.containsKey(source)){if(job.metrics!=null)job.metrics.cached();return job.cache.get(source);}
+            if(++job.toolCalls>toolLimit(job)) throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS);
             var evidence=analysis.evidence(job.facts,analysis.read(dataset,year,month,offset),source);
             job.cache.put(source,evidence); return evidence;
         });
     }
     public AssistantAnalysisService.Evidence calculate(UUID id,AssistantAnalysisService.Operation operation,List<String> refs) {
-        return withJob(id,job->{
+        return withJob(id,"calculate",job->{
             if(job.selectedDocument!=null)throw new IllegalArgumentException("Consulta limitada al documento seleccionado");
-            if(++job.toolCalls>16) throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS);
+            if(++job.toolCalls>toolLimit(job)) throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS);
             return analysis.calculate(job.facts,operation,refs);
         });
     }
     public record LibrarySnippet(UUID documentId,Integer page,String content) {}
     public record LibraryEvidence(String status, AssistantAnalysisService.Evidence evidence,List<LibrarySnippet> snippets) {}
     public LibraryEvidence financialDocuments(UUID id,com.ceroa.api.dto.DocumentContracts.Query query) {
-        return withJob(id,job->{
-            if(++job.toolCalls>16||++job.libraryCalls>6)throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS);
+        return withJob(id,"financialDocuments",job->{
             var effective=query;
             if(job.selectedDocument!=null){
                 var selected=job.selectedDocument;
@@ -227,14 +242,26 @@ public class AssistantService {
                     intent=com.ceroa.api.dto.DocumentContracts.Intent.HYBRID_SEARCH;
                 effective=new com.ceroa.api.dto.DocumentContracts.Query(intent,job.question,filters,0,10);
             }
-            var result=library.query(effective);
-            if(effective.intent()==com.ceroa.api.dto.DocumentContracts.Intent.PERIOD_ANALYSIS)
+            library.assertCurrent(job.libraryDocuments.values());
+            if(job.libraryCache.containsKey(effective)){
+                var cached=job.libraryCache.get(effective);job.libraryResult=cached.result();job.libraryIntent=cached.intent();if(job.metrics!=null){job.metrics.cached();job.metrics.delivered(json.valueToTree(cached.response()).toString().length());}return cached.response();
+            }
+            if(++job.toolCalls>toolLimit(job)||++job.libraryCalls>(job.budget==null?6:job.budget.maxLibraryCalls()))throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS);
+            long retrievalStart=System.nanoTime();
+            var result=DocumentQueryBudget.bound(library.query(effective),Math.max(0,(job.budget==null?90000:job.budget.maxContextCharacters())-job.retrievedContextCharacters));
+            job.retrievedContextCharacters+=DocumentQueryBudget.characters(result);
+            if(job.metrics!=null){job.metrics.stage("documentRetrieval",System.nanoTime()-retrievalStart);job.metrics.retrievalTrace(result.traceId());}
+            if(effective.intent()==com.ceroa.api.dto.DocumentContracts.Intent.PERIOD_ANALYSIS||effective.intent()==com.ceroa.api.dto.DocumentContracts.Intent.FACT_ANALYSIS)
                 job.periodPages.computeIfAbsent(effective.filters(),f->new TreeMap<>()).put(effective.offset(),result);
             job.libraryResult=result;
             job.libraryIntent=effective.intent();
             if(effective.intent()!=com.ceroa.api.dto.DocumentContracts.Intent.METADATA_SEARCH)job.hadContentSearch=true;
             for(var document:result.documents())job.libraryDocuments.put(document.id(),document);
             com.fasterxml.jackson.databind.node.ObjectNode minimized=json.valueToTree(result);
+            // Uncertain typed values remain stored for review, but are never
+            // offered to the model as usable numeric arithmetic evidence.
+            for(var value:minimized.path("verifiedData").path("analysis").path("facts"))
+                if(value instanceof com.fasterxml.jackson.databind.node.ObjectNode fact&&!fact.path("validationStatus").asText().equals("VERIFIED"))fact.remove("numericValue");
             minimized.path("documents").forEach(d->{if(d instanceof com.fasterxml.jackson.databind.node.ObjectNode doc){
                 doc.remove("ownerId");
                 if(doc.path("periodStart").isTextual()){
@@ -290,7 +317,9 @@ public class AssistantService {
             var evidence=analysis.evidence(job.facts,minimized,"financialDocuments/"+result.traceId());
             // Give the model one evidence representation, just like the established financial tools.
             // Duplicating raw result fields encouraged literal dates/IDs outside the fID contract.
-            return new LibraryEvidence(result.evidenceStatus(),evidence,result.sources().stream().map(source->new LibrarySnippet(source.documentId(),source.page(),source.content())).toList());
+            var response=new LibraryEvidence(result.evidenceStatus(),evidence,result.sources().stream().map(source->new LibrarySnippet(source.documentId(),source.page(),source.content())).toList());
+            if(job.metrics!=null)job.metrics.retrieved(result.documents().size(),result.sources().size(),json.valueToTree(response).toString().length());
+            job.libraryCache.put(effective,new CachedLibrary(result,effective.intent(),response));return response;
         });
     }
     private BigDecimal documentNumber(String literal) {
@@ -315,6 +344,7 @@ public class AssistantService {
             int expected=0;boolean more=true;
             for(var entry:pages.entrySet()) {
                 if(entry.getKey()!=expected||!(entry.getValue().verifiedData() instanceof Map<?,?> coverage))return true;
+                if(coverage.containsKey("analysis")&&!Boolean.TRUE.equals(coverage.get("complete")))return true;
                 if(Boolean.TRUE.equals(coverage.get("contentTruncated"))||coverage.get("documentsWithoutContent") instanceof Number missing&&missing.intValue()>0)return true;
                 expected+=entry.getValue().documents().size();
                 more=Boolean.TRUE.equals(coverage.get("hasMoreDocuments"));
@@ -328,6 +358,7 @@ public class AssistantService {
     public DraftReview review(UUID id,String answer,String transcript,String mode,List<String> sources) {
         return withJob(id,job->{
             if(transcript==null||!transcript.equals(job.question))throw new IllegalArgumentException("La transcripción no coincide con la pregunta preparada");
+            library.assertCurrent(job.libraryDocuments.values());
             boolean valid=true;String feedback="";
             try {
                 if(!(job.libraryIntent==com.ceroa.api.dto.DocumentContracts.Intent.METADATA_SEARCH&&!job.hadContentSearch))
@@ -341,7 +372,7 @@ public class AssistantService {
         });
     }
     public DocumentEvidence documents(UUID id,String query) {
-        return withJob(id,job->{
+        return withJob(id,"knowledgeRetrieval",job->{
             if(job.selectedDocument!=null)throw new IllegalArgumentException("Consulta limitada al documento seleccionado");
             if(query==null||query.isBlank()||query.length()>4000)throw new IllegalArgumentException();
             if(job.question==null||job.question.isBlank())throw new IllegalArgumentException("Falta preparar la pregunta");
@@ -366,13 +397,14 @@ public class AssistantService {
     public Reply complete(UUID id,String answer,String transcript,String mode,List<String> sources) {
         final List<String> citations=sources==null?List.of():List.copyOf(sources);
         try { return withJob(id,job->{
+            library.assertCurrent(job.libraryDocuments.values());
             if(transcript==null || transcript.isBlank() || transcript.length()>2000) throw new IllegalArgumentException("Transcripción vacía o demasiado extensa");
             if(!job.question.isEmpty() && !job.question.equals(transcript)) throw new IllegalArgumentException("La transcripción no coincide con la pregunta preparada");
             String resolved;
             if(job.selectedDocument!=null) {
                 var selected=library.get(job.selectedDocument.id());
                 if(!selected.status().equals("INDEXED")||selected.version()!=job.selectedDocument.version())throw new IllegalArgumentException("Documento modificado; consulta de nuevo");
-                resolved=job.libraryResult==null||job.libraryResult.sources().isEmpty()
+                resolved=job.libraryResult==null||job.libraryResult.sources().isEmpty()&&job.libraryIntent!=com.ceroa.api.dto.DocumentContracts.Intent.FACT_ANALYSIS
                     ?"No encontré fragmentos indexados de este archivo para confirmar ese dato. "+selectedMetadataSummary(selected)
                     :finalizeAnswer(job,answer);
                 job.libraryDocuments.clear();job.libraryDocuments.put(selected.id(),selected);
@@ -416,10 +448,11 @@ public class AssistantService {
         }
     }
     public AssistantAnalysisService.Evidence prepare(UUID id,String transcript) {
-        return withJob(id,job->{
+        return withJob(id,"prepare",job->{
             if(transcript==null || transcript.isBlank() || transcript.length()>2000) throw new IllegalArgumentException();
             if(!job.question.isEmpty() && !job.question.equals(transcript)) throw new IllegalArgumentException();
             job.question=transcript;
+            job.budget=AgentContracts.budget(AgentContracts.intent(transcript,job.selectedDocument!=null));
             if(job.cache.containsKey("inputs")) return job.cache.get("inputs");
             var values=json.createObjectNode();
             values.put("notation","Cifras de la pregunta, no datos registrados. Notación colombiana: coma decimal y punto de miles; confirmar si es ambiguo.");
@@ -441,6 +474,9 @@ public class AssistantService {
             var evidence=analysis.evidence(job.facts,values,"inputs"); job.cache.put("inputs",evidence); return evidence;
         });
     }
+    public AgentContracts.Context agentContext(UUID id){return withJob(id,job->AgentContracts.context(id,job.question,job.selectedDocument!=null));}
+    private int toolLimit(Job job){return job.budget==null?16:job.budget.maxToolCalls();}
+    public void observe(UUID id,AssistantTrace.WorkerObservation observation){withJob(id,job->{if(job.metrics!=null)job.metrics.worker(observation);return null;});}
     private synchronized void limit(UUID user) {
         Instant now=Instant.now();
         jobs.entrySet().removeIf(e->e.getValue().expires.isBefore(now));

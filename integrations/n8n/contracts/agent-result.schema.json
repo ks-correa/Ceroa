@@ -1,0 +1,12 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema","$id":"urn:ceroa:agent-result:1.0",
+  "type":"object","additionalProperties":false,
+  "required":["schemaVersion","requestId","correlationId","role","status","answer","evidenceRefs","error"],
+  "properties":{
+    "schemaVersion":{"const":"1.0"},"requestId":{"type":"string","format":"uuid"},"correlationId":{"type":"string","format":"uuid"},
+    "role":{"enum":["ORCHESTRATOR","FINANCIAL","RAG","SUPPORT"]},
+    "status":{"enum":["SUCCESS","INSUFFICIENT_EVIDENCE","NEEDS_CLARIFICATION","BUDGET_EXCEEDED","DEPENDENCY_UNAVAILABLE","DENIED"]},
+    "answer":{"type":"string","maxLength":12000},"evidenceRefs":{"type":"array","maxItems":100,"uniqueItems":true,"items":{"type":"string","pattern":"^f[1-9][0-9]*$"}},
+    "error":{"oneOf":[{"type":"null"},{"type":"object","additionalProperties":false,"required":["code","retryable"],"properties":{"code":{"enum":["STALE_CONTEXT","UNAUTHORIZED","INCOMPLETE_COVERAGE","PROVIDER_UNAVAILABLE","BUDGET_EXCEEDED","INVALID_CONTRACT"]},"retryable":{"type":"boolean"}}}]}
+  }
+}

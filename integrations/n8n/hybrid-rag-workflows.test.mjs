@@ -24,7 +24,8 @@ test('monthly document analysis requests coverage and backend arithmetic',async(
   assert.match(agent.parameters.options.systemMessage,/PERIOD_ANALYSIS/);
   assert.match(agent.parameters.options.systemMessage,/Calcular con evidencia/);
   assert.match(tool.parameters.url,/nextOffset|offset/);
-  assert.ok(agent.parameters.options.maxIterations>=10);
+  assert.match(agent.parameters.options.maxIterations,/executionBudget.*maxIterations/);
+  assert.match(agent.parameters.options.systemMessage,/FACT_ANALYSIS/);
 });
 test('text and transcribed audio preserve question and selected document scope',async()=>{
   const w=JSON.parse(await readFile(new URL('hybrid-rag-query.json',import.meta.url),'utf8'));

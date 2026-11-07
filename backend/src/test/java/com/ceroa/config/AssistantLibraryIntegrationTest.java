@@ -62,7 +62,8 @@ class AssistantLibraryIntegrationTest {
                     .param("periodFrom",question.equals("metadata-filter")||question.equals(MONTH_QUESTION)?"2026-09-01":"")
                     .param("periodToExclusive",question.equals("metadata-filter")||question.equals(MONTH_QUESTION)?"2026-10-01":""))
                     .andExpect(status().isOk()).andExpect(jsonPath("$.status").value("AVAILABLE")).andExpect(jsonPath("$.evidence.facts").isMap()).andReturn().getResponse().getContentAsString();
-                if(question.startsWith("two"))callback.perform(get(base+"/financial-documents").header("X-Ceroa-Assistant",KEY).param("intent","METADATA_SEARCH").param("question",question)).andExpect(status().isOk());
+                if(question.startsWith("two"))callback.perform(get(base+"/financial-documents").header("X-Ceroa-Assistant",KEY).param("intent","METADATA_SEARCH").param("question",question+" second period")).andExpect(status().isOk());
+                if(question.equals("cached"))for(int repeat=0;repeat<5;repeat++)callback.perform(get(base+"/financial-documents").header("X-Ceroa-Assistant",KEY).param("intent","METADATA_SEARCH").param("question",question)).andExpect(status().isOk());
                 String answer=question.equals("que tasa tengo?")?"La tasa indicada es 2,5%.":"Encontré un extracto de 2026.";
                 if(question.equals(MONTH_QUESTION)){
                     var facts=JSON.readTree(response).path("evidence").path("facts");var refs=new ArrayList<String>();
@@ -171,6 +172,11 @@ class AssistantLibraryIntegrationTest {
     @Test void twoSearchesRetainBothAuthorizedDocumentReferences()throws Exception {
         twoResults();mvc.perform(post("/api/v1/assistant/messages").with(user(actor.toString())).with(csrf()).contentType("application/json").content("{\"message\":\"two\"}"))
             .andExpect(status().isOk()).andExpect(jsonPath("$.documents.length()").value(2));
+    }
+    @Test void identicalQueriesReuseEvidenceWithoutConsumingFreshLibraryBudget()throws Exception {
+        mvc.perform(post("/api/v1/assistant/messages").with(user(actor.toString())).with(csrf()).contentType("application/json").content("{\"message\":\"cached\"}"))
+            .andExpect(status().isOk());
+        org.mockito.Mockito.verify(library,org.mockito.Mockito.times(1)).query(any());
     }
     @Test void revocationOfEarlierSearchStillBlocksFinalDelivery()throws Exception {
         twoResults();when(library.get(docId)).thenThrow(new com.ceroa.exception.ResourceNotFoundException("Revoked"));

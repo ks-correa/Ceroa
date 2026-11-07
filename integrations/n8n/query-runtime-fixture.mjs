@@ -1,0 +1,16 @@
+import {readFile,writeFile} from 'node:fs/promises';
+const [output]=process.argv.slice(2);if(!output)throw Error('Output path required');
+const w=JSON.parse(await readFile(new URL('hybrid-rag-query.json',import.meta.url),'utf8'));
+w.id='ceroaQueryFixture23';w.name='TEST ONLY - Query telemetry failure';
+const set=(name,json)=>{const n=w.nodes.find(n=>n.name===name);n.type='n8n-nodes-base.set';n.typeVersion=3.4;n.parameters={mode:'raw',jsonOutput:JSON.stringify(json),options:{}};delete n.credentials;delete n.webhookId;};
+set('Recibir consulta',{body:{requestId:'00000000-0000-4000-8000-000000000001',message:'Consulta sintética',year:2026,month:8,executionBudget:{maxIterations:4}}});
+set('Preparar contexto en Spring Boot',{facts:{f1:{source:'fixture',value:100}}});
+set('Analizar finanzas',{output:{answer:'Valor {{f1}}.',mode:'personal',sources:[]},intermediateSteps:[]});
+set('Revisar borrador con evidencia',{valid:true,answer:'Valor {{f1}}.',transcript:'Consulta sintética',mode:'personal',sources:[]});
+const end=w.nodes.find(n=>n.name==='Devolver respuesta');end.type='n8n-nodes-base.noOp';end.typeVersion=1;end.parameters={};
+const validate=w.nodes.find(n=>n.name==='Validar evidencia en Spring Boot');validate.type='n8n-nodes-base.noOp';validate.typeVersion=1;validate.parameters={};delete validate.credentials;
+const telemetry=w.nodes.find(n=>n.id==='agent-observation');telemetry.parameters.authentication='none';delete telemetry.parameters.genericAuthType;telemetry.parameters.url='http://127.0.0.1:1/unavailable';
+w.nodes.push({id:'fixture-entry',name:'Iniciar fixture',type:'n8n-nodes-base.manualTrigger',typeVersion:1,parameters:{},position:[-200,0]});
+w.connections['Iniciar fixture']={main:[[{node:'Recibir consulta',type:'main',index:0}]]};
+for(const connections of Object.values(w.connections))for(const key of Object.keys(connections))if(key.startsWith('ai_'))delete connections[key];
+await writeFile(output,JSON.stringify(w,null,2)+'\n',{flag:'wx'});

@@ -10,6 +10,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class AssistantAnalysisServiceTest {
     final AssistantAnalysisService service=new AssistantAnalysisService(new ObjectMapper(),null,null,null,null,null,null,null,null);
+    @Test void typedDocumentNumbersCannotBypassUnitAwareDocumentComparisons(){
+        var facts=Map.of("f1",new AssistantAnalysisService.Fact("financialDocuments/trace/verifiedData/analysis/facts/0/numericValue",DecimalNode.valueOf(new BigDecimal("100"))),"f2",new AssistantAnalysisService.Fact("financialDocuments/trace/verifiedData/analysis/facts/1/numericValue",DecimalNode.valueOf(new BigDecimal("2"))));
+        assertThrows(IllegalArgumentException.class,()->service.calculate(facts,AssistantAnalysisService.Operation.add,List.of("f1","f2")));
+    }
     @Test void translatesStructuredLabelsWithoutChangingDebtNames() {
         var facts=Map.of(
             "f1",new AssistantAnalysisService.Fact("strategy/type",TextNode.valueOf("avalanche")),

@@ -49,6 +49,10 @@ public class AssistantController {
     @DeleteMapping("/api/v1/assistant/conversation")
     public ResponseEntity<Void> forget(){service.forget(AssistantService.Channel.web);return ResponseEntity.noContent().build();}
     public record Preparation(String transcript) {}
+    @GetMapping("/api/v1/assistant-tools/requests/{id}/agent-context")
+    public ResponseEntity<com.ceroa.service.AgentContracts.Context> agentContext(@PathVariable UUID id){return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(service.agentContext(id));}
+    @PostMapping("/api/v1/assistant-tools/requests/{id}/observe")
+    public ResponseEntity<Void> observe(@PathVariable UUID id,@RequestBody com.ceroa.service.AssistantTrace.WorkerObservation observation){service.observe(id,observation);return ResponseEntity.noContent().build();}
     @PostMapping("/api/v1/assistant-tools/requests/{id}/prepare")
     public ResponseEntity<AssistantAnalysisService.Evidence> prepare(@PathVariable UUID id,@RequestBody Preparation body) {
         return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(service.prepare(id,body.transcript));

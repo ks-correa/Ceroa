@@ -113,7 +113,7 @@ public class AssistantAnalysisService {
     public Evidence calculate(Map<String,Fact> facts,Operation operation,List<String> refs) {
         if(refs==null || refs.size()<2 || refs.size()>50) throw new IllegalArgumentException();
         var values=refs.stream().map(id->{
-            Fact fact=facts.get(id); if(fact==null || !fact.value().isNumber()) throw new IllegalArgumentException();
+            Fact fact=facts.get(id); if(fact==null || !fact.value().isNumber()||fact.source().contains("/verifiedData/analysis/")) throw new IllegalArgumentException();
             return fact.value().decimalValue();
         }).toList();
         BigDecimal value=values.get(0);
