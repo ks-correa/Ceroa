@@ -131,10 +131,14 @@ public class DocumentLibraryService {
             if(f.periodFrom()==null||f.periodToExclusive()==null||f.documentId()!=null)throw new IllegalArgumentException("Indica un período para analizar varios archivos");
             var page=repo.search(actor,f,q.offset(),q.limit()+1);
             boolean more=page.size()>q.limit();documents=page.stream().limit(q.limit()).toList();
+            var indexedIds=documents.stream().filter(d->"INDEXED".equals(d.status())).map(Document::id).toList();
+            // One authorized read per page; never retrieve each document in a loop.
+            var batch=repo.indexedSourcesBatch(actor,indexedIds).stream().collect(java.util.stream.Collectors.groupingBy(Source::documentId));
             var gathered=new ArrayList<Source>();int characters=0;boolean truncated=more;boolean contentTruncated=false;int missingContent=0;
             for(var document:documents) {
                 if(!"INDEXED".equals(document.status())){truncated=true;missingContent++;continue;}
-                var indexed=repo.indexedSources(actor,document.id());
+                // A replacement between metadata search and retrieval must not mix versions.
+                var indexed=batch.getOrDefault(document.id(),List.of()).stream().filter(s->s.documentVersion()==document.version()).toList();
                 if(indexed.isEmpty()){truncated=true;missingContent++;}
                 for(var source:indexed) {
                     if(characters+source.content().length()>90000){truncated=true;contentTruncated=true;continue;}
@@ -143,7 +147,7 @@ public class DocumentLibraryService {
             }
             sources=List.copyOf(gathered);
             var coverage=Map.of("documentsOnPage",documents.size(),"indexedSources",sources.size(),"hasMoreDocuments",more,
-                "nextOffset",q.offset()+documents.size(),"complete",!truncated,"documentsWithoutContent",missingContent,"contentTruncated",contentTruncated);
+                "nextOffset",q.offset()+documents.size(),"complete",!truncated,"documentsWithoutContent",missingContent,"contentTruncated",contentTruncated,"contextCharacters",characters);
             UUID trace=UUID.randomUUID();long elapsed=(System.nanoTime()-start)/1_000_000;
             try{repo.audit(trace,actor,q.intent(),json.writeValueAsString(f),documents.size(),elapsed);}catch(com.fasterxml.jackson.core.JsonProcessingException e){throw new IllegalStateException(e);}
             String status=documents.isEmpty()?"INSUFFICIENT":truncated?"PARTIAL":"AVAILABLE";

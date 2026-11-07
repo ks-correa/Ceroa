@@ -26,17 +26,18 @@ class DocumentPeriodAnalysisTest {
     @Test void includesEveryIndexedStatementInPeriodWithoutSemanticRanking(){
         var first=document("INDEXED");var second=document("INDEXED");
         when(repo.search(owner,filters,0,11)).thenReturn(List.of(first,second));
-        when(repo.indexedSources(owner,first.id())).thenReturn(List.of(source(first,"Pago $100.000")));
-        when(repo.indexedSources(owner,second.id())).thenReturn(List.of(source(second,"Intereses $20.000")));
+        when(repo.indexedSourcesBatch(owner,List.of(first.id(),second.id()))).thenReturn(List.of(source(first,"Pago $100.000"),source(second,"Intereses $20.000")));
         var result=service.query(new Query(Intent.PERIOD_ANALYSIS,"pagos e intereses",filters,0,10));
         assertEquals("AVAILABLE",result.evidenceStatus());assertEquals(2,result.documents().size());assertEquals(2,result.sources().size());
         assertEquals(false,((Map<?,?>)result.verifiedData()).get("hasMoreDocuments"));
         verify(repo,never()).retrieve(any(),any(),any(),any());
+        verify(repo,times(1)).indexedSourcesBatch(owner,List.of(first.id(),second.id()));
+        verify(repo,never()).indexedSources(any(),any());
     }
     @Test void incompleteIndexIsReportedAsPartialAndCannotSupportACompleteTotal(){
         var indexed=document("INDEXED");var pending=document("PENDING");
         when(repo.search(owner,filters,0,11)).thenReturn(List.of(indexed,pending));
-        when(repo.indexedSources(owner,indexed.id())).thenReturn(List.of(source(indexed,"Pago $100.000")));
+        when(repo.indexedSourcesBatch(owner,List.of(indexed.id()))).thenReturn(List.of(source(indexed,"Pago $100.000")));
         var result=service.query(new Query(Intent.PERIOD_ANALYSIS,"pagos",filters,0,10));
         assertEquals("PARTIAL",result.evidenceStatus());assertEquals(false,((Map<?,?>)result.verifiedData()).get("complete"));
         verify(repo,never()).indexedSources(owner,pending.id());
@@ -44,7 +45,7 @@ class DocumentPeriodAnalysisTest {
     @Test void indexedDocumentWithoutReadableChunksIsNotCompleteEvidence(){
         var empty=document("INDEXED");
         when(repo.search(owner,filters,0,11)).thenReturn(List.of(empty));
-        when(repo.indexedSources(owner,empty.id())).thenReturn(List.of());
+        when(repo.indexedSourcesBatch(owner,List.of(empty.id()))).thenReturn(List.of());
         var result=service.query(new Query(Intent.PERIOD_ANALYSIS,"pagos y tasas",filters,0,10));
         assertEquals("PARTIAL",result.evidenceStatus());
         assertEquals(1,((Map<?,?>)result.verifiedData()).get("documentsWithoutContent"));
@@ -53,12 +54,29 @@ class DocumentPeriodAnalysisTest {
         var first=document("INDEXED");var second=document("INDEXED");
         when(repo.search(owner,filters,0,2)).thenReturn(List.of(first,second));
         when(repo.search(owner,filters,1,2)).thenReturn(List.of(second));
-        when(repo.indexedSources(owner,first.id())).thenReturn(List.of(source(first,"Pago $100.000")));
-        when(repo.indexedSources(owner,second.id())).thenReturn(List.of(source(second,"Pago $200.000")));
+        when(repo.indexedSourcesBatch(owner,List.of(first.id()))).thenReturn(List.of(source(first,"Pago $100.000")));
+        when(repo.indexedSourcesBatch(owner,List.of(second.id()))).thenReturn(List.of(source(second,"Pago $200.000")));
         var page=service.query(new Query(Intent.PERIOD_ANALYSIS,"pagos",filters,0,1));
         assertEquals(true,((Map<?,?>)page.verifiedData()).get("hasMoreDocuments"));
         assertEquals(1,((Map<?,?>)page.verifiedData()).get("nextOffset"));
         var next=service.query(new Query(Intent.PERIOD_ANALYSIS,"pagos",filters,1,1));
         assertEquals("AVAILABLE",next.evidenceStatus());assertEquals(second.id(),next.sources().get(0).documentId());
+    }
+    @Test void replacementDuringRetrievalCannotMixDocumentVersions(){
+        var d=document("INDEXED");
+        when(repo.search(owner,filters,0,11)).thenReturn(List.of(d));
+        when(repo.indexedSourcesBatch(owner,List.of(d.id()))).thenReturn(List.of(new Source(d.id(),UUID.randomUUID(),1,"page 1","New version",0,2)));
+        var result=service.query(new Query(Intent.PERIOD_ANALYSIS,"pagos",filters,0,10));
+        assertEquals("PARTIAL",result.evidenceStatus());assertTrue(result.sources().isEmpty());
+        assertEquals(1,((Map<?,?>)result.verifiedData()).get("documentsWithoutContent"));
+    }
+    @Test void contextOverflowIsExplicitRatherThanAFalseCompleteTotal(){
+        var d=document("INDEXED");
+        when(repo.search(owner,filters,0,11)).thenReturn(List.of(d));
+        when(repo.indexedSourcesBatch(owner,List.of(d.id()))).thenReturn(List.of(source(d,"x".repeat(60000)),source(d,"y".repeat(40000))));
+        var result=service.query(new Query(Intent.PERIOD_ANALYSIS,"pagos",filters,0,10));
+        assertEquals("PARTIAL",result.evidenceStatus());
+        assertEquals(true,((Map<?,?>)result.verifiedData()).get("contentTruncated"));
+        assertEquals(60000,((Map<?,?>)result.verifiedData()).get("contextCharacters"));
     }
 }

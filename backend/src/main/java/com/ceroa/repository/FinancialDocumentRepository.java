@@ -74,8 +74,13 @@ public class FinancialDocumentRepository {
             Map.of("actor",actor,"id",id),(r,n)->r.getString(1));
     }
     public List<Source> indexedSources(UUID actor,UUID id) {
-        return db.query("SELECT c.* FROM document_chunks c JOIN financial_documents d ON d.id=c.document_id WHERE d.id=:id AND "+READ_SCOPE+" AND d.processing_status='INDEXED' AND c.document_version=d.document_version ORDER BY c.chunk_order",
-            Map.of("actor",actor,"id",id),(r,n)->new Source(r.getObject("document_id",UUID.class),r.getObject("id",UUID.class),(Integer)r.getObject("page"),r.getString("location"),r.getString("content"),0,r.getInt("document_version")));
+        return indexedSourcesBatch(actor,List.of(id));
+    }
+    public List<Source> indexedSourcesBatch(UUID actor,List<UUID> ids) {
+        if(ids.isEmpty())return List.of();
+        if(ids.size()>50||ids.stream().anyMatch(Objects::isNull))throw new IllegalArgumentException("Lote documental inválido");
+        return db.query("SELECT c.* FROM document_chunks c JOIN financial_documents d ON d.id=c.document_id WHERE d.id IN (:ids) AND "+READ_SCOPE+" AND d.processing_status='INDEXED' AND c.document_version=d.document_version ORDER BY c.document_id,c.chunk_order,c.id",
+            Map.of("actor",actor,"ids",ids),(r,n)->new Source(r.getObject("document_id",UUID.class),r.getObject("id",UUID.class),(Integer)r.getObject("page"),r.getString("location"),r.getString("content"),0,r.getInt("document_version")));
     }
     public String storage(UUID id) { return db.queryForObject("SELECT storage_path FROM financial_documents WHERE id=:id",Map.of("id",id),String.class); }
     public String hash(UUID id){return db.queryForObject("SELECT content_hash FROM financial_documents WHERE id=:id",Map.of("id",id),String.class);}
