@@ -1,0 +1,21 @@
+{
+  "capturedAt": "2026-11-07T20:44:23.326Z",
+  "scope": "Read-only availability; not conversational or RAG latency",
+  "probes": [
+    {
+      "name": "csrf",
+      "status": 200,
+      "elapsedMs": 119
+    },
+    {
+      "name": "n8nReadiness",
+      "status": 200,
+      "elapsedMs": 5
+    },
+    {
+      "name": "ragConfiguration",
+      "status": 200,
+      "elapsedMs": 681
+    }
+  ]
+}

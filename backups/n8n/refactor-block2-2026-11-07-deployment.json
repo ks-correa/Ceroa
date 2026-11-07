@@ -1,0 +1,22 @@
+{
+  "capturedAt": "2026-11-07T20:45:42.607Z",
+  "publishedWorkflows": 12,
+  "modifiedWorkflow": "ceroaHybridQuery20",
+  "unaffectedPublishedWorkflows": [
+    "ceroaTelegram01",
+    "ceroaDocuments02",
+    "ceroaRagEmbedding03",
+    "ceroaReminders04",
+    "ceroaReminderError04",
+    "ceroaSentinel05",
+    "ceroaSentinelError05",
+    "ceroaRagIngest20",
+    "ceroaRagSync20",
+    "ceroaOcr21",
+    "ceroaDocumentProcessor22"
+  ],
+  "originalQueryNodes": 33,
+  "currentQueryNodes": 36,
+  "unrelatedQueryNodesPreserved": true,
+  "credentialAssociationsPreserved": true
+}

@@ -1,0 +1,57 @@
+{
+  "scenarios" : [ {
+    "warmup" : 20,
+    "onDemand" : {
+      "jsonBytes" : 8110,
+      "databaseReads" : 1,
+      "p50Ms" : 0.478993,
+      "p95Ms" : 0.737447
+    },
+    "documents" : 1,
+    "samples" : 100,
+    "persisted" : {
+      "jsonBytes" : 553,
+      "databaseReads" : 1,
+      "p50Ms" : 0.29807,
+      "p95Ms" : 0.529066
+    },
+    "scenario" : "single_statement"
+  }, {
+    "warmup" : 20,
+    "onDemand" : {
+      "jsonBytes" : 16549,
+      "databaseReads" : 1,
+      "p50Ms" : 0.558878,
+      "p95Ms" : 0.913642
+    },
+    "documents" : 2,
+    "samples" : 100,
+    "persisted" : {
+      "jsonBytes" : 1487,
+      "databaseReads" : 1,
+      "p50Ms" : 0.286379,
+      "p95Ms" : 0.454234
+    },
+    "scenario" : "two_periods"
+  }, {
+    "warmup" : 20,
+    "onDemand" : {
+      "jsonBytes" : 24989,
+      "databaseReads" : 1,
+      "p50Ms" : 0.676606,
+      "p95Ms" : 1.003411
+    },
+    "documents" : 3,
+    "samples" : 100,
+    "persisted" : {
+      "jsonBytes" : 2422,
+      "databaseReads" : 1,
+      "p50Ms" : 0.261933,
+      "p95Ms" : 0.368331
+    },
+    "scenario" : "three_statements"
+  } ],
+  "scope" : "Isolated PostgreSQL warm batch retrieval + deterministic analysis + JSON serialization. Both routes use one batch read, the same extractor and fixtures. Excludes HTTP, n8n and models; not end-to-end latency.",
+  "llmCalls" : 0,
+  "capturedAt" : "2026-11-07T20:47:36.383768825Z"
+}

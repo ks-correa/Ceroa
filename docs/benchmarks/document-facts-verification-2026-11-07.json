@@ -1,0 +1,90 @@
+{
+  "capturedAt": "2026-11-07T20:44:22.419Z",
+  "java": [
+    {
+      "name": "com.ceroa.config.AssistantIntegrationTest",
+      "tests": 16,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.ceroa.config.AssistantLibraryIntegrationTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.ceroa.config.HybridDocumentIntegrationTest",
+      "tests": 25,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.ceroa.service.AgentContractsTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.ceroa.service.DocumentBatchAuthorizationTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.ceroa.service.DocumentFactTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.ceroa.service.DocumentPeriodAnalysisTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.ceroa.service.DocumentPrivacyTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.ceroa.service.AssistantAnalysisServiceTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.ceroa.service.ScheduledReminderIntegrationTest",
+      "tests": 12,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "com.ceroa.service.SentinelIntegrationTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "nodeTests": 23,
+  "schemaCases": 8,
+  "n8nRuntimeScenarios": [
+    "empty_document_queue",
+    "populated_document_queue",
+    "query_telemetry_failure"
+  ],
+  "providers": "Synthetic fixtures in isolated n8n; real isolated PostgreSQL/pgvector"
+}
