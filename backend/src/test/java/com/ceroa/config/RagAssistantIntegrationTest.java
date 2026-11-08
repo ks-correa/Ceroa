@@ -34,6 +34,12 @@ class RagAssistantIntegrationTest {
             var input=JSON.readTree(exchange.getRequestBody());job=input.path("requestId").asText();context=input.path("conversation").toString();String message=input.path("message").asText();
             String base="/api/v1/assistant-tools/requests/"+job;
             callback.perform(post(base+"/prepare").header("X-Ceroa-Assistant",KEY).contentType("application/json").content(JSON.writeValueAsString(Map.of("transcript",message)))).andExpect(status().isOk());
+            if(message.endsWith("-no-tools")){
+                callback.perform(post(base+"/orchestration/start").header("X-Ceroa-Assistant",KEY)).andExpect(status().isOk());
+                String answer=message.equals("unknown-no-tools")?RagRetrievalService.ABSTENTION:"Una afirmación documental sin evidencia.";
+                var result=callback.perform(post(base+"/complete").header("X-Ceroa-Assistant",KEY).contentType("application/json").content(JSON.writeValueAsString(Map.of("answer",answer,"transcript",message,"mode","documentary","sources",List.of())))).andReturn();
+                completionStatus=result.getResponse().getStatus();exchange.sendResponseHeaders(completionStatus==200?200:503,2);exchange.getResponseBody().write("{}".getBytes());return;
+            }
             if(message.equals("personal-balance")){
                 var financial=callback.perform(get(base+"/data").header("X-Ceroa-Assistant",KEY).param("dataset","debts").param("year","2026").param("month","9")).andExpect(status().isOk()).andReturn();
                 var facts=JSON.readTree(financial.getResponse().getContentAsString()).path("facts");String ref=null;var fields=facts.fields();while(fields.hasNext()){var fact=fields.next();if(fact.getValue().path("source").asText().endsWith("/balance")){ref=fact.getKey();break;}}
@@ -52,6 +58,10 @@ class RagAssistantIntegrationTest {
     }
     @BeforeEach void setup(){callback=mvc;var u=new User();u.setFullName("RAG test");u.setEmail(UUID.randomUUID()+"@example.test");u.setActive(true);u.setPlan(UserPlan.CERO);owner=users.saveAndFlush(u).getId().toString();when(rag.enabled()).thenReturn(true);when(rag.search(anyString())).thenReturn(new RagRetrievalService.Retrieval("empty",null,List.of()));}
     @AfterAll static void stop(){stub.stop(0);}
+    @Test void unknownMultiagentIntentCanOnlyAbstainWithoutRetrieval()throws Exception {
+        assertTrue(send("unknown-no-tools").contains(RagRetrievalService.ABSTENTION));verify(rag,never()).search(anyString());
+        mvc.perform(post("/api/v1/assistant/messages").with(user(owner)).with(csrf()).contentType("application/json").content("{\"message\":\"unverified-no-tools\"}")).andExpect(status().isServiceUnavailable());assertEquals(400,completionStatus);
+    }
     void approved(){var chunk=new RagVectorStore.Chunk("a".repeat(64),"docs/test.md","Fuente sintética","1","b".repeat(64),"Contenido sintético, sin finanzas personales.",0.9);when(rag.search(anyString())).thenReturn(new RagRetrievalService.Retrieval("ok","c".repeat(64),List.of(chunk)));when(rag.current(any(),anyCollection())).thenReturn(true);}
     String send(String text)throws Exception{return mvc.perform(post("/api/v1/assistant/messages").with(user(owner)).with(csrf()).contentType("application/json").content(JSON.writeValueAsString(Map.of("message",text)))).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();}
     @Test void emptyCorpusOverridesInventedDocumentaryAnswerAndSearchUsesActualQuestion()throws Exception{assertTrue(send("empty").contains(RagRetrievalService.ABSTENTION));verify(rag).search("empty");verify(rag,never()).search("Broader unrelated product query");}

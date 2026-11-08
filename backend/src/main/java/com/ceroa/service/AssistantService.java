@@ -467,7 +467,8 @@ public class AssistantService {
                 resolved=finalizeAnswer(job,answer);
             }else if(rag.enabled()) {
                 if(!Set.of("documentary","personal","mixed").contains(mode==null?"":mode)||citations.size()>8||new HashSet<>(citations).size()!=citations.size())throw new IllegalArgumentException();
-                if(!mode.equals("personal")&&job.documentCalls==0)throw new IllegalArgumentException("Falta consultar documentación");
+                boolean pureAbstention=job.runtime!=null&&mode.equals("documentary")&&citations.isEmpty()&&RagRetrievalService.ABSTENTION.equals(answer==null?"":answer.strip());
+                if(!mode.equals("personal")&&job.documentCalls==0&&!pureAbstention)throw new IllegalArgumentException("Falta consultar documentación");
                 var used=new ArrayList<RagVectorStore.Chunk>();
                 for(String ref:citations){var chunk=job.documents.get(ref);if(chunk==null)throw new IllegalArgumentException("Fuente no recuperada");used.add(chunk);}
                 boolean current=!used.isEmpty()&&rag.current(job.retrieval,used.stream().map(RagVectorStore.Chunk::chunkId).toList());
