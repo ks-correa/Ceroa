@@ -1,0 +1,150 @@
+{
+  "date": "2026-11-07",
+  "n8nVersion": "2.40.7",
+  "image": "sha256:ffeb52485f78b1b06c9a832205853cf75da72a07a514c9a27724df85979d6c34",
+  "provider": "SIMULATED_OPENAI_COMPATIBLE_HTTP",
+  "backend": "SIMULATED_HTTP",
+  "samplesPerArchitectureAndScenario": 1,
+  "includes": [
+    "native AI agents",
+    "native workflow delegation",
+    "native structured output parsers",
+    "loopback HTTP tools"
+  ],
+  "excludes": [
+    "real model latency",
+    "production Spring services",
+    "PostgreSQL in this benchmark",
+    "CLI startup and teardown"
+  ],
+  "runs": [
+    {
+      "scenario": "COMPOSITE",
+      "architecture": "MULTIAGENT",
+      "provider": "SIMULATED",
+      "backend": "SIMULATED",
+      "nativeAgents": 3,
+      "executionMs": 1081,
+      "providerRequests": 7,
+      "status": "PASS"
+    },
+    {
+      "scenario": "FINANCIAL",
+      "architecture": "MULTIAGENT",
+      "provider": "SIMULATED",
+      "backend": "SIMULATED",
+      "nativeAgents": 2,
+      "executionMs": 1010,
+      "providerRequests": 4,
+      "status": "PASS"
+    },
+    {
+      "scenario": "RAG",
+      "architecture": "MULTIAGENT",
+      "provider": "SIMULATED",
+      "backend": "SIMULATED",
+      "nativeAgents": 2,
+      "executionMs": 989,
+      "providerRequests": 4,
+      "status": "PASS"
+    },
+    {
+      "scenario": "SUPPORT",
+      "architecture": "MULTIAGENT",
+      "provider": "SIMULATED",
+      "backend": "SIMULATED",
+      "nativeAgents": 2,
+      "executionMs": 1095,
+      "providerRequests": 4,
+      "status": "PASS"
+    },
+    {
+      "scenario": "UNKNOWN",
+      "architecture": "MULTIAGENT",
+      "provider": "SIMULATED",
+      "backend": "SIMULATED",
+      "nativeAgents": 1,
+      "executionMs": 682,
+      "providerRequests": 1,
+      "status": "PASS"
+    },
+    {
+      "scenario": "EXTRACTS",
+      "architecture": "MULTIAGENT",
+      "provider": "SIMULATED",
+      "backend": "SIMULATED",
+      "nativeAgents": 2,
+      "executionMs": 1015,
+      "providerRequests": 4,
+      "status": "PASS"
+    },
+    {
+      "scenario": "COMPOSITE",
+      "architecture": "PREVIOUS_SINGLE_AGENT",
+      "provider": "SIMULATED",
+      "backend": "SIMULATED",
+      "nativeAgents": 1,
+      "executionMs": 779,
+      "providerRequests": 3,
+      "status": "PASS"
+    },
+    {
+      "scenario": "FINANCIAL",
+      "architecture": "PREVIOUS_SINGLE_AGENT",
+      "provider": "SIMULATED",
+      "backend": "SIMULATED",
+      "nativeAgents": 1,
+      "executionMs": 727,
+      "providerRequests": 2,
+      "status": "PASS"
+    },
+    {
+      "scenario": "RAG",
+      "architecture": "PREVIOUS_SINGLE_AGENT",
+      "provider": "SIMULATED",
+      "backend": "SIMULATED",
+      "nativeAgents": 1,
+      "executionMs": 625,
+      "providerRequests": 2,
+      "status": "PASS"
+    },
+    {
+      "scenario": "EXTRACTS",
+      "architecture": "PREVIOUS_SINGLE_AGENT",
+      "provider": "SIMULATED",
+      "backend": "SIMULATED",
+      "nativeAgents": 1,
+      "executionMs": 701,
+      "providerRequests": 2,
+      "status": "PASS"
+    }
+  ],
+  "simple": {
+    "question": "Que deudas tengo",
+    "before": {
+      "route": "DETERMINISTIC_SPRING",
+      "modelRequests": 0,
+      "latencyMs": null
+    },
+    "after": {
+      "route": "DETERMINISTIC_SPRING",
+      "modelRequests": 0,
+      "latencyMs": null
+    },
+    "note": "Existing route preserved; latency not measured. New exact upcoming/active-strategy routes verified by Spring callback absence."
+  },
+  "conclusion": "Native multiagent overhead increased in these simulated point measurements. No real conversational latency reduction, p50 or p95 claim.",
+  "realProvider": {
+    "attempted": true,
+    "status": "API_KEY_INVALID",
+    "endToEndVerified": false,
+    "userDecision": "Continue simulated verification and record real verification pending"
+  },
+  "springAndN8n": {
+    "status": "PASS",
+    "provider": "SIMULATED",
+    "financialData": "H2_SYNTHETIC",
+    "realHttpCallbacks": true,
+    "productionEndToEnd": false
+  }
+}

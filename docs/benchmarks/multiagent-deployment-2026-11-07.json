@@ -1,0 +1,103 @@
+{
+  "before": {
+    "workflows": 12,
+    "nodes": 140,
+    "codeNodes": 38
+  },
+  "after": {
+    "workflows": 15,
+    "nodes": 175,
+    "codeNodes": 38
+  },
+  "specialists": [
+    {
+      "role": "FINANCIAL",
+      "id": "ceroaFinancialAgent30",
+      "nodes": 14
+    },
+    {
+      "role": "RAG",
+      "id": "ceroaKnowledgeAgent30",
+      "nodes": 11
+    },
+    {
+      "role": "SUPPORT",
+      "id": "ceroaSupportAgent30",
+      "nodes": 10
+    }
+  ],
+  "unchanged": [
+    {
+      "id": "ceroaTelegram01",
+      "sha256": "d76693b81d57a9a63a0cdab2c8df6b608ce776e1102d874a1a759b4cd3e6da6b"
+    },
+    {
+      "id": "ceroaDocuments02",
+      "sha256": "a5bed7435ad3fd77814197f31b8376f488b77389c3f881fea640c600cd642808"
+    },
+    {
+      "id": "ceroaRagEmbedding03",
+      "sha256": "9a6fe287c741909fe966ce1e73c3731aba9ec52b4783b314f8b89e86e866c24f"
+    },
+    {
+      "id": "ceroaReminders04",
+      "sha256": "7fb70bf6b00f9349fc73ebb48666b375c53d961e3000e7e38670c47117918166"
+    },
+    {
+      "id": "ceroaReminderError04",
+      "sha256": "a1495debd0fa3b7825342377d9fef962458de566778a4503784344dfdd1a0472"
+    },
+    {
+      "id": "ceroaSentinel05",
+      "sha256": "3de62e3e7f87ca12fa2c07bb596e7186ebcd9ebb10c834ec307693588eed1d48"
+    },
+    {
+      "id": "ceroaSentinelError05",
+      "sha256": "3e6b4c140f329ea1493b6e79fe0a1c47ad7129ae22685f5dac3a139c24b15563"
+    },
+    {
+      "id": "ceroaRagIngest20",
+      "sha256": "1746d68dbaf3c8776498cc0ecac07813514591969aba13d12c4a641d60044273"
+    },
+    {
+      "id": "ceroaRagSync20",
+      "sha256": "32a7b019ec0c69f513fa2c0dbc952da643d2dea872c194622814c0e10bd7d202"
+    },
+    {
+      "id": "ceroaOcr21",
+      "sha256": "26057067006f30bb7e4384bfdd018f0db28307f2e773e508b3a9a7c8be8e065b"
+    },
+    {
+      "id": "ceroaDocumentProcessor22",
+      "sha256": "91255b8d24637fae3aaa9c5d92764b5568e689f9d9f1c59ca17ae53d3929476b"
+    }
+  ],
+  "rootWebhookPreserved": true,
+  "criticalCodePreserved": true,
+  "providerVerification": "PENDING_API_KEY_INVALID",
+  "note": "Definition reconciliation, not proof of real provider execution.",
+  "drafts": {
+    "before": 14,
+    "after": 17,
+    "unrelatedUnchanged": 13
+  },
+  "smoke": {
+    "unauthenticatedWebhook": 403,
+    "expiredAuthorizedRequest": 503,
+    "failureStage": "prepare-context",
+    "modelCalled": false,
+    "financialOperation": false,
+    "credentialAssociationsValidated": 29
+  },
+  "backendImage": "sha256:373973b35f5d09fc94e1c9ace84e7a711ece780995cb9fb4443eb780c6dd72d8",
+  "backendRollbackImage": "sha256:07d55d7b4c0fa55a33bf680cd1b6589b3943897f7b2c59d9de9af12952ca486e",
+  "tests": {
+    "mainJava": 131,
+    "finalTargetedJava": 37,
+    "springAndNativeN8n": 2,
+    "node": 27,
+    "schemas": 14,
+    "provider": "SIMULATED",
+    "realProvider": "PENDING_API_KEY_INVALID"
+  }
+}
