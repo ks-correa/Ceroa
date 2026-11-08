@@ -1,5 +1,7 @@
 # Google Workspace — verificación real autorizada
 
+**Actualización posterior:** la nueva clave de Gemini ya fue actualizada y pasó generación real, embeddings de 768 dimensiones y una prueba nativa de n8n. Calendar todavía requiere completar OAuth. Véase [GEMINI-CALENDAR-2026-11-08.md](GEMINI-CALENDAR-2026-11-08.md); las menciones siguientes al bloqueo anterior de Gemini describen el estado previo a esta actualización.
+
 El 8 de noviembre de 2026 el usuario autorizó usar las credenciales existentes de n8n y realizar tres pruebas: enviar un correo a la propia cuenta conectada, crear `Ceroa - Pruebas Bloque 4` en Drive y añadir `Pruebas Bloque 4` a `Ceroa_Looker_Studio`. La autorización excluye activar las automatizaciones generales. Se reutilizaron las credenciales almacenadas; el secreto OAuth compartido en el chat no se incorporó al código ni al repositorio.
 
 ## Resultados reales

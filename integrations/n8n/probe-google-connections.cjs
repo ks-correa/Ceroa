@@ -30,6 +30,6 @@ async function probe(row){
 }
 db.all('SELECT id,name,type,data FROM credentials_entity',async(error,rows)=>{
  if(error){console.log(JSON.stringify({status:'INVENTORY_FAILED'}));process.exitCode=1;db.close();return;}
- const results=[];for(const row of rows.filter(r=>allowed.has(r.type)))results.push(await probe(row));
+ const results=[];for(const row of rows.filter(r=>allowed.has(r.type)&&(process.argv[2]!=='calendar-only'||r.type==='googleCalendarOAuth2Api')))results.push(await probe(row));
  console.log(JSON.stringify({readOnly:true,credentials:results}));db.close();
 });

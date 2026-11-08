@@ -1,5 +1,7 @@
 # Bloque 4 — implementación y verificación
 
+**Estado más reciente de Gemini/Calendar:** la credencial de Gemini fue actualizada y verificada con Google real, incluyendo embeddings y un nodo nativo de n8n. Calendar sigue pendiente del consentimiento OAuth en n8n. [Detalle de la actualización](GEMINI-CALENDAR-2026-11-08.md).
+
 **Actualización posterior del 8 de noviembre:** el usuario autorizó usar las credenciales existentes y ejecutar pruebas reales delimitadas. Gmail, Drive y Sheets ya pasaron esas pruebas; los detalles actuales están en [GOOGLE-WORKSPACE-LIVE-2026-11-08.md](GOOGLE-WORKSPACE-LIVE-2026-11-08.md). Las referencias a pruebas externas omitidas en este informe describen el despliegue inicial. Las automatizaciones generales continúan desactivadas y Calendar/Meet sigue pendiente de autorización.
 
 La implementación está desplegada en `refactor/n8n-multiagent`, con los proveedores externos desactivados. **El Bloque 4 no se declara completamente operativo.** El usuario indicó «no lo tengo omite» respecto a credenciales y recursos de prueba de Workspace; por ello se omitieron envíos, archivos, hojas y citas reales. Gemini mantiene su bloqueo previo `API_KEY_INVALID`; no se sustituyó el proveedor ni se modificaron sus credenciales.
