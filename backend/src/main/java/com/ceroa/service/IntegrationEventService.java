@@ -69,4 +69,9 @@ public class IntegrationEventService {
     private void projection(IntegrationEvent e){if(e.channel.equals("SHEETS"))return;
         enqueue("SHEETS","OPERATIONAL_METRIC",null,null,"projection:"+e.id+":"+e.status+":"+e.attempts,Map.of("eventId",e.id.toString(),"workflow","ceroaWorkspaceMail40","event",e.kind,"status",e.status,"at",OffsetDateTime.now().toString(),"durationMs",Math.max(0,Duration.between(e.createdAt,OffsetDateTime.now()).toMillis()),"result",e.errorCode==null?e.status:e.errorCode));
     }
+    @Transactional
+    public void driveMetric(UUID syncId,String version,String status){
+        if(!Set.of("QUEUED","READY","FAILED","UNCHANGED").contains(status))throw new IllegalArgumentException();
+        enqueue("SHEETS","OPERATIONAL_METRIC",null,null,"drive:"+syncId+":"+version+":"+status,Map.of("eventId",syncId.toString(),"workflow","ceroaWorkspaceDrive40","event","DOCUMENT_SYNC","status",status,"at",OffsetDateTime.now().toString(),"durationMs",0,"result",status));
+    }
 }

@@ -1,0 +1,275 @@
+{
+  "id": "ceroaWorkspaceDrive40",
+  "name": "Ceroa - Workspace - Drive aprobado",
+  "active": false,
+  "nodes": [
+    {
+      "id": "watch-fileCreated",
+      "name": "Drive fileCreated",
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $env.CEROA_APPROVED_DRIVE_FOLDER_ID }}"
+        },
+        "event": "fileCreated"
+      },
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "watch-fileUpdated",
+      "name": "Drive fileUpdated",
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $env.CEROA_APPROVED_DRIVE_FOLDER_ID }}"
+        },
+        "event": "fileUpdated"
+      },
+      "position": [
+        0,
+        200
+      ]
+    },
+    {
+      "id": "metadata",
+      "name": "Leer metadatos autorizados",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "parameters": {
+        "url": "={{ \"https://www.googleapis.com/drive/v3/files/\" + encodeURIComponent($json.id) }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleDriveOAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "fields",
+              "value": "id,name,mimeType,version,md5Checksum,parents,size,trashed"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "position": [
+        250,
+        0
+      ]
+    },
+    {
+      "id": "validate",
+      "name": "Validar fuente y version",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "parameters": {
+        "method": "POST",
+        "url": "http://backend:8080/api/v1/workspace-tools/drive/validate",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({sourceId:$env.CEROA_APPROVED_DRIVE_SOURCE_ID,metadata:{...$json,size:Number($json.size)}}) }}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "position": [
+        500,
+        0
+      ]
+    },
+    {
+      "id": "changed",
+      "name": "Descargar solo version nueva",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "parameters": {
+        "conditions": {
+          "options": {
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "new",
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "DOWNLOAD",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "position": [
+        750,
+        0
+      ]
+    },
+    {
+      "id": "download",
+      "name": "Drive descargar archivo",
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "parameters": {
+        "resource": "file",
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.fileId }}"
+        },
+        "options": {}
+      },
+      "position": [
+        1000,
+        0
+      ]
+    },
+    {
+      "id": "ingest",
+      "name": "Incorporar a biblioteca existente",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "parameters": {
+        "method": "POST",
+        "url": "={{ \"http://backend:8080/api/v1/workspace-tools/drive/\" + $(\"Validar fuente y version\").first().json.id + \"/ingest\" }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "leaseToken",
+              "value": "={{ $(\"Validar fuente y version\").first().json.leaseToken }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "data"
+            }
+          ]
+        },
+        "options": {
+          "timeout": 90000
+        }
+      },
+      "position": [
+        1250,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Drive fileCreated": {
+      "main": [
+        [
+          {
+            "node": "Leer metadatos autorizados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Drive fileUpdated": {
+      "main": [
+        [
+          {
+            "node": "Leer metadatos autorizados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leer metadatos autorizados": {
+      "main": [
+        [
+          {
+            "node": "Validar fuente y version",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar fuente y version": {
+      "main": [
+        [
+          {
+            "node": "Descargar solo version nueva",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Descargar solo version nueva": {
+      "main": [
+        [
+          {
+            "node": "Drive descargar archivo",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Drive descargar archivo": {
+      "main": [
+        [
+          {
+            "node": "Incorporar a biblioteca existente",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Bogota",
+    "executionTimeout": 120,
+    "saveDataSuccessExecution": "none",
+    "saveDataErrorExecution": "none",
+    "saveManualExecutions": false
+  }
+}
