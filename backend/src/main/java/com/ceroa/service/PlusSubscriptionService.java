@@ -190,6 +190,8 @@ public class PlusSubscriptionService {
         User user = s.user;
         user.setPlan(view(s).plusActive() ? UserPlan.PLUS : UserPlan.CERO);
         users.save(user);
+        if("ACTIVE".equals(s.status)&&!"ACTIVE".equals(previousStatus)&&s.nextPaymentAt!=null)
+            notifyWorkspace(s,IntegrationEventService.MailKind.PLUS_ACTIVATED,"activated");
     }
 
     @Transactional

@@ -41,6 +41,19 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 })
 @AutoConfigureMockMvc
 class HybridDocumentIntegrationTest {
+    @Autowired DriveSyncService driveSync;
+    @Autowired ApprovedDriveSourceRepository driveSources;
+    @Test void approvedDriveVersionsReuseQueueAndInvalidateObsoleteChunks()throws Exception{
+        var source=new ApprovedDriveSource();source.ownerId=a;source.folderId="approved-folder";source.active=true;source.approvedAt=OffsetDateTime.now();source=driveSources.saveAndFlush(source);
+        byte[] original=DocumentTextExtractorTest.word("Manual aprobado version inicial intereses "+UUID.randomUUID());
+        var meta=new DriveSyncService.Metadata("approved-file","manual.docx","application/vnd.openxmlformats-officedocument.wordprocessingml.document","1",HexFormat.of().formatHex(java.security.MessageDigest.getInstance("MD5").digest(original)),List.of("approved-folder"),(long)original.length,false);
+        var w=driveSync.validate(source.id,meta);var queued=driveSync.ingest(w.id(),w.leaseToken(),new MockMultipartFile("file","manual.docx",meta.mimeType(),original));index();
+        assertThat(driveSync.reconcile()).anyMatch(x->x.id().equals(w.id())&&x.status().equals("READY"));assertThat(driveSync.validate(source.id,meta).status()).isEqualTo("UNCHANGED");
+        var old=service.claim();assertThat(old).isEmpty();byte[] updated=DocumentTextExtractorTest.word("Manual aprobado version modificada seguro cobertura "+UUID.randomUUID());
+        var next=driveSync.validate(source.id,new DriveSyncService.Metadata(meta.id(),meta.name(),meta.mimeType(),"2",HexFormat.of().formatHex(java.security.MessageDigest.getInstance("MD5").digest(updated)),meta.parents(),(long)updated.length,false));
+        var replaced=driveSync.ingest(next.id(),next.leaseToken(),new MockMultipartFile("file","manual.docx",meta.mimeType(),updated));assertThat(replaced.documentId()).isEqualTo(queued.documentId());assertThat(replaced.documentVersion()).isEqualTo(2);
+        assertThat(db.queryForObject("SELECT count(*) FROM document_chunks WHERE document_id=?",Integer.class,queued.documentId())).isZero();index();assertThat(documents.indexedContent(a,queued.documentId())).anyMatch(x->x.contains("modificada"));assertThat(documents.indexedContent(a,queued.documentId())).noneMatch(x->x.contains("inicial"));as(b);assertThatThrownBy(()->service.get(queued.documentId())).isInstanceOf(com.ceroa.exception.ResourceNotFoundException.class);
+    }
     @Autowired DocumentLibraryService service;
     @Autowired FinancialDocumentRepository documents;
     @Autowired UserRepository users;
@@ -90,7 +103,7 @@ class HybridDocumentIntegrationTest {
     String vectorString(){return "["+String.join(",",vector().stream().map(Object::toString).toList())+"]";}
     Completion completion(Work work){var vectors=new ArrayList<Vector>();for(int i=0;i<work.chunks().size();i++)vectors.add(new Vector(i,vector()));return new Completion(work.attempt(),work.model(),vectors,List.of());}
     void index(){var w=service.claim().orElseThrow();service.complete(w.jobId(),completion(w));}
-    @Test void realMigrationsAreValidAndIdempotent(){assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("25");assertThat(flyway.validateWithResult().validationSuccessful).isTrue();assertThat(flyway.migrate().migrationsExecuted).isZero();}
+    @Test void realMigrationsAreValidAndIdempotent(){assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("30");assertThat(flyway.validateWithResult().validationSuccessful).isTrue();assertThat(flyway.migrate().migrationsExecuted).isZero();}
     long bindTelegram(UUID user){long sender=TELEGRAM_SEQUENCE.incrementAndGet();var link=new TelegramLink();link.userId=user;link.senderId=sender;link.chatId=sender;link.linkedAt=OffsetDateTime.now();telegramLinks.saveAndFlush(link);return sender;}
     TelegramService.Reply telegram(long sender,String text,TelegramService.Attachment file){return telegram.update(new TelegramService.Update(TELEGRAM_SEQUENCE.incrementAndGet(),sender,sender,true,text,null,null,file));}
     TelegramService.Attachment telegramFile(String text)throws Exception{return new TelegramService.Attachment("synthetic.docx","application/vnd.openxmlformats-officedocument.wordprocessingml.document",Base64.getEncoder().encodeToString(DocumentTextExtractorTest.word(text+" "+UUID.randomUUID())));}

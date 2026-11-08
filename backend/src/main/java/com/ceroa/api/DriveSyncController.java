@@ -9,6 +9,7 @@ public class DriveSyncController {
     private final DriveSyncService service;
     public DriveSyncController(DriveSyncService service){this.service=service;}
     public record Validation(UUID sourceId,DriveSyncService.Metadata metadata) {}
+    @PostMapping("/reconcile") public Object reconcile(){return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(service.reconcile());}
     @PostMapping("/validate") public Object validate(@RequestBody Validation input){return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(service.validate(input.sourceId(),input.metadata()));}
     @PostMapping(value="/{id}/ingest",consumes=MediaType.MULTIPART_FORM_DATA_VALUE) public Object ingest(@PathVariable UUID id,@RequestParam UUID leaseToken,@RequestPart MultipartFile file){return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(service.ingest(id,leaseToken,file));}
 }

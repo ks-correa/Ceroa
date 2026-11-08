@@ -193,9 +193,62 @@
         1250,
         0
       ]
+    },
+    {
+      "id": "status-schedule",
+      "name": "Revisar trabajos documentales",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 2
+            }
+          ]
+        }
+      },
+      "position": [
+        0,
+        500
+      ]
+    },
+    {
+      "id": "status",
+      "name": "Conciliar estado de biblioteca",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "parameters": {
+        "method": "POST",
+        "url": "http://backend:8080/api/v1/workspace-tools/drive/reconcile",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "position": [
+        250,
+        500
+      ]
     }
   ],
   "connections": {
+    "Revisar trabajos documentales": {
+      "main": [
+        [
+          {
+            "node": "Conciliar estado de biblioteca",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
     "Drive fileCreated": {
       "main": [
         [

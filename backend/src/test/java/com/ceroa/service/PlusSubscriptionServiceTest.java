@@ -23,6 +23,20 @@ import static org.springframework.test.web.client.match.MockRestRequestMatchers.
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 class PlusSubscriptionServiceTest {
+    @Test void operationalActivationRequiresVerifiedProviderAndDoesNotRepeat(){
+        configure();var events=mock(IntegrationEventService.class);ReflectionTestUtils.setField(service,"workspaceEvents",events);
+        User user=new User();user.setId(UUID.randomUUID());var s=new PlusSubscription();s.id=UUID.randomUUID();s.user=user;s.providerId="mp-ops";s.periodicity="MONTHLY";s.amount=new BigDecimal("19900");s.currency="COP";
+        when(subscriptions.findByProviderId("mp-ops")).thenReturn(Optional.of(s));
+        String response="{\"id\":\"mp-ops\",\"external_reference\":\""+s.id+"\",\"status\":\"authorized\",\"next_payment_date\":\"2026-12-08T10:00:00-05:00\",\"auto_recurring\":{\"frequency\":1,\"frequency_type\":\"months\",\"transaction_amount\":19900,\"currency_id\":\"COP\"}}";
+        server.expect(requestTo("https://api.mercadopago.com/preapproval/mp-ops")).andRespond(withSuccess(response,MediaType.APPLICATION_JSON));server.expect(requestTo("https://api.mercadopago.com/preapproval/mp-ops")).andRespond(withSuccess(response,MediaType.APPLICATION_JSON));
+        service.refresh("mp-ops");service.refresh("mp-ops");verify(events,times(1)).mail(eq(user),eq(IntegrationEventService.MailKind.PLUS_ACTIVATED),eq("subscription:"+s.id+":activated"),any());server.verify();
+    }
+    @Test void rejectedPaymentCannotEmitRenewal(){configure();var events=mock(IntegrationEventService.class);ReflectionTestUtils.setField(service,"workspaceEvents",events);server.expect(requestTo("https://api.mercadopago.com/authorized_payments/payment-fixture")).andRespond(withSuccess("{\"id\":\"payment-fixture\",\"status\":\"processed\",\"payment\":{\"status\":\"rejected\"}}",MediaType.APPLICATION_JSON));service.refreshAuthorizedPayment("payment-fixture");verifyNoInteractions(events);server.verify();}
+    @Test void verifiedApprovedPaymentAndAdvancedBillingBoundaryEmitRenewal(){
+        configure();var events=mock(IntegrationEventService.class);ReflectionTestUtils.setField(service,"workspaceEvents",events);User user=new User();user.setId(UUID.randomUUID());var s=new PlusSubscription();s.id=UUID.randomUUID();s.user=user;s.providerId="mp-renew";s.status="ACTIVE";s.periodicity="MONTHLY";s.amount=new BigDecimal("19900");s.currency="COP";s.nextPaymentAt=OffsetDateTime.parse("2026-11-08T10:00:00-05:00");when(subscriptions.findByProviderId("mp-renew")).thenReturn(Optional.of(s));
+        server.expect(requestTo("https://api.mercadopago.com/authorized_payments/charge-ok")).andRespond(withSuccess("{\"id\":\"charge-ok\",\"status\":\"processed\",\"payment\":{\"status\":\"approved\"},\"preapproval_id\":\"mp-renew\",\"transaction_amount\":\"19900.00\",\"currency_id\":\"COP\"}",MediaType.APPLICATION_JSON));
+        server.expect(requestTo("https://api.mercadopago.com/preapproval/mp-renew")).andRespond(withSuccess("{\"id\":\"mp-renew\",\"external_reference\":\""+s.id+"\",\"status\":\"authorized\",\"next_payment_date\":\"2026-12-08T10:00:00-05:00\",\"auto_recurring\":{\"frequency\":1,\"frequency_type\":\"months\",\"transaction_amount\":19900,\"currency_id\":\"COP\"}}",MediaType.APPLICATION_JSON));service.refreshAuthorizedPayment("charge-ok");verify(events).mail(eq(user),eq(IntegrationEventService.MailKind.PLUS_RENEWED),eq("subscription:"+s.id+":payment:charge-ok"),any());server.verify();
+    }
     private final PlusSubscriptionRepository subscriptions = mock(PlusSubscriptionRepository.class);
     private final UserRepository users = mock(UserRepository.class);
     private final CurrentUserService currentUser = mock(CurrentUserService.class);

@@ -5,5 +5,6 @@ import jakarta.persistence.LockModeType;
 import java.util.*;
 public interface DriveSyncFileRepository extends JpaRepository<DriveSyncFile,UUID>{
     Optional<DriveSyncFile> findBySourceIdAndFileId(UUID source,String file);
+    List<DriveSyncFile> findTop20ByStatusOrderByUpdatedAtAsc(String status);
     @Lock(LockModeType.PESSIMISTIC_WRITE) @Query("select f from DriveSyncFile f where f.id=:id") Optional<DriveSyncFile> locked(UUID id);
 }

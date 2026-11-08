@@ -38,6 +38,9 @@ public class DriveSyncService {
     private Work work(DriveSyncFile f,String status){return new Work(f.id,f.leaseToken,f.fileId,f.pendingVersion,status,f.documentId,f.documentVersion);}
     private DriveSyncFile lease(UUID id,UUID token){var f=files.locked(id).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));if(token==null||!token.equals(f.leaseToken)||f.leaseUntil==null||!f.leaseUntil.isAfter(OffsetDateTime.now()))throw new ResponseStatusException(HttpStatus.CONFLICT);return f;}
     private DriveSyncFile approvedLease(UUID id,UUID token){var snapshot=files.findById(id).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));approved(snapshot.sourceId);return lease(id,token);}
+    public List<Work> reconcile(){var result=new ArrayList<Work>();for(var snapshot:files.findTop20ByStatusOrderByUpdatedAtAsc("QUEUED")){
+        try{var w=tx.execute(t->{var s=approved(snapshot.sourceId);var f=files.locked(snapshot.id).orElseThrow();if(!"QUEUED".equals(f.status)||f.documentId==null)return work(f,f.status);var d=documents.get(s.ownerId,f.documentId,false,false);if(d.version()!=f.documentVersion)f.status="SUPERSEDED";else if("INDEXED".equals(d.status()))f.status="READY";else if("FAILED".equals(d.status()))f.status="FAILED";else if("REVIEW_REQUIRED".equals(d.status()))f.status="REVIEW_REQUIRED";f.updatedAt=OffsetDateTime.now();files.saveAndFlush(f);if(Set.of("READY","FAILED").contains(f.status))events.driveMetric(f.id,f.lastVersion,f.status);return work(f,f.status);});result.add(w);}catch(ResponseStatusException e){/* Revoked sources cannot be read by the connector. */}
+    }return List.copyOf(result);}
     public Work ingest(UUID id,UUID token,MultipartFile file){
         var input=tx.execute(t->{var f=approvedLease(id,token);var s=sources.findById(f.sourceId).orElseThrow();if(!Set.of("LEASED","INDEXING").contains(f.status))throw new ResponseStatusException(HttpStatus.CONFLICT);f.status="INDEXING";return new UploadContext(s.ownerId,f.documentId,f.documentVersion,f.pendingChecksum,f.pendingVersion);});
         try{
@@ -48,7 +51,7 @@ public class DriveSyncService {
                 String hash=HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(file.getBytes()));
                 if(input.document()!=null&&hash.equals(documents.hash(input.document())))doc=library.get(input.document());
                 else if(input.document()!=null)doc=library.replace(input.document(),input.documentVersion(),file,true,null);
-                else doc=library.upload(file,new DocumentContracts.Metadata(null,DocumentContracts.Kind.OTHER,null,null,null,null,null),true);
+                else doc=library.upload(file,new DocumentContracts.Metadata(DocumentContracts.Identification.OTHER,DocumentContracts.Kind.OTHER,null,null,null,null,null),true);
             }finally{SecurityContextHolder.setContext(previous);}
             return tx.execute(t->{var f=approvedLease(id,token);f.documentId=doc.id();f.documentVersion=doc.version();f.lastVersion=input.version();f.lastChecksum=input.checksum();f.status="QUEUED";f.leaseUntil=null;f.leaseToken=null;events.driveMetric(f.id,f.lastVersion,"QUEUED");return work(f,"QUEUED");});
         }catch(RuntimeException e){throw e;}catch(Exception e){throw new IllegalArgumentException("No fue posible incorporar el archivo");}
