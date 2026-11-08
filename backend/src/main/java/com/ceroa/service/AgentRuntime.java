@@ -53,9 +53,9 @@ public final class AgentRuntime {
     Scope scope(UUID token){checkTime();var s=scopes.get(token);if(s==null||s.result!=null)throw denied();return s;}
     void authorize(Scope s,String capability){
         checkTime();boolean allowed=switch(s.role){
-            case FINANCIAL -> Set.of("finance.read","finance.calculate","finance.simulate","documents.facts").contains(capability);
+            case FINANCIAL -> Set.of("finance.read","finance.calculate","finance.simulate","documents.facts","communications.propose").contains(capability);
             case RAG -> Set.of("documents.facts","documents.retrieve","knowledge.approved").contains(capability);
-            case SUPPORT -> capability.equals("knowledge.approved");
+            case SUPPORT -> Set.of("knowledge.approved","communications.propose").contains(capability);
             default -> false;
         };
         if(!allowed)throw denied();if(++s.calls>8)throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS);s.tools.merge(capability,1,Integer::sum);

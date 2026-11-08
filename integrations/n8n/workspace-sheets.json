@@ -1,0 +1,296 @@
+{
+  "id": "ceroaWorkspaceSheets40",
+  "name": "Ceroa - Workspace - Proyección operativa Sheets",
+  "active": false,
+  "nodes": [
+    {
+      "id": "schedule",
+      "name": "Revisar proyecciones pendientes",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 2
+            }
+          ]
+        }
+      },
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "claim",
+      "name": "Tomar evento",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "parameters": {
+        "method": "POST",
+        "url": "http://backend:8080/api/v1/workspace-tools/events/claim",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"channel\":\"SHEETS\"}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "position": [
+        220,
+        0
+      ]
+    },
+    {
+      "id": "dispatch",
+      "name": "Autorizar proyección",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "parameters": {
+        "method": "POST",
+        "url": "={{ \"http://backend:8080/api/v1/workspace-tools/events/\" + $(\"Tomar evento\").first().json.id + \"/dispatch\" }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({leaseToken:$(\"Tomar evento\").first().json.leaseToken}) }}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "position": [
+        440,
+        0
+      ]
+    },
+    {
+      "id": "sheets",
+      "name": "Sheets · Buscar e insertar o actualizar",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "parameters": {
+        "resource": "sheet",
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $env.CEROA_OPERATIONS_SPREADSHEET_ID }}"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "={{ $env.CEROA_OPERATIONS_SHEET_NAME }}"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "executionId": "={{ $json.id }}",
+            "workflow": "={{ $json.payload.workflow }}",
+            "event": "={{ $json.payload.event }}",
+            "at": "={{ $json.payload.at }}",
+            "status": "={{ $json.payload.status }}",
+            "durationMs": "={{ $json.payload.durationMs }}",
+            "result": "={{ $json.payload.result }}",
+            "sourceEventId": "={{ $json.payload.eventId }}"
+          },
+          "matchingColumns": [
+            "executionId"
+          ],
+          "schema": [
+            {
+              "id": "executionId",
+              "displayName": "executionId",
+              "required": false,
+              "defaultMatch": true,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "workflow",
+              "displayName": "workflow",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "event",
+              "displayName": "event",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "at",
+              "displayName": "at",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "durationMs",
+              "displayName": "durationMs",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "result",
+              "displayName": "result",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "sourceEventId",
+              "displayName": "sourceEventId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "cellFormat": "RAW"
+        }
+      },
+      "position": [
+        680,
+        0
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "ack",
+      "name": "Confirmar proyección",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "parameters": {
+        "method": "POST",
+        "url": "={{ \"http://backend:8080/api/v1/workspace-tools/events/\" + $(\"Tomar evento\").first().json.id + \"/outcome\" }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({leaseToken:$(\"Tomar evento\").first().json.leaseToken,status:\"ACKNOWLEDGED\",providerId:$(\"Tomar evento\").first().json.id,errorCode:null}) }}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "position": [
+        940,
+        0
+      ]
+    },
+    {
+      "id": "retry",
+      "name": "Diferir proyección sin bloquear origen",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "parameters": {
+        "method": "POST",
+        "url": "={{ \"http://backend:8080/api/v1/workspace-tools/events/\" + $(\"Tomar evento\").first().json.id + \"/outcome\" }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({leaseToken:$(\"Tomar evento\").first().json.leaseToken,status:\"RETRY_PROJECTION\",providerId:null,errorCode:\"PROVIDER_UNAVAILABLE\"}) }}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "position": [
+        940,
+        200
+      ]
+    }
+  ],
+  "connections": {
+    "Revisar proyecciones pendientes": {
+      "main": [
+        [
+          {
+            "node": "Tomar evento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tomar evento": {
+      "main": [
+        [
+          {
+            "node": "Autorizar proyección",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Autorizar proyección": {
+      "main": [
+        [
+          {
+            "node": "Sheets · Buscar e insertar o actualizar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sheets · Buscar e insertar o actualizar": {
+      "main": [
+        [
+          {
+            "node": "Confirmar proyección",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Diferir proyección sin bloquear origen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Bogota",
+    "executionTimeout": 120,
+    "saveDataSuccessExecution": "none",
+    "saveDataErrorExecution": "none",
+    "saveManualExecutions": false
+  }
+}

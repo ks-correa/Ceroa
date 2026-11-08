@@ -1,0 +1,269 @@
+{
+  "id": "ceroaWorkspaceMail40",
+  "name": "Ceroa - Workspace - Comunicaciones operativas",
+  "active": false,
+  "nodes": [
+    {
+      "id": "schedule",
+      "name": "Revisar buzón operativo",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 1
+            }
+          ]
+        }
+      },
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "claim",
+      "name": "Tomar evento",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "parameters": {
+        "method": "POST",
+        "url": "http://backend:8080/api/v1/workspace-tools/events/claim",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"channel\":\"GMAIL\"}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "position": [
+        220,
+        0
+      ]
+    },
+    {
+      "id": "template",
+      "name": "Preparar plantilla",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{ JSON.stringify({...$json,subject:{\"WELCOME\":\"Bienvenido a Ceroa\",\"PLUS_ACTIVATED\":\"Tu suscripción Ceroa Plus está activa\",\"PLUS_RENEWED\":\"Renovación confirmada de Ceroa Plus\",\"PLUS_RENEWAL_CANCELLED\":\"Renovación automática cancelada\",\"FINANCIAL_SUMMARY\":\"Tu resumen financiero de Ceroa\",\"UPCOMING_DUES\":\"Tus próximos vencimientos\",\"SUBSCRIPTION_INFO\":\"Información de tu suscripción Ceroa\"}[$json.kind],message:({\"WELCOME\":(\"Tu cuenta fue registrada correctamente. Ya puedes ingresar a Ceroa para organizar tus obligaciones y revisar tus próximos pasos. Este mensaje operativo no solicita contraseñas ni códigos de seguridad.\"),\"PLUS_ACTIVATED\":(\"Ceroa confirmó el estado activo de tu suscripción Plus. Vigencia de acceso informada por el backend: \" + ($json.payload.accessUntil ?? \"no disponible\") + \". Este mensaje no es un comprobante de pago.\"),\"PLUS_RENEWED\":(\"El backend verificó una renovación aprobada por el proveedor. Vigencia de acceso: \" + ($json.payload.accessUntil ?? \"no disponible\") + \". Consulta el estado en tu perfil.\"),\"PLUS_RENEWAL_CANCELLED\":(\"Se confirmó la cancelación de la renovación automática. Acceso pagado vigente hasta: \" + ($json.payload.accessUntil ?? \"no disponible\") + \". No se modificaron tus obligaciones ni pagos.\"),\"FINANCIAL_SUMMARY\":(\"Resumen autorizado. Fecha: \" + $json.payload.asOf + \"\\nDeuda registrada: \" + ($json.payload.totalRegisteredDebt ?? \"no disponible\") + \"\\nObligaciones activas: \" + ($json.payload.activeDebtCount ?? \"no disponible\") + \"\\nPagos exigibles: \" + ($json.payload.requiredPayments ?? \"no disponible\") + \"\\nPresupuesto asignado: \" + ($json.payload.allocatedBudget ?? \"no disponible\") + \"\\nCobertura parcial: \" + ($json.payload.partialCoverage ? \"sí\" : \"no\")),\"UPCOMING_DUES\":(\"Vencimientos autorizados. Fecha: \" + $json.payload.asOf + \"\\n\" + ($json.payload.dues ?? []).map(d=>d.name + \" | \" + (d.amount ?? \"sin importe confirmado\") + \" | \" + (d.dueDate ?? \"sin fecha confirmada\")).join(\"\\n\")),\"SUBSCRIPTION_INFO\":(\"Estado confirmado almacenado en Ceroa: \" + $json.payload.status + \"\\nVigencia: \" + ($json.payload.accessUntil ?? \"no disponible\") + \"\\nRenovación automática: \" + ($json.payload.automaticRenewal ? \"activa\" : \"inactiva\") + \"\\nConsulta autorizada: \" + $json.payload.asOf)})[$json.kind]}) }}",
+        "options": {}
+      },
+      "position": [
+        440,
+        0
+      ]
+    },
+    {
+      "id": "dispatch",
+      "name": "Revalidar destinatario e iniciar intento",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "parameters": {
+        "method": "POST",
+        "url": "={{ \"http://backend:8080/api/v1/workspace-tools/events/\" + $(\"Tomar evento\").first().json.id + \"/dispatch\" }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({leaseToken:$(\"Tomar evento\").first().json.leaseToken}) }}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "position": [
+        680,
+        0
+      ]
+    },
+    {
+      "id": "valid",
+      "name": "Destinatario confirmado",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "parameters": {
+        "conditions": {
+          "options": {
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "recipient",
+              "leftValue": "={{ typeof $json.recipient === \"string\" && $json.recipient.length > 0 }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "position": [
+        900,
+        0
+      ]
+    },
+    {
+      "id": "gmail",
+      "name": "Gmail · Enviar plantilla operativa",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "parameters": {
+        "resource": "message",
+        "operation": "send",
+        "sendTo": "={{ $json.recipient }}",
+        "subject": "={{ $(\"Preparar plantilla\").first().json.subject }}",
+        "emailType": "text",
+        "message": "={{ $(\"Preparar plantilla\").first().json.message }}",
+        "options": {
+          "appendAttribution": false,
+          "senderName": "Ceroa"
+        }
+      },
+      "position": [
+        1120,
+        0
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "ack",
+      "name": "Registrar aceptación Gmail",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "parameters": {
+        "method": "POST",
+        "url": "={{ \"http://backend:8080/api/v1/workspace-tools/events/\" + $(\"Tomar evento\").first().json.id + \"/outcome\" }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({leaseToken:$(\"Tomar evento\").first().json.leaseToken,status:\"ACKNOWLEDGED\",providerId:$json.id,errorCode:null}) }}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "position": [
+        1380,
+        0
+      ]
+    },
+    {
+      "id": "ambiguous",
+      "name": "Retener resultado ambiguo",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "parameters": {
+        "method": "POST",
+        "url": "={{ \"http://backend:8080/api/v1/workspace-tools/events/\" + $(\"Tomar evento\").first().json.id + \"/outcome\" }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({leaseToken:$(\"Tomar evento\").first().json.leaseToken,status:\"AMBIGUOUS\",providerId:null,errorCode:\"PROVIDER_AMBIGUOUS\"}) }}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "position": [
+        1380,
+        220
+      ]
+    }
+  ],
+  "connections": {
+    "Revisar buzón operativo": {
+      "main": [
+        [
+          {
+            "node": "Tomar evento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tomar evento": {
+      "main": [
+        [
+          {
+            "node": "Preparar plantilla",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar plantilla": {
+      "main": [
+        [
+          {
+            "node": "Revalidar destinatario e iniciar intento",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Revalidar destinatario e iniciar intento": {
+      "main": [
+        [
+          {
+            "node": "Destinatario confirmado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Destinatario confirmado": {
+      "main": [
+        [
+          {
+            "node": "Gmail · Enviar plantilla operativa",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Gmail · Enviar plantilla operativa": {
+      "main": [
+        [
+          {
+            "node": "Registrar aceptación Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Retener resultado ambiguo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Bogota",
+    "executionTimeout": 120,
+    "saveDataSuccessExecution": "none",
+    "saveDataErrorExecution": "none",
+    "saveManualExecutions": false
+  }
+}

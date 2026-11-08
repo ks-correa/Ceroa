@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
+import {extendWorkspaceAgents} from './extend-workspace-agents.mjs';
 
 export const roles=['FINANCIAL','RAG','SUPPORT'];
 export const ids={FINANCIAL:'ceroaFinancialAgent30',RAG:'ceroaKnowledgeAgent30',SUPPORT:'ceroaSupportAgent30'};
@@ -74,7 +75,7 @@ export function buildMultiagent(original){
  for(const role of roles){
   const name='Delegar a '+labels[role];const t=node('delegate-'+role,name,'@n8n/n8n-nodes-langchain.toolWorkflow',{description:prompts[role],source:'database',workflowId:{__rl:true,value:ids[role],mode:'id'},workflowInputs:{mappingMode:'defineBelow',value:{requestId:'={{ $("Preparar texto").first().json.requestId }}',task:'={{ $fromAI("task","Tarea concreta y mínima para este especialista", "string") }}',evidenceRefs:'={{ $fromAI("evidenceRefs","Authorized fID or dID keys separated by commas; empty string when absent", "string", "").split(",").map(x=>x.trim()).filter(Boolean) }}',context:'={{ {year:$("Preparar texto").first().json.year,month:$("Preparar texto").first().json.month,selectedDocument:$("Preparar texto").first().json.selectedDocument} }}'},matchingColumns:[],schema:[['requestId','string'],['task','string'],['evidenceRefs','array'],['context','object']].map(([id,type])=>({id,displayName:id,required:true,defaultMatch:false,display:true,canBeUsedToMatch:true,type})),attemptToConvertTypes:false,convertFieldsToString:false}},900+roles.indexOf(role)*300,320);t.typeVersion=2.2;w.nodes.push(t);w.connections[name]={ai_tool:[[edge(a.name,'ai_tool')]]};
  }
- return [w,...children];
+ return extendWorkspaceAgents([w,...children]);
 }
 if(process.argv[1]===fileURLToPath(import.meta.url)){
  const input=JSON.parse(fs.readFileSync(process.argv[2]??new URL('./hybrid-rag-query.json',import.meta.url),'utf8'));

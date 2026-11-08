@@ -69,6 +69,10 @@ logging:
     org.hibernate.SQL: OFF
 
 ceroa:
+  workspace:
+    worker-key: ${WORKSPACE_WORKER_KEY:}
+    gmail-enabled: ${WORKSPACE_GMAIL_ENABLED:false}
+    sheets-enabled: ${WORKSPACE_SHEETS_ENABLED:false}
   library:
     enabled: ${DOCUMENT_LIBRARY_ENABLED:false}
     worker-key: ${DOCUMENT_LIBRARY_WORKER_KEY:}

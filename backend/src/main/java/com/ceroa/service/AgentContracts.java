@@ -11,9 +11,9 @@ public final class AgentContracts {
     public record Context(String schemaVersion,UUID requestId,UUID correlationId,Intent intent,Budget budget,Map<Role,List<String>> tools,String authorization) {}
     public static List<String> capabilities(Role role){return switch(role){
         case ORCHESTRATOR -> List.of("delegate.financial","delegate.rag","delegate.support");
-        case FINANCIAL -> List.of("finance.read","finance.calculate","finance.simulate","documents.facts");
+        case FINANCIAL -> List.of("finance.read","finance.calculate","finance.simulate","documents.facts","communications.propose");
         case RAG -> List.of("documents.facts","documents.retrieve","knowledge.approved");
-        case SUPPORT -> List.of("knowledge.approved","support.propose");
+        case SUPPORT -> List.of("knowledge.approved","support.propose","communications.propose");
     };}
     public static Intent intent(String question,boolean selected){
         if(selected)return Intent.DOCUMENT_SINGLE;

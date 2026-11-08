@@ -20,7 +20,9 @@ public class ExternalAuthService {
     private final ExternalIdentityRepository identities;
     private final UserRepository users;
     private final AuthService auth;
-    public ExternalAuthService(ExternalIdentityRepository identities, UserRepository users, AuthService auth) {
+    private final IntegrationEventService workspaceEvents;
+    public ExternalAuthService(ExternalIdentityRepository identities, UserRepository users, AuthService auth,IntegrationEventService workspaceEvents) {
+        this.workspaceEvents=workspaceEvents;
         this.identities = identities; this.users = users; this.auth = auth;
     }
     @Transactional
@@ -49,6 +51,7 @@ public class ExternalAuthService {
         user.setTermsAcceptedAt(OffsetDateTime.now()); user.setPrivacyAcceptedAt(OffsetDateTime.now());
         users.saveAndFlush(user);
         identities.saveAndFlush(new ExternalIdentity(user, identity.provider(), identity.issuer(), identity.subject()));
+        workspaceEvents.mail(user,IntegrationEventService.MailKind.WELCOME,"registered:"+user.getId(),java.util.Map.of("templateVersion",1));
         return auth.createSession(user);
     }
     public void requireValid(PendingIdentity identity) {

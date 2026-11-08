@@ -33,6 +33,8 @@ public class AssistantController {
     }
     private static <T> ResponseEntity<T> privateResponse(T value){return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(value);}
     public record Completion(String answer,String transcript,String mode,List<String> sources) {}
+    @PostMapping("/api/v1/assistant-tools/requests/{id}/communications/propose")
+    public Object proposeMail(@PathVariable UUID id,@RequestParam UUID scope,@RequestParam com.ceroa.service.IntegrationEventService.MailKind kind){return privateResponse(service.scoped(id,scope,()->service.proposeMail(id,kind)));}
     @GetMapping("/api/v1/assistant-tools/requests/{id}/capacity")
     public Object capacity(@PathVariable UUID id,@RequestParam UUID scope){return privateResponse(service.scoped(id,scope,()->service.capacity(id)));}
     @GetMapping("/api/v1/assistant-tools/requests/{id}/simulate")

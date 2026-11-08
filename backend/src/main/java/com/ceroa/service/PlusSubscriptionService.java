@@ -24,6 +24,7 @@ public class PlusSubscriptionService {
     private final UserRepository users;
     private final CurrentUserService currentUser;
     private final RestClient client;
+    @org.springframework.beans.factory.annotation.Autowired(required=false) private IntegrationEventService workspaceEvents;
     @Value("${ceroa.plus.monthly-price:}") private String monthlyPrice;
     @Value("${ceroa.plus.yearly-price:}") private String yearlyPrice;
     @Value("${ceroa.plus.currency:COP}") private String currency;
@@ -135,6 +136,7 @@ public class PlusSubscriptionService {
                 s.automaticRenewal = false;
                 s.accessUntil = s.nextPaymentAt;
                 s.cancellationConfirmedAt = OffsetDateTime.now();
+                notifyWorkspace(s,IntegrationEventService.MailKind.PLUS_RENEWAL_CANCELLED,"cancelled");
             } else {
                 s.status = "CANCEL_PENDING";
                 s.accessUntil = s.nextPaymentAt;
@@ -161,6 +163,7 @@ public class PlusSubscriptionService {
                 || s.amount.compareTo(recurring.path("transaction_amount").decimalValue()) != 0
                 || recurring.path("frequency").asInt() != (s.periodicity.equals("MONTHLY") ? 1 : 12)
                 || !"months".equals(recurring.path("frequency_type").asText())) return;
+        String previousStatus=s.status;OffsetDateTime previousBoundary=s.nextPaymentAt;
         String status = switch (data.path("status").asText()) {
             case "authorized" -> "ACTIVE";
             case "cancelled", "canceled" -> "CANCELLED";
@@ -189,6 +192,20 @@ public class PlusSubscriptionService {
         users.save(user);
     }
 
+    @Transactional
+    public void refreshAuthorizedPayment(String paymentId){
+        JsonNode charge=client.get().uri("/authorized_payments/{id}",paymentId).header("Authorization","Bearer "+accessToken).retrieve().body(JsonNode.class);
+        if(charge==null||!paymentId.equals(charge.path("id").asText())||!"processed".equals(charge.path("status").asText())||!"approved".equals(charge.path("payment").path("status").asText()))return;
+        var s=subscriptions.findByProviderId(charge.path("preapproval_id").asText()).orElse(null);
+        String amount=charge.path("transaction_amount").asText();
+        if(s==null||!s.currency.equals(charge.path("currency_id").asText())||!amount.matches("[0-9]{1,15}(\\.[0-9]{1,8})?")||s.amount.compareTo(new BigDecimal(amount))!=0)return;
+        var previous=s.nextPaymentAt;boolean active="ACTIVE".equals(s.status);refresh(s.providerId);
+        if(active&&previous!=null&&"ACTIVE".equals(s.status)&&s.nextPaymentAt!=null&&s.nextPaymentAt.isAfter(previous))notifyWorkspace(s,IntegrationEventService.MailKind.PLUS_RENEWED,"payment:"+paymentId);
+    }
+    private void notifyWorkspace(PlusSubscription s,IntegrationEventService.MailKind kind,String boundary){
+        if(workspaceEvents==null)return;var payload=new java.util.LinkedHashMap<String,Object>();payload.put("periodicity",s.periodicity);payload.put("accessUntil",s.accessUntil!=null?s.accessUntil.toString():s.nextPaymentAt==null?null:s.nextPaymentAt.toString());payload.put("automaticRenewal",s.automaticRenewal);
+        workspaceEvents.mail(s.user,kind,"subscription:"+s.id+":"+boundary,payload);
+    }
     private boolean safeCheckoutUrl(String url) {
         try {
             URI uri = URI.create(url);

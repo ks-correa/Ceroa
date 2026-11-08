@@ -26,13 +26,15 @@ public class AuthService {
     private final SessionTokenService tokenService;
     private final long sessionDays;
     private final String dummyPasswordHash;
+    private final IntegrationEventService workspaceEvents;
 
     public AuthService(
             UserRepository userRepository,
             AuthSessionRepository sessionRepository,
             PasswordEncoder passwordEncoder,
-            SessionTokenService tokenService,
+            SessionTokenService tokenService,IntegrationEventService workspaceEvents,
             @Value("${ceroa.session.days:30}") long sessionDays) {
+        this.workspaceEvents=workspaceEvents;
         this.userRepository = userRepository;
         this.sessionRepository = sessionRepository;
         this.passwordEncoder = passwordEncoder;
@@ -61,6 +63,7 @@ public class AuthService {
         user.setPrivacyAcceptedAt(OffsetDateTime.now());
         user.setPlan(UserPlan.CERO);
         user = userRepository.save(user);
+        workspaceEvents.mail(user,IntegrationEventService.MailKind.WELCOME,"registered:"+user.getId(),java.util.Map.of("templateVersion",1));
 
         return createSession(user);
     }

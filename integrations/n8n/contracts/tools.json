@@ -61,11 +61,20 @@
       "method": "GET",
       "path": "/assistant-tools/requests/{requestId}/simulate",
       "effect": "READ_ONLY_HYPOTHETICAL_PLUS_AUTHORIZED"
+    },
+    {
+      "id": "communications.propose",
+      "roles": [
+        "FINANCIAL",
+        "SUPPORT"
+      ],
+      "method": "POST",
+      "path": "/assistant-tools/requests/{requestId}/communications/propose",
+      "effect": "PERSISTENT_PROPOSAL_ONLY; USER_CONFIRMATION_REQUIRED; REGISTERED_RECIPIENT_ONLY"
     }
   ],
   "notImplemented": [
     "scheduling",
-    "external communications",
     "external tools"
   ],
   "delegation": {

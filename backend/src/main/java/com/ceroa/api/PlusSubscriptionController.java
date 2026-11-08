@@ -65,5 +65,6 @@ public class PlusSubscriptionController {
             if (!MessageDigest.isEqual(expected, HexFormat.of().parseHex(v1))) throw new IllegalArgumentException();
         } catch (Exception ex) { throw new ResponseStatusException(HttpStatus.UNAUTHORIZED); }
         if ("subscription_preapproval".equals(type)) service.refresh(id);
+        if ("subscription_authorized_payment".equals(type)) service.refreshAuthorizedPayment(id);
     }
 }

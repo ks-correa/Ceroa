@@ -73,17 +73,18 @@ public class AssistantService {
     private final DocumentLibraryService library;
     private final SimulationService simulations;
     private final SentinelService sentinel;
+    private final WorkspaceActionService workspaceActions;
     private final String webhook, key;
     private final boolean enabled;
     public AssistantService(CurrentUserService current, DebtService debts, PaymentService payments,
         UpcomingDueService dues, StrategyService strategies, MonthlyProgressService monthly,
-        DashboardService dashboard, ObjectMapper json, RateNormalizationService rates, AssistantAnalysisService analysis, RagRetrievalService rag, DocumentLibraryService library,SimulationService simulations,SentinelService sentinel,
+        DashboardService dashboard, ObjectMapper json, RateNormalizationService rates, AssistantAnalysisService analysis, RagRetrievalService rag, DocumentLibraryService library,SimulationService simulations,SentinelService sentinel,WorkspaceActionService workspaceActions,
         @Value("${ceroa.assistant.enabled:false}") boolean enabled,
         @Value("${ceroa.assistant.webhook-url:}") String webhook,
         @Value("${ceroa.assistant.worker-key:}") String key) {
         this.current=current; this.debts=debts; this.payments=payments; this.dues=dues;
         this.strategies=strategies; this.monthly=monthly; this.dashboard=dashboard;
-        this.json=json; this.rates=rates; this.analysis=analysis; this.rag=rag; this.library=library;this.simulations=simulations;this.sentinel=sentinel; this.enabled=enabled; this.webhook=webhook; this.key=key;
+        this.json=json; this.rates=rates; this.analysis=analysis; this.rag=rag; this.library=library;this.simulations=simulations;this.sentinel=sentinel;this.workspaceActions=workspaceActions; this.enabled=enabled; this.webhook=webhook; this.key=key;
     }
     public Reply message(String message, String audio, String mime) {
         return message(message,audio,mime,Channel.web);
@@ -107,6 +108,7 @@ public class AssistantService {
         boolean hasText=message!=null && !message.isBlank(), hasAudio=audio!=null && !audio.isBlank();
         if (hasText==hasAudio || (hasText && message.length()>2000)) throw new IllegalArgumentException();
         if (hasAudio) validateAudio(audio,mime);
+        if(hasText&&selectedDocumentId==null){var operational=workspaceMessage(message);if(operational!=null)return operational;}
         com.ceroa.api.dto.DocumentContracts.Document selected=null;
         if(selectedDocumentId!=null){
             selected=library.get(selectedDocumentId);
@@ -179,6 +181,22 @@ public class AssistantService {
         if(q.matches("(?:cual es mi estrategia activa|muestrame mi estrategia activa)"))return Intent.strategy;
         return null;
     }
+    private Reply workspaceMessage(String message){
+        var confirmation=java.util.regex.Pattern.compile("(?i)^\\s*confirmar env[ií]o ([A-Z]{20})\\s*$").matcher(message);
+        if(confirmation.matches()){var result=workspaceActions.confirmMail(confirmation.group(1).toUpperCase(Locale.ROOT));return new Reply(result.status().equals("CONFIRMED")?"Autorización registrada. El correo queda pendiente de envío; todavía no hay confirmación de Gmail.":result.instruction(),"communication");}
+        String q=java.text.Normalizer.normalize(message.toLowerCase(Locale.ROOT),java.text.Normalizer.Form.NFD).replaceAll("\\p{M}","").replaceAll("[¿?!.]","").strip();
+        IntegrationEventService.MailKind kind=switch(q){
+            case "enviame al correo mis proximos vencimientos","enviame mis proximos vencimientos al correo" -> IntegrationEventService.MailKind.UPCOMING_DUES;
+            case "enviame un resumen financiero a mi correo","enviame al correo mi resumen financiero" -> IntegrationEventService.MailKind.FINANCIAL_SUMMARY;
+            case "enviame informacion de mi suscripcion al correo" -> IntegrationEventService.MailKind.SUBSCRIPTION_INFO;
+            default -> null;
+        };
+        return kind==null?null:new Reply(workspaceActions.propose(kind).instruction(),"communication");
+    }
+    public AssistantAnalysisService.Evidence proposeMail(UUID id,IntegrationEventService.MailKind kind){return withJob(id,"communicationProposal",job->{
+        guard(job,"communications.propose");var scope=activeScope.get();if(scope==null||job.selectedDocument!=null||scope.role==AgentContracts.Role.SUPPORT&&kind!=IntegrationEventService.MailKind.SUBSCRIPTION_INFO||scope.role==AgentContracts.Role.FINANCIAL&&!Set.of(IntegrationEventService.MailKind.FINANCIAL_SUMMARY,IntegrationEventService.MailKind.UPCOMING_DUES).contains(kind))throw AgentRuntime.denied();
+        return analysis.evidence(job.facts,json.valueToTree(workspaceActions.propose(kind)),"workspaceProposal");
+    });}
     private boolean isDebtListQuestion(String question) {
         String plain=java.text.Normalizer.normalize(question.toLowerCase(Locale.ROOT),java.text.Normalizer.Form.NFD)
             .replaceAll("\\p{M}","").replaceAll("[^a-z ]"," ").trim().replaceAll("\\s+"," ");
