@@ -1,0 +1,10 @@
+# Optional operator configuration. All Google providers remain disabled by default.
+# Append to the SAME Compose files used by the current deployment.
+services:
+  backend:
+    environment:
+      WORKSPACE_WORKER_KEY: ${WORKSPACE_WORKER_KEY:-}
+      WORKSPACE_GMAIL_ENABLED: ${WORKSPACE_GMAIL_ENABLED:-false}
+      WORKSPACE_SHEETS_ENABLED: ${WORKSPACE_SHEETS_ENABLED:-false}
+      WORKSPACE_CALENDAR_ENABLED: ${WORKSPACE_CALENDAR_ENABLED:-false}
+      WORKSPACE_CALENDAR_URL: ${WORKSPACE_CALENDAR_URL:-}
