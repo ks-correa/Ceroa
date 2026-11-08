@@ -1,0 +1,10 @@
+const fs=require('fs'),assert=require('assert/strict');
+const log=fs.readFileSync('/tmp/execute.log','utf8');const start=log.indexOf('{\n  "data":');assert(start>=0,'Native execution output missing');const data=JSON.parse(log.slice(start));assert.equal(data.finished,true);assert(!data.data.resultData.error,JSON.stringify(data.data.resultData.error));
+const scenario=process.argv[2]??'COMPOSITE';
+const legacy=process.argv[3]==='legacy';
+const trace=JSON.parse(fs.readFileSync('/tmp/provider-traces.json')).filter(t=>t.scenario===scenario&&(legacy?t.model==='fixture-legacy':t.model!=='fixture-legacy'));assert(trace.some(t=>t.model===(legacy?'fixture-legacy':'fixture-root')));
+const expected=legacy?[]:scenario==='COMPOSITE'?['ceroaFinancialAgent30','ceroaKnowledgeAgent30']:scenario==='FINANCIAL'?['ceroaFinancialAgent30']:scenario==='RAG'||scenario==='EXTRACTS'?['ceroaKnowledgeAgent30']:scenario==='SUPPORT'?['ceroaSupportAgent30']:[];
+for(const id of ['ceroaFinancialAgent30','ceroaKnowledgeAgent30','ceroaSupportAgent30'])assert.equal(trace.some(t=>t.model===id),expected.includes(id),scenario+' '+id);
+assert(trace.length<=10);assert(!log.includes('Received tool input did not match'));assert(!log.includes('SPECIALIST_UNAVAILABLE'));assert(!log.includes('"observation": "[{\\"error\\"'));
+const elapsed=Date.parse(data.stoppedAt)-Date.parse(data.startedAt);
+console.log(JSON.stringify({scenario,architecture:legacy?'PREVIOUS_SINGLE_AGENT':'MULTIAGENT',provider:'SIMULATED',backend:'SIMULATED',nativeAgents:expected.length+1,executionMs:elapsed,providerRequests:trace.length,status:'PASS'}));

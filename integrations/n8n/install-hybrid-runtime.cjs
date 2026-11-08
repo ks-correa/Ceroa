@@ -25,7 +25,7 @@ process.stdin.on('end',()=>{
           {id:'ceroaLibraryOcr21',name:'Ceroa OCR privado',type:'httpHeaderAuth',data:encrypt({name:'X-Ceroa-Ocr',value:values.workerKey})},
           {id:'ceroaSupabaseGateway21',name:'Ceroa Supabase · Gateway restringido',type:'supabaseApi',data:encrypt({host:'http://backend:8080/api/v1/library-supabase',serviceRole:values.workerKey})}
         ]),{mode:0o600});
-        for(const file of ['document-processor','hybrid-rag-ingestion','hybrid-rag-sync','hybrid-rag-query','hybrid-rag-ocr']) {
+        for(const file of ['document-processor','hybrid-rag-ingestion','hybrid-rag-sync','financial-agent','knowledge-agent','support-agent','multiagent-query','hybrid-rag-ocr']) {
           const w=JSON.parse(fs.readFileSync('/opt/ceroa-workflows/'+file+'.json','utf8'));
           w.active=false;
           for(const n of w.nodes) {
@@ -35,7 +35,7 @@ process.stdin.on('end',()=>{
               n.credentials={httpHeaderAuth:{id:'ceroaRagGemini03',name:'Ceroa RAG Gemini Embeddings'}};
             } else if(file==='hybrid-rag-ocr'&&n.type==='n8n-nodes-base.webhook')n.credentials={httpHeaderAuth:{id:'ceroaLibraryOcr21',name:'Ceroa OCR privado'}};
             else if(n.type.includes('lmChatGoogleGemini'))n.credentials=model.credentials;
-            else if(file==='hybrid-rag-query'){
+            else if(['multiagent-query','financial-agent','knowledge-agent','support-agent'].includes(file)){
               if(byName.get(n.name)?.credentials)n.credentials=byName.get(n.name).credentials;
               else if(n.parameters.genericAuthType==='httpHeaderAuth')n.credentials=header;
             } else if(n.parameters.authentication==='headerAuth'||n.parameters.genericAuthType==='httpHeaderAuth')n.credentials={httpHeaderAuth:{id:'ceroaLibraryWorker20',name:'Ceroa biblioteca privada'}};

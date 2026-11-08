@@ -122,4 +122,5 @@ const shared=shareDocumentProcessor(ingestion(false),ingestion(true));
 for (const [name, workflow] of [['hybrid-rag-ingestion.json', shared.adapters[0]], ['hybrid-rag-sync.json', shared.adapters[1]], ['document-processor.json',shared.worker], ['hybrid-rag-query.json', extendDocumentQuery(assistant)],['hybrid-rag-ocr.json',ocr]]) {
   await writeFile(new URL(name, import.meta.url), JSON.stringify(workflow, null, 2) + '\n');
 }
-console.log('Prepared four inactive workflows with native Supabase configuration checks and Gemini OCR.');
+await import('./generate-multiagent-templates.mjs');
+console.log('Prepared inactive documentary workflows, hybrid rollback reference and multiagent assistant templates.');
