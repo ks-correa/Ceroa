@@ -44,9 +44,9 @@ Para Telegram, el túnel temporal cambia de URL al recrearlo. Iniciar `telegram-
 
 ## Calendar y estado de implementación
 
-La credencial Calendar **sí está creada**, con Client ID y Client Secret cifrados y guardados en n8n. Esos datos se trasladan. Un cliente OAuth no contiene por sí solo el permiso de acceso a la agenda: si el estado es `CONSENT_REQUIRED`, abrir `Ceroa Calendar - pendiente de autorizacion` y completar **Conectar con Google**. Ese permiso debe concederlo la cuenta de Google; no se inventan tokens ni se copian tokens de Drive como si autorizaran Calendar.
+La credencial **Ceroa Calendar** tiene guardados el cliente OAuth y sus tokens autorizados. Se comprob? acceso real, disponibilidad y creaci?n de un evento privado con Meet, sin invitados ni correos. El calendario exclusivo de pruebas qued? vinculado al workflow. Los tokens y la configuraci?n se incluyen en el volumen cifrado.
 
-Gmail, Drive y Sheets tienen pruebas reales documentadas. Gemini está actualizado y verificado, incluidos embeddings y el nodo nativo. Las automatizaciones generales de Workspace permanecen desactivadas. La fuente de Drive aún necesita asociarse al propietario de Ceroa y configurar su `sourceId`; MCP personal necesita un token del propietario con scopes mínimos. Estos pendientes funcionales se conservan explícitos y no se convierten en conexiones operativas por hacer un respaldo.
+Gmail, Drive y Sheets tienen pruebas reales documentadas. Gemini est? verificado, incluidos embeddings y el nodo nativo. La fuente Drive aprobada ya est? asociada al propietario real identificado y su sourceId est? fijado. No se ha comprobado todav?a la ingesta documental completa desde Drive. Los workflows generales de Workspace siguen inactivos y sus flags desactivados, seg?n lo acordado. MCP personal a?n necesita el token del propietario con sus scopes; el cliente externo necesita su servidor y autenticaci?n operativos. El respaldo conserva este estado y no activa automatizaciones.
 
 Si se completa OAuth u otra configuración después de exportar, ejecutar otra vez el exportador y trasladar el paquete más reciente.
 

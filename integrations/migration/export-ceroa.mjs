@@ -17,7 +17,7 @@ try{
  run('git',['archive','--format=tar','--output='+path.join(stage,'project.tar'),'HEAD']);
  run('docker',['stop','ceroa-n8n']);stopped=true;
  try{run('docker',['run','--rm','--network','none','--user','0:0','--entrypoint','/bin/sh','-v',volume+':/data:ro','-v',stage+':/backup',image,'-c','tar -czf /backup/n8n-volume.tar.gz -C /data .']);}finally{run('docker',['start','ceroa-n8n']);stopped=false;}
- const manifest={format:'CEROA_MIGRATION_V1',id,createdAt:new Date().toISOString(),gitCommit:run('git',['rev-parse','HEAD']).trim(),n8nImage:image,sourceArchiveSha256:hash(path.join(stage,'project.tar')),n8nVolumeSha256:hash(path.join(stage,'n8n-volume.tar.gz')),privateFiles,externalDatabase:'Existing remote database and storage; credentials preserved, no database dump',calendarConsent:'Pending unless granted after this snapshot',startAutomatically:false};
+ const manifest={format:'CEROA_MIGRATION_V1',id,createdAt:new Date().toISOString(),gitCommit:run('git',['rev-parse','HEAD']).trim(),n8nImage:image,sourceArchiveSha256:hash(path.join(stage,'project.tar')),n8nVolumeSha256:hash(path.join(stage,'n8n-volume.tar.gz')),privateFiles,externalDatabase:'Existing remote database and storage; credentials preserved, no database dump',calendarConsent:'Stored OAuth tokens; checked by offline restoration, provider may require renewal',startAutomatically:false};
  fs.writeFileSync(path.join(stage,'manifest.json'),JSON.stringify(manifest,null,2));
  run('tar',['-czf',path.join(stage,'bundle.tar.gz'),'-C',stage,'project.tar','n8n-volume.tar.gz','private','manifest.json']);
  const archive=path.join(output,id+'.ceroa'),key=path.join(keyDir,id+'.key');
