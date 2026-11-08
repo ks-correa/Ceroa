@@ -12,6 +12,7 @@ async function probe(row){
  const result={id:row.id,name:row.name,type:row.type};
  try{
   let data=cipher.decrypt(row.data);if(typeof data==='string')data=JSON.parse(data);
+  result.clientConfigurationStored=!!data.clientId&&!!data.clientSecret;
   let token=data.oauthTokenData;if(typeof token==='string')token=JSON.parse(token);
   if(!token){result.status='CONSENT_REQUIRED';return result;}
   result.scopes=typeof token.scope==='string'?token.scope.split(' '):[];

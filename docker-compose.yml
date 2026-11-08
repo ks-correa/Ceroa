@@ -45,7 +45,7 @@ services:
       - "3000:3000"
 
   n8n:
-    image: docker.n8n.io/n8nio/n8n:stable@sha256:80e23ced901f0e22597d4f3464e3aaf9d835372262ea6f08ef760d8ca35df25c
+    image: docker.n8n.io/n8nio/n8n@sha256:ffeb52485f78b1b06c9a832205853cf75da72a07a514c9a27724df85979d6c34
     container_name: ceroa-n8n
     restart: unless-stopped
     entrypoint: ["tini", "--", "/bin/sh", "/opt/ceroa-workflows/start-n8n.sh"]

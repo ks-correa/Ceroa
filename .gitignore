@@ -18,4 +18,5 @@ tmp/
 # Private backup keys and decrypted restore output.
 *.key
 /backups/n8n/restored/
+/backups/migration/
 .DS_Store
