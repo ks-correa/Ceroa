@@ -1,0 +1,346 @@
+{
+  "id": "ceroaWorkspaceCalendar40",
+  "name": "Ceroa - Workspace - Calendar y Meet",
+  "active": false,
+  "nodes": [
+    {
+      "id": "hook",
+      "name": "Operacion Calendar autorizada",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ceroa-workspace-calendar-v4",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "ceroa-workspace-calendar-v4"
+    },
+    {
+      "id": "gate",
+      "name": "Operacion permitida",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.operation }}",
+                    "rightValue": "availability",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "availability"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.operation }}",
+                    "rightValue": "create",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "create"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.operation }}",
+                    "rightValue": "get",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "get"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.body.operation }}",
+                    "rightValue": "delete",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "delete"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "position": [
+        220,
+        0
+      ]
+    },
+    {
+      "id": "availability",
+      "name": "Calendar disponibilidad",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "parameters": {
+        "resource": "calendar",
+        "operation": "availability",
+        "calendar": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $env.CEROA_SUPPORT_CALENDAR_ID }}"
+        },
+        "timeMin": "={{ $json.body.start }}",
+        "timeMax": "={{ $json.body.end }}",
+        "options": {
+          "outputFormat": "availability"
+        }
+      },
+      "position": [
+        500,
+        0
+      ]
+    },
+    {
+      "id": "create",
+      "name": "Calendar crear con Meet",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "parameters": {
+        "resource": "event",
+        "operation": "create",
+        "calendar": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $env.CEROA_SUPPORT_CALENDAR_ID }}"
+        },
+        "start": "={{ $json.body.start }}",
+        "end": "={{ $json.body.end }}",
+        "additionalFields": {
+          "id": "={{ $json.body.eventId }}",
+          "summary": "Asesoria Ceroa",
+          "description": "Solicitud confirmada en Ceroa. Sin datos financieros adjuntos.",
+          "attendees": [
+            "={{ $json.body.email }}"
+          ],
+          "sendUpdates": "all",
+          "conferenceDataUi": {
+            "conferenceDataValues": {
+              "conferenceSolution": "hangoutsMeet"
+            }
+          }
+        }
+      },
+      "position": [
+        500,
+        200
+      ]
+    },
+    {
+      "id": "get",
+      "name": "Calendar consultar reserva",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "parameters": {
+        "resource": "event",
+        "operation": "get",
+        "calendar": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $env.CEROA_SUPPORT_CALENDAR_ID }}"
+        },
+        "eventId": "={{ $json.body.eventId }}",
+        "options": {}
+      },
+      "position": [
+        500,
+        400
+      ]
+    },
+    {
+      "id": "delete",
+      "name": "Calendar cancelar reserva",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "parameters": {
+        "resource": "event",
+        "operation": "delete",
+        "calendar": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $env.CEROA_SUPPORT_CALENDAR_ID }}"
+        },
+        "eventId": "={{ $json.body.eventId }}",
+        "options": {
+          "sendUpdates": "all"
+        }
+      },
+      "position": [
+        500,
+        600
+      ],
+      "alwaysOutputData": true
+    },
+    {
+      "id": "result",
+      "name": "Responder proveedor",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "position": [
+        800,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Operacion Calendar autorizada": {
+      "main": [
+        [
+          {
+            "node": "Operacion permitida",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Operacion permitida": {
+      "main": [
+        [
+          {
+            "node": "Calendar disponibilidad",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Calendar crear con Meet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Calendar consultar reserva",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Calendar cancelar reserva",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calendar disponibilidad": {
+      "main": [
+        [
+          {
+            "node": "Responder proveedor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calendar crear con Meet": {
+      "main": [
+        [
+          {
+            "node": "Responder proveedor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calendar consultar reserva": {
+      "main": [
+        [
+          {
+            "node": "Responder proveedor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calendar cancelar reserva": {
+      "main": [
+        [
+          {
+            "node": "Responder proveedor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Bogota",
+    "executionTimeout": 120,
+    "saveDataSuccessExecution": "none",
+    "saveDataErrorExecution": "none",
+    "saveManualExecutions": false
+  }
+}

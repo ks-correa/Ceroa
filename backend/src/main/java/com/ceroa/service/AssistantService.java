@@ -74,15 +74,16 @@ public class AssistantService {
     private final SimulationService simulations;
     private final SentinelService sentinel;
     private final WorkspaceActionService workspaceActions;
+    private final SupportBookingService supportBookings;
     private final String webhook, key;
     private final boolean enabled;
     public AssistantService(CurrentUserService current, DebtService debts, PaymentService payments,
         UpcomingDueService dues, StrategyService strategies, MonthlyProgressService monthly,
         DashboardService dashboard, ObjectMapper json, RateNormalizationService rates, AssistantAnalysisService analysis, RagRetrievalService rag, DocumentLibraryService library,SimulationService simulations,SentinelService sentinel,WorkspaceActionService workspaceActions,
-        @Value("${ceroa.assistant.enabled:false}") boolean enabled,
+        SupportBookingService supportBookings,@Value("${ceroa.assistant.enabled:false}") boolean enabled,
         @Value("${ceroa.assistant.webhook-url:}") String webhook,
         @Value("${ceroa.assistant.worker-key:}") String key) {
-        this.current=current; this.debts=debts; this.payments=payments; this.dues=dues;
+        this.current=current; this.debts=debts; this.payments=payments; this.dues=dues;this.supportBookings=supportBookings;
         this.strategies=strategies; this.monthly=monthly; this.dashboard=dashboard;
         this.json=json; this.rates=rates; this.analysis=analysis; this.rag=rag; this.library=library;this.simulations=simulations;this.sentinel=sentinel;this.workspaceActions=workspaceActions; this.enabled=enabled; this.webhook=webhook; this.key=key;
     }
@@ -182,6 +183,10 @@ public class AssistantService {
         return null;
     }
     private Reply workspaceMessage(String message){
+        var booking=Pattern.compile("(?i)^\\s*(Confirmar asesoria|Consultar asesoria|Cancelar asesoria) ([A-Z]{20})\\s*$").matcher(message);
+        if(booking.matches()){String code=booking.group(2).toUpperCase(Locale.ROOT);var result=switch(booking.group(1).toLowerCase(Locale.ROOT)){case "confirmar asesoria"->supportBookings.confirm(code);case "cancelar asesoria"->supportBookings.proposeCancellation(code);default->supportBookings.get(code);};return bookingReply(result);}
+        var cancel=Pattern.compile("(?i)^\\s*Confirmar cancelacion ([A-Z]{20}) ([A-Z]{20})\\s*$").matcher(message);
+        if(cancel.matches())return bookingReply(supportBookings.confirmCancellation(cancel.group(1).toUpperCase(Locale.ROOT),cancel.group(2).toUpperCase(Locale.ROOT)));
         var confirmation=java.util.regex.Pattern.compile("(?i)^\\s*confirmar env[ií]o ([A-Z]{20})\\s*$").matcher(message);
         if(confirmation.matches()){var result=workspaceActions.confirmMail(confirmation.group(1).toUpperCase(Locale.ROOT));return new Reply(result.status().equals("CONFIRMED")?"Autorización registrada. El correo queda pendiente de envío; todavía no hay confirmación de Gmail.":result.instruction(),"communication");}
         String q=java.text.Normalizer.normalize(message.toLowerCase(Locale.ROOT),java.text.Normalizer.Form.NFD).replaceAll("\\p{M}","").replaceAll("[¿?!.]","").strip();
@@ -193,6 +198,17 @@ public class AssistantService {
         };
         return kind==null?null:new Reply(workspaceActions.propose(kind).instruction(),"communication");
     }
+    private Reply bookingReply(SupportBookingService.View result){return new Reply("Estado de asesoria: "+result.status()+". Horario: "+result.start()+". "+(result.meetUrl()==null?"":result.meetUrl()+" ")+result.instruction(),"support");}
+    public AssistantAnalysisService.Evidence bookingTool(UUID id,String operation,String value){return withJob(id,"supportBooking",job->{
+        guard(job,"support.booking");if(activeScope.get()==null||activeScope.get().role!=AgentContracts.Role.SUPPORT||job.selectedDocument!=null)throw AgentRuntime.denied();
+        Object result=switch(operation){case "availability"->supportBookings.availability(OffsetDateTime.parse(value));case "propose"->supportBookings.propose(OffsetDateTime.parse(value));case "get"->supportBookings.get(value);case "cancel"->supportBookings.proposeCancellation(value);default->throw AgentRuntime.denied();};
+        return analysis.evidence(job.facts,json.valueToTree(result),"supportBooking");
+    });}
+    public Object authorizeMcpClient(UUID id){return withJob(id,"externalMcp",job->{guard(job,"support.external");if(activeScope.get()==null||activeScope.get().role!=AgentContracts.Role.SUPPORT||job.selectedDocument!=null)throw AgentRuntime.denied();return Map.of("authorized",true,"server","CONTROLLED_CAPABILITIES","tool","ceroa_capabilities");});}
+    public AssistantAnalysisService.Evidence mcpClientResult(UUID id,com.fasterxml.jackson.databind.JsonNode input){return withJob(id,"externalMcpResult",job->{
+        guard(job,"support.external");if(activeScope.get()==null||activeScope.get().role!=AgentContracts.Role.SUPPORT||job.selectedDocument!=null||input==null||input.toString().length()>8000)throw AgentRuntime.denied();
+        try{var text=input.path("content").get(0).path("text");var value=text.isTextual()?json.readTree(text.asText()):text;if(!value.path("synthetic").asBoolean()||!value.path("capabilities").isArray()||value.path("capabilities").size()!=1||!value.path("capabilities").get(0).asText().equals("support.proposal"))throw AgentRuntime.denied();return analysis.evidence(job.facts,json.valueToTree(Map.of("provider","CONTROLLED_TEST_SERVER","capability","support.proposal","synthetic",true)),"externalMcp");}catch(Exception e){throw new IllegalArgumentException("Respuesta externa no permitida");}
+    });}
     public AssistantAnalysisService.Evidence proposeMail(UUID id,IntegrationEventService.MailKind kind){return withJob(id,"communicationProposal",job->{
         guard(job,"communications.propose");var scope=activeScope.get();if(scope==null||job.selectedDocument!=null||scope.role==AgentContracts.Role.SUPPORT&&kind!=IntegrationEventService.MailKind.SUBSCRIPTION_INFO||scope.role==AgentContracts.Role.FINANCIAL&&!Set.of(IntegrationEventService.MailKind.FINANCIAL_SUMMARY,IntegrationEventService.MailKind.UPCOMING_DUES).contains(kind))throw AgentRuntime.denied();
         return analysis.evidence(job.facts,json.valueToTree(workspaceActions.propose(kind)),"workspaceProposal");

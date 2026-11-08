@@ -13,7 +13,7 @@ public final class AgentContracts {
         case ORCHESTRATOR -> List.of("delegate.financial","delegate.rag","delegate.support");
         case FINANCIAL -> List.of("finance.read","finance.calculate","finance.simulate","documents.facts","communications.propose");
         case RAG -> List.of("documents.facts","documents.retrieve","knowledge.approved");
-        case SUPPORT -> List.of("knowledge.approved","support.propose","communications.propose");
+        case SUPPORT -> List.of("knowledge.approved","support.propose","communications.propose","support.booking","support.external");
     };}
     public static Intent intent(String question,boolean selected){
         if(selected)return Intent.DOCUMENT_SINGLE;

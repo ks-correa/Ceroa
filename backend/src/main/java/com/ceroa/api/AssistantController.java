@@ -33,6 +33,12 @@ public class AssistantController {
     }
     private static <T> ResponseEntity<T> privateResponse(T value){return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(value);}
     public record Completion(String answer,String transcript,String mode,List<String> sources) {}
+    @PostMapping("/api/v1/assistant-tools/requests/{id}/external/authorize")
+    public Object mcpAuthorize(@PathVariable UUID id,@RequestParam UUID scope){return privateResponse(service.scoped(id,scope,()->service.authorizeMcpClient(id)));}
+    @PostMapping("/api/v1/assistant-tools/requests/{id}/external/result")
+    public Object mcpResult(@PathVariable UUID id,@RequestParam UUID scope,@RequestBody com.fasterxml.jackson.databind.JsonNode input){return privateResponse(service.scoped(id,scope,()->service.mcpClientResult(id,input)));}
+    @PostMapping("/api/v1/assistant-tools/requests/{id}/support/booking")
+    public Object booking(@PathVariable UUID id,@RequestParam UUID scope,@RequestParam String operation,@RequestParam String value){return privateResponse(service.scoped(id,scope,()->service.bookingTool(id,operation,value)));}
     @PostMapping("/api/v1/assistant-tools/requests/{id}/communications/propose")
     public Object proposeMail(@PathVariable UUID id,@RequestParam UUID scope,@RequestParam com.ceroa.service.IntegrationEventService.MailKind kind){return privateResponse(service.scoped(id,scope,()->service.proposeMail(id,kind)));}
     @GetMapping("/api/v1/assistant-tools/requests/{id}/capacity")

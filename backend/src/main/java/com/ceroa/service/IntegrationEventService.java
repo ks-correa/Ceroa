@@ -14,7 +14,7 @@ import java.util.*;
 
 @Service
 public class IntegrationEventService {
-    public enum MailKind { WELCOME,PLUS_ACTIVATED,PLUS_RENEWED,PLUS_RENEWAL_CANCELLED,FINANCIAL_SUMMARY,UPCOMING_DUES,SUBSCRIPTION_INFO }
+    public enum MailKind { WELCOME,PLUS_ACTIVATED,PLUS_RENEWED,PLUS_RENEWAL_CANCELLED,FINANCIAL_SUMMARY,UPCOMING_DUES,SUBSCRIPTION_INFO,BOOKING_CONFIRMED,BOOKING_CANCELLED }
     public record Work(UUID id,UUID leaseToken,String channel,String kind,String recipient,JsonNode payload,int attempt) {}
     public record Outcome(String status,String providerId,String errorCode) {}
     private final IntegrationEventRepository events;private final UserRepository users;private final ObjectMapper json;

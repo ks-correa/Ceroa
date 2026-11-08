@@ -55,7 +55,7 @@ public final class AgentRuntime {
         checkTime();boolean allowed=switch(s.role){
             case FINANCIAL -> Set.of("finance.read","finance.calculate","finance.simulate","documents.facts","communications.propose").contains(capability);
             case RAG -> Set.of("documents.facts","documents.retrieve","knowledge.approved").contains(capability);
-            case SUPPORT -> Set.of("knowledge.approved","communications.propose").contains(capability);
+            case SUPPORT -> Set.of("knowledge.approved","communications.propose","support.booking","support.external").contains(capability);
             default -> false;
         };
         if(!allowed)throw denied();if(++s.calls>8)throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS);s.tools.merge(capability,1,Integer::sum);
