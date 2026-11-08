@@ -1,12 +1,221 @@
 {
-  "$schema":"https://json-schema.org/draft/2020-12/schema","$id":"urn:ceroa:agent-result:1.0",
-  "type":"object","additionalProperties":false,
-  "required":["schemaVersion","requestId","correlationId","role","status","answer","evidenceRefs","error"],
-  "properties":{
-    "schemaVersion":{"const":"1.0"},"requestId":{"type":"string","format":"uuid"},"correlationId":{"type":"string","format":"uuid"},
-    "role":{"enum":["ORCHESTRATOR","FINANCIAL","RAG","SUPPORT"]},
-    "status":{"enum":["SUCCESS","INSUFFICIENT_EVIDENCE","NEEDS_CLARIFICATION","BUDGET_EXCEEDED","DEPENDENCY_UNAVAILABLE","DENIED"]},
-    "answer":{"type":"string","maxLength":12000},"evidenceRefs":{"type":"array","maxItems":100,"uniqueItems":true,"items":{"type":"string","pattern":"^f[1-9][0-9]*$"}},
-    "error":{"oneOf":[{"type":"null"},{"type":"object","additionalProperties":false,"required":["code","retryable"],"properties":{"code":{"enum":["STALE_CONTEXT","UNAUTHORIZED","INCOMPLETE_COVERAGE","PROVIDER_UNAVAILABLE","BUDGET_EXCEEDED","INVALID_CONTRACT"]},"retryable":{"type":"boolean"}}}]}
-  }
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:ceroa:agent-result:1.1",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "requestId",
+        "correlationId",
+        "role",
+        "status",
+        "answer",
+        "evidenceRefs",
+        "error"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": "1.0"
+        },
+        "requestId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "correlationId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "role": {
+          "enum": [
+            "ORCHESTRATOR",
+            "FINANCIAL",
+            "RAG",
+            "SUPPORT"
+          ]
+        },
+        "status": {
+          "enum": [
+            "SUCCESS",
+            "INSUFFICIENT_EVIDENCE",
+            "NEEDS_CLARIFICATION",
+            "BUDGET_EXCEEDED",
+            "DEPENDENCY_UNAVAILABLE",
+            "DENIED"
+          ]
+        },
+        "answer": {
+          "type": "string",
+          "maxLength": 12000
+        },
+        "evidenceRefs": {
+          "type": "array",
+          "maxItems": 100,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^f[1-9][0-9]*$"
+          }
+        },
+        "error": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "code",
+                "retryable"
+              ],
+              "properties": {
+                "code": {
+                  "enum": [
+                    "STALE_CONTEXT",
+                    "UNAUTHORIZED",
+                    "INCOMPLETE_COVERAGE",
+                    "PROVIDER_UNAVAILABLE",
+                    "BUDGET_EXCEEDED",
+                    "INVALID_CONTRACT"
+                  ]
+                },
+                "retryable": {
+                  "type": "boolean"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "role",
+        "status",
+        "answer",
+        "evidenceRefs",
+        "sources",
+        "coverage",
+        "missingData",
+        "requiresConfirmation"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": "1.1"
+        },
+        "role": {
+          "enum": [
+            "FINANCIAL",
+            "RAG",
+            "SUPPORT"
+          ]
+        },
+        "status": {
+          "enum": [
+            "OK",
+            "PARTIAL",
+            "INSUFFICIENT",
+            "FAILED"
+          ]
+        },
+        "answer": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 10000
+        },
+        "evidenceRefs": {
+          "type": "array",
+          "maxItems": 100,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^f[1-9][0-9]*$"
+          }
+        },
+        "sources": {
+          "type": "array",
+          "maxItems": 8,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^d[1-8]$"
+          }
+        },
+        "coverage": {
+          "enum": [
+            "COMPLETE",
+            "PARTIAL",
+            "NONE"
+          ]
+        },
+        "missingData": {
+          "type": "array",
+          "maxItems": 12,
+          "items": {
+            "type": "string",
+            "maxLength": 200
+          }
+        },
+        "requiresConfirmation": {
+          "type": "boolean"
+        },
+        "requestId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "correlationId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "requiresClarification": {
+          "type": "boolean"
+        },
+        "errorCode": {
+          "enum": [
+            null,
+            "SPECIALIST_UNAVAILABLE"
+          ]
+        },
+        "metrics": {
+          "type": "object"
+        },
+        "advisoryProposal": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "status",
+                "topic"
+              ],
+              "properties": {
+                "status": {
+                  "const": "PROPOSED"
+                },
+                "topic": {
+                  "type": "string",
+                  "maxLength": 500
+                },
+                "availability": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "maxLength": 300
+                }
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
 }

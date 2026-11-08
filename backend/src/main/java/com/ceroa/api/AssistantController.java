@@ -23,34 +23,49 @@ public class AssistantController {
     @GetMapping("/api/v1/assistant-tools/requests/{id}/data")
     public ResponseEntity<AssistantAnalysisService.Evidence> data(@PathVariable UUID id,
         @RequestParam AssistantAnalysisService.Dataset dataset,@RequestParam int year,@RequestParam int month,
-        @RequestParam(defaultValue="0") int offset) {
-        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(service.data(id,dataset,year,month,offset));
+        @RequestParam(defaultValue="0") int offset,@RequestParam(required=false) UUID scope) {
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(service.scoped(id,scope,()->service.data(id,dataset,year,month,offset)));
     }
     @GetMapping("/api/v1/assistant-tools/requests/{id}/calculate")
     public ResponseEntity<AssistantAnalysisService.Evidence> calculate(@PathVariable UUID id,
-        @RequestParam AssistantAnalysisService.Operation operation,@RequestParam List<String> refs) {
-        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(service.calculate(id,operation,refs));
+        @RequestParam AssistantAnalysisService.Operation operation,@RequestParam List<String> refs,@RequestParam(required=false) UUID scope) {
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(service.scoped(id,scope,()->service.calculate(id,operation,refs)));
     }
+    private static <T> ResponseEntity<T> privateResponse(T value){return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(value);}
     public record Completion(String answer,String transcript,String mode,List<String> sources) {}
+    @GetMapping("/api/v1/assistant-tools/requests/{id}/capacity")
+    public Object capacity(@PathVariable UUID id,@RequestParam UUID scope){return privateResponse(service.scoped(id,scope,()->service.capacity(id)));}
+    @GetMapping("/api/v1/assistant-tools/requests/{id}/simulate")
+    public Object simulate(@PathVariable UUID id,@RequestParam UUID scope,@RequestParam String debtName,@RequestParam String strategy,@RequestParam(defaultValue="") String extraPaymentRef){
+        return privateResponse(service.scoped(id,scope,()->service.simulate(id,debtName,com.ceroa.domain.StrategyType.fromValue(strategy),extraPaymentRef)));
+    }
     @GetMapping("/api/v1/assistant-tools/requests/{id}/financial-documents")
     public ResponseEntity<AssistantService.LibraryEvidence> financialDocuments(@PathVariable UUID id,
         @RequestParam com.ceroa.api.dto.DocumentContracts.Intent intent,@RequestParam(required=false) String question,
         @RequestParam(required=false) com.ceroa.api.dto.DocumentContracts.Identification identificationType,
         @RequestParam(required=false) com.ceroa.api.dto.DocumentContracts.Kind documentType,
         @RequestParam(required=false) java.time.LocalDate periodFrom,@RequestParam(required=false) java.time.LocalDate periodToExclusive,
-        @RequestParam(defaultValue="0") int offset) {
+        @RequestParam(defaultValue="0") int offset,@RequestParam(required=false) UUID scope) {
         var filters=new com.ceroa.api.dto.DocumentContracts.Filters(null,identificationType,documentType,null,periodFrom,periodToExclusive);
-        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(service.financialDocuments(id,new com.ceroa.api.dto.DocumentContracts.Query(intent,question,filters,offset,10)));
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(service.scoped(id,scope,()->service.financialDocuments(id,new com.ceroa.api.dto.DocumentContracts.Query(intent,question,filters,offset,10))));
     }
     @GetMapping("/api/v1/assistant-tools/requests/{id}/documents")
-    public ResponseEntity<AssistantService.DocumentEvidence> documents(@PathVariable UUID id,@RequestParam String query){
-        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(service.documents(id,query));
+    public ResponseEntity<AssistantService.DocumentEvidence> documents(@PathVariable UUID id,@RequestParam String query,@RequestParam(required=false) UUID scope){
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(service.scoped(id,scope,()->service.documents(id,query)));
     }
     @DeleteMapping("/api/v1/assistant/conversation")
     public ResponseEntity<Void> forget(){service.forget(AssistantService.Channel.web);return ResponseEntity.noContent().build();}
     public record Preparation(String transcript) {}
     @GetMapping("/api/v1/assistant-tools/requests/{id}/agent-context")
     public ResponseEntity<com.ceroa.service.AgentContracts.Context> agentContext(@PathVariable UUID id){return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(service.agentContext(id));}
+    @PostMapping("/api/v1/assistant-tools/requests/{id}/orchestration/start")
+    public Object start(@PathVariable UUID id){return privateResponse(service.startOrchestration(id));}
+    @PostMapping("/api/v1/assistant-tools/requests/{id}/delegations/{role}/begin")
+    public Object begin(@PathVariable UUID id,@PathVariable com.ceroa.service.AgentContracts.Role role,@RequestBody com.ceroa.service.AgentRuntime.Task task){return privateResponse(service.beginDelegation(id,role,task));}
+    @PostMapping("/api/v1/assistant-tools/requests/{id}/delegations/{token}/complete")
+    public Object finish(@PathVariable UUID id,@PathVariable UUID token,@RequestBody com.ceroa.service.AgentRuntime.Result result){return privateResponse(service.finishDelegation(id,token,result,false));}
+    @PostMapping("/api/v1/assistant-tools/requests/{id}/delegations/{token}/fail")
+    public Object fail(@PathVariable UUID id,@PathVariable UUID token){return privateResponse(service.finishDelegation(id,token,null,true));}
     @PostMapping("/api/v1/assistant-tools/requests/{id}/observe")
     public ResponseEntity<Void> observe(@PathVariable UUID id,@RequestBody com.ceroa.service.AssistantTrace.WorkerObservation observation){service.observe(id,observation);return ResponseEntity.noContent().build();}
     @PostMapping("/api/v1/assistant-tools/requests/{id}/prepare")

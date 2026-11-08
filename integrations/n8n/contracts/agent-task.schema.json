@@ -1,19 +1,219 @@
 {
-  "$schema":"https://json-schema.org/draft/2020-12/schema",
-  "$id":"urn:ceroa:agent-task:1.0",
-  "type":"object","additionalProperties":false,
-  "required":["schemaVersion","requestId","correlationId","role","task","budget"],
-  "properties":{
-    "schemaVersion":{"const":"1.0"},
-    "requestId":{"type":"string","format":"uuid","description":"Server-bound request context; never accept an LLM-supplied identity or scope."},
-    "correlationId":{"type":"string","format":"uuid"},
-    "role":{"enum":["ORCHESTRATOR","FINANCIAL","RAG","SUPPORT"]},
-    "task":{"type":"string","minLength":1,"maxLength":2000},
-    "budget":{"type":"object","additionalProperties":false,"required":["maxIterations","maxToolCalls","maxLibraryCalls","maxContextCharacters","deadlineMs"],"properties":{
-      "maxIterations":{"type":"integer","minimum":2,"maximum":12},"maxToolCalls":{"type":"integer","minimum":1,"maximum":16},
-      "maxLibraryCalls":{"type":"integer","minimum":0,"maximum":6},"maxContextCharacters":{"type":"integer","minimum":1000,"maximum":90000},
-      "deadlineMs":{"type":"integer","minimum":1000,"maximum":150000}
-    }},
-    "evidenceRefs":{"type":"array","maxItems":100,"uniqueItems":true,"items":{"type":"string","pattern":"^f[1-9][0-9]*$"}}
-  }
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:ceroa:agent-task:1.1",
+  "oneOf": [
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "requestId",
+        "correlationId",
+        "role",
+        "task",
+        "budget"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": "1.0"
+        },
+        "requestId": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Server-bound request context; never accept an LLM-supplied identity or scope."
+        },
+        "correlationId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "role": {
+          "enum": [
+            "ORCHESTRATOR",
+            "FINANCIAL",
+            "RAG",
+            "SUPPORT"
+          ]
+        },
+        "task": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "budget": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "maxIterations",
+            "maxToolCalls",
+            "maxLibraryCalls",
+            "maxContextCharacters",
+            "deadlineMs"
+          ],
+          "properties": {
+            "maxIterations": {
+              "type": "integer",
+              "minimum": 2,
+              "maximum": 12
+            },
+            "maxToolCalls": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 16
+            },
+            "maxLibraryCalls": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 6
+            },
+            "maxContextCharacters": {
+              "type": "integer",
+              "minimum": 1000,
+              "maximum": 90000
+            },
+            "deadlineMs": {
+              "type": "integer",
+              "minimum": 1000,
+              "maximum": 150000
+            }
+          }
+        },
+        "evidenceRefs": {
+          "type": "array",
+          "maxItems": 100,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^f[1-9][0-9]*$"
+          }
+        }
+      }
+    },
+    {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schemaVersion",
+        "requestId",
+        "correlationId",
+        "role",
+        "scopeToken",
+        "task",
+        "maxIterations",
+        "remainingMs",
+        "maxContextCharacters",
+        "cached",
+        "evidence",
+        "channel",
+        "capabilities",
+        "budget"
+      ],
+      "properties": {
+        "schemaVersion": {
+          "const": "1.1"
+        },
+        "requestId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "correlationId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "role": {
+          "enum": [
+            "FINANCIAL",
+            "RAG",
+            "SUPPORT"
+          ]
+        },
+        "scopeToken": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Backend-only grant. Bind in HTTP node expressions; never include in model prompt."
+        },
+        "task": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "maxIterations": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 4
+        },
+        "remainingMs": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 150000
+        },
+        "maxContextCharacters": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 90000
+        },
+        "cached": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "evidence": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^f[1-9][0-9]*$"
+          }
+        },
+        "channel": {
+          "enum": [
+            "web",
+            "telegram"
+          ]
+        },
+        "capabilities": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "budget": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "maxIterations",
+            "maxToolCalls",
+            "maxLibraryCalls",
+            "maxContextCharacters",
+            "deadlineMs"
+          ],
+          "properties": {
+            "maxIterations": {
+              "type": "integer",
+              "minimum": 2,
+              "maximum": 4
+            },
+            "maxToolCalls": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 8
+            },
+            "maxLibraryCalls": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 6
+            },
+            "maxContextCharacters": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 90000
+            },
+            "deadlineMs": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 150000
+            }
+          }
+        }
+      }
+    }
+  ]
 }

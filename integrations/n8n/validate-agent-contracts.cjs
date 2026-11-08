@@ -13,4 +13,8 @@ assert(!validate({...task,userId:'foreign'}));assert(!validate({...task,budget:{
 const result=ajv.compile(JSON.parse(fs.readFileSync(dir+'agent-result.schema.json','utf8')));
 const output={schemaVersion:'1.0',requestId:task.requestId,correlationId:task.correlationId,role:'RAG',status:'SUCCESS',answer:'Valor {{f1}}',evidenceRefs:['f1'],error:null};
 assert(result(output));assert(!result({...output,evidenceRefs:['f1','f1']}));assert(!result({...output,error:{code:'SECRET_MESSAGE',retryable:true}}));assert(!result({...output,paymentCreated:true}));
-console.log('8 schema validations passed using installed Ajv; identity overrides, extra writes and oversized budgets rejected.');
+const grant={schemaVersion:'1.1',requestId:task.requestId,correlationId:task.requestId,role:'FINANCIAL',scopeToken:task.requestId,task:'Analizar saldo',maxIterations:4,remainingMs:60000,maxContextCharacters:16000,cached:null,evidence:{f1:{source:'inputs/value',value:100}},channel:'web',capabilities:['finance.read'],budget:{maxIterations:4,maxToolCalls:8,maxLibraryCalls:3,maxContextCharacters:16000,deadlineMs:60000}};
+assert(validate(grant),JSON.stringify(validate.errors));assert(!validate({...grant,userId:'foreign'}));assert(!validate({...grant,maxIterations:99}));
+const delegated={schemaVersion:'1.1',role:'SUPPORT',status:'OK',answer:'Propuesta pendiente de confirmación.',evidenceRefs:[],sources:[],coverage:'NONE',missingData:[],requiresConfirmation:true,requiresClarification:false,advisoryProposal:{status:'PROPOSED',topic:'Uso del simulador',availability:null}};
+assert(result(delegated),JSON.stringify(result.errors));assert(!result({...delegated,advisoryProposal:{status:'CONFIRMED',topic:'Consulta'}}));assert(!result({...delegated,role:'ADMIN'}));
+console.log('14 schema validations passed using installed Ajv, including runtime grants and advisory proposals.');

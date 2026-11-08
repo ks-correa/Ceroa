@@ -92,6 +92,8 @@ public class SentinelService {
         return new Assessment(POLICY,now(),version,"COMPLETE","WITHIN_BUDGET",
             "Los pagos exigibles registrados caben en el presupuesto asignado; esta comparación no descarta otros riesgos financieros.",budget,required,BigDecimal.ZERO,List.of());
     }
+    /** Read-only assessment for authorized assistant tools; does not evaluate, create alerts or send notifications. */
+    public Assessment currentAssessment(){on();UUID id=current.id();return assess(id,states.findById(id).map(s->s.financialVersion).orElse(0L));}
     public Overview overview(){on();UUID id=current.id();var version=states.findById(id).map(s->s.financialVersion).orElse(0L);var p=prefs.findById(id).orElse(null);var user=current.entity();var link=links.findById(id).orElse(null);
         return new Overview(assess(id,version),alerts.findAllByUserIdOrderByCreatedAtDesc(id,PageRequest.of(0,20)).stream().map(this::view).toList(),
             consenting(p,link),plans.entitled(user)&&validLink(link),plans.entitled(user));}

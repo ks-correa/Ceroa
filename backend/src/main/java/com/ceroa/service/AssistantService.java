@@ -49,6 +49,8 @@ public class AssistantService {
         final Map<com.ceroa.api.dto.DocumentContracts.Filters,NavigableMap<Integer,com.ceroa.api.dto.DocumentContracts.Result>> periodPages=new HashMap<>();
         final Map<UUID,com.ceroa.api.dto.DocumentContracts.Document> libraryDocuments=new LinkedHashMap<>();
         final Map<com.ceroa.api.dto.DocumentContracts.Query,CachedLibrary> libraryCache=new HashMap<>();
+        AgentRuntime runtime;
+        Channel channel;
         AssistantTrace metrics;
         AgentContracts.Budget budget;
         int retrievedContextCharacters;
@@ -69,17 +71,19 @@ public class AssistantService {
     private final AssistantAnalysisService analysis;
     private final RagRetrievalService rag;
     private final DocumentLibraryService library;
+    private final SimulationService simulations;
+    private final SentinelService sentinel;
     private final String webhook, key;
     private final boolean enabled;
     public AssistantService(CurrentUserService current, DebtService debts, PaymentService payments,
         UpcomingDueService dues, StrategyService strategies, MonthlyProgressService monthly,
-        DashboardService dashboard, ObjectMapper json, RateNormalizationService rates, AssistantAnalysisService analysis, RagRetrievalService rag, DocumentLibraryService library,
+        DashboardService dashboard, ObjectMapper json, RateNormalizationService rates, AssistantAnalysisService analysis, RagRetrievalService rag, DocumentLibraryService library,SimulationService simulations,SentinelService sentinel,
         @Value("${ceroa.assistant.enabled:false}") boolean enabled,
         @Value("${ceroa.assistant.webhook-url:}") String webhook,
         @Value("${ceroa.assistant.worker-key:}") String key) {
         this.current=current; this.debts=debts; this.payments=payments; this.dues=dues;
         this.strategies=strategies; this.monthly=monthly; this.dashboard=dashboard;
-        this.json=json; this.rates=rates; this.analysis=analysis; this.rag=rag; this.library=library; this.enabled=enabled; this.webhook=webhook; this.key=key;
+        this.json=json; this.rates=rates; this.analysis=analysis; this.rag=rag; this.library=library;this.simulations=simulations;this.sentinel=sentinel; this.enabled=enabled; this.webhook=webhook; this.key=key;
     }
     public Reply message(String message, String audio, String mime) {
         return message(message,audio,mime,Channel.web);
@@ -111,13 +115,14 @@ public class AssistantService {
         if (selected==null && hasText && message.trim().matches("(?iu)^(?:[¿?]\\s*)?(?:qué|que)\\s+(?:información\\s+)?(?:dice|contiene)\\s+(?:esto|este|esta)(?:\\s+documento)?[?.!\\s]*$"))
             return new Reply("¿A cuál documento te refieres? Indica el nombre del archivo o selecciónalo en la biblioteca para poder describir su contenido.","analysis");
         if (hasText && selected==null) {
-            if(isDebtListQuestion(message)){
-                var metrics=new AssistantTrace(UUID.randomUUID());try{return new Reply(render(Intent.debts,null,null),Intent.debts.name());}finally{metrics.log(log,json,"DETERMINISTIC");}
+            Intent direct=deterministicIntent(message);
+            if(direct!=null){
+                var metrics=new AssistantTrace(UUID.randomUUID());try{return new Reply(render(direct,null,null),direct.name());}finally{metrics.log(log,json,"DETERMINISTIC");}
             }
         }
         UUID id=UUID.randomUUID(); var job=start(userId,id);
         job.metrics=new AssistantTrace(id);job.budget=AgentContracts.budget(hasAudio?AgentContracts.Intent.COMPOSITE:AgentContracts.intent(message,selected!=null));
-        job.selectedDocument=selected;
+        job.selectedDocument=selected;job.channel=channel;
         var conversation=new Conversation(userId,channel,conversations.computeIfAbsent(audience,a->UUID.randomUUID()));
         job.question=hasText?message:"";
         try {
@@ -165,7 +170,14 @@ public class AssistantService {
             log.warn("Assistant request failed before workflow completion: type={}, cause={}",
                 e.getClass().getSimpleName(),e.getCause()==null?"none":e.getCause().getClass().getSimpleName());
             throw unavailable();
-        } finally {job.metrics.log(log,json,AgentContracts.intent(job.question,job.selectedDocument!=null).name());jobs.remove(id); }
+        } finally {if(job.runtime!=null)job.metrics.agents(job.runtime.metrics());job.metrics.log(log,json,AgentContracts.intent(job.question,job.selectedDocument!=null).name());jobs.remove(id); }
+    }
+    private Intent deterministicIntent(String question){
+        if(isDebtListQuestion(question))return Intent.debts;
+        String q=java.text.Normalizer.normalize(question.toLowerCase(Locale.ROOT),java.text.Normalizer.Form.NFD).replaceAll("\\p{M}","").replaceAll("[^a-z ]"," ").trim().replaceAll("\\s+"," ");
+        if(q.matches("(?:muestrame mis proximos vencimientos|cuales son mis proximos vencimientos|mis proximos vencimientos)"))return Intent.upcoming;
+        if(q.matches("(?:cual es mi estrategia activa|muestrame mi estrategia activa)"))return Intent.strategy;
+        return null;
     }
     private boolean isDebtListQuestion(String question) {
         String plain=java.text.Normalizer.normalize(question.toLowerCase(Locale.ROOT),java.text.Normalizer.Form.NFD)
@@ -186,6 +198,7 @@ public class AssistantService {
     private <T> T withJob(UUID id,java.util.function.Function<Job,T> work) {
         return withJob(id,"backendTools",work);
     }
+    private final ThreadLocal<Integer> jobCallDepth=ThreadLocal.withInitial(()->0);
     private <T> T withJob(UUID id,String stage,java.util.function.Function<Job,T> work) {
         var job=jobs.get(id);
         if(job==null || job.expires.isBefore(Instant.now())) throw new ResponseStatusException(HttpStatus.GONE);
@@ -195,12 +208,13 @@ public class AssistantService {
             var context=SecurityContextHolder.createEmptyContext();
             context.setAuthentication(new UsernamePasswordAuthenticationToken(job.user.toString(),null,List.of()));
             SecurityContextHolder.setContext(context);
+            int depth=jobCallDepth.get();jobCallDepth.set(depth+1);
             long toolStart=System.nanoTime();
             try {
                 if(!current.entity().isActive()) throw new ResponseStatusException(HttpStatus.FORBIDDEN);
                 return work.apply(job);
-            }catch(RuntimeException e){if(job.metrics!=null)job.metrics.error();throw e;}
-            finally {if(job.metrics!=null){long elapsed=System.nanoTime()-toolStart;job.metrics.stage("backendTools",elapsed);if(!stage.equals("backendTools"))job.metrics.stage(stage,elapsed);}SecurityContextHolder.setContext(previous); }
+            }catch(RuntimeException e){if(depth==0&&job.metrics!=null)job.metrics.error();throw e;}
+            finally {if(job.metrics!=null){long elapsed=System.nanoTime()-toolStart;if(depth==0)job.metrics.stage("backendTools",elapsed);if(!stage.equals("backendTools"))job.metrics.stage(stage,elapsed);}if(depth==0)jobCallDepth.remove();else jobCallDepth.set(depth);SecurityContextHolder.setContext(previous); }
         }
     }
     private String contextOnly(String text){
@@ -214,6 +228,7 @@ public class AssistantService {
     }
     public AssistantAnalysisService.Evidence data(UUID id,AssistantAnalysisService.Dataset dataset,int year,int month,int offset) {
         return withJob(id,"financialData",job->{
+            guard(job,"finance.read");
             if(job.selectedDocument!=null)throw new IllegalArgumentException("Consulta limitada al documento seleccionado");
             String source=dataset+"/"+year+"/"+month+"/"+offset;
             if(job.cache.containsKey(source)){if(job.metrics!=null)job.metrics.cached();return job.cache.get(source);}
@@ -224,15 +239,47 @@ public class AssistantService {
     }
     public AssistantAnalysisService.Evidence calculate(UUID id,AssistantAnalysisService.Operation operation,List<String> refs) {
         return withJob(id,"calculate",job->{
+            guard(job,"finance.calculate");
+            if(activeScope.get()!=null&&!activeScope.get().issued.containsAll(refs))throw AgentRuntime.denied();
             if(job.selectedDocument!=null)throw new IllegalArgumentException("Consulta limitada al documento seleccionado");
             if(++job.toolCalls>toolLimit(job)) throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS);
             return analysis.calculate(job.facts,operation,refs);
         });
     }
     public record LibrarySnippet(UUID documentId,Integer page,String content) {}
+    public AssistantAnalysisService.Evidence capacity(UUID id){return withJob(id,"capacity",job->{
+        guard(job,"finance.read");if(job.selectedDocument!=null)throw AgentRuntime.denied();
+        if(job.cache.containsKey("capacity")){if(job.metrics!=null)job.metrics.cached();return job.cache.get("capacity");}
+        if(++job.toolCalls>toolLimit(job))throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS);
+        var result=analysis.evidence(job.facts,json.valueToTree(sentinel.currentAssessment()),"capacity");job.cache.put("capacity",result);return result;
+    });}
+    public AssistantAnalysisService.Evidence simulate(UUID id,String debtName,com.ceroa.domain.StrategyType strategy,String extraPaymentRef){
+        return withJob(id,"simulation",job->{
+            guard(job,"finance.simulate");
+            if(job.selectedDocument!=null||activeScope.get()==null)throw AgentRuntime.denied();
+            if(debtName==null||debtName.isBlank()||debtName.length()>200)throw new IllegalArgumentException("Indica la obligación exacta");
+            var matches=debts.findAll().stream().filter(d->d.name().equalsIgnoreCase(debtName.strip())).toList();
+            if(matches.size()!=1)throw new IllegalArgumentException("Obligación ausente o ambigua; confirma su nombre");
+            var events=new ArrayList<com.ceroa.api.dto.SimulationEventRequest>();
+            if(extraPaymentRef!=null&&!extraPaymentRef.isBlank()){
+                if(!activeScope.get().issued.contains(extraPaymentRef))throw AgentRuntime.denied();
+                var fact=job.facts.get(extraPaymentRef);
+                if(fact==null||!fact.value().isNumber()||!fact.source().matches("inputs/userProvidedNumbers/[0-9]+/value")||fact.value().decimalValue().signum()<0)throw new IllegalArgumentException("El abono hipotético debe provenir de la pregunta actual");
+                events.add(new com.ceroa.api.dto.SimulationEventRequest(null,1,fact.value().decimalValue(),null));
+            }
+            if(++job.toolCalls>toolLimit(job))throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS);
+            var result=json.valueToTree(simulations.runSimulation(new com.ceroa.api.dto.SimulationRequest(matches.getFirst().id(),strategy,events)));
+            if(result.path("debt").isObject())((com.fasterxml.jackson.databind.node.ObjectNode)result.path("debt")).remove("id");
+            ((com.fasterxml.jackson.databind.node.ObjectNode)result).put("hypothetical",true);
+            // Detailed amortization rows stay in the simulator; agents receive derived projections only.
+            ((com.fasterxml.jackson.databind.node.ObjectNode)result).remove("periods");
+            return analysis.evidence(job.facts,result,"hypotheticalSimulation");
+        });
+    }
     public record LibraryEvidence(String status, AssistantAnalysisService.Evidence evidence,List<LibrarySnippet> snippets) {}
     public LibraryEvidence financialDocuments(UUID id,com.ceroa.api.dto.DocumentContracts.Query query) {
         return withJob(id,"financialDocuments",job->{
+            guard(job,query.intent()==com.ceroa.api.dto.DocumentContracts.Intent.FACT_ANALYSIS?"documents.facts":"documents.retrieve");
             var effective=query;
             if(job.selectedDocument!=null){
                 var selected=job.selectedDocument;
@@ -373,6 +420,7 @@ public class AssistantService {
     }
     public DocumentEvidence documents(UUID id,String query) {
         return withJob(id,"knowledgeRetrieval",job->{
+            guard(job,"knowledge.approved");
             if(job.selectedDocument!=null)throw new IllegalArgumentException("Consulta limitada al documento seleccionado");
             if(query==null||query.isBlank()||query.length()>4000)throw new IllegalArgumentException();
             if(job.question==null||job.question.isBlank())throw new IllegalArgumentException("Falta preparar la pregunta");
@@ -397,6 +445,7 @@ public class AssistantService {
     public Reply complete(UUID id,String answer,String transcript,String mode,List<String> sources) {
         final List<String> citations=sources==null?List.of():List.copyOf(sources);
         try { return withJob(id,job->{
+            if(job.runtime!=null)job.runtime.validateShared(answer,sources);
             library.assertCurrent(job.libraryDocuments.values());
             if(transcript==null || transcript.isBlank() || transcript.length()>2000) throw new IllegalArgumentException("Transcripción vacía o demasiado extensa");
             if(!job.question.isEmpty() && !job.question.equals(transcript)) throw new IllegalArgumentException("La transcripción no coincide con la pregunta preparada");
@@ -430,6 +479,7 @@ public class AssistantService {
                     else if(mode.equals("mixed"))resolved+="\n\n"+RagRetrievalService.ABSTENTION;
                 }
             }else resolved=finalizeAnswer(job,answer);
+            if(job.runtime!=null&&job.runtime.limited())resolved+="\nEl análisis se limita a la evidencia disponible; alguna parte de la consulta quedó incompleta o requiere aclaración.";
             job.question=transcript;
             if(job.libraryResult!=null) {
                 var result=job.libraryResult;
@@ -475,6 +525,39 @@ public class AssistantService {
         });
     }
     public AgentContracts.Context agentContext(UUID id){return withJob(id,job->AgentContracts.context(id,job.question,job.selectedDocument!=null));}
+    private final ThreadLocal<AgentRuntime.Scope> activeScope=new ThreadLocal<>();
+    private void guard(Job job,String capability){
+        if(job.runtime==null)return;
+        var scope=activeScope.get();if(scope==null)throw AgentRuntime.denied();job.runtime.authorize(scope,capability);
+    }
+    public AgentContracts.Context startOrchestration(UUID id){return withJob(id,job->{
+        if(!job.cache.containsKey("inputs"))throw new IllegalArgumentException("Preparar contexto primero");
+        if(job.runtime==null)job.runtime=new AgentRuntime(id,job.budget,job.cache.get("inputs").facts().keySet());
+        return AgentContracts.context(id,job.question,job.selectedDocument!=null);
+    });}
+    public AgentRuntime.Grant beginDelegation(UUID id,AgentContracts.Role role,AgentRuntime.Task task){return withJob(id,job->{
+        if(job.runtime==null)throw AgentRuntime.denied();library.assertCurrent(job.libraryDocuments.values());
+        if(job.retrieval!=null&&!job.documents.isEmpty()&&!rag.current(job.retrieval,job.documents.values().stream().map(RagVectorStore.Chunk::chunkId).toList()))throw AgentRuntime.denied();
+        return job.runtime.context(job.runtime.begin(role,task,job.selectedDocument!=null),job.facts,job.channel==null?"web":job.channel.name(),AgentContracts.context(id,job.question,job.selectedDocument!=null).tools().get(role));
+    });}
+    public <T> T scoped(UUID id,UUID token,java.util.function.Supplier<T> action){
+        if(token==null)return action.get();
+        return withJob(id,job->{
+            if(job.runtime==null)throw AgentRuntime.denied();var scope=job.runtime.scope(token);activeScope.set(scope);long start=System.nanoTime();
+            try{T value=action.get();String encoded=json.valueToTree(value).toString();job.runtime.delivered(scope,encoded.length());
+                if(value instanceof AssistantAnalysisService.Evidence evidence)scope.issued.addAll(evidence.facts().keySet());
+                if(value instanceof LibraryEvidence evidence){scope.issued.addAll(evidence.evidence().facts().keySet());scope.partial|=!Set.of("AVAILABLE","COMPLETE","SUFFICIENT").contains(evidence.status())||incompletePeriods(job);}
+                if(value instanceof DocumentEvidence evidence){scope.issued.addAll(evidence.sources().keySet());scope.partial|=evidence.sources().isEmpty();}
+                return value;
+            }finally{scope.toolNanos+=System.nanoTime()-start;activeScope.remove();}
+        });
+    }
+    public AgentRuntime.Result finishDelegation(UUID id,UUID token,AgentRuntime.Result result,boolean failed){return withJob(id,job->{
+        if(job.runtime==null)throw AgentRuntime.denied();var scope=job.runtime.scope(token);library.assertCurrent(job.libraryDocuments.values());
+        if(failed)return job.runtime.fail(scope);
+        if(result==null)throw new IllegalArgumentException("Resultado ausente");
+        analysis.resolve(job.facts,result.answer());return job.runtime.complete(scope,result);
+    });}
     private int toolLimit(Job job){return job.budget==null?16:job.budget.maxToolCalls();}
     public void observe(UUID id,AssistantTrace.WorkerObservation observation){withJob(id,job->{if(job.metrics!=null)job.metrics.worker(observation);return null;});}
     private synchronized void limit(UUID user) {
@@ -509,6 +592,7 @@ public class AssistantService {
     }
     /** Worker cannot supply a user ID, URL or mutation. Only a live context and closed intent. */
     public Reply query(UUID id, Intent intent, Integer year, Integer month) {
+        withJob(id,job->{if(job.runtime!=null)throw AgentRuntime.denied();return null;});
         var job=jobs.get(id);
         if (job==null || job.expires.isBefore(Instant.now())) throw new ResponseStatusException(HttpStatus.GONE);
         synchronized(job) {

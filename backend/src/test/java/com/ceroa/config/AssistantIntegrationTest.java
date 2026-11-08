@@ -37,6 +37,7 @@ class AssistantIntegrationTest {
                 String message=body.path("message").asText();
                 if(!body.path("audio").asText().isBlank())message="analysis-audio";
                 lastConversation=body.path("conversation").toString();
+                if(message.startsWith("multiagent")){ multiagentCallback(lastJob,message);exchange.sendResponseHeaders(200,0);exchange.getResponseBody().write("{}".getBytes());return;}
                 if(message.startsWith("analysis")) {
                     String base="/api/v1/assistant-tools/requests/"+lastJob;
                     var preparation=callback.perform(post(base+"/prepare").header("X-Ceroa-Assistant",KEY)
@@ -98,6 +99,46 @@ class AssistantIntegrationTest {
         registry.add("ceroa.telegram.bot-username",()->"Ceroa_bot");
         registry.add("ceroa.assistant.worker-key",()->KEY);
         registry.add("ceroa.assistant.webhook-url",()->"http://127.0.0.1:"+stub.getAddress().getPort()+"/assistant");
+    }
+    static void multiagentCallback(String id,String question) throws Exception {
+        String base="/api/v1/assistant-tools/requests/"+id;
+        callback.perform(post(base+"/prepare").header("X-Ceroa-Assistant",KEY).contentType("application/json").content(JSON.writeValueAsString(Map.of("transcript",question)))).andExpect(status().isOk());
+        callback.perform(post(base+"/orchestration/start").header("X-Ceroa-Assistant",KEY)).andExpect(status().isOk());
+        String support=callback.perform(post(base+"/delegations/SUPPORT/begin").header("X-Ceroa-Assistant",KEY).contentType("application/json").content("{\"task\":\"Ayuda\",\"evidenceRefs\":[]}")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        String denied=JSON.readTree(support).path("scopeToken").asText();
+        callback.perform(get(base+"/simulate").header("X-Ceroa-Assistant",KEY).param("scope",denied).param("debtName","Authorized multiagent debt").param("strategy","snowball")).andExpect(status().isForbidden());
+        callback.perform(get(base+"/capacity").header("X-Ceroa-Assistant",KEY).param("scope",denied)).andExpect(status().isForbidden());
+        callback.perform(get(base+"/data").header("X-Ceroa-Assistant",KEY).param("scope",denied).param("dataset","debts").param("year","2026").param("month","11")).andExpect(status().isForbidden());
+        callback.perform(get(base+"/data").header("X-Ceroa-Assistant",KEY).param("dataset","debts").param("year","2026").param("month","11")).andExpect(status().isForbidden());
+        callback.perform(get(base+"/query").header("X-Ceroa-Assistant",KEY).param("intent","debts")).andExpect(status().isForbidden());
+        callback.perform(post(base+"/delegations/ORCHESTRATOR/begin").header("X-Ceroa-Assistant",KEY).contentType("application/json").content("{\"task\":\"Ciclo\",\"evidenceRefs\":[]}")).andExpect(status().isForbidden());
+        String task="{\"task\":\"Analizar saldo\",\"evidenceRefs\":[]}";
+        String grant=callback.perform(post(base+"/delegations/FINANCIAL/begin").header("X-Ceroa-Assistant",KEY).contentType("application/json").content(task)).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+        String token=JSON.readTree(grant).path("scopeToken").asText();
+        var read=callback.perform(get(base+"/data").header("X-Ceroa-Assistant",KEY).param("scope",token).param("dataset","debts").param("year","2026").param("month","11")).andExpect(status().isOk()).andReturn();
+        lastEvidence=read.getResponse().getContentAsString();var facts=JSON.readTree(lastEvidence).path("facts");String balance=null;
+        for(var entry:(Iterable<Map.Entry<String,com.fasterxml.jackson.databind.JsonNode>>)facts::fields)if(entry.getValue().path("source").asText().endsWith("/items/0/balance"))balance=entry.getKey();
+        org.junit.jupiter.api.Assertions.assertNotNull(balance);
+        String answer="Saldo registrado {{"+balance+"}}.";
+        callback.perform(post(base+"/complete").header("X-Ceroa-Assistant",KEY).contentType("application/json").content(JSON.writeValueAsString(Map.of("answer",answer,"transcript",question,"mode","personal","sources",List.of())))).andExpect(status().isForbidden());
+        callback.perform(get(base+"/simulate").header("X-Ceroa-Assistant",KEY).param("scope",token).param("debtName","Authorized multiagent debt").param("strategy","snowball")).andExpect(status().isUnprocessableEntity()).andExpect(jsonPath("$.code").value("PLAN_RESTRICTED"));
+        callback.perform(get(base+"/simulate").header("X-Ceroa-Assistant",KEY).param("scope",token).param("debtName","Authorized multiagent debt").param("strategy","snowball").param("extraPaymentRef","f2")).andExpect(status().isBadRequest());
+        var result=new HashMap<String,Object>();result.put("schemaVersion","1.1");result.put("role","FINANCIAL");result.put("status","OK");result.put("answer",answer);result.put("evidenceRefs",List.of(balance));result.put("sources",List.of());result.put("coverage","COMPLETE");result.put("missingData",List.of());result.put("requiresConfirmation",false);
+        result.put("evidenceRefs",List.of("f999999"));
+        callback.perform(post(base+"/delegations/"+token+"/complete").header("X-Ceroa-Assistant",KEY).contentType("application/json").content(JSON.writeValueAsString(result))).andExpect(status().isForbidden());
+        result.put("evidenceRefs",List.of(balance));
+        callback.perform(post(base+"/delegations/"+token+"/complete").header("X-Ceroa-Assistant",KEY).contentType("application/json").content(JSON.writeValueAsString(result))).andExpect(status().isOk());
+        callback.perform(post(base+"/delegations/FINANCIAL/begin").header("X-Ceroa-Assistant",KEY).contentType("application/json").content(task)).andExpect(status().isOk()).andExpect(jsonPath("$.cached.answer").value(answer));
+        callback.perform(post(base+"/complete").header("X-Ceroa-Assistant",KEY).contentType("application/json").content(JSON.writeValueAsString(Map.of("answer",answer,"transcript",question,"mode","personal","sources",List.of())))).andExpect(status().isOk());
+    }
+    @Test void multiagentScopesPreserveAccountEvidenceAndRejectEscalation() throws Exception {
+        debt(owner,"Authorized multiagent debt",123);
+        mvc.perform(post("/api/v1/assistant/messages").with(user(owner)).with(csrf()).contentType("application/json").content("{\"message\":\"multiagent complex finance\"}")).andExpect(status().isOk()).andExpect(jsonPath("$.answer").value(org.hamcrest.Matchers.containsString("123")));
+    }
+    @Test void simpleUpcomingAndStrategyAvoidTheWebhook() throws Exception {
+        for(String question:List.of("Muéstrame mis próximos vencimientos","¿Cuál es mi estrategia activa?")){
+            lastJob=null;mvc.perform(post("/api/v1/assistant/messages").with(user(owner)).with(csrf()).contentType("application/json").content(JSON.writeValueAsString(Map.of("message",question)))).andExpect(status().isOk());org.junit.jupiter.api.Assertions.assertNull(lastJob);
+        }
     }
     @BeforeEach void seed() {
         callback=mvc; owner=UUID.randomUUID().toString();

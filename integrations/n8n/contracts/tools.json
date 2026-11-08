@@ -1,13 +1,78 @@
 {
-  "schemaVersion":"1.0",
-  "identityBinding":"requestId is bound by Spring Boot; model arguments must never override it",
-  "authorization":"Capabilities are routing hints. Every backend operation revalidates identity, current plan, document scope and version.",
-  "tools":[
-    {"id":"finance.read","roles":["FINANCIAL"],"method":"GET","path":"/assistant-tools/requests/{requestId}/data","effect":"READ_ONLY"},
-    {"id":"finance.calculate","roles":["FINANCIAL"],"method":"GET","path":"/assistant-tools/requests/{requestId}/calculate","effect":"REQUEST_BOUND_EVIDENCE_ARITHMETIC"},
-    {"id":"documents.facts","roles":["RAG"],"method":"GET","path":"/assistant-tools/requests/{requestId}/financial-documents","fixedArguments":{"intent":"FACT_ANALYSIS"},"effect":"READ_ONLY"},
-    {"id":"documents.retrieve","roles":["RAG"],"method":"GET","path":"/assistant-tools/requests/{requestId}/financial-documents","effect":"READ_ONLY"},
-    {"id":"knowledge.approved","roles":["RAG","SUPPORT"],"method":"GET","path":"/assistant-tools/requests/{requestId}/documents","effect":"READ_ONLY"}
+  "schemaVersion": "1.1",
+  "identityBinding": "requestId is bound by Spring Boot; model arguments must never override it",
+  "authorization": "Capabilities are routing hints. Every backend operation revalidates identity, current plan, document scope and version.",
+  "tools": [
+    {
+      "id": "finance.read",
+      "roles": [
+        "FINANCIAL"
+      ],
+      "method": "GET",
+      "path": "/assistant-tools/requests/{requestId}/data",
+      "effect": "READ_ONLY"
+    },
+    {
+      "id": "finance.calculate",
+      "roles": [
+        "FINANCIAL"
+      ],
+      "method": "GET",
+      "path": "/assistant-tools/requests/{requestId}/calculate",
+      "effect": "REQUEST_BOUND_EVIDENCE_ARITHMETIC"
+    },
+    {
+      "id": "documents.facts",
+      "roles": [
+        "FINANCIAL",
+        "RAG"
+      ],
+      "method": "GET",
+      "path": "/assistant-tools/requests/{requestId}/financial-documents",
+      "fixedArguments": {
+        "intent": "FACT_ANALYSIS"
+      },
+      "effect": "READ_ONLY"
+    },
+    {
+      "id": "documents.retrieve",
+      "roles": [
+        "RAG"
+      ],
+      "method": "GET",
+      "path": "/assistant-tools/requests/{requestId}/financial-documents",
+      "effect": "READ_ONLY"
+    },
+    {
+      "id": "knowledge.approved",
+      "roles": [
+        "RAG",
+        "SUPPORT"
+      ],
+      "method": "GET",
+      "path": "/assistant-tools/requests/{requestId}/documents",
+      "effect": "READ_ONLY"
+    },
+    {
+      "id": "finance.simulate",
+      "roles": [
+        "FINANCIAL"
+      ],
+      "method": "GET",
+      "path": "/assistant-tools/requests/{requestId}/simulate",
+      "effect": "READ_ONLY_HYPOTHETICAL_PLUS_AUTHORIZED"
+    }
   ],
-  "notImplemented":["agent delegation runtime","scheduling","external communications","external tools"]
+  "notImplemented": [
+    "scheduling",
+    "external communications",
+    "external tools"
+  ],
+  "delegation": {
+    "mechanism": "Native Call n8n Workflow Tool 2.2 -> Execute Workflow Trigger -> AI Agent 3",
+    "maxDepth": 1,
+    "maxDelegations": 4,
+    "maxReservedIterations": 22,
+    "scope": "Backend-issued random token, fixed role per specialist workflow; unscoped data endpoints disabled after orchestration/start"
+  }
 }
