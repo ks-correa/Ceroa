@@ -3,7 +3,7 @@ set -eu
 node /fixtures/provider.cjs >/tmp/provider.log 2>&1 &
 n8n import:credentials --input=/fixtures/credentials.json >/tmp/credentials.log 2>&1
 n8n import:workflow --input=/fixtures/workflows.json >/tmp/import.log 2>&1
-for id in ceroaFinancialAgent30 ceroaKnowledgeAgent30 ceroaSupportAgent30; do n8n publish:workflow --id="$id" >>/tmp/publish.log 2>&1; done
+for id in ceroaMcpSupport40 ceroaFinancialAgent30 ceroaKnowledgeAgent30 ceroaSupportAgent30; do n8n publish:workflow --id="$id" >>/tmp/publish.log 2>&1; done
 n8n start >/tmp/server.log 2>&1 &
 node /fixtures/wait.cjs
 for scenario in COMPOSITE FINANCIAL RAG SUPPORT UNKNOWN EXTRACTS; do

@@ -1,0 +1,93 @@
+{
+  "id": "ceroaMcpClient40",
+  "name": "Ceroa - MCP cliente controlado",
+  "active": false,
+  "nodes": [
+    {
+      "id": "entry",
+      "name": "Entrada controlada",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "client",
+      "name": "MCP consultar capacidades publicas",
+      "type": "@n8n/n8n-nodes-langchain.mcpClient",
+      "typeVersion": 1.1,
+      "parameters": {
+        "serverTransport": "httpStreamable",
+        "endpointUrl": "http://127.0.0.1:3100/mcp",
+        "authentication": "headerAuth",
+        "tool": {
+          "__rl": true,
+          "mode": "id",
+          "value": "ceroa_capabilities"
+        },
+        "inputMode": "json",
+        "jsonInput": "{}",
+        "options": {
+          "timeout": 5000,
+          "convertToBinary": false
+        }
+      },
+      "position": [
+        250,
+        0
+      ]
+    },
+    {
+      "id": "bounded",
+      "name": "Limitar respuesta externa",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{ JSON.stringify({status:\"UNTRUSTED_EXTERNAL_METADATA\",content:JSON.stringify($json).slice(0,4000)}) }}",
+        "options": {}
+      },
+      "position": [
+        500,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Entrada controlada": {
+      "main": [
+        [
+          {
+            "node": "MCP consultar capacidades publicas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MCP consultar capacidades publicas": {
+      "main": [
+        [
+          {
+            "node": "Limitar respuesta externa",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Bogota",
+    "executionTimeout": 15,
+    "saveDataSuccessExecution": "none",
+    "saveDataErrorExecution": "none",
+    "saveManualExecutions": false
+  }
+}

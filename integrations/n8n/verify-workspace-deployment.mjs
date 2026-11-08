@@ -1,0 +1,8 @@
+import fs from 'node:fs';import assert from 'node:assert/strict';
+const [beforeFile,afterFile,draftsFile]=process.argv.slice(2);const before=JSON.parse(fs.readFileSync(beforeFile,'utf8')),after=JSON.parse(fs.readFileSync(afterFile,'utf8')),drafts=JSON.parse(fs.readFileSync(draftsFile,'utf8'));
+const modified=new Set(['ceroaHybridQuery20','ceroaFinancialAgent30','ceroaSupportAgent30']);
+const shape=w=>({nodes:w.nodes,connections:w.connections,settings:w.settings});assert.equal(after.length,before.length);
+for(const old of before){const current=after.find(w=>w.id===old.id);assert(current);if(!modified.has(old.id))assert.deepEqual(shape(current),shape(old),'Unrelated workflow changed: '+old.id);else{for(const n of old.nodes){const actual=current.nodes.find(x=>x.id===n.id);assert(actual,'Existing node removed');assert.deepEqual(actual.credentials,n.credentials,'Existing credential changed');}assert.equal(current.nodes.filter(n=>n.type.endsWith('.code')).length,old.nodes.filter(n=>n.type.endsWith('.code')).length);}}
+const external=['ceroaWorkspaceMail40','ceroaWorkspaceSheets40','ceroaWorkspaceDrive40','ceroaWorkspaceCalendar40','ceroaMcpServer40','ceroaMcpBackend40','ceroaMcpClient40','ceroaMcpSupport40'];
+for(const id of external){const w=drafts.find(w=>w.id===id);assert(w);assert.equal(w.active,false,'Unconfigured external workflow active');assert(!after.some(w=>w.id===id),'Unconfigured workflow published');}
+console.log(JSON.stringify({published:after.length,nodes:after.reduce((n,w)=>n+w.nodes.length,0),codeNodes:after.reduce((n,w)=>n+w.nodes.filter(x=>x.type.endsWith('.code')).length,externalInactive:external.length,unrelatedPublishedPreserved:before.length-modified.size}));

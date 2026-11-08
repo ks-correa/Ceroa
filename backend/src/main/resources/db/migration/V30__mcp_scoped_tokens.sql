@@ -1,0 +1,5 @@
+CREATE TABLE mcp_access_tokens (
+ id UUID PRIMARY KEY,owner_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+ token_hash VARCHAR(64) NOT NULL UNIQUE,scopes VARCHAR(250) NOT NULL,
+ expires_at TIMESTAMPTZ NOT NULL,revoked_at TIMESTAMPTZ
+);

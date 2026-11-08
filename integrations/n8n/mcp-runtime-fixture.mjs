@@ -1,0 +1,6 @@
+import fs from 'node:fs';import {mcpClientWorkflow,mcpServerWorkflow,mcpBackendWorkflow} from './workspace-mcp.mjs';
+const dir=process.argv[2];fs.mkdirSync(dir,{recursive:true});
+const client=mcpClientWorkflow();client.nodes[0].type='n8n-nodes-base.manualTrigger';client.nodes[0].typeVersion=1;client.nodes[0].parameters={};client.nodes.find(n=>n.id==='client').credentials={httpHeaderAuth:{id:'mcp-fixture',name:'MCP synthetic only'}};
+const server=mcpServerWorkflow();server.active=true;for(const n of server.nodes){n.credentials={httpHeaderAuth:{id:'mcp-fixture',name:'MCP synthetic only'}};if(n.type==='n8n-nodes-base.httpRequestTool')n.parameters.url=n.parameters.url.replace('http://backend:8080/api/v1/mcp-tools/','http://127.0.0.1:3100/backend/');}
+const backend=mcpBackendWorkflow();for(const n of backend.nodes)if(n.type==='n8n-nodes-base.httpRequest'){n.credentials={httpHeaderAuth:{id:'mcp-fixture',name:'MCP synthetic only'}};n.parameters.url=n.parameters.url.replace('http://backend:8080/api/v1/mcp-tools/','http://127.0.0.1:3100/backend/');}
+fs.writeFileSync(dir+'/workflows.json',JSON.stringify([client,server,backend]));fs.writeFileSync(dir+'/credentials.json',JSON.stringify([{id:'mcp-fixture',name:'MCP synthetic only',type:'httpHeaderAuth',data:{name:'X-Ceroa-MCP',value:'synthetic-mcp-key'}}]));

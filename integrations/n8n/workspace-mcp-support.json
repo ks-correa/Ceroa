@@ -1,0 +1,151 @@
+{
+  "id": "ceroaMcpSupport40",
+  "name": "Ceroa - MCP soporte con alcance",
+  "active": false,
+  "nodes": [
+    {
+      "id": "entry",
+      "name": "Entrada controlada",
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "id": "authorize",
+      "name": "Autorizar MCP publico",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "parameters": {
+        "method": "POST",
+        "url": "={{ \"http://backend:8080/api/v1/assistant-tools/requests/\" + $(\"Entrada controlada\").first().json.requestId + \"/external/authorize\" }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "scope",
+              "value": "={{ $(\"Entrada controlada\").first().json.scope }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "position": [
+        200,
+        0
+      ]
+    },
+    {
+      "id": "client",
+      "name": "MCP consultar capacidades publicas",
+      "type": "@n8n/n8n-nodes-langchain.mcpClient",
+      "typeVersion": 1.1,
+      "parameters": {
+        "serverTransport": "httpStreamable",
+        "endpointUrl": "http://127.0.0.1:3100/mcp",
+        "authentication": "headerAuth",
+        "tool": {
+          "__rl": true,
+          "mode": "id",
+          "value": "ceroa_capabilities"
+        },
+        "inputMode": "json",
+        "jsonInput": "{}",
+        "options": {
+          "timeout": 5000,
+          "convertToBinary": false
+        }
+      },
+      "position": [
+        250,
+        0
+      ]
+    },
+    {
+      "id": "result",
+      "name": "Validar datos externos",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "parameters": {
+        "method": "POST",
+        "url": "={{ \"http://backend:8080/api/v1/assistant-tools/requests/\" + $(\"Entrada controlada\").first().json.requestId + \"/external/result\" }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "scope",
+              "value": "={{ $(\"Entrada controlada\").first().json.scope }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "timeout": 10000
+        }
+      },
+      "position": [
+        650,
+        0
+      ]
+    }
+  ],
+  "connections": {
+    "Entrada controlada": {
+      "main": [
+        [
+          {
+            "node": "Autorizar MCP publico",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Autorizar MCP publico": {
+      "main": [
+        [
+          {
+            "node": "MCP consultar capacidades publicas",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MCP consultar capacidades publicas": {
+      "main": [
+        [
+          {
+            "node": "Validar datos externos",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Bogota",
+    "executionTimeout": 15,
+    "saveDataSuccessExecution": "none",
+    "saveDataErrorExecution": "none",
+    "saveManualExecutions": false
+  }
+}

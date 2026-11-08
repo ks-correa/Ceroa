@@ -1,0 +1,525 @@
+{
+  "id": "ceroaMcpServer40",
+  "name": "Ceroa - MCP personal con scopes",
+  "active": false,
+  "nodes": [
+    {
+      "id": "server",
+      "name": "MCP personal Ceroa",
+      "type": "@n8n/n8n-nodes-langchain.mcpTrigger",
+      "typeVersion": 2.1,
+      "parameters": {
+        "path": "ceroa-personal-v4",
+        "authentication": "headerAuth",
+        "requireExecuteAccess": true,
+        "includeUserInOutput": false,
+        "instructions": "Personal endpoint for ONE approved Ceroa token owner. Backend derives identity from credential, never tool arguments. Read personal information or propose support; never confirm bookings, send emails, change debts or execute code. Financial data are sensitive. A support proposal requires confirmation inside authenticated Ceroa."
+      },
+      "position": [
+        700,
+        0
+      ],
+      "webhookId": "ceroa-personal-v4"
+    },
+    {
+      "id": "mcp-finance.summary",
+      "name": "consultar_resumen_financiero",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "parameters": {
+        "description": "Scoped personal Ceroa operation finance.summary. Backend authenticates owner, expiry, revocation and exact scope. ",
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "ceroaMcpBackend40"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "operation": "finance.summary",
+            "start": "",
+            "offset": 0
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "operation",
+              "displayName": "operation",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "start",
+              "displayName": "start",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "offset",
+              "displayName": "offset",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "position": [
+        0,
+        300
+      ]
+    },
+    {
+      "id": "mcp-finance.debts",
+      "name": "consultar_deudas",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "parameters": {
+        "description": "Scoped personal Ceroa operation finance.debts. Backend authenticates owner, expiry, revocation and exact scope. ",
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "ceroaMcpBackend40"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "operation": "finance.debts",
+            "start": "",
+            "offset": "={{ $fromAI(\"offset\",\"Multiple of 25, default zero\",\"number\",0) }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "operation",
+              "displayName": "operation",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "start",
+              "displayName": "start",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "offset",
+              "displayName": "offset",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "position": [
+        200,
+        300
+      ]
+    },
+    {
+      "id": "mcp-finance.upcoming",
+      "name": "consultar_vencimientos",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "parameters": {
+        "description": "Scoped personal Ceroa operation finance.upcoming. Backend authenticates owner, expiry, revocation and exact scope. ",
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "ceroaMcpBackend40"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "operation": "finance.upcoming",
+            "start": "",
+            "offset": "={{ $fromAI(\"offset\",\"Multiple of 25, default zero\",\"number\",0) }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "operation",
+              "displayName": "operation",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "start",
+              "displayName": "start",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "offset",
+              "displayName": "offset",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "position": [
+        400,
+        300
+      ]
+    },
+    {
+      "id": "mcp-finance.strategy",
+      "name": "consultar_estrategia",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "parameters": {
+        "description": "Scoped personal Ceroa operation finance.strategy. Backend authenticates owner, expiry, revocation and exact scope. ",
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "ceroaMcpBackend40"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "operation": "finance.strategy",
+            "start": "",
+            "offset": 0
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "operation",
+              "displayName": "operation",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "start",
+              "displayName": "start",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "offset",
+              "displayName": "offset",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "position": [
+        600,
+        300
+      ]
+    },
+    {
+      "id": "mcp-subscription.read",
+      "name": "consultar_estado_suscripcion",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "parameters": {
+        "description": "Scoped personal Ceroa operation subscription.read. Backend authenticates owner, expiry, revocation and exact scope. ",
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "ceroaMcpBackend40"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "operation": "subscription.read",
+            "start": "",
+            "offset": 0
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "operation",
+              "displayName": "operation",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "start",
+              "displayName": "start",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "offset",
+              "displayName": "offset",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "position": [
+        800,
+        300
+      ]
+    },
+    {
+      "id": "mcp-support.availability",
+      "name": "consultar_disponibilidad_soporte",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "parameters": {
+        "description": "Scoped personal Ceroa operation support.availability. Backend authenticates owner, expiry, revocation and exact scope. ",
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "ceroaMcpBackend40"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "operation": "support.availability",
+            "start": "={{ $fromAI(\"start\",\"Requested ISO8601 thirty-minute slot with timezone offset\",\"string\") }}",
+            "offset": 0
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "operation",
+              "displayName": "operation",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "start",
+              "displayName": "start",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "offset",
+              "displayName": "offset",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "position": [
+        1000,
+        300
+      ]
+    },
+    {
+      "id": "mcp-support.propose",
+      "name": "solicitar_asesoria",
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 2.2,
+      "parameters": {
+        "description": "Scoped personal Ceroa operation support.propose. Backend authenticates owner, expiry, revocation and exact scope. Only creates an expiring proposal. User confirms in Ceroa.",
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "ceroaMcpBackend40"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "operation": "support.propose",
+            "start": "={{ $fromAI(\"start\",\"Requested ISO8601 thirty-minute slot with timezone offset\",\"string\") }}",
+            "offset": 0
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "operation",
+              "displayName": "operation",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "start",
+              "displayName": "start",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "offset",
+              "displayName": "offset",
+              "required": true,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        }
+      },
+      "position": [
+        1200,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "consultar_resumen_financiero": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP personal Ceroa",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "consultar_deudas": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP personal Ceroa",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "consultar_vencimientos": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP personal Ceroa",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "consultar_estrategia": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP personal Ceroa",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "consultar_estado_suscripcion": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP personal Ceroa",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "consultar_disponibilidad_soporte": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP personal Ceroa",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "solicitar_asesoria": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP personal Ceroa",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Bogota",
+    "executionTimeout": 120,
+    "saveDataSuccessExecution": "none",
+    "saveDataErrorExecution": "none",
+    "saveManualExecutions": false
+  }
+}

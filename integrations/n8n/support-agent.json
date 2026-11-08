@@ -248,7 +248,7 @@
     },
     {
       "id": "booking-availability",
-      "name": "Asesoria availability",
+      "name": "consultar_disponibilidad_soporte",
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
       "position": [
@@ -285,7 +285,7 @@
     },
     {
       "id": "booking-propose",
-      "name": "Asesoria propose",
+      "name": "proponer_asesoria",
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
       "position": [
@@ -322,7 +322,7 @@
     },
     {
       "id": "booking-get",
-      "name": "Asesoria get",
+      "name": "consultar_asesoria",
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
       "position": [
@@ -359,7 +359,7 @@
     },
     {
       "id": "booking-cancel",
-      "name": "Asesoria cancel",
+      "name": "cancelar_asesoria",
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
       "position": [
@@ -557,7 +557,7 @@
         ]
       ]
     },
-    "Asesoria availability": {
+    "consultar_disponibilidad_soporte": {
       "ai_tool": [
         [
           {
@@ -568,7 +568,7 @@
         ]
       ]
     },
-    "Asesoria propose": {
+    "proponer_asesoria": {
       "ai_tool": [
         [
           {
@@ -579,7 +579,7 @@
         ]
       ]
     },
-    "Asesoria get": {
+    "consultar_asesoria": {
       "ai_tool": [
         [
           {
@@ -590,7 +590,7 @@
         ]
       ]
     },
-    "Asesoria cancel": {
+    "cancelar_asesoria": {
       "ai_tool": [
         [
           {

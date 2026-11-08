@@ -71,12 +71,27 @@
       "method": "POST",
       "path": "/assistant-tools/requests/{requestId}/communications/propose",
       "effect": "PERSISTENT_PROPOSAL_ONLY; USER_CONFIRMATION_REQUIRED; REGISTERED_RECIPIENT_ONLY"
+    },
+    {
+      "id": "support.booking",
+      "roles": [
+        "SUPPORT"
+      ],
+      "method": "POST",
+      "path": "/assistant-tools/requests/{requestId}/support/booking",
+      "effect": "AVAILABILITY_OR_OWN_PROPOSAL_QUERY; CREATE_AND_CANCEL_CONFIRMATION_ONLY_BY_REAL_USER_MESSAGE_OR_CSRF_SESSION"
+    },
+    {
+      "id": "support.external",
+      "roles": [
+        "SUPPORT"
+      ],
+      "method": "POST",
+      "path": "/assistant-tools/requests/{requestId}/external/{authorize|result}",
+      "effect": "FIXED_CONTROLLED_MCP_SERVER; PUBLIC_CAPABILITIES_ONLY; BACKEND_GRANT_AND_VALIDATED_EVIDENCE"
     }
   ],
-  "notImplemented": [
-    "scheduling",
-    "external tools"
-  ],
+  "notImplemented": [],
   "delegation": {
     "mechanism": "Native Call n8n Workflow Tool 2.2 -> Execute Workflow Trigger -> AI Agent 3",
     "maxDepth": 1,

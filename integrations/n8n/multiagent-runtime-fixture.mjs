@@ -1,9 +1,11 @@
 import fs from 'node:fs';
 import {buildMultiagent} from './multiagent-workflows.mjs';
+import {scopedMcpClientWorkflow} from './workspace-mcp.mjs';
 const dir=process.argv[2];fs.mkdirSync(dir,{recursive:true});
 const original=JSON.parse(fs.readFileSync(new URL('./hybrid-rag-query.json',import.meta.url),'utf8'));
 const all=buildMultiagent(original);
 const [root,...children]=all;
+all.push(scopedMcpClientWorkflow());
 const edge=node=>({node,type:'main',index:0});
 const keep=['Analizar finanzas','Gemini Ceroa','Contrato de respuesta',...root.nodes.filter(n=>n.type.endsWith('.toolWorkflow')).map(n=>n.name)];
 root.nodes=root.nodes.filter(n=>keep.includes(n.name));

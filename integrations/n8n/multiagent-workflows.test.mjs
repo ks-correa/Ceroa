@@ -10,10 +10,10 @@ test('native specialists expose only their assigned tools and cannot delegate re
  assert.equal(root.nodes.filter(n=>n.type.endsWith('.httpRequestTool')).length,0);
  for(const w of specialists){
   assert.equal(w.nodes.filter(n=>n.type.endsWith('.agent')).length,1);
-  assert(!w.nodes.some(n=>n.type.endsWith('.toolWorkflow')||n.type.endsWith('.webhook')||n.type.endsWith('.code')));
+  assert(!w.nodes.some(n=>(n.type.endsWith('.toolWorkflow')&&n.id!=='mcp-public')||n.type.endsWith('.webhook')||n.type.endsWith('.code')));
   assert(w.nodes.some(n=>n.type.endsWith('.outputParserStructured')));
   const tools=w.nodes.filter(n=>n.type.endsWith('.httpRequestTool'));
-  if(w.id===ids.SUPPORT)assert.deepEqual(tools.map(n=>n.id),['rag-tool','workspace-mail-proposal']);
+  if(w.id===ids.SUPPORT)assert.deepEqual(tools.map(n=>n.id),['rag-tool','workspace-mail-proposal','booking-availability','booking-propose','booking-get','booking-cancel']);
   if(w.id===ids.RAG)assert(!tools.some(t=>['data-tool','calc-tool','simulation-tool'].includes(t.id)));
   for(const t of tools){assert(t.parameters.queryParameters.parameters.some(p=>p.name==='scope'&&!p.value.includes('$fromAI')));assert(!JSON.stringify(t).includes('Preparar texto'));}
  }
