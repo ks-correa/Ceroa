@@ -1,0 +1,20 @@
+{
+  "stats": {
+    "startTime": "2026-11-09T19:13:28.765Z",
+    "duration": 6213.753,
+    "expected": 3,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "scopes": [
+    "React debt CRUD + PostgreSQL",
+    "React payment + PostgreSQL",
+    "React strategy + PostgreSQL + deterministic assistant"
+  ],
+  "isolatedPorts": {
+    "frontend": 3008,
+    "backend": 18088
+  },
+  "externalProviders": false
+}

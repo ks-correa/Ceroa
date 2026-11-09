@@ -1,0 +1,2965 @@
+{
+  "capturedAt": "2026-11-09T19:17:34.514Z",
+  "overlapNotice": "Suites overlap; counts must not be added as unique test cases.",
+  "suites": {
+    "javaClean": {
+      "tests": 436,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 34,
+      "classes": [
+        {
+          "name": "com.ceroa.api.PlusSubscriptionControllerTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "signedWebhookRefreshesProviderAndDuplicateIsIdempotentAtEndpoint",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.config.AssistantIntegrationTest",
+          "tests": 20,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "highestInterestComparesEquivalentRatesInsteadOfBalances",
+              "status": "PASS"
+            },
+            {
+              "name": "unverifiedModelReplyIsNeverReturnedAsFinancialTruth",
+              "status": "PASS"
+            },
+            {
+              "name": "completionCredentialIsNotAWebSessionAndCannotWriteFinances",
+              "status": "PASS"
+            },
+            {
+              "name": "toolCredentialCannotBypassWebSessionOrCsrf",
+              "status": "PASS"
+            },
+            {
+              "name": "simpleUpcomingAndStrategyAvoidTheWebhook",
+              "status": "PASS"
+            },
+            {
+              "name": "analysisUsesOnlySessionEvidenceAndBackendArithmetic",
+              "status": "PASS"
+            },
+            {
+              "name": "preparedAudioUsesTheSameEvidenceAndCorrectionContractAsText",
+              "status": "PASS"
+            },
+            {
+              "name": "writesAndUnknownIntentsNeverExecuteMutations",
+              "status": "PASS"
+            },
+            {
+              "name": "telegramAnalysisUsesLinkedAccountAndDeliveryIsRevokedAfterUnlink",
+              "status": "PASS"
+            },
+            {
+              "name": "invalidDraftCanBeCorrectedWithoutReissuingFinancialReads",
+              "status": "PASS"
+            },
+            {
+              "name": "followupKeepsTheRequestedYearWithoutTreatingOldAnswersAsFreshEvidence",
+              "status": "PASS"
+            },
+            {
+              "name": "invalidAudioIsRejectedBeforeCallingWorkflow",
+              "status": "PASS"
+            },
+            {
+              "name": "assistantProposalRequiresUserConfirmationBeforeSyntheticCalendarCreation",
+              "status": "PASS"
+            },
+            {
+              "name": "financeCannotActivateSupportFallbackAndFailedParserCannotProduceAnAcceptedBalance",
+              "status": "PASS"
+            },
+            {
+              "name": "hypotheticalAmountsRemainClearlyMarkedUserInputs",
+              "status": "PASS"
+            },
+            {
+              "name": "analysisRejectsInventedAmountsAndFabricatedEvidence",
+              "status": "PASS"
+            },
+            {
+              "name": "multiagentScopesPreserveAccountEvidenceAndRejectEscalation",
+              "status": "PASS"
+            },
+            {
+              "name": "requestIsBoundToItsSessionOwnerAndExpiresAfterCompletion",
+              "status": "PASS"
+            },
+            {
+              "name": "disabledAccountAndArbitraryToolsAreRejected",
+              "status": "PASS"
+            },
+            {
+              "name": "requestsAreLimitedPerAccount",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.config.AssistantLibraryIntegrationTest",
+          "tests": 10,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "selectedFileWithoutMatchingChunksReturnsVerifiedMetadataInsteadOfAnError",
+              "status": "PASS"
+            },
+            {
+              "name": "selectedFileRateQuestionUsesOnlyThatFileAndAcceptsItsExactEvidence",
+              "status": "PASS"
+            },
+            {
+              "name": "revocationOfEarlierSearchStillBlocksFinalDelivery",
+              "status": "PASS"
+            },
+            {
+              "name": "twoSearchesRetainBothAuthorizedDocumentReferences",
+              "status": "PASS"
+            },
+            {
+              "name": "metadataListingDiscardsInvalidModelNumbersAndUsesAuthorizedDatabaseEvidence",
+              "status": "PASS"
+            },
+            {
+              "name": "metadataFiltersReachPrivateLibraryAndReturnMatchingReference",
+              "status": "PASS"
+            },
+            {
+              "name": "comparesPaymentsFromDifferentMonthsAndKeepsBothDocumentReferences",
+              "status": "PASS"
+            },
+            {
+              "name": "periodAnalysisCombinesTwoAuthorizedStatementsWithBackendArithmetic",
+              "status": "PASS"
+            },
+            {
+              "name": "identicalQueriesReuseEvidenceWithoutConsumingFreshLibraryBudget",
+              "status": "PASS"
+            },
+            {
+              "name": "semanticExplanationsStillRejectUnsupportedModelNumbers",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.config.AuthIntegrationTest",
+          "tests": 27,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "rejectsInvalidFields(String, String)[1]",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsInvalidFields(String, String)[2]",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsInvalidFields(String, String)[3]",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsInvalidFields(String, String)[4]",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsInvalidFields(String, String)[5]",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsInvalidFields(String, String)[6]",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsInvalidFields(String, String)[7]",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsInvalidFields(String, String)[8]",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsInvalidFields(String, String)[9]",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsInvalidFields(String, String)[10]",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsInvalidFields(String, String)[11]",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsInvalidFields(String, String)[12]",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsInvalidFields(String, String)[13]",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsMissingExpiredOrCancelledExternalRegistration",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsExternalUnderageAndMissingConsent",
+              "status": "PASS"
+            },
+            {
+              "name": "registersPersistsHashesAndRestoresSession",
+              "status": "PASS"
+            },
+            {
+              "name": "loginReturnsSetupStatusAndGenericErrors",
+              "status": "PASS"
+            },
+            {
+              "name": "completesExternalRegistrationWithoutPasswordAndNeverAuthenticatesPending(String)[1]",
+              "status": "PASS"
+            },
+            {
+              "name": "completesExternalRegistrationWithoutPasswordAndNeverAuthenticatesPending(String)[2]",
+              "status": "PASS"
+            },
+            {
+              "name": "requiresEveryField(String)[1]",
+              "status": "PASS"
+            },
+            {
+              "name": "requiresEveryField(String)[2]",
+              "status": "PASS"
+            },
+            {
+              "name": "requiresEveryField(String)[3]",
+              "status": "PASS"
+            },
+            {
+              "name": "requiresEveryField(String)[4]",
+              "status": "PASS"
+            },
+            {
+              "name": "requiresEveryField(String)[5]",
+              "status": "PASS"
+            },
+            {
+              "name": "requiresEveryField(String)[6]",
+              "status": "PASS"
+            },
+            {
+              "name": "requiresEveryField(String)[7]",
+              "status": "PASS"
+            },
+            {
+              "name": "requiresEveryField(String)[8]",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.config.AutomationIntegrationTest",
+          "tests": 8,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "readOnlyCredentialCannotWriteOrEnterBrowserApi",
+              "status": "PASS"
+            },
+            {
+              "name": "automationCannotReadAnotherUsersDebt",
+              "status": "PASS"
+            },
+            {
+              "name": "credentialIsHashedScopedAndRevocable",
+              "status": "PASS"
+            },
+            {
+              "name": "paymentRetryIsAtomicAndCannotDuplicateBalanceImpact",
+              "status": "PASS"
+            },
+            {
+              "name": "assistantCanVerifyCredentialOwnerAndReadActiveStrategyWithoutWritePermission",
+              "status": "PASS"
+            },
+            {
+              "name": "failedMutationDoesNotReserveKeyAndMissingHeaderIsBadRequest",
+              "status": "PASS"
+            },
+            {
+              "name": "expiredCredentialAndDisabledAccountAreRejected",
+              "status": "PASS"
+            },
+            {
+              "name": "browserCredentialIssuanceStillRequiresCsrfAndValidLifetime",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.config.Block6GoogleEndToEndTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 1,
+          "cases": [
+            {
+              "name": "singleSelfMailThenStableProjection",
+              "status": "SKIPPED"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.config.DashboardIntegrationTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "rejectsUnauthenticatedRequests",
+              "status": "PASS"
+            },
+            {
+              "name": "dashboardSummaryEndToEnd",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.config.DebtIntegrationTest",
+          "tests": 12,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "testAutoLoanEndToEnd",
+              "status": "PASS"
+            },
+            {
+              "name": "testCommercialAndInstallmentEndToEnd",
+              "status": "PASS"
+            },
+            {
+              "name": "testCreditCardEndToEnd",
+              "status": "PASS"
+            },
+            {
+              "name": "testFamilyAndOtherEndToEnd",
+              "status": "PASS"
+            },
+            {
+              "name": "testPersonalLoanEndToEnd",
+              "status": "PASS"
+            },
+            {
+              "name": "testEditDebtAuthorized_HU035",
+              "status": "PASS"
+            },
+            {
+              "name": "testPlanCeroDebtLimit",
+              "status": "PASS"
+            },
+            {
+              "name": "testMortgageEndToEnd",
+              "status": "PASS"
+            },
+            {
+              "name": "testStudentLoanEndToEnd",
+              "status": "PASS"
+            },
+            {
+              "name": "testOverdueBillEndToEnd",
+              "status": "PASS"
+            },
+            {
+              "name": "testConsultDebtDetailAndPayments_HU034",
+              "status": "PASS"
+            },
+            {
+              "name": "testDeleteDebtDefinitivelyWithPayments_HU036",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.config.DocumentIngestionIntegrationTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "extractsPartialDraftWithoutAnyFinancialWriteAndConsumesCallback",
+              "status": "PASS"
+            },
+            {
+              "name": "foreignDebtIsRejectedBeforeExtractionAndInactiveOwnerCannotUpload",
+              "status": "PASS"
+            },
+            {
+              "name": "requiresSessionCsrfConsentAndDoesNotTrustWorkerForUpload",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.config.DrivePipelineIntegrationTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "newFileAndModifiedVersionUseExistingUploadAndReplace",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.config.DriveSyncIntegrationTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "leasesOnlyChangedFilesAndPreventsConcurrentDownloads",
+              "status": "PASS"
+            },
+            {
+              "name": "downloadedBytesMustMatchVerifiedMetadata",
+              "status": "PASS"
+            },
+            {
+              "name": "httpRetainsAuthorizationAndConflictStatuses",
+              "status": "PASS"
+            },
+            {
+              "name": "checksumAndVersionSkipWithoutCreatingAnotherDocument",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsUnapprovedFolderAndDisabledSource",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.config.HybridDocumentIntegrationTest",
+          "tests": 27,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 27,
+          "cases": [
+            {
+              "name": "scannedPdfIsStoredForReviewWithoutInventingText",
+              "status": "SKIPPED"
+            },
+            {
+              "name": "fileOnlyUploadExtractsSearchableMetadataAndPreservesManualCorrections",
+              "status": "SKIPPED"
+            },
+            {
+              "name": "replacementKeepsIdentityArchivesOriginalAndRebuildsOnlyCurrentChunks",
+              "status": "SKIPPED"
+            },
+            {
+              "name": "duplicateUpdateDeleteAndObsoleteCallbacksKeepIndexConsistent",
+              "status": "SKIPPED"
+            },
+            {
+              "name": "recordComparableDocumentFactRetrievalMeasurements",
+              "status": "SKIPPED"
+            },
+            {
+              "name": "connectorsResolveFixedOwnerAndNeverAcceptWebSessionsAsConnectorCredentials",
+              "status": "SKIPPED"
+            },
+            {
+              "name": "selectedDocumentSearchNeverReturnsAnotherIndexedFile",
+              "status": "SKIPPED"
+            },
+            {
+              "name": "expiredLeaseRejectsStaleAttempt",
+              "status": "SKIPPED"
+            },
+            {
+              "name": "syntheticPdfAndWorkbookPersistIndexReprocessAndDelete",
+              "status": "SKIPPED"
+            },
+            {
+              "name": "lexicalFallbackAndCrossMonthOverlapUseTheSameScope",
+              "status": "SKIPPED"
+            },
+            {
+              "name": "unknownIdentificationIsNeverInventedAndMissingEvidenceIsExplicit",
+              "status": "SKIPPED"
+            },
+            {
+              "name": "explicitGrantFiltersCCAndPeriodBeforeRanking",
+              "status": "SKIPPED"
+            },
+            {
+              "name": "promptInjectionStaysEvidenceAndCannotMutateFinancesOrSelectIdentity",
+              "status": "SKIPPED"
+            },
+            {
+              "name": "failedStorageDeletionLeavesNonSearchableRetryableTombstone",
+              "status": "SKIPPED"
+            },
+            {
+              "name": "nativeSupabaseGatewayDeniesFinancialTablesAndSessionCredentials",
+              "status": "SKIPPED"
+            },
+            {
+              "name": "realMigrationsAreValidAndIdempotent",
+              "status": "SKIPPED"
+            },
+            {
+              "name": "telegramReplacementHistoryDownloadDeletionAndDeliveryRevocation",
+              "status": "SKIPPED"
+            },
+            {
+              "name": "telegramDuplicateUploadsMalformedCommandsAndForeignGroupsCannotMutateDocuments",
+              "status": "SKIPPED"
+            },
+            {
+              "name": "approvedDriveVersionsReuseQueueAndInvalidateObsoleteChunks",
+              "status": "SKIPPED"
+            },
+            {
+              "name": "telegramDocumentsRequireConsentAndUseSamePrivateLibraryAndFilters",
+              "status": "SKIPPED"
+            },
+            {
+              "name": "invalidModelVectorAndMetadataEvidenceRollbackAllChunks",
+              "status": "SKIPPED"
+            },
+            {
+              "name": "duplicateReplacementAndMissingConsentCannotOverwriteAnotherDocument",
+              "status": "SKIPPED"
+            },
+            {
+              "name": "ownershipAndAdminRoleWithoutGrantCannotReadOrDownload",
+              "status": "SKIPPED"
+            },
+            {
+              "name": "financialFactsPersistWithEvidenceAndCannotCrossOwnersOrVersions",
+              "status": "SKIPPED"
+            },
+            {
+              "name": "temporaryDownloadRequiresSessionOwnerTicketAndLiveResource",
+              "status": "SKIPPED"
+            },
+            {
+              "name": "backendTotalsAndOwnerScopeRemainSeparateFromAdministrativeDocuments",
+              "status": "SKIPPED"
+            },
+            {
+              "name": "relevantVectorsAreRankedAndSyntheticLatencyIsBounded",
+              "status": "SKIPPED"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.config.McpIntegrationTest",
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "tokenCannotExpandScopeOrUseAdminTools",
+              "status": "PASS"
+            },
+            {
+              "name": "revokedExpiredAndInactiveOwnerTokensFail",
+              "status": "PASS"
+            },
+            {
+              "name": "unknownScopeCannotIssueAndOnlyHashIsStored",
+              "status": "PASS"
+            },
+            {
+              "name": "identityComesOnlyFromTokenAndInactiveOwnersAreRejected",
+              "status": "PASS"
+            },
+            {
+              "name": "tokenBudgetRejectsThirtyFirstRequest",
+              "status": "PASS"
+            },
+            {
+              "name": "otherOwnerCannotRevoke",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.config.MonthlyProgressIntegrationTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "capturesMutationsAndEnforcesOwnerAndPlanOnRead",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.config.MultiagentEndToEndTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 2,
+          "cases": [
+            {
+              "name": "webRequestDelegatesAndReturnsServerValidatedFreshFinancialEvidence",
+              "status": "SKIPPED"
+            },
+            {
+              "name": "unknownIntentAbstainsThroughBothServicesWithoutCallingSpecialists",
+              "status": "SKIPPED"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.config.NotificationIntegrationTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "notificationCenterAndIdempotentRead",
+              "status": "PASS"
+            },
+            {
+              "name": "deletingDebtPreservesHistoricalNotificationsSafely",
+              "status": "PASS"
+            },
+            {
+              "name": "externalReminderCannotBeSpoofedByUser",
+              "status": "PASS"
+            },
+            {
+              "name": "upcomingDuesIncludeExactMilestones",
+              "status": "PASS"
+            },
+            {
+              "name": "isolationBetweenUsers",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.config.OAuthFlowTest",
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "cancellationInvalidatesTransientState(String)[1]",
+              "status": "PASS"
+            },
+            {
+              "name": "cancellationInvalidatesTransientState(String)[2]",
+              "status": "PASS"
+            },
+            {
+              "name": "validatedIdentityWaitsForRegistrationThenReturnsExistingAccount(String)[1]",
+              "status": "PASS"
+            },
+            {
+              "name": "validatedIdentityWaitsForRegistrationThenReturnsExistingAccount(String)[2]",
+              "status": "PASS"
+            },
+            {
+              "name": "startsRealAuthorizationAndRejectsUncorrelatedCallback(String)[1]",
+              "status": "PASS"
+            },
+            {
+              "name": "startsRealAuthorizationAndRejectsUncorrelatedCallback(String)[2]",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.config.PaymentIntegrationTest",
+          "tests": 7,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "testCrossUserAuthorization",
+              "status": "PASS"
+            },
+            {
+              "name": "testFullPaymentSetsDebtToPaid",
+              "status": "PASS"
+            },
+            {
+              "name": "testDeletePaymentEndToEnd",
+              "status": "PASS"
+            },
+            {
+              "name": "testCreatePaymentEndToEnd",
+              "status": "PASS"
+            },
+            {
+              "name": "lateInstallmentClearsOverdueAndDeletingItRestoresTheDueDate",
+              "status": "PASS"
+            },
+            {
+              "name": "testCreatePaymentValidations",
+              "status": "PASS"
+            },
+            {
+              "name": "testUpdatePaymentEndToEnd",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.config.PostgresMigrationIntegrationTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 3,
+          "cases": [
+            {
+              "name": "apiAuthenticatesAndReadsMigratedFinancialData",
+              "status": "SKIPPED"
+            },
+            {
+              "name": "hibernatePersistsJsonbAndOptimisticVersionInSelectedSchema",
+              "status": "SKIPPED"
+            },
+            {
+              "name": "migrationsValidateAndRemainIdempotent",
+              "status": "SKIPPED"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.config.ProfileIntegrationTest",
+          "tests": 17,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "updateProfileDoesNotChangeEmail",
+              "status": "PASS"
+            },
+            {
+              "name": "getProfileReturnsAuthenticatedUserData",
+              "status": "PASS"
+            },
+            {
+              "name": "getProfileWithoutAuthReturns401",
+              "status": "PASS"
+            },
+            {
+              "name": "verifyEmailChangeWithAlreadyUsedCodeFails",
+              "status": "PASS"
+            },
+            {
+              "name": "updateProfileWithUnderageBirthDateReturns422",
+              "status": "PASS"
+            },
+            {
+              "name": "requestEmailChangeWithValidEmailReturnsRequestId",
+              "status": "PASS"
+            },
+            {
+              "name": "verifyEmailChangeWithCorrectCodeUpdatesEmail",
+              "status": "PASS"
+            },
+            {
+              "name": "verifyEmailChangeWithWrongCodeDoesNotUpdateEmail",
+              "status": "PASS"
+            },
+            {
+              "name": "updateProfileWithBlankFullNameReturns400",
+              "status": "PASS"
+            },
+            {
+              "name": "updateProfileWithValidDataSucceeds",
+              "status": "PASS"
+            },
+            {
+              "name": "updateProfileWithInvalidPhoneReturns400",
+              "status": "PASS"
+            },
+            {
+              "name": "requestEmailChangeWithSameEmailReturns422",
+              "status": "PASS"
+            },
+            {
+              "name": "updateProfileWithWhitespaceOnlyFullNameReturns400",
+              "status": "PASS"
+            },
+            {
+              "name": "updateProfileWithFutureBirthDateReturns422",
+              "status": "PASS"
+            },
+            {
+              "name": "verifyEmailChangeWithExpiredRequestFails",
+              "status": "PASS"
+            },
+            {
+              "name": "oldEmailRemainsActiveAfterRequestButBeforeVerify",
+              "status": "PASS"
+            },
+            {
+              "name": "requestEmailChangeWithInvalidEmailReturns400",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.config.RagAssistantIntegrationTest",
+          "tests": 7,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "workerAndPublicIdsNeverAuthorizeAWebSession",
+              "status": "PASS"
+            },
+            {
+              "name": "emptyCorpusOverridesInventedDocumentaryAnswerAndSearchUsesActualQuestion",
+              "status": "PASS"
+            },
+            {
+              "name": "isolatesWebTelegramAndOtherAccountsAndCanForgetWebContext",
+              "status": "PASS"
+            },
+            {
+              "name": "addsOnlyRetrievedCurrentSourcesAndRejectsForgedOrRevokedOnes",
+              "status": "PASS"
+            },
+            {
+              "name": "unknownMultiagentIntentCanOnlyAbstainWithoutRetrieval",
+              "status": "PASS"
+            },
+            {
+              "name": "credentialsAndPreviousSourceReferencesAreNotKeptInContext",
+              "status": "PASS"
+            },
+            {
+              "name": "personalBalanceIsReadAgainAndNeverRecoveredFromRagOrMemory",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.config.RealMultiagentEndToEndTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 1,
+          "cases": [
+            {
+              "name": "repeatedSyntheticConversationsThroughRealGemini",
+              "status": "SKIPPED"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.config.RecoveryIntegrationTest",
+          "tests": 16,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "rejectsInvalidEmails(String)[1]",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsInvalidEmails(String)[2]",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsInvalidEmails(String)[3]",
+              "status": "PASS"
+            },
+            {
+              "name": "wrongCodeAttemptsCommitAndCannotBeBypassed",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsMismatchMissingForgedAndUnverifiedAuthorization",
+              "status": "PASS"
+            },
+            {
+              "name": "logoutRevokesServerSessionAndIsIdempotent",
+              "status": "PASS"
+            },
+            {
+              "name": "identicalPublicResponseAndLimitsForExistingAndUnknownEmails",
+              "status": "PASS"
+            },
+            {
+              "name": "resettingOneChallengeInvalidatesOtherVerifiedChallenges",
+              "status": "PASS"
+            },
+            {
+              "name": "completeSmtpRecoveryRevokesSessionsAndPreventsEveryReuse",
+              "status": "PASS"
+            },
+            {
+              "name": "concurrentResetConsumesAuthorizationExactlyOnce",
+              "status": "PASS"
+            },
+            {
+              "name": "expiredCodeAndGrantAreRejected",
+              "status": "PASS"
+            },
+            {
+              "name": "invalidPasswordsCannotChangeHash(String)[1]",
+              "status": "PASS"
+            },
+            {
+              "name": "invalidPasswordsCannotChangeHash(String)[2]",
+              "status": "PASS"
+            },
+            {
+              "name": "invalidPasswordsCannotChangeHash(String)[3]",
+              "status": "PASS"
+            },
+            {
+              "name": "invalidPasswordsCannotChangeHash(String)[4]",
+              "status": "PASS"
+            },
+            {
+              "name": "invalidPasswordsCannotChangeHash(String)[5]",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.config.RecoveryUnavailableTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "missingConfigurationRejectsRequestWithoutClaimingDelivery",
+              "status": "PASS"
+            },
+            {
+              "name": "smtpFailureNeverLeavesUsableCode",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.config.SecurityConfigTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "allowsLogoutWithCsrfWhenTheSessionIsAlreadyExpired",
+              "status": "PASS"
+            },
+            {
+              "name": "exposesCsrfTokenForTheSpa",
+              "status": "PASS"
+            },
+            {
+              "name": "returnsNotFoundInsteadOfInternalErrorForNonexistentAuthenticatedApiRoute",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsLoginWithoutCsrfToken",
+              "status": "PASS"
+            },
+            {
+              "name": "acceptsCsrfProtectedLoginRequestBeforeCredentialValidation",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.config.SimulationIntegrationTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "rejectsSimulationOfOtherUsersDebt",
+              "status": "PASS"
+            },
+            {
+              "name": "strictlyEnforcesImmutabilityAcrossOperations",
+              "status": "PASS"
+            },
+            {
+              "name": "successfulSimulationComparisonAndPeriods",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsPlanCeroUser",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsUnauthenticatedSimulation",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.config.StrategyIntegrationTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "hu039_changeStrategySuccessfullyAndEnforcesInvariance",
+              "status": "PASS"
+            },
+            {
+              "name": "hu041_planPlusGetsFullStrategyWithProjectionsAndComparison",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsUnauthenticatedRequests",
+              "status": "PASS"
+            },
+            {
+              "name": "manualPriorityPersistsAndCanBeReset",
+              "status": "PASS"
+            },
+            {
+              "name": "hu040_planCeroGetsBasicStrategyWithoutPlusDetails",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.config.SubscriptionPersistenceIntegrationTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "confirmedCancellationPreservesPaidAccessAndDoesNotReactivate",
+              "status": "PASS"
+            },
+            {
+              "name": "staleBillingSnapshotCannotMoveTheBoundaryBackwards",
+              "status": "PASS"
+            },
+            {
+              "name": "activationRenewalAndOldChargeReplayKeepDurableProof",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectedChargeCannotGrantAccessOrCreateReceipt",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.config.SupportBookingIntegrationTest",
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "confirmedProviderProofIsRequiredAndConfirmIsIdempotent",
+              "status": "PASS"
+            },
+            {
+              "name": "secondReservationCannotTakeSameSlot",
+              "status": "PASS"
+            },
+            {
+              "name": "expiredProposalAndOccupiedSlotCannotCreate",
+              "status": "PASS"
+            },
+            {
+              "name": "ambiguousCancellationRequiresProviderProofAndNeverRepeatsDelete",
+              "status": "PASS"
+            },
+            {
+              "name": "proposalDoesNotCreateAndOtherOwnerCannotConfirm",
+              "status": "PASS"
+            },
+            {
+              "name": "ambiguousCreateIsHeldAndNeverAutomaticallyRepeated",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.config.TelegramIntegrationTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "duplicateUpdatesDoNotConsumeAnotherCodeAndInactiveUserCannotAuthorize",
+              "status": "PASS"
+            },
+            {
+              "name": "oneUsePrivateLinkCannotBeReplayedByAnotherSenderAndUnlinkRevokesAudio",
+              "status": "PASS"
+            },
+            {
+              "name": "expiredCodeAndGroupOrForgedChatCannotLink",
+              "status": "PASS"
+            },
+            {
+              "name": "requiresSessionCsrfConsentAndSeparateWorkerCredential",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.config.WorkspaceEventIntegrationTest",
+          "tests": 9,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "ambiguityNeverRetriesGmailButDoesNotBlockOtherMail",
+              "status": "PASS"
+            },
+            {
+              "name": "sheetsFailureLeavesProjectionPendingWithoutReopeningTheEmail",
+              "status": "PASS"
+            },
+            {
+              "name": "browserSessionCannotImpersonateTheWorkspaceWorker",
+              "status": "PASS"
+            },
+            {
+              "name": "duplicatesAreNotSentAndRepeatedAcknowledgementIsIdempotent",
+              "status": "PASS"
+            },
+            {
+              "name": "leaseRecoveryDistinguishesBeforeAndAfterDispatch",
+              "status": "PASS"
+            },
+            {
+              "name": "changedRecipientCancelsRatherThanRedirecting",
+              "status": "PASS"
+            },
+            {
+              "name": "financialEmailRequiresAnOwnedUnexpiredConfirmationAndQueuesOnce",
+              "status": "PASS"
+            },
+            {
+              "name": "expiredConfirmationCannotGenerateAnEvent",
+              "status": "PASS"
+            },
+            {
+              "name": "outboxParticipatesInTheRegistrationTransaction",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.service.AgentContractsTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "budgetsAreBoundedAndSelectedDocumentsCannotAcquireFinanceTools",
+              "status": "PASS"
+            },
+            {
+              "name": "traceKeepsUnknownModelMeasurementsUnknownAndDeduplicatesWorkerReports",
+              "status": "PASS"
+            },
+            {
+              "name": "routesOperationalSupportFollowUpAndCompositeDocumentFinancialQuestions",
+              "status": "PASS"
+            },
+            {
+              "name": "deterministicSpecialtiesDoNotUseSupportAsFallback",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.service.AgentRuntimeTest",
+          "tests": 13,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "contextBudgetIsSharedAcrossSpecialists",
+              "status": "PASS"
+            },
+            {
+              "name": "globalDelegationsAndToolCallsAreBounded",
+              "status": "PASS"
+            },
+            {
+              "name": "metricsDoNotInventProviderCallsOrIterations",
+              "status": "PASS"
+            },
+            {
+              "name": "unknownEvidenceAndCrossRequestTokensAreRejected",
+              "status": "PASS"
+            },
+            {
+              "name": "partialCoverageCannotBecomeComplete",
+              "status": "PASS"
+            },
+            {
+              "name": "selectedDocumentCannotReadOtherCapabilities",
+              "status": "PASS"
+            },
+            {
+              "name": "resultsAreCachedOnlyAfterValidationAndDoNotRunTwice",
+              "status": "PASS"
+            },
+            {
+              "name": "rolesCannotEscalateToolsOrDelegate",
+              "status": "PASS"
+            },
+            {
+              "name": "partialReferencesRetainCoverageAcrossDelegations",
+              "status": "PASS"
+            },
+            {
+              "name": "safeFailureIsReusableAndDoesNotShareUnreturnedEvidence",
+              "status": "PASS"
+            },
+            {
+              "name": "advisoryCannotClaimCalendarWrites",
+              "status": "PASS"
+            },
+            {
+              "name": "supportCannotReceivePrivateFinancialReferences",
+              "status": "PASS"
+            },
+            {
+              "name": "failuresCannotBeReportedAsFunctionalSuccess",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.service.AssistantAnalysisServiceTest",
+          "tests": 11,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "divisionByZeroFailsWithoutAnInventedResult",
+              "status": "PASS"
+            },
+            {
+              "name": "removesRepeatedEquivalentRatesAfterEvidenceSubstitution",
+              "status": "PASS"
+            },
+            {
+              "name": "typedDocumentNumbersCannotBypassUnitAwareDocumentComparisons",
+              "status": "PASS"
+            },
+            {
+              "name": "resolvesExactDecimalFactsWithoutModelFormatting",
+              "status": "PASS"
+            },
+            {
+              "name": "calendarYearsAreNotRenderedAsGroupedMoneyAndInternalIdsAreNotEvidence",
+              "status": "PASS"
+            },
+            {
+              "name": "stripsInlineDocumentCitationsNormalizesPercentScaleAndDeduplicatesStrategyLabels",
+              "status": "PASS"
+            },
+            {
+              "name": "translatesStructuredLabelsWithoutChangingDebtNames",
+              "status": "PASS"
+            },
+            {
+              "name": "separatesThousandsAndPreservesFractionsDatesAndYears",
+              "status": "PASS"
+            },
+            {
+              "name": "exactArithmeticCannotAcceptFabricatedOrTextOperands",
+              "status": "PASS"
+            },
+            {
+              "name": "groundsExactDocumentLiteralsAndListMarkersButRejectsInventedNumbers",
+              "status": "PASS"
+            },
+            {
+              "name": "finalFallbackKeepsVerifiedFactsAndMasksUnsupportedNumbers",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.service.AssistantProviderGateTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "concurrencyAndMinuteBudgetApplyAcrossRequests",
+              "status": "PASS"
+            },
+            {
+              "name": "quotaCooldownIsSharedAndFailureDoesNotRefundReservations",
+              "status": "PASS"
+            },
+            {
+              "name": "reservationsBoundRootAndSpecialistIterations",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.service.DashboardServiceTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "identifiesPartialCoverage",
+              "status": "PASS"
+            },
+            {
+              "name": "returnsEmptyStateWhenNoDebts",
+              "status": "PASS"
+            },
+            {
+              "name": "handlesInsufficientDataWithoutFictitiousValues",
+              "status": "PASS"
+            },
+            {
+              "name": "calculatesTotalsAndIndicatorsCorrectly",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.service.DebtServiceTest",
+          "tests": 12,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "rejectsBalanceGreaterThanOriginalAmountForPersonalLoan",
+              "status": "PASS"
+            },
+            {
+              "name": "deleteDebtUnauthorizedThrowsNotFound",
+              "status": "PASS"
+            },
+            {
+              "name": "systemCalculatesPaidStatusWhenBalanceIsZero",
+              "status": "PASS"
+            },
+            {
+              "name": "updateDebtUnauthorizedThrowsNotFound",
+              "status": "PASS"
+            },
+            {
+              "name": "findByIdUnauthorizedThrowsNotFound",
+              "status": "PASS"
+            },
+            {
+              "name": "updateDebtSuccessfullyPersistsAndRecalculatesStatus",
+              "status": "PASS"
+            },
+            {
+              "name": "findByIdAuthorizedReturnsDetailWithPaymentCount",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsThirdDebtForCeroPlan",
+              "status": "PASS"
+            },
+            {
+              "name": "systemCalculatesOverdueStatusForOverdueBill",
+              "status": "PASS"
+            },
+            {
+              "name": "updateDebtRejectsDebtTypeChange",
+              "status": "PASS"
+            },
+            {
+              "name": "systemCalculatesDueTodayStatus",
+              "status": "PASS"
+            },
+            {
+              "name": "deleteDebtDeletesDebtAndItsPaymentsTransactionally",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.service.DocumentBatchAuthorizationTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "batchQueryEnforcesOwnerGrantsCurrentVersionAndIndexedStatus",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.service.DocumentDraftValidatorTest",
+          "tests": 8,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "rejectsUnknownKeysInvalidEnumsAndInventedLocations",
+              "status": "PASS"
+            },
+            {
+              "name": "absentRateDoesNotBecomeZeroOrNone",
+              "status": "PASS"
+            },
+            {
+              "name": "acceptsLiteralBalanceButNullsConflictingObligations",
+              "status": "PASS"
+            },
+            {
+              "name": "ambiguousNumbersAndAbsentInterestEvidenceRemainUnknown",
+              "status": "PASS"
+            },
+            {
+              "name": "detectsConflictingCopPayments",
+              "status": "PASS"
+            },
+            {
+              "name": "acceptsExplicitCopThousandsWithoutGuessingBareNumbersOrRates",
+              "status": "PASS"
+            },
+            {
+              "name": "valuesRequireRealQuotesAndNumbersNotJustCorrectJson",
+              "status": "PASS"
+            },
+            {
+              "name": "doesNotTurnNextDueDateIntoFixedMonthlyDay",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.service.DocumentFactTest",
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "comparesOnlyLinkedObligationsWithCompatibleUnitsAndDisjointPeriods",
+              "status": "PASS"
+            },
+            {
+              "name": "contextBudgetsPreserveCoverageAndNeverTrimAnIndividualValue",
+              "status": "PASS"
+            },
+            {
+              "name": "repeatedMovementReferencesAreSubtotalsNotRegisteredPayments",
+              "status": "PASS"
+            },
+            {
+              "name": "staleVersionsAndOverlappingPeriodsCannotSupportAComparison",
+              "status": "PASS"
+            },
+            {
+              "name": "incompleteChunkEdgesCannotCreateTruncatedNumbers",
+              "status": "PASS"
+            },
+            {
+              "name": "extractsTypedValuesWithExactOffsetsAndConservativeUnknowns",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.service.DocumentMetadataInferenceTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "fillsSearchableFieldsWithoutHumanEntry",
+              "status": "PASS"
+            },
+            {
+              "name": "neverOverwritesCorrectionsOrChangesDebtAssociation",
+              "status": "PASS"
+            },
+            {
+              "name": "ignoresInvalidDatesEnumsAndConflictingFields",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.service.DocumentOcrClientTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "rejectsDuplicatePagesAndUnknownConfidence",
+              "status": "PASS"
+            },
+            {
+              "name": "validatesPageCoverageAndReturnsOriginalPageOrder",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsUncertainOrMissingPages",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.service.DocumentPeriodAnalysisTest",
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "furtherPagesAreReportedAndCanBeReadWithoutDroppingTheirSources",
+              "status": "PASS"
+            },
+            {
+              "name": "replacementDuringRetrievalCannotMixDocumentVersions",
+              "status": "PASS"
+            },
+            {
+              "name": "includesEveryIndexedStatementInPeriodWithoutSemanticRanking",
+              "status": "PASS"
+            },
+            {
+              "name": "indexedDocumentWithoutReadableChunksIsNotCompleteEvidence",
+              "status": "PASS"
+            },
+            {
+              "name": "incompleteIndexIsReportedAsPartialAndCannotSupportACompleteTotal",
+              "status": "PASS"
+            },
+            {
+              "name": "contextOverflowIsExplicitRatherThanAFalseCompleteTotal",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.service.DocumentPrivacyTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "minimizesIdentificationAccountsAndEmail",
+              "status": "PASS"
+            },
+            {
+              "name": "keepsFinancialAmountsAndRatesWhileMaskingAccountNumbers",
+              "status": "PASS"
+            },
+            {
+              "name": "retainsValidDocumentaryDatesWhileMinimizingIdentification",
+              "status": "PASS"
+            },
+            {
+              "name": "invalidPeriodsAreRejected",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.service.DocumentTextExtractorTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "rejectsCorruptOversizedAndExternalLinkedOffice",
+              "status": "PASS"
+            },
+            {
+              "name": "excelRequiresExplicitSheetAndDoesNotUseFormulaOrOtherSheet",
+              "status": "PASS"
+            },
+            {
+              "name": "readsPdfWithPageEvidenceAndRejectsScanInsteadOfInventingOcr",
+              "status": "PASS"
+            },
+            {
+              "name": "wordRetainsParagraphAndTableLocationsAndRejectsMismatch",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.service.FinancialClaimGroundingTest",
+          "tests": 11,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "invalidReferenceIdsFailClosed",
+              "status": "PASS"
+            },
+            {
+              "name": "bareUntrustedNumbersAreNotFinancialEvidence",
+              "status": "PASS"
+            },
+            {
+              "name": "arithmeticRejectsUnknownOrIncompatibleCurrenciesAndChainedBypasses",
+              "status": "PASS"
+            },
+            {
+              "name": "pageCannotBecomeBalanceEvenThroughAnExplicitReference",
+              "status": "PASS"
+            },
+            {
+              "name": "maskedReferenceCannotBecomeAnAmountButRemainsDisplayable",
+              "status": "PASS"
+            },
+            {
+              "name": "untrustedInstructionsDoNotBecomeEvidenceEvenWhenTheyMentionALabel",
+              "status": "PASS"
+            },
+            {
+              "name": "rateCannotChangeModality",
+              "status": "PASS"
+            },
+            {
+              "name": "ambiguousDocumentsAndPeriodsCannotGroundABareClaim",
+              "status": "PASS"
+            },
+            {
+              "name": "amountCannotChangeFieldOrCurrency",
+              "status": "PASS"
+            },
+            {
+              "name": "fallbackOmitsMisattributedAndInventedValues",
+              "status": "PASS"
+            },
+            {
+              "name": "aSingleDigitCannotGroundAnyPartOfALargerNumber",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.service.FinancialProfileServiceTest",
+          "tests": 7,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "completesInitialSetupSuccessfullyWhenValid",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsAvailableMoneyAboveIncomeAfterExpenses",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsCompletionWithoutRegisteredDebts",
+              "status": "PASS"
+            },
+            {
+              "name": "updatesStrategySuccessfully",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsExpensesExceedingIncome",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsUpdateStrategyWithoutRegisteredDebts",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsCompletionWithoutStrategy",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.service.MonthlyProgressServiceTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "comparesConfirmedPeriodsWithoutMutatingHistory",
+              "status": "PASS"
+            },
+            {
+              "name": "marksUnobservedPastInsufficientAndFiltersBasicDetails",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.service.PaymentScheduleTest",
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "historicalPaymentsAndExtraPrincipalDoNotSettleThePendingInstallment",
+              "status": "PASS"
+            },
+            {
+              "name": "changingPaymentDateRecalculatesTheNextCycle",
+              "status": "PASS"
+            },
+            {
+              "name": "editingOrDeletingThePaymentRestoresThePendingCycle",
+              "status": "PASS"
+            },
+            {
+              "name": "preservesMonthEndAcrossFebruaryAndSubsequentCycles",
+              "status": "PASS"
+            },
+            {
+              "name": "partialPaymentsOnlyAdvanceOnceTheyCoverTheInstallment",
+              "status": "PASS"
+            },
+            {
+              "name": "lateInstallmentAdvancesToNextDueDate",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.service.PaymentServiceTest",
+          "tests": 14,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "updateRevertsPreviousAndAppliesNewEffect",
+              "status": "PASS"
+            },
+            {
+              "name": "createPaymentSubtractsAmountFromDebtBalance",
+              "status": "PASS"
+            },
+            {
+              "name": "updateFullPaymentValidatesAgainstRestoredBalance",
+              "status": "PASS"
+            },
+            {
+              "name": "createFullPaymentValidatesAgainstBalance",
+              "status": "PASS"
+            },
+            {
+              "name": "createFullPaymentRejectsMismatchingAmount",
+              "status": "PASS"
+            },
+            {
+              "name": "createRejectsAmountExceedingBalance",
+              "status": "PASS"
+            },
+            {
+              "name": "updateDecreasingAmountIncreasesBalance",
+              "status": "PASS"
+            },
+            {
+              "name": "findAllByDebtIdValidatesOwnership",
+              "status": "PASS"
+            },
+            {
+              "name": "createRejectsZeroOrNegativeAmount",
+              "status": "PASS"
+            },
+            {
+              "name": "deleteDoesNotCapAtOriginalAmountWhenNullOrDifferent",
+              "status": "PASS"
+            },
+            {
+              "name": "updateRejectsChangingAssociatedDebt",
+              "status": "PASS"
+            },
+            {
+              "name": "multipleEditsDoNotAccumulateErrors",
+              "status": "PASS"
+            },
+            {
+              "name": "createRejectsFutureDate",
+              "status": "PASS"
+            },
+            {
+              "name": "deletePaymentRevertsBalanceCorrectly",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.service.PaymentStatusLifecycleTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "loweringThePaymentBelowMinimumRestoresOverdueAndCompletingItClearsIt",
+              "status": "PASS"
+            },
+            {
+              "name": "payingTheInstallmentLateUpdatesBothPaymentResponseAndDebtRead",
+              "status": "PASS"
+            },
+            {
+              "name": "fullyPayingStillClosesTheDebt",
+              "status": "PASS"
+            },
+            {
+              "name": "deletingTheInstallmentRestoresOverdueStateAndOriginalDueDate",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.service.PlanAccessServiceTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "defaultsToCeroWithoutPlus",
+              "status": "PASS"
+            },
+            {
+              "name": "plusHasPremiumCapabilitiesAndNoFunctionalDebtLimit",
+              "status": "PASS"
+            },
+            {
+              "name": "scheduledCancellationExpiresByServerClockWithoutDeletingData",
+              "status": "PASS"
+            },
+            {
+              "name": "downgradeOnlyChangesPermissions",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.service.PlusSubscriptionServiceTest",
+          "tests": 7,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "nonActiveProviderStatesNeverGrantPlus",
+              "status": "PASS"
+            },
+            {
+              "name": "confirmedCancellationKeepsPaidAccessAndIsIdempotent",
+              "status": "PASS"
+            },
+            {
+              "name": "checkoutUsesServerPriceAndKeepsPlanCeroUntilProviderConfirms",
+              "status": "PASS"
+            },
+            {
+              "name": "providerAuthorizedActivatesAndRepeatedRefreshDoesNotCreateAnotherSubscription",
+              "status": "PASS"
+            },
+            {
+              "name": "operationalActivationRequiresVerifiedProviderAndDoesNotRepeat",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectedPaymentCannotEmitRenewal",
+              "status": "PASS"
+            },
+            {
+              "name": "verifiedApprovedPaymentAndAdvancedBillingBoundaryEmitRenewal",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.service.RagRetrievalServiceTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "emptyCorpusAndUncalibratedCollectionNeverCallProvider",
+              "status": "PASS"
+            },
+            {
+              "name": "incompatibleModelAndFailedStoreAbstain",
+              "status": "PASS"
+            },
+            {
+              "name": "filtersLowRelevanceUsingPublishedCalibrationAndChecksRevocation",
+              "status": "PASS"
+            },
+            {
+              "name": "vectorsRequireActualDimensionsFiniteValuesAndNonzeroNorm",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.service.RateNormalizationServiceTest",
+          "tests": 7,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "marksIndexedRatesAsNonComparableWithoutExternalIndex",
+              "status": "PASS"
+            },
+            {
+              "name": "comparesNAMVVsEACorrectly",
+              "status": "PASS"
+            },
+            {
+              "name": "normalizesMVToEACorrectly",
+              "status": "PASS"
+            },
+            {
+              "name": "normalizesNAMVToEACorrectly",
+              "status": "PASS"
+            },
+            {
+              "name": "normalizesEACorrectly",
+              "status": "PASS"
+            },
+            {
+              "name": "normalizesNONEAsZeroRate",
+              "status": "PASS"
+            },
+            {
+              "name": "marksNullOrMissingRateAsNonComparable",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.service.ScheduledReminderIntegrationTest",
+          "tests": 12,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "scheduleWaitsForChosenHourAndNewLinkNeedsFreshConsent",
+              "status": "PASS"
+            },
+            {
+              "name": "separateWorkerCredentialSessionCsrfAndNoFinancialAuthority",
+              "status": "PASS"
+            },
+            {
+              "name": "confirmedDeliveryIsIdempotentAndReadingDoesNotMeanSent",
+              "status": "PASS"
+            },
+            {
+              "name": "concurrentScansAndReservationsHaveOneWinner",
+              "status": "PASS"
+            },
+            {
+              "name": "rateLimitBackoffPermanentFailureAndUnknownTimeout",
+              "status": "PASS"
+            },
+            {
+              "name": "consentAndPlusRevocationAreCheckedBeforeDispatch",
+              "status": "PASS"
+            },
+            {
+              "name": "lateEventsExpireAndRetryLimitStopsAutomaticDelivery",
+              "status": "PASS"
+            },
+            {
+              "name": "onlyExactMilestonesAndSharedInAppEvent",
+              "status": "PASS"
+            },
+            {
+              "name": "expiredDispatchIsAmbiguousAndReservedLeaseCanRecover",
+              "status": "PASS"
+            },
+            {
+              "name": "revalidationDetectsPaymentDateChangeAndUnlink",
+              "status": "PASS"
+            },
+            {
+              "name": "weeklyBriefingUsesSelectedWeekday",
+              "status": "PASS"
+            },
+            {
+              "name": "briefingHasIndependentKeyAndUsesCanonicalTotals",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.service.SentinelIntegrationTest",
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "confirmedProfileChangeEvaluatesAfterCommit",
+              "status": "PASS"
+            },
+            {
+              "name": "simultaneousApprovalConsumesOnlyOnce",
+              "status": "PASS"
+            },
+            {
+              "name": "anotherUserCannotApproveAndWorkerCannotAccessFinances",
+              "status": "PASS"
+            },
+            {
+              "name": "telegramNeedsSeparateConsentAndBackendRevalidatesNumbers",
+              "status": "PASS"
+            },
+            {
+              "name": "oneAlertPerEpisodeAndExplicitProposalOnly",
+              "status": "PASS"
+            },
+            {
+              "name": "missingDataAndStaleDataNeverProduceCriticalAlert",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.service.SimulationServiceTest",
+          "tests": 8,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "rejectsIncoherentDateAndPeriod",
+              "status": "PASS"
+            },
+            {
+              "name": "handlesZeroInterestRateDebt",
+              "status": "PASS"
+            },
+            {
+              "name": "handlesIndexedRateAsInsufficientData",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsCeroPlanUser",
+              "status": "PASS"
+            },
+            {
+              "name": "runsSuccessfulSimulationWithEvents",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsNegativeOrZeroAmounts",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsPastEventDate",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsDebtNotOwnedByUser",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.service.StrategyEngineTest",
+          "tests": 7,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "avalancheOrdersByComparableRateDescending",
+              "status": "PASS"
+            },
+            {
+              "name": "snowballOrdersByBalanceAscendingWithStableTieBreaker",
+              "status": "PASS"
+            },
+            {
+              "name": "avalancheTieBreakerUsesCreatedAtAndIdNotBalance",
+              "status": "PASS"
+            },
+            {
+              "name": "avalancheMarksNonComparableRatesAsInsufficientData",
+              "status": "PASS"
+            },
+            {
+              "name": "planPlusIncludesAllDebtsAdvancedProjectionsAndComparison",
+              "status": "PASS"
+            },
+            {
+              "name": "distributesExtraPaymentOnlyToPriorityOne",
+              "status": "PASS"
+            },
+            {
+              "name": "planCeroConsidersMaximumTwoDebtsAndHidesAdvancedDetails",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.service.UpcomingDueServiceTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "calculatesMilestonesAccurately",
+              "status": "PASS"
+            },
+            {
+              "name": "paidOrZeroBalanceDebtsExcludedFromUpcoming",
+              "status": "PASS"
+            },
+            {
+              "name": "paidDebtHasNoMilestone",
+              "status": "PASS"
+            },
+            {
+              "name": "ordersChronologicallyAscending",
+              "status": "PASS"
+            },
+            {
+              "name": "returnsDueForSpecificDebt",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.service.validation.DebtValidatorTest",
+          "tests": 22,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "requiresInterestRateWhenFamilyLoanHasInterest",
+              "status": "PASS"
+            },
+            {
+              "name": "acceptsFamilyLoanWithoutInterestAndWithoutInitialAmount",
+              "status": "PASS"
+            },
+            {
+              "name": "acceptsOtherObligationMinimalData",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsMissingOriginalDueDate",
+              "status": "PASS"
+            },
+            {
+              "name": "acceptsOverdueBillWithAgreement",
+              "status": "PASS"
+            },
+            {
+              "name": "acceptsInstallmentPurchaseWithFixedFee",
+              "status": "PASS"
+            },
+            {
+              "name": "acceptsRetailCreditWithFixedFinancialCostInsteadOfRate",
+              "status": "PASS"
+            },
+            {
+              "name": "acceptsStudyStageWithoutPeriodicPayment",
+              "status": "PASS"
+            },
+            {
+              "name": "requiresPaymentAndDueDateWhenPaymentExigible",
+              "status": "PASS"
+            },
+            {
+              "name": "acceptsVehicleLoanWithResidualValue",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsMissingModality",
+              "status": "PASS"
+            },
+            {
+              "name": "acceptsPesosAndUvrModalities",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsBalanceGreaterThanDisbursedAmount",
+              "status": "PASS"
+            },
+            {
+              "name": "acceptsValidPersonalLoan",
+              "status": "PASS"
+            },
+            {
+              "name": "allowsStatementDateAndDueDateSameDayWithoutArtificialDifferenceConstraint",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsZeroOrMissingCreditLimit",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsAvailableCreditGreaterThanCreditLimit",
+              "status": "PASS"
+            },
+            {
+              "name": "acceptsValidCreditCard",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsBlankName",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsNonZeroRateWhenRateTypeIsNone",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsNegativeOrZeroBalanceForNonCard",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsNullType",
+              "status": "PASS"
+            }
+          ]
+        }
+      ]
+    },
+    "postgres": {
+      "tests": 69,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "classes": [
+        {
+          "name": "com.ceroa.config.DashboardIntegrationTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "rejectsUnauthenticatedRequests",
+              "status": "PASS"
+            },
+            {
+              "name": "dashboardSummaryEndToEnd",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.config.DebtIntegrationTest",
+          "tests": 12,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "testAutoLoanEndToEnd",
+              "status": "PASS"
+            },
+            {
+              "name": "testCommercialAndInstallmentEndToEnd",
+              "status": "PASS"
+            },
+            {
+              "name": "testCreditCardEndToEnd",
+              "status": "PASS"
+            },
+            {
+              "name": "testFamilyAndOtherEndToEnd",
+              "status": "PASS"
+            },
+            {
+              "name": "testPersonalLoanEndToEnd",
+              "status": "PASS"
+            },
+            {
+              "name": "testEditDebtAuthorized_HU035",
+              "status": "PASS"
+            },
+            {
+              "name": "testPlanCeroDebtLimit",
+              "status": "PASS"
+            },
+            {
+              "name": "testMortgageEndToEnd",
+              "status": "PASS"
+            },
+            {
+              "name": "testStudentLoanEndToEnd",
+              "status": "PASS"
+            },
+            {
+              "name": "testOverdueBillEndToEnd",
+              "status": "PASS"
+            },
+            {
+              "name": "testConsultDebtDetailAndPayments_HU034",
+              "status": "PASS"
+            },
+            {
+              "name": "testDeleteDebtDefinitivelyWithPayments_HU036",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.config.McpIntegrationTest",
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "tokenCannotExpandScopeOrUseAdminTools",
+              "status": "PASS"
+            },
+            {
+              "name": "revokedExpiredAndInactiveOwnerTokensFail",
+              "status": "PASS"
+            },
+            {
+              "name": "unknownScopeCannotIssueAndOnlyHashIsStored",
+              "status": "PASS"
+            },
+            {
+              "name": "identityComesOnlyFromTokenAndInactiveOwnersAreRejected",
+              "status": "PASS"
+            },
+            {
+              "name": "tokenBudgetRejectsThirtyFirstRequest",
+              "status": "PASS"
+            },
+            {
+              "name": "otherOwnerCannotRevoke",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.config.MonthlyProgressIntegrationTest",
+          "tests": 1,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "capturesMutationsAndEnforcesOwnerAndPlanOnRead",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.config.PaymentIntegrationTest",
+          "tests": 7,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "testCrossUserAuthorization",
+              "status": "PASS"
+            },
+            {
+              "name": "testFullPaymentSetsDebtToPaid",
+              "status": "PASS"
+            },
+            {
+              "name": "testDeletePaymentEndToEnd",
+              "status": "PASS"
+            },
+            {
+              "name": "testCreatePaymentEndToEnd",
+              "status": "PASS"
+            },
+            {
+              "name": "lateInstallmentClearsOverdueAndDeletingItRestoresTheDueDate",
+              "status": "PASS"
+            },
+            {
+              "name": "testCreatePaymentValidations",
+              "status": "PASS"
+            },
+            {
+              "name": "testUpdatePaymentEndToEnd",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.config.ProfileIntegrationTest",
+          "tests": 17,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "updateProfileDoesNotChangeEmail",
+              "status": "PASS"
+            },
+            {
+              "name": "getProfileReturnsAuthenticatedUserData",
+              "status": "PASS"
+            },
+            {
+              "name": "getProfileWithoutAuthReturns401",
+              "status": "PASS"
+            },
+            {
+              "name": "verifyEmailChangeWithAlreadyUsedCodeFails",
+              "status": "PASS"
+            },
+            {
+              "name": "updateProfileWithUnderageBirthDateReturns422",
+              "status": "PASS"
+            },
+            {
+              "name": "requestEmailChangeWithValidEmailReturnsRequestId",
+              "status": "PASS"
+            },
+            {
+              "name": "verifyEmailChangeWithCorrectCodeUpdatesEmail",
+              "status": "PASS"
+            },
+            {
+              "name": "verifyEmailChangeWithWrongCodeDoesNotUpdateEmail",
+              "status": "PASS"
+            },
+            {
+              "name": "updateProfileWithBlankFullNameReturns400",
+              "status": "PASS"
+            },
+            {
+              "name": "updateProfileWithValidDataSucceeds",
+              "status": "PASS"
+            },
+            {
+              "name": "updateProfileWithInvalidPhoneReturns400",
+              "status": "PASS"
+            },
+            {
+              "name": "requestEmailChangeWithSameEmailReturns422",
+              "status": "PASS"
+            },
+            {
+              "name": "updateProfileWithWhitespaceOnlyFullNameReturns400",
+              "status": "PASS"
+            },
+            {
+              "name": "updateProfileWithFutureBirthDateReturns422",
+              "status": "PASS"
+            },
+            {
+              "name": "verifyEmailChangeWithExpiredRequestFails",
+              "status": "PASS"
+            },
+            {
+              "name": "oldEmailRemainsActiveAfterRequestButBeforeVerify",
+              "status": "PASS"
+            },
+            {
+              "name": "requestEmailChangeWithInvalidEmailReturns400",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.config.StrategyIntegrationTest",
+          "tests": 5,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "hu039_changeStrategySuccessfullyAndEnforcesInvariance",
+              "status": "PASS"
+            },
+            {
+              "name": "hu041_planPlusGetsFullStrategyWithProjectionsAndComparison",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectsUnauthenticatedRequests",
+              "status": "PASS"
+            },
+            {
+              "name": "manualPriorityPersistsAndCanBeReset",
+              "status": "PASS"
+            },
+            {
+              "name": "hu040_planCeroGetsBasicStrategyWithoutPlusDetails",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.config.SubscriptionPersistenceIntegrationTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "confirmedCancellationPreservesPaidAccessAndDoesNotReactivate",
+              "status": "PASS"
+            },
+            {
+              "name": "staleBillingSnapshotCannotMoveTheBoundaryBackwards",
+              "status": "PASS"
+            },
+            {
+              "name": "activationRenewalAndOldChargeReplayKeepDurableProof",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectedChargeCannotGrantAccessOrCreateReceipt",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.config.SupportBookingIntegrationTest",
+          "tests": 6,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "confirmedProviderProofIsRequiredAndConfirmIsIdempotent",
+              "status": "PASS"
+            },
+            {
+              "name": "secondReservationCannotTakeSameSlot",
+              "status": "PASS"
+            },
+            {
+              "name": "expiredProposalAndOccupiedSlotCannotCreate",
+              "status": "PASS"
+            },
+            {
+              "name": "ambiguousCancellationRequiresProviderProofAndNeverRepeatsDelete",
+              "status": "PASS"
+            },
+            {
+              "name": "proposalDoesNotCreateAndOtherOwnerCannotConfirm",
+              "status": "PASS"
+            },
+            {
+              "name": "ambiguousCreateIsHeldAndNeverAutomaticallyRepeated",
+              "status": "PASS"
+            }
+          ]
+        },
+        {
+          "name": "com.ceroa.config.WorkspaceEventIntegrationTest",
+          "tests": 9,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "ambiguityNeverRetriesGmailButDoesNotBlockOtherMail",
+              "status": "PASS"
+            },
+            {
+              "name": "sheetsFailureLeavesProjectionPendingWithoutReopeningTheEmail",
+              "status": "PASS"
+            },
+            {
+              "name": "browserSessionCannotImpersonateTheWorkspaceWorker",
+              "status": "PASS"
+            },
+            {
+              "name": "duplicatesAreNotSentAndRepeatedAcknowledgementIsIdempotent",
+              "status": "PASS"
+            },
+            {
+              "name": "leaseRecoveryDistinguishesBeforeAndAfterDispatch",
+              "status": "PASS"
+            },
+            {
+              "name": "changedRecipientCancelsRatherThanRedirecting",
+              "status": "PASS"
+            },
+            {
+              "name": "financialEmailRequiresAnOwnedUnexpiredConfirmationAndQueuesOnce",
+              "status": "PASS"
+            },
+            {
+              "name": "expiredConfirmationCannotGenerateAnEvent",
+              "status": "PASS"
+            },
+            {
+              "name": "outboxParticipatesInTheRegistrationTransaction",
+              "status": "PASS"
+            }
+          ]
+        }
+      ]
+    },
+    "hybrid": {
+      "tests": 27,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "classes": [
+        {
+          "name": "com.ceroa.config.HybridDocumentIntegrationTest",
+          "tests": 27,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "scannedPdfIsStoredForReviewWithoutInventingText",
+              "status": "PASS"
+            },
+            {
+              "name": "fileOnlyUploadExtractsSearchableMetadataAndPreservesManualCorrections",
+              "status": "PASS"
+            },
+            {
+              "name": "replacementKeepsIdentityArchivesOriginalAndRebuildsOnlyCurrentChunks",
+              "status": "PASS"
+            },
+            {
+              "name": "duplicateUpdateDeleteAndObsoleteCallbacksKeepIndexConsistent",
+              "status": "PASS"
+            },
+            {
+              "name": "recordComparableDocumentFactRetrievalMeasurements",
+              "status": "PASS"
+            },
+            {
+              "name": "connectorsResolveFixedOwnerAndNeverAcceptWebSessionsAsConnectorCredentials",
+              "status": "PASS"
+            },
+            {
+              "name": "selectedDocumentSearchNeverReturnsAnotherIndexedFile",
+              "status": "PASS"
+            },
+            {
+              "name": "expiredLeaseRejectsStaleAttempt",
+              "status": "PASS"
+            },
+            {
+              "name": "syntheticPdfAndWorkbookPersistIndexReprocessAndDelete",
+              "status": "PASS"
+            },
+            {
+              "name": "lexicalFallbackAndCrossMonthOverlapUseTheSameScope",
+              "status": "PASS"
+            },
+            {
+              "name": "unknownIdentificationIsNeverInventedAndMissingEvidenceIsExplicit",
+              "status": "PASS"
+            },
+            {
+              "name": "explicitGrantFiltersCCAndPeriodBeforeRanking",
+              "status": "PASS"
+            },
+            {
+              "name": "promptInjectionStaysEvidenceAndCannotMutateFinancesOrSelectIdentity",
+              "status": "PASS"
+            },
+            {
+              "name": "failedStorageDeletionLeavesNonSearchableRetryableTombstone",
+              "status": "PASS"
+            },
+            {
+              "name": "nativeSupabaseGatewayDeniesFinancialTablesAndSessionCredentials",
+              "status": "PASS"
+            },
+            {
+              "name": "realMigrationsAreValidAndIdempotent",
+              "status": "PASS"
+            },
+            {
+              "name": "telegramReplacementHistoryDownloadDeletionAndDeliveryRevocation",
+              "status": "PASS"
+            },
+            {
+              "name": "telegramDuplicateUploadsMalformedCommandsAndForeignGroupsCannotMutateDocuments",
+              "status": "PASS"
+            },
+            {
+              "name": "approvedDriveVersionsReuseQueueAndInvalidateObsoleteChunks",
+              "status": "PASS"
+            },
+            {
+              "name": "telegramDocumentsRequireConsentAndUseSamePrivateLibraryAndFilters",
+              "status": "PASS"
+            },
+            {
+              "name": "invalidModelVectorAndMetadataEvidenceRollbackAllChunks",
+              "status": "PASS"
+            },
+            {
+              "name": "duplicateReplacementAndMissingConsentCannotOverwriteAnotherDocument",
+              "status": "PASS"
+            },
+            {
+              "name": "ownershipAndAdminRoleWithoutGrantCannotReadOrDownload",
+              "status": "PASS"
+            },
+            {
+              "name": "financialFactsPersistWithEvidenceAndCannotCrossOwnersOrVersions",
+              "status": "PASS"
+            },
+            {
+              "name": "temporaryDownloadRequiresSessionOwnerTicketAndLiveResource",
+              "status": "PASS"
+            },
+            {
+              "name": "backendTotalsAndOwnerScopeRemainSeparateFromAdministrativeDocuments",
+              "status": "PASS"
+            },
+            {
+              "name": "relevantVectorsAreRankedAndSyntheticLatencyIsBounded",
+              "status": "PASS"
+            }
+          ]
+        }
+      ]
+    },
+    "assistantSupplement": {
+      "tests": 21,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "classes": [
+        {
+          "name": "com.ceroa.config.AssistantIntegrationTest",
+          "tests": 21,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "highestInterestComparesEquivalentRatesInsteadOfBalances",
+              "status": "PASS"
+            },
+            {
+              "name": "unverifiedModelReplyIsNeverReturnedAsFinancialTruth",
+              "status": "PASS"
+            },
+            {
+              "name": "completionCredentialIsNotAWebSessionAndCannotWriteFinances",
+              "status": "PASS"
+            },
+            {
+              "name": "toolCredentialCannotBypassWebSessionOrCsrf",
+              "status": "PASS"
+            },
+            {
+              "name": "simpleUpcomingAndStrategyAvoidTheWebhook",
+              "status": "PASS"
+            },
+            {
+              "name": "analysisUsesOnlySessionEvidenceAndBackendArithmetic",
+              "status": "PASS"
+            },
+            {
+              "name": "preparedAudioUsesTheSameEvidenceAndCorrectionContractAsText",
+              "status": "PASS"
+            },
+            {
+              "name": "advisoryInformationDoesNotRequireCalendar",
+              "status": "PASS"
+            },
+            {
+              "name": "writesAndUnknownIntentsNeverExecuteMutations",
+              "status": "PASS"
+            },
+            {
+              "name": "telegramAnalysisUsesLinkedAccountAndDeliveryIsRevokedAfterUnlink",
+              "status": "PASS"
+            },
+            {
+              "name": "invalidDraftCanBeCorrectedWithoutReissuingFinancialReads",
+              "status": "PASS"
+            },
+            {
+              "name": "followupKeepsTheRequestedYearWithoutTreatingOldAnswersAsFreshEvidence",
+              "status": "PASS"
+            },
+            {
+              "name": "invalidAudioIsRejectedBeforeCallingWorkflow",
+              "status": "PASS"
+            },
+            {
+              "name": "assistantProposalRequiresUserConfirmationBeforeSyntheticCalendarCreation",
+              "status": "PASS"
+            },
+            {
+              "name": "financeCannotActivateSupportFallbackAndFailedParserCannotProduceAnAcceptedBalance",
+              "status": "PASS"
+            },
+            {
+              "name": "hypotheticalAmountsRemainClearlyMarkedUserInputs",
+              "status": "PASS"
+            },
+            {
+              "name": "analysisRejectsInventedAmountsAndFabricatedEvidence",
+              "status": "PASS"
+            },
+            {
+              "name": "multiagentScopesPreserveAccountEvidenceAndRejectEscalation",
+              "status": "PASS"
+            },
+            {
+              "name": "requestIsBoundToItsSessionOwnerAndExpiresAfterCompletion",
+              "status": "PASS"
+            },
+            {
+              "name": "disabledAccountAndArbitraryToolsAreRejected",
+              "status": "PASS"
+            },
+            {
+              "name": "requestsAreLimitedPerAccount",
+              "status": "PASS"
+            }
+          ]
+        }
+      ]
+    },
+    "subscriptionSupplement": {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "classes": [
+        {
+          "name": "com.ceroa.config.SubscriptionPersistenceIntegrationTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "confirmedCancellationPreservesPaidAccessAndDoesNotReactivate",
+              "status": "PASS"
+            },
+            {
+              "name": "staleBillingSnapshotCannotMoveTheBoundaryBackwards",
+              "status": "PASS"
+            },
+            {
+              "name": "activationRenewalAndOldChargeReplayKeepDurableProof",
+              "status": "PASS"
+            },
+            {
+              "name": "rejectedChargeCannotGrantAccessOrCreateReceipt",
+              "status": "PASS"
+            }
+          ]
+        }
+      ]
+    },
+    "native": {
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "classes": [
+        {
+          "name": "com.ceroa.config.MultiagentEndToEndTest",
+          "tests": 2,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            {
+              "name": "webRequestDelegatesAndReturnsServerValidatedFreshFinancialEvidence",
+              "status": "PASS"
+            },
+            {
+              "name": "unknownIntentAbstainsThroughBothServicesWithoutCallingSpecialists",
+              "status": "PASS"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

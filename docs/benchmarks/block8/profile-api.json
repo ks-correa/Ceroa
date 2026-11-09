@@ -1,0 +1,9 @@
+{
+  "scope": "Financial profile API -> Spring -> isolated PostgreSQL",
+  "createUpdateRead": "PASS",
+  "invalidUpdatePreservesState": "PASS",
+  "ownerIsolation": "PASS",
+  "unauthenticatedRead": "REJECTED",
+  "browserE2E": false,
+  "externalProviders": false
+}

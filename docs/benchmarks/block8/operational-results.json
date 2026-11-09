@@ -1,0 +1,51 @@
+{
+  "node": {
+    "tests": 47,
+    "passed": 47,
+    "failures": 0
+  },
+  "frontend": {
+    "tests": 190,
+    "passed": 190,
+    "typescript": "PASS",
+    "vite": "PASS"
+  },
+  "workspaceNative": {
+    "scenarios": [
+      "success",
+      "ambiguous",
+      "changed",
+      "empty"
+    ],
+    "result": "PASS",
+    "provider": "SIMULATED_HTTP"
+  },
+  "backup": {
+    "n8nVersion": "2.40.7",
+    "offlineIntegrity": "PASS",
+    "workflows": 30,
+    "originalActive": 15,
+    "quarantinedActive": 0,
+    "registeredWebhooksAfterQuarantine": 0,
+    "credentialDecryptionCount": 22,
+    "n8nStarted": false,
+    "network": "none",
+    "authenticatedRoundTrip": "PASS",
+    "tamperedCiphertext": "REJECTED",
+    "incorrectKey": "REJECTED"
+  },
+  "securityBaseline": {
+    "commit": "337802e",
+    "tests": 11,
+    "failedBeforeFix": 10,
+    "finalFailures": 0,
+    "scope": "Same FinancialClaimGroundingTest class, independent checkout"
+  },
+  "secretScan": {
+    "scope": "Tracked text files, high-confidence patterns; not a complete historical audit",
+    "findings": 0
+  },
+  "productionWorkflowMutation": false,
+  "push": false,
+  "merge": false
+}

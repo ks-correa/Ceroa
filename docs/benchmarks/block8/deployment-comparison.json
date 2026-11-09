@@ -1,0 +1,13 @@
+{
+  "backend": {
+    "comparedClasses": 394,
+    "baselineCommit": "337802e",
+    "missingClasses": [],
+    "changedClasses": []
+  },
+  "frontend": {
+    "sourceMatches": true,
+    "normalization": "LF/CRLF only difference in App.tsx"
+  },
+  "conversationalProfileMatches": true
+}

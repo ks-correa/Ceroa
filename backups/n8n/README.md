@@ -1,6 +1,23 @@
 # Respaldo privado de n8n
 
-## Exportación actual verificada
+## Estado comprobado el 9 de noviembre de 2026
+
+El runtime observado es **n8n 2.40.7**, con 30 workflows, 15 publicados/activos,
+15 inactivos y 22 credenciales. Las referencias de versión y los conteos que
+siguen corresponden a respaldos históricos; no describen el runtime actual.
+No se debe restaurar una base de una versión distinta sin comprobar compatibilidad.
+
+El respaldo nuevo está fuera de Git, en
+`%USERPROFILE%\.ceroa-backups\n8n-block8-2026-11-09.ceroa`; su clave externa
+está en `%USERPROFILE%\.ceroa-backup-keys\block8-verified-2026-11-09.key`.
+La recuperación se comprobó sin red, sin arrancar n8n y poniendo primero en
+cuarentena los workflows y webhooks de la copia. Conserva ambos archivos en
+medios privados separados. El respaldo de n8n no incluye la base financiera.
+
+Consulta el [informe del Bloque 8](../../docs/BLOQUE-8-CONSOLIDACION-2026-11-09.md)
+para el procedimiento selectivo, la evidencia y los límites de restauración.
+
+## Exportación histórica verificada (4 de noviembre de 2026)
 
 `ceroa-n8n-live-2026-11-04.ceroa` es el respaldo recomendado, exportado
 directamente desde n8n 2.45.4 en Docker el 4 de noviembre de 2026.

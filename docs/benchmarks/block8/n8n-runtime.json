@@ -1,0 +1,891 @@
+{
+  "capturedAt": "2026-11-09T19:05:51.601Z",
+  "total": 30,
+  "active": 15,
+  "published": 15,
+  "inactive": 15,
+  "unpublished": 15,
+  "credentials": 22,
+  "workflows": [
+    {
+      "id": "4nrq5JNFp8i4aJVZ",
+      "name": "My workflow",
+      "active": false,
+      "published": false,
+      "versionId": "7c3ace85-dcd0-46a8-8f67-796877cd2e6d",
+      "activeVersionId": null,
+      "draftDiffersFromPublished": false,
+      "nodesHash": "42a341238c57af2026798dcd50cfbf42ea90eed22eed3a4c4dd1688bfe51f655",
+      "connectionsHash": "c2024635a709643914df113c2d2605e0422a3435ac1a565791cf405a20c4b6ba",
+      "settingsHash": "3b1c5701e4da7574a24a0b442c2345ec25493d8d5e4d44f7cb5663c7ba56e581",
+      "registeredWebhooks": 0,
+      "subworkflows": [],
+      "credentialReferences": 3,
+      "missingCredentialReferences": 0,
+      "triggers": [
+        {
+          "type": "n8n-nodes-base.googleDriveTrigger",
+          "disabled": false,
+          "eligibleWhenPublished": false
+        }
+      ]
+    },
+    {
+      "id": "ceroaBlock5DriveValidation50",
+      "name": "Ceroa - Bloque 5 - un archivo sintetico",
+      "active": false,
+      "published": false,
+      "versionId": "34af163e-18d9-4155-b66c-0d9fe70a2c96",
+      "activeVersionId": null,
+      "draftDiffersFromPublished": false,
+      "nodesHash": "db374fb6daa576ef43f3e6917990cc69c45f113e5c778286234eecaaaee68099",
+      "connectionsHash": "d46d3432e55958a7d0ef71c8c041852eee69764ff9730648d103a136f2160f94",
+      "settingsHash": "6985bbe3e5fa7704add124a1f0b2270c87e36af4d1b3d0737caf2a2476e28c7c",
+      "registeredWebhooks": 0,
+      "subworkflows": [],
+      "credentialReferences": 4,
+      "missingCredentialReferences": 0,
+      "triggers": [
+        {
+          "type": "n8n-nodes-base.manualTrigger",
+          "disabled": false,
+          "eligibleWhenPublished": false
+        }
+      ]
+    },
+    {
+      "id": "ceroaCalendarMeetVerification44",
+      "name": "Ceroa - Meet real autorizado (manual)",
+      "active": false,
+      "published": false,
+      "versionId": "6f9091ae-2dee-4064-b1df-bc1ea622e845",
+      "activeVersionId": null,
+      "draftDiffersFromPublished": false,
+      "nodesHash": "6d2a756242de3a4ab2b9a23f5ef7b319b52cf0bfde7ad198a34f700fbcc3f402",
+      "connectionsHash": "d49e570a270f2e83ebc93316408815d099f009b8c22c81bf9f499029632a6c92",
+      "settingsHash": "6985bbe3e5fa7704add124a1f0b2270c87e36af4d1b3d0737caf2a2476e28c7c",
+      "registeredWebhooks": 0,
+      "subworkflows": [],
+      "credentialReferences": 2,
+      "missingCredentialReferences": 0,
+      "triggers": [
+        {
+          "type": "n8n-nodes-base.manualTrigger",
+          "disabled": false,
+          "eligibleWhenPublished": false
+        }
+      ]
+    },
+    {
+      "id": "ceroaCalendarVerification43",
+      "name": "Ceroa - Calendar configuracion y disponibilidad (manual)",
+      "active": false,
+      "published": false,
+      "versionId": "f5af2d24-78d2-4d3a-b0ac-577d2e8313e0",
+      "activeVersionId": null,
+      "draftDiffersFromPublished": false,
+      "nodesHash": "86156ddd6323b00222bdb5b90e0bacec8dd54f0609436db7ab41633037959609",
+      "connectionsHash": "74a8f37eee231da603dcb3e10a4161a05785e4bd4e544b8e6cdca82cc4ba26b3",
+      "settingsHash": "6985bbe3e5fa7704add124a1f0b2270c87e36af4d1b3d0737caf2a2476e28c7c",
+      "registeredWebhooks": 0,
+      "subworkflows": [],
+      "credentialReferences": 3,
+      "missingCredentialReferences": 0,
+      "triggers": [
+        {
+          "type": "n8n-nodes-base.manualTrigger",
+          "disabled": false,
+          "eligibleWhenPublished": false
+        }
+      ]
+    },
+    {
+      "id": "ceroaDocumentProcessor22",
+      "name": "Ceroa - Biblioteca - Procesador compartido",
+      "active": true,
+      "published": true,
+      "versionId": "2defb931-634e-45e1-be3f-51324c9dad64",
+      "activeVersionId": "2defb931-634e-45e1-be3f-51324c9dad64",
+      "draftDiffersFromPublished": false,
+      "nodesHash": "63d846ffb61becdd29a1f28f3a7a7e8007f4d0b13afd74b880530271d11148b8",
+      "connectionsHash": "b88bed9c54366241bf75e376d3378255ad72e5cfa2e15143b992c243ff361ec3",
+      "settingsHash": "a248724d56d7ca6261f4447b8547ce28a6a2fcbec843fe190e36125a8a723952",
+      "registeredWebhooks": 0,
+      "subworkflows": [],
+      "credentialReferences": 6,
+      "missingCredentialReferences": 0,
+      "triggers": [
+        {
+          "type": "n8n-nodes-base.executeWorkflowTrigger",
+          "disabled": false,
+          "eligibleWhenPublished": true
+        }
+      ]
+    },
+    {
+      "id": "ceroaDocuments02",
+      "name": "RA-N8N-002 - Borrador desde documentos",
+      "active": true,
+      "published": true,
+      "versionId": "6eebf96e-edca-41a6-94f2-13a6de72fb60",
+      "activeVersionId": "6eebf96e-edca-41a6-94f2-13a6de72fb60",
+      "draftDiffersFromPublished": false,
+      "nodesHash": "1065a16515184c7b4ed3c40a974840b44cbe2e2a6143b15cdc408520fd70686a",
+      "connectionsHash": "3cb8a68a9642c2a21ee25ef718c51749285b1b24966cd3149e1ad6e2283f4d9e",
+      "settingsHash": "97b69c83719de02aef163e6fca6f80a7b2e8d3230f6663710ec09e7907c5b7bf",
+      "registeredWebhooks": 1,
+      "subworkflows": [],
+      "credentialReferences": 3,
+      "missingCredentialReferences": 0,
+      "triggers": [
+        {
+          "type": "n8n-nodes-base.webhook",
+          "disabled": false,
+          "eligibleWhenPublished": true
+        },
+        {
+          "type": "n8n-nodes-base.respondToWebhook",
+          "disabled": false,
+          "eligibleWhenPublished": true
+        },
+        {
+          "type": "n8n-nodes-base.respondToWebhook",
+          "disabled": false,
+          "eligibleWhenPublished": true
+        }
+      ]
+    },
+    {
+      "id": "ceroaFinancialAgent30",
+      "name": "Ceroa - Agente Financiero",
+      "active": true,
+      "published": true,
+      "versionId": "520acb92-ef49-4342-916b-9159ffa499b1",
+      "activeVersionId": "520acb92-ef49-4342-916b-9159ffa499b1",
+      "draftDiffersFromPublished": false,
+      "nodesHash": "ea9a7ff31406ed492a22ce47d249141648db2000f8ba33b2d1b99abf5111ea86",
+      "connectionsHash": "355dd211597435bbfec61830e769d52d6ad556d78005fd8f2237ba4a457d871a",
+      "settingsHash": "6d057bb73e108017b36942398bbb04fe713f8f51c500d3618299628c08cc0bde",
+      "registeredWebhooks": 0,
+      "subworkflows": [],
+      "credentialReferences": 10,
+      "missingCredentialReferences": 0,
+      "triggers": [
+        {
+          "type": "n8n-nodes-base.executeWorkflowTrigger",
+          "disabled": false,
+          "eligibleWhenPublished": true
+        }
+      ]
+    },
+    {
+      "id": "ceroaGeminiVerification42",
+      "name": "Ceroa - Verificacion Gemini (manual sintetica)",
+      "active": false,
+      "published": false,
+      "versionId": "9547195a-2791-4fff-bcb6-5c44ae09dd13",
+      "activeVersionId": null,
+      "draftDiffersFromPublished": false,
+      "nodesHash": "3ec67bdf3f49e35645f3389d6e0a3e49b669581d498a0162d7a9951d68f08933",
+      "connectionsHash": "ae83c7d2a878dabd8e490ef4f37fb0085fb237f26a5dbacaee4e94289c76ad64",
+      "settingsHash": "6985bbe3e5fa7704add124a1f0b2270c87e36af4d1b3d0737caf2a2476e28c7c",
+      "registeredWebhooks": 0,
+      "subworkflows": [],
+      "credentialReferences": 1,
+      "missingCredentialReferences": 0,
+      "triggers": [
+        {
+          "type": "n8n-nodes-base.manualTrigger",
+          "disabled": false,
+          "eligibleWhenPublished": false
+        }
+      ]
+    },
+    {
+      "id": "ceroaGoogleVerification41",
+      "name": "Ceroa - Prueba Google autorizada (manual)",
+      "active": false,
+      "published": false,
+      "versionId": "f5b3fb25-f0b6-4cbd-bf26-c1c4b3b3a4c1",
+      "activeVersionId": null,
+      "draftDiffersFromPublished": false,
+      "nodesHash": "c30e8f7b825ef23634cdf2943b9282eadf5a75fe5460a968319c3e121fb8b5e2",
+      "connectionsHash": "aaf2e0e621c18c96b80b705c4e20a56bfbf5cf2a6d1ece19bcdc4250270bbb48",
+      "settingsHash": "6985bbe3e5fa7704add124a1f0b2270c87e36af4d1b3d0737caf2a2476e28c7c",
+      "registeredWebhooks": 0,
+      "subworkflows": [],
+      "credentialReferences": 1,
+      "missingCredentialReferences": 0,
+      "triggers": [
+        {
+          "type": "n8n-nodes-base.manualTrigger",
+          "disabled": false,
+          "eligibleWhenPublished": false
+        }
+      ]
+    },
+    {
+      "id": "ceroaHybridQuery20",
+      "name": "Ceroa - Asistente - Orquestador multiagente",
+      "active": true,
+      "published": true,
+      "versionId": "7afdd145-d6e3-4ff7-83e4-8a3481c93819",
+      "activeVersionId": "7afdd145-d6e3-4ff7-83e4-8a3481c93819",
+      "draftDiffersFromPublished": false,
+      "nodesHash": "a9bc9353d3e3747bd1b0ee28d011ddc3e4f0a9d356805fe2ab028ec7aaa5dcf1",
+      "connectionsHash": "38358ae312c2a71f6af2449ce69ffb67592f36f4094f92c6360ecb9990e8a437",
+      "settingsHash": "a84b994e34a808707fbcd22a89d1fed2becf80c550bb67fa7fa45e7d6cbcec55",
+      "registeredWebhooks": 1,
+      "subworkflows": [
+        {
+          "id": "ceroaFinancialAgent30",
+          "exists": true,
+          "dynamic": false
+        },
+        {
+          "id": "ceroaKnowledgeAgent30",
+          "exists": true,
+          "dynamic": false
+        },
+        {
+          "id": "ceroaSupportAgent30",
+          "exists": true,
+          "dynamic": false
+        }
+      ],
+      "credentialReferences": 9,
+      "missingCredentialReferences": 0,
+      "triggers": [
+        {
+          "type": "n8n-nodes-base.webhook",
+          "disabled": false,
+          "eligibleWhenPublished": true
+        },
+        {
+          "type": "n8n-nodes-base.respondToWebhook",
+          "disabled": false,
+          "eligibleWhenPublished": true
+        },
+        {
+          "type": "n8n-nodes-base.respondToWebhook",
+          "disabled": false,
+          "eligibleWhenPublished": true
+        },
+        {
+          "type": "n8n-nodes-base.respondToWebhook",
+          "disabled": false,
+          "eligibleWhenPublished": true
+        },
+        {
+          "type": "n8n-nodes-base.respondToWebhook",
+          "disabled": false,
+          "eligibleWhenPublished": true
+        },
+        {
+          "type": "n8n-nodes-base.respondToWebhook",
+          "disabled": false,
+          "eligibleWhenPublished": true
+        },
+        {
+          "type": "n8n-nodes-base.respondToWebhook",
+          "disabled": false,
+          "eligibleWhenPublished": true
+        },
+        {
+          "type": "n8n-nodes-base.respondToWebhook",
+          "disabled": false,
+          "eligibleWhenPublished": true
+        },
+        {
+          "type": "n8n-nodes-base.respondToWebhook",
+          "disabled": false,
+          "eligibleWhenPublished": true
+        },
+        {
+          "type": "n8n-nodes-base.respondToWebhook",
+          "disabled": false,
+          "eligibleWhenPublished": true
+        },
+        {
+          "type": "n8n-nodes-base.respondToWebhook",
+          "disabled": false,
+          "eligibleWhenPublished": true
+        },
+        {
+          "type": "n8n-nodes-base.respondToWebhook",
+          "disabled": false,
+          "eligibleWhenPublished": true
+        },
+        {
+          "type": "n8n-nodes-base.respondToWebhook",
+          "disabled": false,
+          "eligibleWhenPublished": true
+        },
+        {
+          "type": "n8n-nodes-base.respondToWebhook",
+          "disabled": false,
+          "eligibleWhenPublished": true
+        }
+      ]
+    },
+    {
+      "id": "ceroaKnowledgeAgent30",
+      "name": "Ceroa - Agente Conocimiento y RAG",
+      "active": true,
+      "published": true,
+      "versionId": "8508338c-132d-4bc7-9708-0d659f2abfcd",
+      "activeVersionId": "8508338c-132d-4bc7-9708-0d659f2abfcd",
+      "draftDiffersFromPublished": false,
+      "nodesHash": "77475cf268b65ab7ffba46a68c0fc65de9686c9f058dd65bd7f9ecb3ee6720d5",
+      "connectionsHash": "6e6aa1dadb981d82f5da47f698cd8f2a1a4db1b2f00a85168bb003522fa96959",
+      "settingsHash": "4957189b41ff23a2410ef79a9ad96646d238cf012227ceb01a54a00dec7fa6fc",
+      "registeredWebhooks": 0,
+      "subworkflows": [],
+      "credentialReferences": 6,
+      "missingCredentialReferences": 0,
+      "triggers": [
+        {
+          "type": "n8n-nodes-base.executeWorkflowTrigger",
+          "disabled": false,
+          "eligibleWhenPublished": true
+        }
+      ]
+    },
+    {
+      "id": "ceroaMcpBackend40",
+      "name": "Ceroa - MCP backend personal autorizado",
+      "active": false,
+      "published": false,
+      "versionId": "3274a39e-222b-4921-bc9a-e5751542d412",
+      "activeVersionId": null,
+      "draftDiffersFromPublished": false,
+      "nodesHash": "9795256211979aaefa02de22a29aba3bc6ca961989551be09dc5ed49b5fe434b",
+      "connectionsHash": "9428339617a761adb5b8ebdc8adfed2577af2b56cab271efd60c58035b4bbfee",
+      "settingsHash": "6985bbe3e5fa7704add124a1f0b2270c87e36af4d1b3d0737caf2a2476e28c7c",
+      "registeredWebhooks": 0,
+      "subworkflows": [],
+      "credentialReferences": 0,
+      "missingCredentialReferences": 0,
+      "triggers": [
+        {
+          "type": "n8n-nodes-base.executeWorkflowTrigger",
+          "disabled": false,
+          "eligibleWhenPublished": false
+        }
+      ]
+    },
+    {
+      "id": "ceroaMcpClient40",
+      "name": "Ceroa - MCP cliente controlado",
+      "active": false,
+      "published": false,
+      "versionId": "8b9d4576-2b1b-456f-9d39-487a0110a9b3",
+      "activeVersionId": null,
+      "draftDiffersFromPublished": false,
+      "nodesHash": "9264e8171a0ce6098f20ddb5d9bba9a360cfdb69169cd80a9b754767c94579fe",
+      "connectionsHash": "d8c27618c0fa409f8a7d8b1cdb024a4c2b2cac2343b8beb2483aa8b5456718de",
+      "settingsHash": "35fbf3288951b8775756bd287d8c9ba030fd5778867348a531fa203db4283280",
+      "registeredWebhooks": 0,
+      "subworkflows": [],
+      "credentialReferences": 0,
+      "missingCredentialReferences": 0,
+      "triggers": [
+        {
+          "type": "n8n-nodes-base.executeWorkflowTrigger",
+          "disabled": false,
+          "eligibleWhenPublished": false
+        }
+      ]
+    },
+    {
+      "id": "ceroaMcpServer40",
+      "name": "Ceroa - MCP personal con scopes",
+      "active": false,
+      "published": false,
+      "versionId": "867d476f-4069-4504-b9b7-3edeed2364a8",
+      "activeVersionId": null,
+      "draftDiffersFromPublished": false,
+      "nodesHash": "decee67004f331ae33b192c918a16bfd2402d046ace53f9f22db5e86e13e515c",
+      "connectionsHash": "9b85e27d1616bf571c20cb3b92f7b6b3a02eaf038c235e7baa0f6e035e959bcb",
+      "settingsHash": "6985bbe3e5fa7704add124a1f0b2270c87e36af4d1b3d0737caf2a2476e28c7c",
+      "registeredWebhooks": 0,
+      "subworkflows": [
+        {
+          "id": "ceroaMcpBackend40",
+          "exists": true,
+          "dynamic": false
+        },
+        {
+          "id": "ceroaMcpBackend40",
+          "exists": true,
+          "dynamic": false
+        },
+        {
+          "id": "ceroaMcpBackend40",
+          "exists": true,
+          "dynamic": false
+        },
+        {
+          "id": "ceroaMcpBackend40",
+          "exists": true,
+          "dynamic": false
+        },
+        {
+          "id": "ceroaMcpBackend40",
+          "exists": true,
+          "dynamic": false
+        },
+        {
+          "id": "ceroaMcpBackend40",
+          "exists": true,
+          "dynamic": false
+        },
+        {
+          "id": "ceroaMcpBackend40",
+          "exists": true,
+          "dynamic": false
+        }
+      ],
+      "credentialReferences": 0,
+      "missingCredentialReferences": 0,
+      "triggers": [
+        {
+          "type": "@n8n/n8n-nodes-langchain.mcpTrigger",
+          "disabled": false,
+          "eligibleWhenPublished": false
+        }
+      ]
+    },
+    {
+      "id": "ceroaMcpSupport40",
+      "name": "Ceroa - MCP soporte con alcance",
+      "active": false,
+      "published": false,
+      "versionId": "d1514f31-2032-48eb-bc3f-9a73d3ce8670",
+      "activeVersionId": null,
+      "draftDiffersFromPublished": false,
+      "nodesHash": "85f7e7e9237d13d67e90292a2d2c7d91ac93f18b888f1a0fe12aa2058bf33ac4",
+      "connectionsHash": "fafe7044ce1a9f61eb1ec057de53ec5e9d06db88b5ecd812a848863d72ad154c",
+      "settingsHash": "35fbf3288951b8775756bd287d8c9ba030fd5778867348a531fa203db4283280",
+      "registeredWebhooks": 0,
+      "subworkflows": [],
+      "credentialReferences": 0,
+      "missingCredentialReferences": 0,
+      "triggers": [
+        {
+          "type": "n8n-nodes-base.executeWorkflowTrigger",
+          "disabled": false,
+          "eligibleWhenPublished": false
+        }
+      ]
+    },
+    {
+      "id": "ceroaOcr21",
+      "name": "Ceroa - RAG - OCR con Gemini",
+      "active": true,
+      "published": true,
+      "versionId": "a658aa93-9b87-48b0-8211-fc9802f361b9",
+      "activeVersionId": "a658aa93-9b87-48b0-8211-fc9802f361b9",
+      "draftDiffersFromPublished": false,
+      "nodesHash": "d87e0bd8cf3b80e07d357e06b7ef9b38765edc11c7b99d5578bbf5afdbf0051f",
+      "connectionsHash": "b04b8c780dda9bf5d4d9a7855cc668633156832fef74161955800a9f3477c6cc",
+      "settingsHash": "b34275f6f7b55ae1210255ef14568610fa8bf9f7c3efb80e94e53000939210b8",
+      "registeredWebhooks": 1,
+      "subworkflows": [],
+      "credentialReferences": 3,
+      "missingCredentialReferences": 0,
+      "triggers": [
+        {
+          "type": "n8n-nodes-base.webhook",
+          "disabled": false,
+          "eligibleWhenPublished": true
+        },
+        {
+          "type": "n8n-nodes-base.respondToWebhook",
+          "disabled": false,
+          "eligibleWhenPublished": true
+        },
+        {
+          "type": "n8n-nodes-base.respondToWebhook",
+          "disabled": false,
+          "eligibleWhenPublished": true
+        },
+        {
+          "type": "n8n-nodes-base.respondToWebhook",
+          "disabled": false,
+          "eligibleWhenPublished": true
+        },
+        {
+          "type": "n8n-nodes-base.respondToWebhook",
+          "disabled": false,
+          "eligibleWhenPublished": true
+        },
+        {
+          "type": "n8n-nodes-base.respondToWebhook",
+          "disabled": false,
+          "eligibleWhenPublished": true
+        }
+      ]
+    },
+    {
+      "id": "ceroaRagEmbedding03",
+      "name": "RA-N8N-003 - Embeddings privados",
+      "active": true,
+      "published": true,
+      "versionId": "948af776-d9f3-408b-9ea7-f6679098e7af",
+      "activeVersionId": "948af776-d9f3-408b-9ea7-f6679098e7af",
+      "draftDiffersFromPublished": false,
+      "nodesHash": "1739d8aec0651fb22b9c8ff217eeaac62e0874b46f0c96c7e5d287c3b02e1c85",
+      "connectionsHash": "66a85d57e8f16dddbef51411fb6db7fcb123235d6401288dc64bea3c465bc854",
+      "settingsHash": "77745351d242b1f48761508b1716be1d6d657f0b25326a75f3f1430ba814817f",
+      "registeredWebhooks": 1,
+      "subworkflows": [],
+      "credentialReferences": 2,
+      "missingCredentialReferences": 0,
+      "triggers": [
+        {
+          "type": "n8n-nodes-base.webhook",
+          "disabled": false,
+          "eligibleWhenPublished": true
+        },
+        {
+          "type": "n8n-nodes-base.respondToWebhook",
+          "disabled": false,
+          "eligibleWhenPublished": true
+        },
+        {
+          "type": "n8n-nodes-base.respondToWebhook",
+          "disabled": false,
+          "eligibleWhenPublished": true
+        }
+      ]
+    },
+    {
+      "id": "ceroaRagIndex03",
+      "name": "RA-N8N-003 - Indexación administrativa aprobada",
+      "active": false,
+      "published": false,
+      "versionId": "44066bae-494a-4552-94a8-defff6cdb06a",
+      "activeVersionId": null,
+      "draftDiffersFromPublished": false,
+      "nodesHash": "86a6f9f77a955951777111f22379186580a9e7aefcbdcea47eec6c77e6c02f54",
+      "connectionsHash": "e47ac0195dc01479e1ae73864bd20615082b6a0e434799435f78adad3a022ab1",
+      "settingsHash": "77745351d242b1f48761508b1716be1d6d657f0b25326a75f3f1430ba814817f",
+      "registeredWebhooks": 0,
+      "subworkflows": [],
+      "credentialReferences": 2,
+      "missingCredentialReferences": 0,
+      "triggers": [
+        {
+          "type": "n8n-nodes-base.manualTrigger",
+          "disabled": false,
+          "eligibleWhenPublished": false
+        }
+      ]
+    },
+    {
+      "id": "ceroaRagIngest20",
+      "name": "Ceroa - RAG - Ingestión documental",
+      "active": true,
+      "published": true,
+      "versionId": "a1c6938c-5098-4313-8815-bc40fc4553ec",
+      "activeVersionId": "a1c6938c-5098-4313-8815-bc40fc4553ec",
+      "draftDiffersFromPublished": false,
+      "nodesHash": "4e00cdac829de8a0eda72e4bcf2cbf1c46c2928ec96d42c4ac6c54da4356a5a4",
+      "connectionsHash": "6b2bbe933dd8960bd46013f8684b7bfadc66b64d6f75b07c7a56bfcf0d098e31",
+      "settingsHash": "a248724d56d7ca6261f4447b8547ce28a6a2fcbec843fe190e36125a8a723952",
+      "registeredWebhooks": 1,
+      "subworkflows": [
+        {
+          "id": "ceroaDocumentProcessor22",
+          "exists": true,
+          "dynamic": false
+        }
+      ],
+      "credentialReferences": 1,
+      "missingCredentialReferences": 0,
+      "triggers": [
+        {
+          "type": "n8n-nodes-base.webhook",
+          "disabled": false,
+          "eligibleWhenPublished": true
+        }
+      ]
+    },
+    {
+      "id": "ceroaRagSync20",
+      "name": "Ceroa - RAG - Sincronización documental",
+      "active": true,
+      "published": true,
+      "versionId": "5f965264-9ec6-4f1a-aef0-7520b4fe5071",
+      "activeVersionId": "5f965264-9ec6-4f1a-aef0-7520b4fe5071",
+      "draftDiffersFromPublished": false,
+      "nodesHash": "6b0510e561807e51b6f59d8b82e538f213df8eaaaf62d6283c21c8ae6060bf1f",
+      "connectionsHash": "6c803c17e42060d26868f446dff934c37c3526d10a4a663bfccb0a2620bb9538",
+      "settingsHash": "63bb31a9a49c3eec7a6c9388e3af9ba0db12850fd840212f9785a7e2478ab214",
+      "registeredWebhooks": 0,
+      "subworkflows": [
+        {
+          "id": "ceroaDocumentProcessor22",
+          "exists": true,
+          "dynamic": false
+        }
+      ],
+      "credentialReferences": 0,
+      "missingCredentialReferences": 0,
+      "triggers": [
+        {
+          "type": "n8n-nodes-base.scheduleTrigger",
+          "disabled": false,
+          "eligibleWhenPublished": true
+        }
+      ]
+    },
+    {
+      "id": "ceroaReminderError04",
+      "name": "RA-N8N-004 - Alerta operativa sin datos personales",
+      "active": true,
+      "published": true,
+      "versionId": "18f02cf9-2ae6-4141-a176-47be8f50e478",
+      "activeVersionId": "18f02cf9-2ae6-4141-a176-47be8f50e478",
+      "draftDiffersFromPublished": false,
+      "nodesHash": "7511dfa28a8135c9e8a7d79011003a8e3a0518adc2d1db9ff2307ae42d04af7f",
+      "connectionsHash": "4bf5c5850144a961925436b92157f2d424ec264293f2843012a872fd33691f41",
+      "settingsHash": "a880d6be0723b1d0479969a0fa3f111bc155320bddaa7655ad4d6becead50d5c",
+      "registeredWebhooks": 0,
+      "subworkflows": [],
+      "credentialReferences": 0,
+      "missingCredentialReferences": 0,
+      "triggers": [
+        {
+          "type": "n8n-nodes-base.errorTrigger",
+          "disabled": false,
+          "eligibleWhenPublished": true
+        }
+      ]
+    },
+    {
+      "id": "ceroaReminders04",
+      "name": "RA-N8N-004 - Recordatorios y briefing autorizados",
+      "active": true,
+      "published": true,
+      "versionId": "5c5a9af0-0dcd-42df-adff-deee49d77f40",
+      "activeVersionId": "5c5a9af0-0dcd-42df-adff-deee49d77f40",
+      "draftDiffersFromPublished": false,
+      "nodesHash": "dfe362f3fd0f3743bd63493827db2f6dbb7196f6ae54b258a3ee02f17f9153ce",
+      "connectionsHash": "8ed0666abe7bffcefd117f1af333d3ef8c90bb85f8880a58cf056e564d4bf7cc",
+      "settingsHash": "948ea6534dbf05012ed0e8c3ec937eaa54bd7e831d39d0bfbb0a4389d63e6be2",
+      "registeredWebhooks": 0,
+      "subworkflows": [],
+      "credentialReferences": 6,
+      "missingCredentialReferences": 0,
+      "triggers": [
+        {
+          "type": "n8n-nodes-base.scheduleTrigger",
+          "disabled": false,
+          "eligibleWhenPublished": true
+        }
+      ]
+    },
+    {
+      "id": "ceroaSentinel05",
+      "name": "RA-N8N-005 - Centinela de sobrecapacidad",
+      "active": true,
+      "published": true,
+      "versionId": "455a449f-b783-4415-8fcb-c7dd874469c4",
+      "activeVersionId": "455a449f-b783-4415-8fcb-c7dd874469c4",
+      "draftDiffersFromPublished": false,
+      "nodesHash": "dd1a969fad7ae227e18791ebe74da860870a27a93fa8e9845b38fb35c929b6ae",
+      "connectionsHash": "3f25be1220339d24ac3759d0bc4ecf9d9805ef5386d3159317167ac630465b02",
+      "settingsHash": "c7146aa720122d6aeea356cebcfe21d45d62998bf2070481929fedf588598b07",
+      "registeredWebhooks": 0,
+      "subworkflows": [],
+      "credentialReferences": 6,
+      "missingCredentialReferences": 0,
+      "triggers": [
+        {
+          "type": "n8n-nodes-base.scheduleTrigger",
+          "disabled": false,
+          "eligibleWhenPublished": true
+        }
+      ]
+    },
+    {
+      "id": "ceroaSentinelError05",
+      "name": "RA-N8N-005 - Error operativo sin datos personales",
+      "active": true,
+      "published": true,
+      "versionId": "69595ca6-69ea-47fd-9518-fdf8f21061bb",
+      "activeVersionId": "69595ca6-69ea-47fd-9518-fdf8f21061bb",
+      "draftDiffersFromPublished": false,
+      "nodesHash": "8d978894f497a54eb83b161a8c7c68df416efea1364decbdbb0742239a44c7fc",
+      "connectionsHash": "4bf5c5850144a961925436b92157f2d424ec264293f2843012a872fd33691f41",
+      "settingsHash": "a880d6be0723b1d0479969a0fa3f111bc155320bddaa7655ad4d6becead50d5c",
+      "registeredWebhooks": 0,
+      "subworkflows": [],
+      "credentialReferences": 0,
+      "missingCredentialReferences": 0,
+      "triggers": [
+        {
+          "type": "n8n-nodes-base.errorTrigger",
+          "disabled": false,
+          "eligibleWhenPublished": true
+        }
+      ]
+    },
+    {
+      "id": "ceroaSupportAgent30",
+      "name": "Ceroa - Agente Soporte",
+      "active": true,
+      "published": true,
+      "versionId": "75e3bcd1-c682-4a91-aa2f-aaa52c1d8110",
+      "activeVersionId": "75e3bcd1-c682-4a91-aa2f-aaa52c1d8110",
+      "draftDiffersFromPublished": false,
+      "nodesHash": "8d6c377d35fd1034c93ee8481c93ec95da4e6f497dfa665e6a06e20ad5ec8687",
+      "connectionsHash": "eebab808f4f56f6eedc31afedb592f9ea1a3b6fd239ae4d05950676a30adfa36",
+      "settingsHash": "4957189b41ff23a2410ef79a9ad96646d238cf012227ceb01a54a00dec7fa6fc",
+      "registeredWebhooks": 0,
+      "subworkflows": [],
+      "credentialReferences": 10,
+      "missingCredentialReferences": 0,
+      "triggers": [
+        {
+          "type": "n8n-nodes-base.executeWorkflowTrigger",
+          "disabled": false,
+          "eligibleWhenPublished": true
+        }
+      ]
+    },
+    {
+      "id": "ceroaTelegram01",
+      "name": "RA-N8N-001 - Telegram financiero",
+      "active": true,
+      "published": true,
+      "versionId": "2173da1e-4571-4b9b-8a61-5b0aaeb1b571",
+      "activeVersionId": "2173da1e-4571-4b9b-8a61-5b0aaeb1b571",
+      "draftDiffersFromPublished": false,
+      "nodesHash": "68315d4b5678535b83064f2fb72485f1bd2189ec14b4bd924f155aa84e43556d",
+      "connectionsHash": "c68eff3187d96721db9ae17f021bc4a62076488b56696043a9a31b1683165a51",
+      "settingsHash": "17a12b83a881681dd34c0947b2b41a7b9845f820939615291edb7cb25fa8211e",
+      "registeredWebhooks": 1,
+      "subworkflows": [],
+      "credentialReferences": 8,
+      "missingCredentialReferences": 0,
+      "triggers": [
+        {
+          "type": "n8n-nodes-base.telegramTrigger",
+          "disabled": false,
+          "eligibleWhenPublished": true
+        }
+      ]
+    },
+    {
+      "id": "ceroaWorkspaceCalendar40",
+      "name": "Ceroa - Workspace - Calendar y Meet",
+      "active": false,
+      "published": false,
+      "versionId": "b553d3a5-ddc9-495b-8e36-89944457fb7b",
+      "activeVersionId": null,
+      "draftDiffersFromPublished": false,
+      "nodesHash": "f0e6ef0dc79d8cf92d1d06beba2ceb0aaef7e3f442e72d51ba6c30f80da62b64",
+      "connectionsHash": "0e5aa274766fbdc80424379a195f4f77fb7a884fff1f34fc21158aeb5191accc",
+      "settingsHash": "6985bbe3e5fa7704add124a1f0b2270c87e36af4d1b3d0737caf2a2476e28c7c",
+      "registeredWebhooks": 0,
+      "subworkflows": [],
+      "credentialReferences": 5,
+      "missingCredentialReferences": 0,
+      "triggers": [
+        {
+          "type": "n8n-nodes-base.webhook",
+          "disabled": false,
+          "eligibleWhenPublished": false
+        },
+        {
+          "type": "n8n-nodes-base.respondToWebhook",
+          "disabled": false,
+          "eligibleWhenPublished": false
+        }
+      ]
+    },
+    {
+      "id": "ceroaWorkspaceDrive40",
+      "name": "Ceroa - Workspace - Drive aprobado",
+      "active": false,
+      "published": false,
+      "versionId": "26546743-9641-4a43-8a19-1737bec11b51",
+      "activeVersionId": null,
+      "draftDiffersFromPublished": false,
+      "nodesHash": "a119aa016be1f9caf25157e658c1ab04c4738588466e5b842c8eb2470f313d6b",
+      "connectionsHash": "c216867072b4a94aa0f851293e734d2e13cdac165320ea165f997fccd28aa44d",
+      "settingsHash": "6985bbe3e5fa7704add124a1f0b2270c87e36af4d1b3d0737caf2a2476e28c7c",
+      "registeredWebhooks": 0,
+      "subworkflows": [],
+      "credentialReferences": 7,
+      "missingCredentialReferences": 0,
+      "triggers": [
+        {
+          "type": "n8n-nodes-base.googleDriveTrigger",
+          "disabled": false,
+          "eligibleWhenPublished": false
+        },
+        {
+          "type": "n8n-nodes-base.googleDriveTrigger",
+          "disabled": false,
+          "eligibleWhenPublished": false
+        },
+        {
+          "type": "n8n-nodes-base.scheduleTrigger",
+          "disabled": false,
+          "eligibleWhenPublished": false
+        }
+      ]
+    },
+    {
+      "id": "ceroaWorkspaceMail40",
+      "name": "Ceroa - Workspace - Comunicaciones operativas",
+      "active": false,
+      "published": false,
+      "versionId": "871c58dc-2f0c-4193-b1ec-265ad7cb1e5a",
+      "activeVersionId": null,
+      "draftDiffersFromPublished": false,
+      "nodesHash": "7b3887c1a6d9ac84d8aff309df9e649b9c5824eef1d270a2f5cd753116e897d5",
+      "connectionsHash": "81c3ae4f04dc8b1df25404db0203f4540b4f960ac5ff2bfa2416f267b90cc8df",
+      "settingsHash": "6985bbe3e5fa7704add124a1f0b2270c87e36af4d1b3d0737caf2a2476e28c7c",
+      "registeredWebhooks": 0,
+      "subworkflows": [],
+      "credentialReferences": 5,
+      "missingCredentialReferences": 0,
+      "triggers": [
+        {
+          "type": "n8n-nodes-base.scheduleTrigger",
+          "disabled": false,
+          "eligibleWhenPublished": false
+        }
+      ]
+    },
+    {
+      "id": "ceroaWorkspaceSheets40",
+      "name": "Ceroa - Workspace - Proyección operativa Sheets",
+      "active": false,
+      "published": false,
+      "versionId": "464ec72a-992e-4c11-b31a-4675fa290500",
+      "activeVersionId": null,
+      "draftDiffersFromPublished": false,
+      "nodesHash": "49ce74d17f082bcc6ca784317de6d60d1a1d82186df8687e23977b6917d0af23",
+      "connectionsHash": "4b888f9c4cc3b4e5e05a9d847715b5c4c1b56c72791e9281d27281b2d4b49f1a",
+      "settingsHash": "6985bbe3e5fa7704add124a1f0b2270c87e36af4d1b3d0737caf2a2476e28c7c",
+      "registeredWebhooks": 0,
+      "subworkflows": [],
+      "credentialReferences": 5,
+      "missingCredentialReferences": 0,
+      "triggers": [
+        {
+          "type": "n8n-nodes-base.scheduleTrigger",
+          "disabled": false,
+          "eligibleWhenPublished": false
+        }
+      ]
+    }
+  ],
+  "unchangedSinceInitialAudit": true
+}
