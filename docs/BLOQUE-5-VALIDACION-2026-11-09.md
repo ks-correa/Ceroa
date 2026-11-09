@@ -72,6 +72,7 @@ La instantánea nativa permite contar invocaciones de los nodos Gemini y medir s
 - Estabilización focalizada: 33 pruebas, cero fallos (Drive, MCP, Calendar, outbox y Plus).
 - Asistente/MCP/Calendar desde API: 19 pruebas, cero fallos. La prueba nueva recorre propuesta del asistente → confirmación persistente → Calendar simulado → Meet simulado, y comprueba una sola creación ante confirmación repetida.
 - PostgreSQL/pgvector real: 26 pruebas de biblioteca híbrida, cero fallos. Proveedores Storage/embeddings simulados en esa batería; complementada por la ingesta real de Drive descrita arriba.
+- Migraciones sobre otra base PostgreSQL desechable con TLS: tres pruebas correctas, incluida validación Flyway hasta `30`, segunda migración sin cambios, autenticación API y persistencia JSONB/versionado.
 - Frontend: 186 pruebas en 23 archivos, cero fallos; compilación Vite correcta, con aviso de tamaño de bundle.
 - Node: 42 pruebas, cero fallos, incluidas las nuevas sobre esquema Gemini, expresión Drive y preservación de configuración al preparar parches.
 - n8n multiagente con proveedor simulado: seis escenarios nativos y cuatro escenarios de comparación anterior, todos correctos. No se presentan como resultados Gemini.
@@ -104,7 +105,9 @@ No hay una integración general declarada lista para activación continua. Para 
 
 Se conservaron los mecanismos de exportación/restauración existentes y la imagen n8n fijada por digest. Los respaldos de workflows anteriores a los cambios de este bloque están cifrados en `backups/migration/block5-20261109/`; la clave está separada en `backups/migration-keys/`. Ambos quedan fuera de Git. La imagen anterior del backend se conserva como `ceroa-backend:pre-block5-20261109`.
 
-La exportación final incluye revisión exacta, configuración privada y volumen n8n, versiones publicadas, claves internas y OAuth. El ensayo de restauración debe realizarse con `--offline-test`, volumen temporal y sin planificadores; su resultado se registra en el cierre del bloque. Descifrar credenciales no acredita vigencia OAuth ni conectividad tras un traslado. Las lecturas actuales de Google pertenecen al equipo de origen.
+Se exportó la revisión `b6b47a5` y se restauró con `--offline-test`: **22 credenciales descifradas, 30 workflows y 15 versiones publicadas; cero servicios arrancados**. El volumen temporal de restauración fue eliminado por el restaurador. El destino de inspección privado queda en `tmp/block5-offline-restore-c5fcaada/`. Después del cierre documental se genera también el paquete de la revisión final, en el directorio ignorado de migración.
+
+La exportación incluye revisión exacta, configuración privada y volumen n8n, versiones publicadas, claves internas y OAuth. Descifrar credenciales no acredita vigencia OAuth ni conectividad tras un traslado. Las lecturas actuales de Google pertenecen al equipo de origen. El paquete cifrado y su clave separada no están en Git.
 
 No se migró definitivamente ni se arrancó un segundo entorno contra Supabase/Google. Los contenedores conversacionales de prueba usan H2, herramientas de prueba y puerto interno de una red independiente; solo Gemini recibe textos sintéticos. Los ensayos PostgreSQL usan una base desechable independiente. El cliente/servidor MCP de prueba no tiene acceso a finanzas reales.
 
