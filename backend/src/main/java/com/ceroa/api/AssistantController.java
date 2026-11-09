@@ -72,8 +72,9 @@ public class AssistantController {
     public Object begin(@PathVariable UUID id,@PathVariable com.ceroa.service.AgentContracts.Role role,@RequestBody com.ceroa.service.AgentRuntime.Task task){return privateResponse(service.beginDelegation(id,role,task));}
     @PostMapping("/api/v1/assistant-tools/requests/{id}/delegations/{token}/complete")
     public Object finish(@PathVariable UUID id,@PathVariable UUID token,@RequestBody com.ceroa.service.AgentRuntime.Result result){return privateResponse(service.finishDelegation(id,token,result,false));}
+    public record SpecialistFailure(String errorCode){}
     @PostMapping("/api/v1/assistant-tools/requests/{id}/delegations/{token}/fail")
-    public Object fail(@PathVariable UUID id,@PathVariable UUID token){return privateResponse(service.finishDelegation(id,token,null,true));}
+    public Object fail(@PathVariable UUID id,@PathVariable UUID token,@RequestBody(required=false) SpecialistFailure failure){return privateResponse(service.failDelegation(id,token,failure==null||failure.errorCode()==null?"SPECIALIST_UNAVAILABLE":failure.errorCode()));}
     @PostMapping("/api/v1/assistant-tools/requests/{id}/observe")
     public ResponseEntity<Void> observe(@PathVariable UUID id,@RequestBody com.ceroa.service.AssistantTrace.WorkerObservation observation){service.observe(id,observation);return ResponseEntity.noContent().build();}
     @PostMapping("/api/v1/assistant-tools/requests/{id}/prepare")

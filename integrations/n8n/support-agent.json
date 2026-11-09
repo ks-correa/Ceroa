@@ -327,7 +327,7 @@
         "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({errorCode: /429|quota|RESOURCE_EXHAUSTED/i.test(JSON.stringify($json.error ?? {})) ? \"PROVIDER_QUOTA\" : /parse|schema|format/i.test(JSON.stringify($json.error ?? {})) ? \"PARSER_ERROR\" : $json.output ? \"CONTRACT_ERROR\" : \"PROVIDER_UNAVAILABLE\"}) }}",
+        "jsonBody": "={{ JSON.stringify({errorCode: /GoogleGenerative.*429|quota|RESOURCE_EXHAUSTED/i.test(JSON.stringify($json.error ?? {})) ? \"PROVIDER_QUOTA\" : /parse|schema|format/i.test(JSON.stringify($json.error ?? {})) ? \"PARSER_ERROR\" : /\b(?:400|403|409)\b|contract|referen|eviden|Bad request|Forbidden/i.test(JSON.stringify($json.error ?? {})) || $json.output ? \"CONTRACT_ERROR\" : /httpRequest|tool/i.test(JSON.stringify($json.error ?? {})) ? \"TOOL_ERROR\" : \"PROVIDER_UNAVAILABLE\"}) }}",
         "options": {
           "timeout": 15000
         }

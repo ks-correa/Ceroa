@@ -12,6 +12,9 @@ spring:
       ddl-auto: create-drop
 
 ceroa:
+  assistant:
+    provider-limits:
+      enabled: false
   recovery:
     delivery-enabled: false
   frontend-url: http://localhost:3000

@@ -11,6 +11,8 @@ public final class AssistantTrace {
     private final Map<String,WorkerObservation> workers=new LinkedHashMap<>();
     private final Set<UUID> retrievalTraceIds=new LinkedHashSet<>();
     private Map<String,Object> agents=Map.of();
+    private String functionalStatus;
+    public synchronized void outcome(String value){functionalStatus=value;}
     public synchronized void agents(Map<String,Object> value){agents=value;}
     private int cacheHits,fragments,contextCharacters,documents,errors;
     public AssistantTrace(UUID id){this.id=id;}
@@ -28,7 +30,7 @@ public final class AssistantTrace {
     public synchronized Map<String,Object> snapshot(String route){
         var result=new LinkedHashMap<String,Object>();result.put("requestId",id);result.put("route",route);result.put("totalMs",(System.nanoTime()-started)/1_000_000);
         result.put("stagesMs",Map.copyOf(stages));result.put("springHandlingMs",Math.max(0,(System.nanoTime()-started)/1_000_000-stages.getOrDefault("n8nRoundTrip",0L))+stages.getOrDefault("backendTools",0L));result.put("cacheHits",cacheHits);result.put("documents",documents);result.put("fragments",fragments);result.put("contextCharacters",contextCharacters);result.put("errors",errors);
-        result.put("multiagent",agents);result.put("workerObservations",List.copyOf(workers.values()));result.put("retrievalTraceIds",List.copyOf(retrievalTraceIds));result.put("llmCalls",null);result.put("modelDurationMs",null);result.put("measurementNote","Native agent aggregate is measured; exact provider calls, retries and model-only durations require provider trace data. Null means unobserved, never zero.");return result;
+        result.put("functionalStatus",functionalStatus);result.put("multiagent",agents);result.put("workerObservations",List.copyOf(workers.values()));result.put("retrievalTraceIds",List.copyOf(retrievalTraceIds));result.put("llmCalls",null);result.put("modelDurationMs",null);result.put("measurementNote","Native agent aggregate is measured; exact provider calls, retries and model-only durations require provider trace data. Null means unobserved, never zero.");return result;
     }
     public void log(org.slf4j.Logger log,ObjectMapper json,String route){try{log.info("CEROA_QUERY_METRICS {}",json.writeValueAsString(snapshot(route)));}catch(Exception ignored){log.warn("CEROA_QUERY_METRICS serialization failed");}}
 }

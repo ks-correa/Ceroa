@@ -5,7 +5,8 @@ import { DocumentLibraryPanel, type DocumentView } from './DocumentLibraryPanel'
 import { DocumentReferences } from './DocumentReferences';
 import type { FinancialDocument } from '../../services/documentLibraryService';
 
-type ChatMessage = { role: 'user' | 'assistant'; text: string; audio?: Blob; documents?: FinancialDocument[] };
+type FunctionalStatus = 'COMPLETE' | 'PARTIAL' | 'INSUFFICIENT' | 'FAILED';
+type ChatMessage = { functionalStatus?: FunctionalStatus; role: 'user' | 'assistant'; text: string; audio?: Blob; documents?: FinancialDocument[] };
 const LIMIT = 4 * 1024 * 1024;
 function ChatAudio({ blob }: { blob: Blob }) {
   const [url, setUrl] = useState('');
@@ -81,10 +82,10 @@ export function AssistantFab() {
       if (!alive.current || generation.current !== turn) return;
       setMessages(m => [...m, { role: 'user' as const, text: message || '', audio: blob }].slice(-20));
       setText('');
-      const result = await apiRequest<{ answer: string; documents?: FinancialDocument[] }>('/assistant/messages', {
+      const result = await apiRequest<{ answer: string; documents?: FinancialDocument[]; functionalStatus?: FunctionalStatus }>('/assistant/messages', {
         method: 'POST', body: JSON.stringify(blob ? { audio, mime: blob.type.split(';')[0], ...(selectedDocument ? { documentId: selectedDocument.id } : {}) } : { message, ...(selectedDocument ? { documentId: selectedDocument.id } : {}) })
       });
-      if (alive.current && generation.current === turn) setMessages(m => [...m, { role: 'assistant' as const, text: result.answer, documents: result.documents }].slice(-20));
+      if (alive.current && generation.current === turn) setMessages(m => [...m, { role: 'assistant' as const, text: result.answer, documents: result.documents, functionalStatus: result.functionalStatus }].slice(-20));
     } catch (cause) {
       if (alive.current && generation.current === turn) setError(cause instanceof Error ? cause.message : 'No pude procesar la consulta.');
     } finally { if (alive.current && generation.current === turn) setBusy(false); }
@@ -214,7 +215,7 @@ export function AssistantFab() {
         {selectedDocument && <div className="rounded-xl border border-teal-300 bg-teal-50 p-3 text-sm dark:border-teal-700 dark:bg-teal-950"><p className="font-semibold">Conversación enfocada en este archivo</p><p className="truncate">{selectedDocument.financialEntity || 'Documento'} · {selectedDocument.documentType} · {selectedDocument.periodStart || 'Sin período'}</p><div className="mt-2 flex flex-wrap gap-3"><button type="button" className="text-xs font-semibold underline" onClick={() => {generation.current++;setSelectedDocument(null);setMessages([]);setText('');}}>Salir del archivo</button><button type="button" className="text-xs font-semibold underline" onClick={() => {const period=selectedDocument.periodStart;generation.current++;setSelectedDocument(null);setMessages([]);setText(period?`Analiza todos mis extractos de ${new Intl.DateTimeFormat('es-CO',{month:'long',timeZone:'UTC'}).format(new Date(`${period.slice(0,7)}-01T12:00:00Z`))} de ${period.slice(0,4)}: `:'Analiza todos mis extractos del período: ');input.current?.focus();}}>Analizar varios extractos</button></div></div>}
         {documentView && <DocumentLibraryPanel view={documentView} onDiscuss={document => { if(busy||recording||startingRecording)return;generation.current++;setSelectedDocument(document);setMessages([]);setText('');setDocumentView(null);input.current?.focus(); }} />}
         {messages.length === 0 && <p className="rounded-2xl border border-dashed border-slate-200 bg-white p-4 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">Escribe una pregunta para empezar la conversación.</p>}
-        {messages.map((m, i) => <div key={i} className={`max-w-[90%] whitespace-pre-wrap rounded-2xl p-3 text-sm shadow-sm ${m.role === 'user' ? 'ml-auto rounded-br-md bg-teal-700 text-white' : 'mr-auto rounded-bl-md border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800'}`}><strong className="mb-1 block text-xs opacity-75">{m.role === 'user' ? 'Tú' : 'Ceroa'}</strong>{m.audio ? <ChatAudio blob={m.audio} /> : m.text}{!!m.documents?.length && <DocumentReferences documents={m.documents} />}</div>)}
+        {messages.map((m, i) => <div key={i} className={`max-w-[90%] whitespace-pre-wrap rounded-2xl p-3 text-sm shadow-sm ${m.role === 'user' ? 'ml-auto rounded-br-md bg-teal-700 text-white' : 'mr-auto rounded-bl-md border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800'}`}><strong className="mb-1 block text-xs opacity-75">{m.role === 'user' ? 'Tú' : 'Ceroa'}</strong>{m.role === 'assistant' && m.functionalStatus && m.functionalStatus !== 'COMPLETE' && <span className="mb-2 block text-xs font-semibold text-amber-700 dark:text-amber-300">{{PARTIAL:'Respuesta parcial',INSUFFICIENT:'Evidencia insuficiente',FAILED:'No se pudo completar la consulta'}[m.functionalStatus]}</span>}{m.audio ? <ChatAudio blob={m.audio} /> : m.text}{!!m.documents?.length && <DocumentReferences documents={m.documents} />}</div>)}
         {startingRecording && <p role="status">Esperando permiso del micrófono… Revisa la solicitud de permisos del navegador.</p>}
         {(recording || audioDraft) && <div className="rounded-xl bg-teal-50 p-3 dark:bg-teal-950">
           <div className="flex items-center gap-2 text-teal-800 dark:text-teal-200"><Mic size={20} className={recording ? 'animate-pulse' : ''} /><span role="status">{recording ? 'Escuchando…' : 'Audio listo para enviar'} {String(Math.floor(elapsed / 60)).padStart(2, '0')}:{String(elapsed % 60).padStart(2, '0')} / 01:00</span></div>

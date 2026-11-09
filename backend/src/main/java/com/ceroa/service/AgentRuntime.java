@@ -28,8 +28,10 @@ public final class AgentRuntime {
     private final UUID requestId; private final Instant deadline; private final AgentContracts.Budget budget;
     private final Map<UUID,Scope> scopes=new LinkedHashMap<>(); private final Map<String,Scope> tasks=new HashMap<>();
     private final Set<String> partialRefs=new HashSet<>();
-    private final Set<String> shared=new HashSet<>(),initial=new HashSet<>(); private int reserved=6,cacheHits,characters;
-    public AgentRuntime(UUID id,AgentContracts.Budget budget,Collection<String> initial){requestId=id;this.budget=budget;deadline=Instant.now().plusMillis(budget.deadlineMs());shared.addAll(initial);this.initial.addAll(initial);}
+    private final Set<String> shared=new HashSet<>(),initial=new HashSet<>(); private int reserved,cacheHits,characters,deniedDelegations;private final int modelBudget;
+    public void deniedDelegation(){deniedDelegations++;}
+    public AgentRuntime(UUID id,AgentContracts.Budget budget,Collection<String> initial){this(id,budget,initial,22);}
+    public AgentRuntime(UUID id,AgentContracts.Budget budget,Collection<String> initial,int modelBudget){requestId=id;this.budget=budget;this.modelBudget=modelBudget;reserved=Math.min(6,budget.maxIterations());deadline=Instant.now().plusMillis(budget.deadlineMs());shared.addAll(initial);this.initial.addAll(initial);}
     public Grant begin(AgentContracts.Role role,Task input,boolean selected){
         checkTime();
         if(role==AgentContracts.Role.ORCHESTRATOR||selected&&role!=AgentContracts.Role.RAG)throw denied();
@@ -41,7 +43,7 @@ public final class AgentRuntime {
         var existing=tasks.get(key);
         if(existing!=null){if(existing.result==null)throw new ResponseStatusException(HttpStatus.CONFLICT,"Delegación en curso");cacheHits++;return grant(existing);}
         int iterations=role==AgentContracts.Role.SUPPORT?3:4;
-        if(scopes.size()>=4||reserved+iterations>22)throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,"Presupuesto de delegación agotado");
+        if(scopes.size()>=4||reserved+iterations>modelBudget)throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,"Presupuesto de delegación agotado");
         reserved+=iterations;var scope=new Scope(role,input.task(),iterations,refs);scope.partial=refs.stream().anyMatch(partialRefs::contains);if(role!=AgentContracts.Role.SUPPORT)scope.issued.addAll(initial);scopes.put(scope.token,scope);tasks.put(key,scope);return grant(scope);
     }
     private Grant grant(Scope s){long remaining=Math.max(0,java.time.Duration.between(Instant.now(),deadline).toMillis());return new Grant(requestId,requestId,s.role,s.token,s.task,s.iterations,remaining,budget.maxContextCharacters(),s.result,Map.of(),"",List.of(),"1.1",new AgentContracts.Budget(s.iterations,Math.min(8,budget.maxToolCalls()),budget.maxLibraryCalls(),Math.max(0,budget.maxContextCharacters()-characters),(int)remaining));}
@@ -73,18 +75,31 @@ public final class AgentRuntime {
         var proposal=result.advisoryProposal();
         if(proposal!=null&&(s.role!=AgentContracts.Role.SUPPORT||!"PROPOSED".equals(proposal.status())||!result.requiresConfirmation()||proposal.topic()==null||proposal.topic().isBlank()||proposal.topic().length()>500||proposal.availability()!=null&&proposal.availability().length()>300))throw new IllegalArgumentException("Propuesta de asesoría inválida");
         s.elapsedMs=(System.nanoTime()-s.started)/1_000_000;
-        s.result=new Result(result.schemaVersion(),s.role,result.status(),result.answer(),List.copyOf(result.evidenceRefs()),List.copyOf(result.sources()),result.coverage(),List.copyOf(result.missingData()),result.requiresConfirmation(),requestId,requestId,proposal,result.requiresClarification(),result.status().equals("FAILED")?"SPECIALIST_UNAVAILABLE":null,Map.of("elapsedMs",s.elapsedMs,"toolCalls",s.calls,"tools",Map.copyOf(s.tools),"toolMs",s.toolNanos/1_000_000,"contextCharacters",s.characters));
+        String failure=result.status().equals("FAILED")?(FAILURE_CODES.contains(result.errorCode()==null?"":result.errorCode())?result.errorCode():"SPECIALIST_UNAVAILABLE"):null;
+        s.result=new Result(result.schemaVersion(),s.role,result.status(),result.answer(),List.copyOf(result.evidenceRefs()),List.copyOf(result.sources()),result.coverage(),List.copyOf(result.missingData()),result.requiresConfirmation(),requestId,requestId,proposal,result.requiresClarification(),failure,Map.of("elapsedMs",s.elapsedMs,"toolCalls",s.calls,"tools",Map.copyOf(s.tools),"toolMs",s.toolNanos/1_000_000,"contextCharacters",s.characters));
         shared.addAll(declared);if(!result.coverage().equals("COMPLETE"))partialRefs.addAll(declared);return s.result;
     }
     Result fail(Scope s){s.partial=true;return complete(s,new Result("1.1",s.role,"FAILED","No fue posible completar esta parte de la consulta.",List.of(),List.of(),"NONE",List.of("SPECIALIST_UNAVAILABLE"),false));}
+    public static final Set<String> FAILURE_CODES=Set.of("PARSER_ERROR","CONTRACT_ERROR","PROVIDER_QUOTA","PROVIDER_UNAVAILABLE","TOOL_ERROR","SPECIALIST_UNAVAILABLE");
+    Result fail(Scope s,String code){if(!FAILURE_CODES.contains(code))throw new IllegalArgumentException();s.partial=true;return complete(s,new Result("1.1",s.role,"FAILED","No fue posible completar esta parte de la consulta.",List.of(),List.of(),"NONE",List.of(code),false,null,null,null,false,code,Map.of()));}
     void validateShared(String answer,List<String> sources){var m=java.util.regex.Pattern.compile("\\{\\{(f[0-9]+)}}").matcher(answer==null?"":answer);while(m.find())if(!shared.contains(m.group(1)))throw denied();if(sources!=null&&!shared.containsAll(sources))throw denied();}
     public boolean limited(){return scopes.values().stream().anyMatch(s->s.result==null||!s.result.status().equals("OK")||!s.result.coverage().equals("COMPLETE"));}
+    public boolean noUsableResult(){return scopes.values().stream().noneMatch(s->s.result!=null&&Set.of("OK","PARTIAL").contains(s.result.status())&&(!s.result.evidenceRefs().isEmpty()||!s.result.sources().isEmpty()));}
+    public boolean hasDelegations(){return !scopes.isEmpty();}
+    public Set<String> operationalReferences(){var refs=new HashSet<String>();for(var s:scopes.values())if(s.result!=null&&Set.of("OK","PARTIAL").contains(s.result.status())&&(s.tools.containsKey("support.booking")||s.tools.containsKey("communications.propose")))refs.addAll(s.result.evidenceRefs());return Set.copyOf(refs);}
+    public String functionalStatus(Set<AgentContracts.Role> expected){
+        if(scopes.isEmpty())return "INSUFFICIENT";
+        if(noUsableResult())return scopes.values().stream().anyMatch(s->s.result!=null&&s.result.status().equals("FAILED"))?"FAILED":"INSUFFICIENT";
+        var completed=EnumSet.noneOf(AgentContracts.Role.class);for(var s:scopes.values())if(s.result!=null&&s.result.status().equals("OK")&&s.result.coverage().equals("COMPLETE"))completed.add(s.role);
+        return !limited()&&completed.containsAll(expected)?"COMPLETE":"PARTIAL";
+    }
     private Map<String,Object> scopeMetrics(Scope s){
         var metrics=new LinkedHashMap<String,Object>();metrics.put("role",s.role);metrics.put("status",s.result==null?"INCOMPLETE":s.result.status());metrics.put("elapsedMs",s.result==null?(System.nanoTime()-s.started)/1_000_000:s.elapsedMs);
         metrics.put("toolCalls",s.calls);metrics.put("tools",Map.copyOf(s.tools));metrics.put("toolMs",s.toolNanos/1_000_000);metrics.put("contextCharacters",s.characters);
+        metrics.put("errorCode",s.result==null?null:s.result.errorCode());
         metrics.put("llmCalls",null);metrics.put("iterations",null);metrics.put("providerRetries",null);return Collections.unmodifiableMap(metrics);
     }
-    public Map<String,Object> metrics(){return Map.of("delegations",scopes.size(),"delegationCacheHits",cacheHits,"maxDepth",scopes.isEmpty()?0:1,"reservedIterations",reserved,"agents",scopes.values().stream().map(this::scopeMetrics).toList());}
+    public Map<String,Object> metrics(){return Map.of("delegations",scopes.size(),"deniedDelegations",deniedDelegations,"delegationCacheHits",cacheHits,"maxDepth",scopes.isEmpty()?0:1,"reservedIterations",reserved,"agents",scopes.values().stream().map(this::scopeMetrics).toList());}
     private void checkTime(){if(!Instant.now().isBefore(deadline))throw new ResponseStatusException(HttpStatus.GONE,"Plazo de delegación agotado");}
     static ResponseStatusException denied(){return new ResponseStatusException(HttpStatus.FORBIDDEN,"Herramienta fuera del alcance delegado");}
 }

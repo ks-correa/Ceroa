@@ -3,6 +3,17 @@ import org.junit.jupiter.api.Test;
 import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 class AgentContractsTest {
+    @Test void deterministicSpecialtiesDoNotUseSupportAsFallback(){
+        assertEquals(Set.of(AgentContracts.Role.SUPPORT),AgentContracts.selectedRoles(AgentContracts.routingQuestion("¿Y eso?","Cómo registrar un pago",false),false));
+        assertTrue(AgentContracts.selectedRoles(AgentContracts.routingQuestion("Quién ganará un partido mañana","Cómo registrar un pago",false),false).isEmpty());
+        assertEquals(Set.of(AgentContracts.Role.FINANCIAL),AgentContracts.selectedRoles("Interpreta el saldo de mis obligaciones registradas usando solo mis datos financieros actuales. No necesito conceptos generales ni ayuda de navegación.",false));
+        assertEquals(Set.of(AgentContracts.Role.RAG),AgentContracts.selectedRoles("Explica el concepto de bola de nieve y avalancha usando documentación aprobada",false));
+        assertEquals(Set.of(AgentContracts.Role.SUPPORT),AgentContracts.selectedRoles("Explícame cómo registrar un pago usando documentación aprobada",false));
+        assertEquals(Set.of(AgentContracts.Role.RAG,AgentContracts.Role.FINANCIAL),AgentContracts.selectedRoles("Explica el concepto de bola de nieve y contrástalo con el saldo de mis obligaciones registradas",false));
+        assertTrue(AgentContracts.selectedRoles("Quién ganará un partido de fútbol mañana",false).isEmpty());
+        assertEquals(Set.of(AgentContracts.Role.RAG),AgentContracts.selectedRoles("Compara mis extractos",false));
+        assertEquals(Set.of(AgentContracts.Role.RAG),AgentContracts.selectedRoles("Consulta financiera y soporte",true));
+    }
     @Test void budgetsAreBoundedAndSelectedDocumentsCannotAcquireFinanceTools(){
         var context=AgentContracts.context(UUID.randomUUID(),"compara mis extractos",true);
         assertFalse(context.tools().containsKey(AgentContracts.Role.FINANCIAL));

@@ -6,6 +6,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.springframework.web.server.ResponseStatusException;
 
 class AgentRuntimeTest {
+    @Test void failuresCannotBeReportedAsFunctionalSuccess(){var r=runtime();var g=r.begin(AgentContracts.Role.SUPPORT,new AgentRuntime.Task("Ayuda",List.of()),false);r.fail(r.scope(g.scopeToken()),"PARSER_ERROR");assertTrue(r.noUsableResult());assertEquals("FAILED",r.functionalStatus(Set.of(AgentContracts.Role.SUPPORT)));assertThrows(IllegalArgumentException.class,()->runtime().fail(new AgentRuntime.Scope(AgentContracts.Role.SUPPORT,"Ayuda",3,List.of()),"private prompt"));}
     AgentRuntime runtime(){return new AgentRuntime(UUID.randomUUID(),AgentContracts.budget(AgentContracts.Intent.COMPOSITE),List.of("f1"));}
     AgentRuntime.Result result(AgentContracts.Role role,String coverage,List<String> refs){return new AgentRuntime.Result("1.1",role,"OK","Evidencia {{f1}}",refs,List.of(),coverage,List.of(),false);}
     @Test void rolesCannotEscalateToolsOrDelegate(){

@@ -4,6 +4,12 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { AssistantFab } from './AssistantFab';
 import { apiRequest } from '../../services/api';
 vi.mock('../../services/api', () => ({ apiRequest: vi.fn() }));
+it('labels an HTTP-success response as partial when the backend reports partial evidence',async()=>{
+ vi.mocked(apiRequest).mockResolvedValueOnce({answer:'Solo hay evidencia de una parte.',functionalStatus:'PARTIAL'});
+ render(<AssistantFab/>);fireEvent.click(screen.getByRole('button',{name:'Abrir asistente financiero'}));
+ fireEvent.change(screen.getByRole('textbox'),{target:{value:'Analiza mi información'}});fireEvent.click(screen.getByRole('button',{name:'Enviar pregunta'}));
+ expect(await screen.findByText('Respuesta parcial')).toBeTruthy();expect(screen.getByText('Solo hay evidencia de una parte.')).toBeTruthy();
+});
 it('starts a new conversation only after the backend forgets the previous context',async()=>{
   vi.mocked(apiRequest).mockResolvedValueOnce({answer:'Respuesta anterior'}).mockResolvedValueOnce(undefined);
   render(<AssistantFab/>);fireEvent.click(screen.getByRole('button',{name:'Abrir asistente financiero'}));

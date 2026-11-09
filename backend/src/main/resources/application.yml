@@ -105,6 +105,11 @@ ceroa:
     enabled: ${ASSISTANT_ENABLED:false}
     webhook-url: ${ASSISTANT_WEBHOOK_URL:}
     worker-key: ${ASSISTANT_WORKER_KEY:}
+    provider-limits:
+      enabled: ${ASSISTANT_PROVIDER_LIMITS_ENABLED:true}
+      calls-per-minute: ${ASSISTANT_PROVIDER_CALLS_PER_MINUTE:15}
+      concurrency: ${ASSISTANT_PROVIDER_CONCURRENCY:1}
+      cooldown-seconds: ${ASSISTANT_PROVIDER_COOLDOWN_SECONDS:60}
   plus:
     monthly-price: ${PLUS_MONTHLY_PRICE:}
     yearly-price: ${PLUS_YEARLY_PRICE:}
