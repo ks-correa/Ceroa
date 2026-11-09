@@ -1,0 +1,886 @@
+{
+  "scope": "Disposable n8n real Gemini executions, including initial quota failures and paced checks",
+  "exactProviderHttpCalls": null,
+  "notes": [
+    "Native language-model node invocations are observed, not inferred from tool counts.",
+    "Node duration includes transport and SDK overhead; provider-only latency and hidden retries remain unknown.",
+    "Root, specialist and tool durations can overlap and must not be summed as total latency."
+  ],
+  "observations": [
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 1944,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "FINANCIAL",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 3404,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 2295,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "FINANCIAL",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 1750,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 1734,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "FINANCIAL",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 1953,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 1951,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "FINANCIAL",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 1780,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 1025,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "FINANCIAL",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 1609,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 838,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "FINANCIAL",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 241,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 246,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 309,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 251,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 304,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 243,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 253,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 276,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 226,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 291,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 252,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 245,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 3,
+      "modelNodeMs": 2335,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "FINANCIAL",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 1278,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "RAG",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 2205,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 1707,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "FINANCIAL",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 1869,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 1580,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "FINANCIAL",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 1926,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 3,
+      "modelNodeMs": 1905,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "RAG",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 2121,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "SUPPORT",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 1601,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 271,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 236,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 247,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 243,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 235,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 222,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 217,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 255,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 277,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 208,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 238,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 226,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 222,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 238,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 230,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 276,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 228,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 275,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 231,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 215,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 284,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 218,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 237,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 223,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 219,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 228,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 216,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 216,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 230,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 296,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 220,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 277,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 232,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 228,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 289,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 236,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 263,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 232,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 573,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 205,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 356,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 232,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 293,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 217,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 230,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 222,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 227,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 242,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 223,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 221,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 272,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 231,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 299,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 222,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 257,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 225,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 247,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 274,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 236,
+      "modelNodeErrors": 1,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 2048,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "FINANCIAL",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 2380,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 2802,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "FINANCIAL",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 1919,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 1789,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "FINANCIAL",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 2156,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 3,
+      "modelNodeMs": 2944,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "RAG",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 1683,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "SUPPORT",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 1906,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 1662,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "RAG",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 1765,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 3,
+      "modelNodeMs": 2992,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "RAG",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 2230,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "SUPPORT",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 2053,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 3,
+      "modelNodeMs": 2944,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "SUPPORT",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 1988,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "RAG",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 2211,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 3,
+      "modelNodeMs": 3318,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "SUPPORT",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 2082,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "RAG",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 2116,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 3,
+      "modelNodeMs": 3104,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "SUPPORT",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 1965,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "RAG",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 1682,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 3,
+      "modelNodeMs": 3253,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "RAG",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 1626,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "FINANCIAL",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 1938,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 4,
+      "modelNodeMs": 4270,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "RAG",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 1754,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "SUPPORT",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 2317,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "FINANCIAL",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 1880,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 3,
+      "modelNodeMs": 3146,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "RAG",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 1911,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "FINANCIAL",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 1905,
+      "modelNodeErrors": 0,
+      "executionError": false
+    }
+  ]
+}

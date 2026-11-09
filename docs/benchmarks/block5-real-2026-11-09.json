@@ -1,0 +1,3107 @@
+{
+  "capturedAt": "2026-11-09T13:47:36.675Z",
+  "provider": "REAL_GEMINI",
+  "spring": "REAL_HTTP_CALLBACKS_AND_H2_SYNTHETIC_ACCOUNTS",
+  "knowledgeStore": "SIMULATED_APPROVED_KNOWLEDGE",
+  "reactBrowserTested": false,
+  "exactProviderHttpCalls": null,
+  "providerOnlyDurationMs": null,
+  "notes": [
+    "HTTP 200 may carry a partial response; specialist status is reported separately.",
+    "Initial unpaced batch hit actual Gemini free-tier quota: 15 generateContent requests per minute.",
+    "Paced batch waited 35 seconds between conversational requests. Small successful sample counts do not establish a production p95.",
+    "No prompts, responses, financial data, credentials or owner IDs are exported.",
+    "No same-scenario legacy architecture comparison with real Gemini was performed."
+  ],
+  "batches": [
+    {
+      "name": "unpaced",
+      "scenarios": {
+        "DETERMINISTIC": {
+          "attempts": 20,
+          "http200": 20,
+          "allSpecialistsOK": 20,
+          "http200LatencyMs": {
+            "p50": 4,
+            "p95": 10
+          },
+          "fullyValidatedSpecialistsLatencyMs": {
+            "p50": 4,
+            "p95": 10
+          },
+          "percentilesPreliminary": false
+        },
+        "FINANCIAL": {
+          "attempts": 20,
+          "http200": 7,
+          "allSpecialistsOK": 6,
+          "http200LatencyMs": {
+            "p50": 3999,
+            "p95": 6784
+          },
+          "fullyValidatedSpecialistsLatencyMs": {
+            "p50": 3957,
+            "p95": 6784
+          },
+          "percentilesPreliminary": true
+        },
+        "RAG": {
+          "attempts": 20,
+          "http200": 0,
+          "allSpecialistsOK": 0,
+          "http200LatencyMs": {
+            "p50": null,
+            "p95": null
+          },
+          "fullyValidatedSpecialistsLatencyMs": {
+            "p50": null,
+            "p95": null
+          },
+          "percentilesPreliminary": true
+        },
+        "SUPPORT": {
+          "attempts": 20,
+          "http200": 0,
+          "allSpecialistsOK": 0,
+          "http200LatencyMs": {
+            "p50": null,
+            "p95": null
+          },
+          "fullyValidatedSpecialistsLatencyMs": {
+            "p50": null,
+            "p95": null
+          },
+          "percentilesPreliminary": true
+        },
+        "COMPOSITE": {
+          "attempts": 20,
+          "http200": 0,
+          "allSpecialistsOK": 0,
+          "http200LatencyMs": {
+            "p50": null,
+            "p95": null
+          },
+          "fullyValidatedSpecialistsLatencyMs": {
+            "p50": null,
+            "p95": null
+          },
+          "percentilesPreliminary": true
+        }
+      },
+      "records": [
+        {
+          "scenario": "DETERMINISTIC",
+          "sample": 0,
+          "totalMs": 68,
+          "httpStatus": 200,
+          "intent": "upcoming",
+          "hasAnswer": true,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {},
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "DETERMINISTIC",
+          "sample": 1,
+          "totalMs": 5,
+          "httpStatus": 200,
+          "intent": "upcoming",
+          "hasAnswer": true,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {},
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "DETERMINISTIC",
+          "sample": 2,
+          "totalMs": 4,
+          "httpStatus": 200,
+          "intent": "upcoming",
+          "hasAnswer": true,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {},
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "DETERMINISTIC",
+          "sample": 3,
+          "totalMs": 4,
+          "httpStatus": 200,
+          "intent": "upcoming",
+          "hasAnswer": true,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {},
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "DETERMINISTIC",
+          "sample": 4,
+          "totalMs": 5,
+          "httpStatus": 200,
+          "intent": "upcoming",
+          "hasAnswer": true,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {},
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "DETERMINISTIC",
+          "sample": 5,
+          "totalMs": 7,
+          "httpStatus": 200,
+          "intent": "upcoming",
+          "hasAnswer": true,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {},
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "DETERMINISTIC",
+          "sample": 6,
+          "totalMs": 4,
+          "httpStatus": 200,
+          "intent": "upcoming",
+          "hasAnswer": true,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {},
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "DETERMINISTIC",
+          "sample": 7,
+          "totalMs": 5,
+          "httpStatus": 200,
+          "intent": "upcoming",
+          "hasAnswer": true,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {},
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "DETERMINISTIC",
+          "sample": 8,
+          "totalMs": 10,
+          "httpStatus": 200,
+          "intent": "upcoming",
+          "hasAnswer": true,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {},
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "DETERMINISTIC",
+          "sample": 9,
+          "totalMs": 8,
+          "httpStatus": 200,
+          "intent": "upcoming",
+          "hasAnswer": true,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {},
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "DETERMINISTIC",
+          "sample": 10,
+          "totalMs": 4,
+          "httpStatus": 200,
+          "intent": "upcoming",
+          "hasAnswer": true,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {},
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "DETERMINISTIC",
+          "sample": 11,
+          "totalMs": 5,
+          "httpStatus": 200,
+          "intent": "upcoming",
+          "hasAnswer": true,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {},
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "DETERMINISTIC",
+          "sample": 12,
+          "totalMs": 5,
+          "httpStatus": 200,
+          "intent": "upcoming",
+          "hasAnswer": true,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {},
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "DETERMINISTIC",
+          "sample": 13,
+          "totalMs": 3,
+          "httpStatus": 200,
+          "intent": "upcoming",
+          "hasAnswer": true,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {},
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "DETERMINISTIC",
+          "sample": 14,
+          "totalMs": 2,
+          "httpStatus": 200,
+          "intent": "upcoming",
+          "hasAnswer": true,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {},
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "DETERMINISTIC",
+          "sample": 15,
+          "totalMs": 4,
+          "httpStatus": 200,
+          "intent": "upcoming",
+          "hasAnswer": true,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {},
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "DETERMINISTIC",
+          "sample": 16,
+          "totalMs": 3,
+          "httpStatus": 200,
+          "intent": "upcoming",
+          "hasAnswer": true,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {},
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "DETERMINISTIC",
+          "sample": 17,
+          "totalMs": 3,
+          "httpStatus": 200,
+          "intent": "upcoming",
+          "hasAnswer": true,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {},
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "DETERMINISTIC",
+          "sample": 18,
+          "totalMs": 3,
+          "httpStatus": 200,
+          "intent": "upcoming",
+          "hasAnswer": true,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {},
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "DETERMINISTIC",
+          "sample": 19,
+          "totalMs": 5,
+          "httpStatus": 200,
+          "intent": "upcoming",
+          "hasAnswer": true,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {},
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "FINANCIAL",
+          "sample": 0,
+          "totalMs": 6784,
+          "httpStatus": 200,
+          "intent": "analysis",
+          "hasAnswer": true,
+          "abstained": false,
+          "delegations": 1,
+          "agents": [
+            {
+              "role": "FINANCIAL",
+              "status": "OK",
+              "elapsedMs": 3597,
+              "toolCalls": 1,
+              "tools": {
+                "finance.read": 1
+              },
+              "toolMs": 68,
+              "contextCharacters": 1486,
+              "llmCalls": null,
+              "iterations": null,
+              "providerRetries": null
+            }
+          ],
+          "stagesMs": {
+            "financialData": 53,
+            "n8nRoundTrip": 6730,
+            "prepare": 3,
+            "backendTools": 99
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "FINANCIAL",
+          "sample": 1,
+          "totalMs": 4307,
+          "httpStatus": 200,
+          "intent": "analysis",
+          "hasAnswer": true,
+          "abstained": false,
+          "delegations": 1,
+          "agents": [
+            {
+              "role": "FINANCIAL",
+              "status": "OK",
+              "elapsedMs": 1814,
+              "toolCalls": 1,
+              "tools": {
+                "finance.read": 1
+              },
+              "toolMs": 3,
+              "contextCharacters": 1486,
+              "llmCalls": null,
+              "iterations": null,
+              "providerRetries": null
+            }
+          ],
+          "stagesMs": {
+            "financialData": 3,
+            "n8nRoundTrip": 4302,
+            "prepare": 1,
+            "backendTools": 15
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "FINANCIAL",
+          "sample": 2,
+          "totalMs": 3957,
+          "httpStatus": 200,
+          "intent": "analysis",
+          "hasAnswer": true,
+          "abstained": false,
+          "delegations": 1,
+          "agents": [
+            {
+              "role": "FINANCIAL",
+              "status": "OK",
+              "elapsedMs": 2029,
+              "toolCalls": 1,
+              "tools": {
+                "finance.read": 1
+              },
+              "toolMs": 4,
+              "contextCharacters": 1486,
+              "llmCalls": null,
+              "iterations": null,
+              "providerRetries": null
+            }
+          ],
+          "stagesMs": {
+            "financialData": 3,
+            "n8nRoundTrip": 3950,
+            "prepare": 1,
+            "backendTools": 15
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "FINANCIAL",
+          "sample": 3,
+          "totalMs": 3999,
+          "httpStatus": 200,
+          "intent": "analysis",
+          "hasAnswer": true,
+          "abstained": false,
+          "delegations": 1,
+          "agents": [
+            {
+              "role": "FINANCIAL",
+              "status": "OK",
+              "elapsedMs": 1850,
+              "toolCalls": 1,
+              "tools": {
+                "finance.read": 1
+              },
+              "toolMs": 4,
+              "contextCharacters": 1486,
+              "llmCalls": null,
+              "iterations": null,
+              "providerRetries": null
+            }
+          ],
+          "stagesMs": {
+            "financialData": 4,
+            "n8nRoundTrip": 3995,
+            "prepare": 1,
+            "backendTools": 12
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "FINANCIAL",
+          "sample": 4,
+          "totalMs": 2842,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 1,
+          "agents": [
+            {
+              "role": "FINANCIAL",
+              "status": "OK",
+              "elapsedMs": 1663,
+              "toolCalls": 1,
+              "tools": {
+                "finance.read": 1
+              },
+              "toolMs": 3,
+              "contextCharacters": 1486,
+              "llmCalls": null,
+              "iterations": null,
+              "providerRetries": null
+            }
+          ],
+          "stagesMs": {
+            "financialData": 2,
+            "n8nRoundTrip": 2831,
+            "prepare": 1,
+            "backendTools": 7
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "FINANCIAL",
+          "sample": 5,
+          "totalMs": 1248,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 1,
+          "agents": [
+            {
+              "role": "FINANCIAL",
+              "status": "FAILED",
+              "elapsedMs": 267,
+              "toolCalls": 0,
+              "tools": {},
+              "toolMs": 0,
+              "contextCharacters": 0,
+              "llmCalls": null,
+              "iterations": null,
+              "providerRetries": null
+            }
+          ],
+          "stagesMs": {
+            "prepare": 1,
+            "backendTools": 1,
+            "n8nRoundTrip": 1243
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": false
+        },
+        {
+          "scenario": "FINANCIAL",
+          "sample": 6,
+          "totalMs": 330,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 1,
+            "backendTools": 1,
+            "n8nRoundTrip": 326
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "FINANCIAL",
+          "sample": 7,
+          "totalMs": 391,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 1,
+            "backendTools": 1,
+            "n8nRoundTrip": 387
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "FINANCIAL",
+          "sample": 8,
+          "totalMs": 332,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 1,
+            "backendTools": 1,
+            "n8nRoundTrip": 328
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "FINANCIAL",
+          "sample": 9,
+          "totalMs": 388,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 1,
+            "backendTools": 1,
+            "n8nRoundTrip": 384
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "FINANCIAL",
+          "sample": 10,
+          "totalMs": 329,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 324
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "FINANCIAL",
+          "sample": 11,
+          "totalMs": 337,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 1,
+            "backendTools": 1,
+            "n8nRoundTrip": 333
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "FINANCIAL",
+          "sample": 12,
+          "totalMs": 359,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 355
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "FINANCIAL",
+          "sample": 13,
+          "totalMs": 396,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 4,
+            "backendTools": 5,
+            "n8nRoundTrip": 383
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "FINANCIAL",
+          "sample": 14,
+          "totalMs": 379,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 1,
+            "backendTools": 1,
+            "n8nRoundTrip": 374
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "FINANCIAL",
+          "sample": 15,
+          "totalMs": 353,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 349
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "FINANCIAL",
+          "sample": 16,
+          "totalMs": 325,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 320
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "FINANCIAL",
+          "sample": 17,
+          "totalMs": 6164,
+          "httpStatus": 200,
+          "intent": "analysis",
+          "hasAnswer": true,
+          "abstained": false,
+          "delegations": 2,
+          "agents": [
+            {
+              "role": "FINANCIAL",
+              "status": "FAILED",
+              "elapsedMs": 1344,
+              "toolCalls": 1,
+              "tools": {
+                "finance.read": 1
+              },
+              "toolMs": 4,
+              "contextCharacters": 1486,
+              "llmCalls": null,
+              "iterations": null,
+              "providerRetries": null
+            },
+            {
+              "role": "RAG",
+              "status": "PARTIAL",
+              "elapsedMs": 2281,
+              "toolCalls": 1,
+              "tools": {
+                "knowledge.approved": 1
+              },
+              "toolMs": 9,
+              "contextCharacters": 613,
+              "llmCalls": null,
+              "iterations": null,
+              "providerRetries": null
+            }
+          ],
+          "stagesMs": {
+            "knowledgeRetrieval": 7,
+            "n8nRoundTrip": 6160,
+            "financialData": 3,
+            "prepare": 0,
+            "backendTools": 16
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": false
+        },
+        {
+          "scenario": "FINANCIAL",
+          "sample": 18,
+          "totalMs": 3813,
+          "httpStatus": 200,
+          "intent": "analysis",
+          "hasAnswer": true,
+          "abstained": false,
+          "delegations": 1,
+          "agents": [
+            {
+              "role": "FINANCIAL",
+              "status": "OK",
+              "elapsedMs": 1930,
+              "toolCalls": 1,
+              "tools": {
+                "finance.read": 1
+              },
+              "toolMs": 3,
+              "contextCharacters": 1486,
+              "llmCalls": null,
+              "iterations": null,
+              "providerRetries": null
+            }
+          ],
+          "stagesMs": {
+            "financialData": 3,
+            "n8nRoundTrip": 3809,
+            "prepare": 1,
+            "backendTools": 9
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "FINANCIAL",
+          "sample": 19,
+          "totalMs": 3739,
+          "httpStatus": 200,
+          "intent": "analysis",
+          "hasAnswer": true,
+          "abstained": false,
+          "delegations": 1,
+          "agents": [
+            {
+              "role": "FINANCIAL",
+              "status": "OK",
+              "elapsedMs": 1982,
+              "toolCalls": 1,
+              "tools": {
+                "finance.read": 1
+              },
+              "toolMs": 3,
+              "contextCharacters": 1486,
+              "llmCalls": null,
+              "iterations": null,
+              "providerRetries": null
+            }
+          ],
+          "stagesMs": {
+            "financialData": 2,
+            "n8nRoundTrip": 3735,
+            "prepare": 0,
+            "backendTools": 7
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "RAG",
+          "sample": 0,
+          "totalMs": 5922,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 2,
+          "agents": [
+            {
+              "role": "RAG",
+              "status": "FAILED",
+              "elapsedMs": 2168,
+              "toolCalls": 1,
+              "tools": {
+                "knowledge.approved": 1
+              },
+              "toolMs": 0,
+              "contextCharacters": 613,
+              "llmCalls": null,
+              "iterations": null,
+              "providerRetries": null
+            },
+            {
+              "role": "SUPPORT",
+              "status": "FAILED",
+              "elapsedMs": 1667,
+              "toolCalls": 1,
+              "tools": {
+                "knowledge.approved": 1
+              },
+              "toolMs": 2,
+              "contextCharacters": 613,
+              "llmCalls": null,
+              "iterations": null,
+              "providerRetries": null
+            }
+          ],
+          "stagesMs": {
+            "n8nRoundTrip": 5918,
+            "prepare": 1,
+            "backendTools": 11,
+            "knowledgeRetrieval": 2
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 1,
+          "allSpecialistsOK": false
+        },
+        {
+          "scenario": "RAG",
+          "sample": 1,
+          "totalMs": 361,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 357
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "RAG",
+          "sample": 2,
+          "totalMs": 342,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 1,
+            "backendTools": 1,
+            "n8nRoundTrip": 337
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "RAG",
+          "sample": 3,
+          "totalMs": 360,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 356
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "RAG",
+          "sample": 4,
+          "totalMs": 335,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 330
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "RAG",
+          "sample": 5,
+          "totalMs": 325,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 321
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "RAG",
+          "sample": 6,
+          "totalMs": 324,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 320
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "RAG",
+          "sample": 7,
+          "totalMs": 307,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 303
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "RAG",
+          "sample": 8,
+          "totalMs": 342,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 338
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "RAG",
+          "sample": 9,
+          "totalMs": 364,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 360
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "RAG",
+          "sample": 10,
+          "totalMs": 293,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 289
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "RAG",
+          "sample": 11,
+          "totalMs": 361,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 1,
+            "backendTools": 2,
+            "n8nRoundTrip": 357
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "RAG",
+          "sample": 12,
+          "totalMs": 328,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 320
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "RAG",
+          "sample": 13,
+          "totalMs": 304,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 300
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "RAG",
+          "sample": 14,
+          "totalMs": 321,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 318
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "RAG",
+          "sample": 15,
+          "totalMs": 312,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 309
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "RAG",
+          "sample": 16,
+          "totalMs": 379,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 1,
+            "n8nRoundTrip": 375
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "RAG",
+          "sample": 17,
+          "totalMs": 314,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 311
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "RAG",
+          "sample": 18,
+          "totalMs": 361,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 357
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "RAG",
+          "sample": 19,
+          "totalMs": 326,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 321
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "SUPPORT",
+          "sample": 0,
+          "totalMs": 293,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 290
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "SUPPORT",
+          "sample": 1,
+          "totalMs": 366,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 363
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "SUPPORT",
+          "sample": 2,
+          "totalMs": 301,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 298
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "SUPPORT",
+          "sample": 3,
+          "totalMs": 323,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 319
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "SUPPORT",
+          "sample": 4,
+          "totalMs": 306,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 302
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "SUPPORT",
+          "sample": 5,
+          "totalMs": 310,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 307
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "SUPPORT",
+          "sample": 6,
+          "totalMs": 309,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 305
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "SUPPORT",
+          "sample": 7,
+          "totalMs": 329,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 324
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "SUPPORT",
+          "sample": 8,
+          "totalMs": 314,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 310
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "SUPPORT",
+          "sample": 9,
+          "totalMs": 312,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 308
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "SUPPORT",
+          "sample": 10,
+          "totalMs": 396,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 392
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "SUPPORT",
+          "sample": 11,
+          "totalMs": 306,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 302
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "SUPPORT",
+          "sample": 12,
+          "totalMs": 368,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 365
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "SUPPORT",
+          "sample": 13,
+          "totalMs": 315,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 312
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "SUPPORT",
+          "sample": 14,
+          "totalMs": 305,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 302
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "SUPPORT",
+          "sample": 15,
+          "totalMs": 365,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 362
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "SUPPORT",
+          "sample": 16,
+          "totalMs": 309,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 306
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "SUPPORT",
+          "sample": 17,
+          "totalMs": 347,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 343
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "SUPPORT",
+          "sample": 18,
+          "totalMs": 316,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 313
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "SUPPORT",
+          "sample": 19,
+          "totalMs": 662,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 658
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "COMPOSITE",
+          "sample": 0,
+          "totalMs": 295,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 291
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "COMPOSITE",
+          "sample": 1,
+          "totalMs": 432,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 429
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "COMPOSITE",
+          "sample": 2,
+          "totalMs": 323,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 320
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "COMPOSITE",
+          "sample": 3,
+          "totalMs": 375,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 372
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "COMPOSITE",
+          "sample": 4,
+          "totalMs": 300,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 297
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "COMPOSITE",
+          "sample": 5,
+          "totalMs": 310,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 306
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "COMPOSITE",
+          "sample": 6,
+          "totalMs": 307,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 303
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "COMPOSITE",
+          "sample": 7,
+          "totalMs": 302,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 299
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "COMPOSITE",
+          "sample": 8,
+          "totalMs": 319,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 1,
+            "backendTools": 1,
+            "n8nRoundTrip": 317
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "COMPOSITE",
+          "sample": 9,
+          "totalMs": 314,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 310
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "COMPOSITE",
+          "sample": 10,
+          "totalMs": 304,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 301
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "COMPOSITE",
+          "sample": 11,
+          "totalMs": 365,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 361
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "COMPOSITE",
+          "sample": 12,
+          "totalMs": 350,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 346
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "COMPOSITE",
+          "sample": 13,
+          "totalMs": 373,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 370
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "COMPOSITE",
+          "sample": 14,
+          "totalMs": 303,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 300
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "COMPOSITE",
+          "sample": 15,
+          "totalMs": 375,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 371
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "COMPOSITE",
+          "sample": 16,
+          "totalMs": 306,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 303
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "COMPOSITE",
+          "sample": 17,
+          "totalMs": 322,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 319
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "COMPOSITE",
+          "sample": 18,
+          "totalMs": 361,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 357
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "COMPOSITE",
+          "sample": 19,
+          "totalMs": 312,
+          "httpStatus": 503,
+          "intent": "",
+          "hasAnswer": false,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 0,
+            "backendTools": 0,
+            "n8nRoundTrip": 309
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        }
+      ]
+    },
+    {
+      "name": "paced",
+      "scenarios": {
+        "DETERMINISTIC": {
+          "attempts": 3,
+          "http200": 3,
+          "allSpecialistsOK": 3,
+          "http200LatencyMs": {
+            "p50": 5,
+            "p95": 82
+          },
+          "fullyValidatedSpecialistsLatencyMs": {
+            "p50": 5,
+            "p95": 82
+          },
+          "percentilesPreliminary": true
+        },
+        "FINANCIAL": {
+          "attempts": 3,
+          "http200": 3,
+          "allSpecialistsOK": 3,
+          "http200LatencyMs": {
+            "p50": 4981,
+            "p95": 5221
+          },
+          "fullyValidatedSpecialistsLatencyMs": {
+            "p50": 4981,
+            "p95": 5221
+          },
+          "percentilesPreliminary": true
+        },
+        "RAG": {
+          "attempts": 3,
+          "http200": 3,
+          "allSpecialistsOK": 1,
+          "http200LatencyMs": {
+            "p50": 6888,
+            "p95": 7680
+          },
+          "fullyValidatedSpecialistsLatencyMs": {
+            "p50": 3836,
+            "p95": 3836
+          },
+          "percentilesPreliminary": true
+        },
+        "SUPPORT": {
+          "attempts": 3,
+          "http200": 3,
+          "allSpecialistsOK": 0,
+          "http200LatencyMs": {
+            "p50": 7451,
+            "p95": 7845
+          },
+          "fullyValidatedSpecialistsLatencyMs": {
+            "p50": null,
+            "p95": null
+          },
+          "percentilesPreliminary": true
+        },
+        "COMPOSITE": {
+          "attempts": 3,
+          "http200": 3,
+          "allSpecialistsOK": 2,
+          "http200LatencyMs": {
+            "p50": 7296,
+            "p95": 10706
+          },
+          "fullyValidatedSpecialistsLatencyMs": {
+            "p50": 7151,
+            "p95": 7296
+          },
+          "percentilesPreliminary": true
+        }
+      },
+      "records": [
+        {
+          "scenario": "DETERMINISTIC",
+          "sample": 0,
+          "totalMs": 82,
+          "httpStatus": 200,
+          "intent": "upcoming",
+          "hasAnswer": true,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {},
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "DETERMINISTIC",
+          "sample": 1,
+          "totalMs": 5,
+          "httpStatus": 200,
+          "intent": "upcoming",
+          "hasAnswer": true,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {},
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "DETERMINISTIC",
+          "sample": 2,
+          "totalMs": 4,
+          "httpStatus": 200,
+          "intent": "upcoming",
+          "hasAnswer": true,
+          "abstained": false,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {},
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "FINANCIAL",
+          "sample": 0,
+          "totalMs": 5221,
+          "httpStatus": 200,
+          "intent": "analysis",
+          "hasAnswer": true,
+          "abstained": false,
+          "delegations": 1,
+          "agents": [
+            {
+              "role": "FINANCIAL",
+              "status": "OK",
+              "elapsedMs": 2543,
+              "toolCalls": 1,
+              "tools": {
+                "finance.read": 1
+              },
+              "toolMs": 64,
+              "contextCharacters": 1486,
+              "llmCalls": null,
+              "iterations": null,
+              "providerRetries": null
+            }
+          ],
+          "stagesMs": {
+            "financialData": 52,
+            "backendTools": 109,
+            "prepare": 3,
+            "n8nRoundTrip": 5161
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "FINANCIAL",
+          "sample": 1,
+          "totalMs": 4981,
+          "httpStatus": 200,
+          "intent": "analysis",
+          "hasAnswer": true,
+          "abstained": false,
+          "delegations": 1,
+          "agents": [
+            {
+              "role": "FINANCIAL",
+              "status": "OK",
+              "elapsedMs": 1975,
+              "toolCalls": 1,
+              "tools": {
+                "finance.read": 1
+              },
+              "toolMs": 3,
+              "contextCharacters": 1486,
+              "llmCalls": null,
+              "iterations": null,
+              "providerRetries": null
+            }
+          ],
+          "stagesMs": {
+            "financialData": 3,
+            "backendTools": 16,
+            "prepare": 1,
+            "n8nRoundTrip": 4974
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "FINANCIAL",
+          "sample": 2,
+          "totalMs": 4170,
+          "httpStatus": 200,
+          "intent": "analysis",
+          "hasAnswer": true,
+          "abstained": false,
+          "delegations": 1,
+          "agents": [
+            {
+              "role": "FINANCIAL",
+              "status": "OK",
+              "elapsedMs": 2210,
+              "toolCalls": 1,
+              "tools": {
+                "finance.read": 1
+              },
+              "toolMs": 4,
+              "contextCharacters": 1486,
+              "llmCalls": null,
+              "iterations": null,
+              "providerRetries": null
+            }
+          ],
+          "stagesMs": {
+            "financialData": 3,
+            "backendTools": 15,
+            "prepare": 1,
+            "n8nRoundTrip": 4166
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "RAG",
+          "sample": 0,
+          "totalMs": 6888,
+          "httpStatus": 200,
+          "intent": "analysis",
+          "hasAnswer": true,
+          "abstained": false,
+          "delegations": 2,
+          "agents": [
+            {
+              "role": "RAG",
+              "status": "FAILED",
+              "elapsedMs": 1759,
+              "toolCalls": 1,
+              "tools": {
+                "knowledge.approved": 1
+              },
+              "toolMs": 9,
+              "contextCharacters": 613,
+              "llmCalls": null,
+              "iterations": null,
+              "providerRetries": null
+            },
+            {
+              "role": "SUPPORT",
+              "status": "FAILED",
+              "elapsedMs": 1972,
+              "toolCalls": 1,
+              "tools": {
+                "knowledge.approved": 1
+              },
+              "toolMs": 2,
+              "contextCharacters": 613,
+              "llmCalls": null,
+              "iterations": null,
+              "providerRetries": null
+            }
+          ],
+          "stagesMs": {
+            "knowledgeRetrieval": 7,
+            "backendTools": 26,
+            "prepare": 1,
+            "n8nRoundTrip": 6884
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 1,
+          "allSpecialistsOK": false
+        },
+        {
+          "scenario": "RAG",
+          "sample": 1,
+          "totalMs": 3836,
+          "httpStatus": 200,
+          "intent": "analysis",
+          "hasAnswer": true,
+          "abstained": false,
+          "delegations": 1,
+          "agents": [
+            {
+              "role": "RAG",
+              "status": "OK",
+              "elapsedMs": 1839,
+              "toolCalls": 1,
+              "tools": {
+                "knowledge.approved": 1
+              },
+              "toolMs": 1,
+              "contextCharacters": 613,
+              "llmCalls": null,
+              "iterations": null,
+              "providerRetries": null
+            }
+          ],
+          "stagesMs": {
+            "knowledgeRetrieval": 0,
+            "backendTools": 11,
+            "prepare": 1,
+            "n8nRoundTrip": 3826
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "RAG",
+          "sample": 2,
+          "totalMs": 7680,
+          "httpStatus": 200,
+          "intent": "analysis",
+          "hasAnswer": true,
+          "abstained": false,
+          "delegations": 2,
+          "agents": [
+            {
+              "role": "RAG",
+              "status": "FAILED",
+              "elapsedMs": 2307,
+              "toolCalls": 1,
+              "tools": {
+                "knowledge.approved": 1
+              },
+              "toolMs": 1,
+              "contextCharacters": 613,
+              "llmCalls": null,
+              "iterations": null,
+              "providerRetries": null
+            },
+            {
+              "role": "SUPPORT",
+              "status": "FAILED",
+              "elapsedMs": 2123,
+              "toolCalls": 1,
+              "tools": {
+                "knowledge.approved": 1
+              },
+              "toolMs": 3,
+              "contextCharacters": 613,
+              "llmCalls": null,
+              "iterations": null,
+              "providerRetries": null
+            }
+          ],
+          "stagesMs": {
+            "knowledgeRetrieval": 4,
+            "backendTools": 18,
+            "prepare": 1,
+            "n8nRoundTrip": 7676
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 2,
+          "allSpecialistsOK": false
+        },
+        {
+          "scenario": "SUPPORT",
+          "sample": 0,
+          "totalMs": 7451,
+          "httpStatus": 200,
+          "intent": "analysis",
+          "hasAnswer": true,
+          "abstained": false,
+          "delegations": 2,
+          "agents": [
+            {
+              "role": "SUPPORT",
+              "status": "FAILED",
+              "elapsedMs": 2038,
+              "toolCalls": 1,
+              "tools": {
+                "knowledge.approved": 1
+              },
+              "toolMs": 1,
+              "contextCharacters": 613,
+              "llmCalls": null,
+              "iterations": null,
+              "providerRetries": null
+            },
+            {
+              "role": "RAG",
+              "status": "OK",
+              "elapsedMs": 2256,
+              "toolCalls": 1,
+              "tools": {
+                "knowledge.approved": 1
+              },
+              "toolMs": 2,
+              "contextCharacters": 613,
+              "llmCalls": null,
+              "iterations": null,
+              "providerRetries": null
+            }
+          ],
+          "stagesMs": {
+            "knowledgeRetrieval": 2,
+            "backendTools": 16,
+            "prepare": 1,
+            "n8nRoundTrip": 7447
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 1,
+          "allSpecialistsOK": false
+        },
+        {
+          "scenario": "SUPPORT",
+          "sample": 1,
+          "totalMs": 7845,
+          "httpStatus": 200,
+          "intent": "analysis",
+          "hasAnswer": true,
+          "abstained": false,
+          "delegations": 2,
+          "agents": [
+            {
+              "role": "SUPPORT",
+              "status": "FAILED",
+              "elapsedMs": 2136,
+              "toolCalls": 1,
+              "tools": {
+                "knowledge.approved": 1
+              },
+              "toolMs": 2,
+              "contextCharacters": 613,
+              "llmCalls": null,
+              "iterations": null,
+              "providerRetries": null
+            },
+            {
+              "role": "RAG",
+              "status": "OK",
+              "elapsedMs": 2163,
+              "toolCalls": 1,
+              "tools": {
+                "knowledge.approved": 1
+              },
+              "toolMs": 1,
+              "contextCharacters": 613,
+              "llmCalls": null,
+              "iterations": null,
+              "providerRetries": null
+            }
+          ],
+          "stagesMs": {
+            "knowledgeRetrieval": 3,
+            "backendTools": 15,
+            "prepare": 1,
+            "n8nRoundTrip": 7841
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": false
+        },
+        {
+          "scenario": "SUPPORT",
+          "sample": 2,
+          "totalMs": 7122,
+          "httpStatus": 200,
+          "intent": "analysis",
+          "hasAnswer": true,
+          "abstained": false,
+          "delegations": 2,
+          "agents": [
+            {
+              "role": "SUPPORT",
+              "status": "FAILED",
+              "elapsedMs": 2027,
+              "toolCalls": 1,
+              "tools": {
+                "knowledge.approved": 1
+              },
+              "toolMs": 1,
+              "contextCharacters": 613,
+              "llmCalls": null,
+              "iterations": null,
+              "providerRetries": null
+            },
+            {
+              "role": "RAG",
+              "status": "OK",
+              "elapsedMs": 1726,
+              "toolCalls": 1,
+              "tools": {
+                "knowledge.approved": 1
+              },
+              "toolMs": 1,
+              "contextCharacters": 613,
+              "llmCalls": null,
+              "iterations": null,
+              "providerRetries": null
+            }
+          ],
+          "stagesMs": {
+            "knowledgeRetrieval": 0,
+            "backendTools": 15,
+            "prepare": 1,
+            "n8nRoundTrip": 7116
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 1,
+          "allSpecialistsOK": false
+        },
+        {
+          "scenario": "COMPOSITE",
+          "sample": 0,
+          "totalMs": 7151,
+          "httpStatus": 200,
+          "intent": "analysis",
+          "hasAnswer": true,
+          "abstained": false,
+          "delegations": 2,
+          "agents": [
+            {
+              "role": "RAG",
+              "status": "OK",
+              "elapsedMs": 1670,
+              "toolCalls": 1,
+              "tools": {
+                "knowledge.approved": 1
+              },
+              "toolMs": 1,
+              "contextCharacters": 613,
+              "llmCalls": null,
+              "iterations": null,
+              "providerRetries": null
+            },
+            {
+              "role": "FINANCIAL",
+              "status": "OK",
+              "elapsedMs": 1990,
+              "toolCalls": 1,
+              "tools": {
+                "finance.read": 1
+              },
+              "toolMs": 4,
+              "contextCharacters": 1486,
+              "llmCalls": null,
+              "iterations": null,
+              "providerRetries": null
+            }
+          ],
+          "stagesMs": {
+            "knowledgeRetrieval": 0,
+            "backendTools": 18,
+            "prepare": 1,
+            "financialData": 4,
+            "n8nRoundTrip": 7147
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "COMPOSITE",
+          "sample": 1,
+          "totalMs": 10706,
+          "httpStatus": 200,
+          "intent": "analysis",
+          "hasAnswer": true,
+          "abstained": false,
+          "delegations": 3,
+          "agents": [
+            {
+              "role": "RAG",
+              "status": "FAILED",
+              "elapsedMs": 1817,
+              "toolCalls": 1,
+              "tools": {
+                "knowledge.approved": 1
+              },
+              "toolMs": 1,
+              "contextCharacters": 613,
+              "llmCalls": null,
+              "iterations": null,
+              "providerRetries": null
+            },
+            {
+              "role": "SUPPORT",
+              "status": "FAILED",
+              "elapsedMs": 2376,
+              "toolCalls": 1,
+              "tools": {
+                "knowledge.approved": 1
+              },
+              "toolMs": 1,
+              "contextCharacters": 613,
+              "llmCalls": null,
+              "iterations": null,
+              "providerRetries": null
+            },
+            {
+              "role": "FINANCIAL",
+              "status": "OK",
+              "elapsedMs": 1936,
+              "toolCalls": 1,
+              "tools": {
+                "finance.read": 1
+              },
+              "toolMs": 3,
+              "contextCharacters": 1486,
+              "llmCalls": null,
+              "iterations": null,
+              "providerRetries": null
+            }
+          ],
+          "stagesMs": {
+            "knowledgeRetrieval": 0,
+            "backendTools": 18,
+            "prepare": 1,
+            "financialData": 3,
+            "n8nRoundTrip": 10701
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 1,
+          "allSpecialistsOK": false
+        },
+        {
+          "scenario": "COMPOSITE",
+          "sample": 2,
+          "totalMs": 7296,
+          "httpStatus": 200,
+          "intent": "analysis",
+          "hasAnswer": true,
+          "abstained": false,
+          "delegations": 2,
+          "agents": [
+            {
+              "role": "RAG",
+              "status": "OK",
+              "elapsedMs": 1955,
+              "toolCalls": 1,
+              "tools": {
+                "knowledge.approved": 1
+              },
+              "toolMs": 0,
+              "contextCharacters": 613,
+              "llmCalls": null,
+              "iterations": null,
+              "providerRetries": null
+            },
+            {
+              "role": "FINANCIAL",
+              "status": "OK",
+              "elapsedMs": 1960,
+              "toolCalls": 1,
+              "tools": {
+                "finance.read": 1
+              },
+              "toolMs": 3,
+              "contextCharacters": 1486,
+              "llmCalls": null,
+              "iterations": null,
+              "providerRetries": null
+            }
+          ],
+          "stagesMs": {
+            "knowledgeRetrieval": 0,
+            "backendTools": 12,
+            "prepare": 1,
+            "financialData": 3,
+            "n8nRoundTrip": 7291
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        }
+      ]
+    },
+    {
+      "name": "finalSmoke",
+      "scenarios": {
+        "RAG": {
+          "attempts": 1,
+          "http200": 1,
+          "allSpecialistsOK": 1,
+          "http200LatencyMs": {
+            "p50": 5757,
+            "p95": 5757
+          },
+          "fullyValidatedSpecialistsLatencyMs": {
+            "p50": 5757,
+            "p95": 5757
+          },
+          "percentilesPreliminary": true
+        },
+        "SUPPORT": {
+          "attempts": 1,
+          "http200": 1,
+          "allSpecialistsOK": 0,
+          "http200LatencyMs": {
+            "p50": 7395,
+            "p95": 7395
+          },
+          "fullyValidatedSpecialistsLatencyMs": {
+            "p50": null,
+            "p95": null
+          },
+          "percentilesPreliminary": true
+        },
+        "COMPOSITE": {
+          "attempts": 1,
+          "http200": 1,
+          "allSpecialistsOK": 1,
+          "http200LatencyMs": {
+            "p50": 6455,
+            "p95": 6455
+          },
+          "fullyValidatedSpecialistsLatencyMs": {
+            "p50": 6455,
+            "p95": 6455
+          },
+          "percentilesPreliminary": true
+        },
+        "UNKNOWN": {
+          "attempts": 1,
+          "http200": 1,
+          "allSpecialistsOK": 1,
+          "http200LatencyMs": {
+            "p50": 995,
+            "p95": 995
+          },
+          "fullyValidatedSpecialistsLatencyMs": {
+            "p50": 995,
+            "p95": 995
+          },
+          "percentilesPreliminary": true
+        }
+      },
+      "records": [
+        {
+          "scenario": "RAG",
+          "sample": 0,
+          "totalMs": 5757,
+          "httpStatus": 200,
+          "intent": "analysis",
+          "hasAnswer": true,
+          "abstained": false,
+          "delegations": 1,
+          "agents": [
+            {
+              "role": "RAG",
+              "status": "OK",
+              "elapsedMs": 2235,
+              "toolCalls": 1,
+              "tools": {
+                "knowledge.approved": 1
+              },
+              "toolMs": 68,
+              "contextCharacters": 613,
+              "llmCalls": null,
+              "iterations": null,
+              "providerRetries": null
+            }
+          ],
+          "stagesMs": {
+            "n8nRoundTrip": 5648,
+            "prepare": 6,
+            "backendTools": 109,
+            "knowledgeRetrieval": 20
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "SUPPORT",
+          "sample": 0,
+          "totalMs": 7395,
+          "httpStatus": 200,
+          "intent": "analysis",
+          "hasAnswer": true,
+          "abstained": false,
+          "delegations": 2,
+          "agents": [
+            {
+              "role": "SUPPORT",
+              "status": "FAILED",
+              "elapsedMs": 1638,
+              "toolCalls": 1,
+              "tools": {
+                "knowledge.approved": 1
+              },
+              "toolMs": 4,
+              "contextCharacters": 613,
+              "llmCalls": null,
+              "iterations": null,
+              "providerRetries": null
+            },
+            {
+              "role": "RAG",
+              "status": "OK",
+              "elapsedMs": 2125,
+              "toolCalls": 1,
+              "tools": {
+                "knowledge.approved": 1
+              },
+              "toolMs": 3,
+              "contextCharacters": 613,
+              "llmCalls": null,
+              "iterations": null,
+              "providerRetries": null
+            }
+          ],
+          "stagesMs": {
+            "n8nRoundTrip": 7388,
+            "prepare": 1,
+            "backendTools": 33,
+            "knowledgeRetrieval": 6
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 1,
+          "allSpecialistsOK": false
+        },
+        {
+          "scenario": "COMPOSITE",
+          "sample": 0,
+          "totalMs": 6455,
+          "httpStatus": 200,
+          "intent": "analysis",
+          "hasAnswer": true,
+          "abstained": false,
+          "delegations": 2,
+          "agents": [
+            {
+              "role": "RAG",
+              "status": "OK",
+              "elapsedMs": 2048,
+              "toolCalls": 1,
+              "tools": {
+                "knowledge.approved": 1
+              },
+              "toolMs": 1,
+              "contextCharacters": 613,
+              "llmCalls": null,
+              "iterations": null,
+              "providerRetries": null
+            },
+            {
+              "role": "FINANCIAL",
+              "status": "OK",
+              "elapsedMs": 1719,
+              "toolCalls": 1,
+              "tools": {
+                "finance.read": 1
+              },
+              "toolMs": 41,
+              "contextCharacters": 1486,
+              "llmCalls": null,
+              "iterations": null,
+              "providerRetries": null
+            }
+          ],
+          "stagesMs": {
+            "knowledgeRetrieval": 0,
+            "n8nRoundTrip": 6446,
+            "financialData": 40,
+            "prepare": 1,
+            "backendTools": 67
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        },
+        {
+          "scenario": "UNKNOWN",
+          "sample": 0,
+          "totalMs": 995,
+          "httpStatus": 200,
+          "intent": "analysis",
+          "hasAnswer": true,
+          "abstained": true,
+          "delegations": 0,
+          "agents": [],
+          "stagesMs": {
+            "prepare": 2,
+            "backendTools": 7,
+            "n8nRoundTrip": 985
+          },
+          "contextCharacters": 0,
+          "fragments": 0,
+          "errors": 0,
+          "allSpecialistsOK": true
+        }
+      ]
+    }
+  ]
+}
