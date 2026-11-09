@@ -1,0 +1,860 @@
+{
+  "source": "Read-only published n8n inventory 2026-11-09; credentials must be bound separately; never activates workflows",
+  "workflows": [
+    {
+      "id": "ceroaFinancialAgent30",
+      "removedNodeIds": [],
+      "nodeOverrides": {
+        "parser": {
+          "parameters": {
+            "schemaType": "manual",
+            "inputSchema": "{\"type\":\"object\",\"additionalProperties\":false,\"required\":[\"schemaVersion\",\"role\",\"status\",\"answer\",\"evidenceRefs\",\"sources\",\"coverage\",\"missingData\",\"requiresConfirmation\",\"requiresClarification\"],\"properties\":{\"schemaVersion\":{\"type\":\"string\",\"pattern\":\"^1[.]1$\"},\"role\":{\"type\":\"string\",\"pattern\":\"^FINANCIAL$\"},\"status\":{\"enum\":[\"OK\",\"PARTIAL\",\"INSUFFICIENT\",\"FAILED\"]},\"answer\":{\"type\":\"string\",\"minLength\":1,\"maxLength\":10000},\"evidenceRefs\":{\"type\":\"array\",\"maxItems\":100,\"uniqueItems\":true,\"items\":{\"type\":\"string\",\"pattern\":\"^f[1-9][0-9]*$\"}},\"sources\":{\"type\":\"array\",\"maxItems\":8,\"uniqueItems\":true,\"items\":{\"type\":\"string\",\"pattern\":\"^d[1-8]$\"}},\"coverage\":{\"enum\":[\"COMPLETE\",\"PARTIAL\",\"NONE\"]},\"missingData\":{\"type\":\"array\",\"maxItems\":12,\"items\":{\"type\":\"string\",\"maxLength\":200}},\"requiresConfirmation\":{\"type\":\"boolean\"},\"requiresClarification\":{\"type\":\"boolean\"}}}"
+          }
+        }
+      },
+      "extraNodes": []
+    },
+    {
+      "id": "ceroaKnowledgeAgent30",
+      "removedNodeIds": [],
+      "nodeOverrides": {},
+      "extraNodes": []
+    },
+    {
+      "id": "ceroaHybridQuery20",
+      "removedNodeIds": [],
+      "nodeOverrides": {
+        "delegate-FINANCIAL": {
+          "parameters": {
+            "description": "Interpreta obligaciones, saldos, tasas normalizadas, vencimientos, pagos registrados, capacidad, estrategia activa, comparaciÃ³n de estrategias y progreso usando datos financieros actuales. profile.availableMoney es presupuesto asignado, no ingreso menos gastos; usa incomeAfterExpenses y unallocatedAfterDebtBudget para esas diferencias. summary contiene indicadores derivados por el backend. Consulta todas las pÃ¡ginas antes de afirmar extremos o totales. Distingue EA, MV y NAMV, tasas desconocidas y sin interÃ©s. Las proyecciones solo existen si el backend las devuelve. Usa FACT_ANALYSIS para comparaciones documentales tipadas; si falta evidencia solicita recuperaciÃ³n al orquestador mediante missingData, sin ampliar tus herramientas. Calcular con evidencia solo admite referencias numÃ©ricas autorizadas. La simulaciÃ³n es hipotÃ©tica y exige permisos vigentes; nunca confirma resultados futuros. No uses conocimiento general sin respaldo documental compartido.",
+            "source": "database",
+            "workflowId": {
+              "__rl": true,
+              "value": "ceroaFinancialAgent30",
+              "mode": "id"
+            },
+            "workflowInputs": {
+              "mappingMode": "defineBelow",
+              "value": {
+                "requestId": "={{ $(\"Preparar texto\").first().json.requestId }}",
+                "task": "={{ $fromAI(\"task\",\"Tarea concreta y mÃ­nima para este especialista\", \"string\") }}",
+                "evidenceRefs": "={{ $fromAI(\"evidenceRefs\",\"Authorized fID or dID keys separated by commas; empty string when absent\", \"string\", \"\").split(\",\").map(x=>x.trim()).filter(Boolean) }}",
+                "context": "={{ {year:$(\"Preparar texto\").first().json.year,month:$(\"Preparar texto\").first().json.month,selectedDocument:$(\"Preparar texto\").first().json.selectedDocument} }}"
+              },
+              "matchingColumns": [],
+              "schema": [
+                {
+                  "id": "requestId",
+                  "displayName": "requestId",
+                  "required": true,
+                  "defaultMatch": false,
+                  "display": true,
+                  "canBeUsedToMatch": true,
+                  "type": "string"
+                },
+                {
+                  "id": "task",
+                  "displayName": "task",
+                  "required": true,
+                  "defaultMatch": false,
+                  "display": true,
+                  "canBeUsedToMatch": true,
+                  "type": "string"
+                },
+                {
+                  "id": "evidenceRefs",
+                  "displayName": "evidenceRefs",
+                  "required": true,
+                  "defaultMatch": false,
+                  "display": true,
+                  "canBeUsedToMatch": true,
+                  "type": "array"
+                },
+                {
+                  "id": "context",
+                  "displayName": "context",
+                  "required": true,
+                  "defaultMatch": false,
+                  "display": true,
+                  "canBeUsedToMatch": true,
+                  "type": "object"
+                }
+              ],
+              "attemptToConvertTypes": false,
+              "convertFieldsToString": false
+            }
+          }
+        },
+        "delegate-RAG": {
+          "parameters": {
+            "description": "Recupera conocimiento aprobado para conceptos financieros, funcionamiento de Ceroa y estrategias. Para documentos privados usa FACT_ANALYSIS primero en comparaciones numÃ©ricas compatibles; PERIOD_ANALYSIS para periodos completos y HYBRID_SEARCH para contenido puntual. No confundas pagos registrados con movimientos documentales. Respeta filtros y selecciÃ³n de archivo. Revisa hasMoreDocuments/nextOffset y cobertura antes de afirmar totalidad; evita sumar saldos entre periodos o tasas. Usa las diferencias y subtotales deterministas devueltos por FACT_ANALYSIS. No realices aritmÃ©tica mental. Si faltan cÃ¡lculos devuelve referencias y missingData para que el orquestador consulte al financiero. Separa fuentes pÃºblicas dID de hechos privados fID. Si no hay conocimiento aprobado relevante: No tengo informaciÃ³n aprobada suficiente para responder esa pregunta.",
+            "source": "database",
+            "workflowId": {
+              "__rl": true,
+              "value": "ceroaKnowledgeAgent30",
+              "mode": "id"
+            },
+            "workflowInputs": {
+              "mappingMode": "defineBelow",
+              "value": {
+                "requestId": "={{ $(\"Preparar texto\").first().json.requestId }}",
+                "task": "={{ $fromAI(\"task\",\"Tarea concreta y mÃ­nima para este especialista\", \"string\") }}",
+                "evidenceRefs": "={{ $fromAI(\"evidenceRefs\",\"Authorized fID or dID keys separated by commas; empty string when absent\", \"string\", \"\").split(\",\").map(x=>x.trim()).filter(Boolean) }}",
+                "context": "={{ {year:$(\"Preparar texto\").first().json.year,month:$(\"Preparar texto\").first().json.month,selectedDocument:$(\"Preparar texto\").first().json.selectedDocument} }}"
+              },
+              "matchingColumns": [],
+              "schema": [
+                {
+                  "id": "requestId",
+                  "displayName": "requestId",
+                  "required": true,
+                  "defaultMatch": false,
+                  "display": true,
+                  "canBeUsedToMatch": true,
+                  "type": "string"
+                },
+                {
+                  "id": "task",
+                  "displayName": "task",
+                  "required": true,
+                  "defaultMatch": false,
+                  "display": true,
+                  "canBeUsedToMatch": true,
+                  "type": "string"
+                },
+                {
+                  "id": "evidenceRefs",
+                  "displayName": "evidenceRefs",
+                  "required": true,
+                  "defaultMatch": false,
+                  "display": true,
+                  "canBeUsedToMatch": true,
+                  "type": "array"
+                },
+                {
+                  "id": "context",
+                  "displayName": "context",
+                  "required": true,
+                  "defaultMatch": false,
+                  "display": true,
+                  "canBeUsedToMatch": true,
+                  "type": "object"
+                }
+              ],
+              "attemptToConvertTypes": false,
+              "convertFieldsToString": false
+            }
+          }
+        },
+        "delegate-SUPPORT": {
+          "parameters": {
+            "description": "Orienta sobre navegaciÃ³n, registro de obligaciones y pagos, diferencias entre Cero y Ceroa Plus, estrategias y uso del simulador solo mediante conocimiento aprobado recuperado. No leas finanzas ni documentos privados. Si la peticiÃ³n exige datos financieros indica en missingData que requiere al financiero, sin responder desde memoria. Ante asesorÃ­a prepara una propuesta pendiente de confirmaciÃ³n, solicita tema y disponibilidad si faltan, marca requiresConfirmation=true y no prometas reserva ni enlaces. No hay Calendar ni Meet. Si falta documentaciÃ³n relevante abstente claramente.",
+            "source": "database",
+            "workflowId": {
+              "__rl": true,
+              "value": "ceroaSupportAgent30",
+              "mode": "id"
+            },
+            "workflowInputs": {
+              "mappingMode": "defineBelow",
+              "value": {
+                "requestId": "={{ $(\"Preparar texto\").first().json.requestId }}",
+                "task": "={{ $fromAI(\"task\",\"Tarea concreta y mÃ­nima para este especialista\", \"string\") }}",
+                "evidenceRefs": "={{ $fromAI(\"evidenceRefs\",\"Authorized fID or dID keys separated by commas; empty string when absent\", \"string\", \"\").split(\",\").map(x=>x.trim()).filter(Boolean) }}",
+                "context": "={{ {year:$(\"Preparar texto\").first().json.year,month:$(\"Preparar texto\").first().json.month,selectedDocument:$(\"Preparar texto\").first().json.selectedDocument} }}"
+              },
+              "matchingColumns": [],
+              "schema": [
+                {
+                  "id": "requestId",
+                  "displayName": "requestId",
+                  "required": true,
+                  "defaultMatch": false,
+                  "display": true,
+                  "canBeUsedToMatch": true,
+                  "type": "string"
+                },
+                {
+                  "id": "task",
+                  "displayName": "task",
+                  "required": true,
+                  "defaultMatch": false,
+                  "display": true,
+                  "canBeUsedToMatch": true,
+                  "type": "string"
+                },
+                {
+                  "id": "evidenceRefs",
+                  "displayName": "evidenceRefs",
+                  "required": true,
+                  "defaultMatch": false,
+                  "display": true,
+                  "canBeUsedToMatch": true,
+                  "type": "array"
+                },
+                {
+                  "id": "context",
+                  "displayName": "context",
+                  "required": true,
+                  "defaultMatch": false,
+                  "display": true,
+                  "canBeUsedToMatch": true,
+                  "type": "object"
+                }
+              ],
+              "attemptToConvertTypes": false,
+              "convertFieldsToString": false
+            }
+          }
+        }
+      },
+      "extraNodes": [
+        {
+          "id": "supabase-config",
+          "name": "Supabase Â· ConfiguraciÃ³n del Ã­ndice",
+          "type": "n8n-nodes-base.supabase",
+          "typeVersion": 1,
+          "position": [
+            500,
+            -250
+          ],
+          "parameters": {
+            "operation": "getAll",
+            "tableId": "ceroa_rag_configuration",
+            "returnAll": false,
+            "limit": 1,
+            "filterType": "string",
+            "filterString": "id=eq.financial-library-v1"
+          },
+          "onError": "continueErrorOutput"
+        },
+        {
+          "id": "supabase-check",
+          "name": "Verificar Ã­ndice y conservar solicitud",
+          "type": "n8n-nodes-base.code",
+          "typeVersion": 2,
+          "position": [
+            730,
+            -250
+          ],
+          "parameters": {
+            "jsCode": "const c=$json;if(c.id!=='financial-library-v1'||c.embedding_model!=='gemini-embedding-001'||c.dimensions!==768||c.schema_version!==21||c.max_file_bytes!==8388608||c.max_pages!==25)throw new Error('Ãndice Supabase incompatible');return [{json:$('Preparar texto').first().json}];"
+          },
+          "onError": "continueErrorOutput"
+        },
+        {
+          "id": "failure-supabase-config",
+          "name": "Fallo Â· Supabase Â· ConfiguraciÃ³n del Ã­ndice",
+          "type": "n8n-nodes-base.respondToWebhook",
+          "typeVersion": 1.4,
+          "position": [
+            2300,
+            500
+          ],
+          "parameters": {
+            "respondWith": "json",
+            "responseBody": "={{ JSON.stringify({available:false,stage:\"supabase-config\",category:/format|parse|schema|structured/i.test(JSON.stringify($json.error??$json))?'FORMAT':/rate limit|quota|429/i.test(JSON.stringify($json.error??$json))?'PROVIDER_LIMIT':'OTHER'}) }}",
+            "options": {
+              "responseCode": 503
+            }
+          }
+        },
+        {
+          "id": "failure-supabase-check",
+          "name": "Fallo Â· Verificar Ã­ndice y conservar solicitud",
+          "type": "n8n-nodes-base.respondToWebhook",
+          "typeVersion": 1.4,
+          "position": [
+            2300,
+            500
+          ],
+          "parameters": {
+            "respondWith": "json",
+            "responseBody": "={{ JSON.stringify({available:false,stage:\"supabase-check\",category:/format|parse|schema|structured/i.test(JSON.stringify($json.error??$json))?'FORMAT':/rate limit|quota|429/i.test(JSON.stringify($json.error??$json))?'PROVIDER_LIMIT':'OTHER'}) }}",
+            "options": {
+              "responseCode": 503
+            }
+          }
+        }
+      ],
+      "connections": {
+        "Recibir consulta": {
+          "main": [
+            [
+              {
+                "node": "Es audio",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Es audio": {
+          "main": [
+            [
+              {
+                "node": "Transcribir audio",
+                "type": "main",
+                "index": 0
+              }
+            ],
+            [
+              {
+                "node": "Preparar texto",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Transcribir audio": {
+          "main": [
+            [
+              {
+                "node": "Preparar texto",
+                "type": "main",
+                "index": 0
+              }
+            ],
+            [
+              {
+                "node": "Fallo Â· Transcribir audio",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Preparar texto": {
+          "main": [
+            [
+              {
+                "node": "Supabase Â· ConfiguraciÃ³n del Ã­ndice",
+                "type": "main",
+                "index": 0
+              }
+            ],
+            [
+              {
+                "node": "Fallo Â· Preparar texto",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Preparar contexto en Spring Boot": {
+          "main": [
+            [
+              {
+                "node": "Iniciar orquestaciÃ³n autorizada",
+                "type": "main",
+                "index": 0
+              }
+            ],
+            [
+              {
+                "node": "Fallo Â· Preparar contexto en Spring Boot",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Gemini Ceroa": {
+          "ai_languageModel": [
+            [
+              {
+                "node": "Analizar finanzas",
+                "type": "ai_languageModel",
+                "index": 0
+              },
+              {
+                "node": "Corregir referencias sin nuevas consultas",
+                "type": "ai_languageModel",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Contrato de respuesta": {
+          "ai_outputParser": [
+            [
+              {
+                "node": "Analizar finanzas",
+                "type": "ai_outputParser",
+                "index": 0
+              },
+              {
+                "node": "Corregir referencias sin nuevas consultas",
+                "type": "ai_outputParser",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Analizar finanzas": {
+          "main": [
+            [
+              {
+                "node": "Registrar mediciÃ³n sin contenido",
+                "type": "main",
+                "index": 0
+              }
+            ],
+            [
+              {
+                "node": "Fallo Â· Analizar finanzas",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Validar respuesta": {
+          "main": [
+            [
+              {
+                "node": "Revisar borrador con evidencia",
+                "type": "main",
+                "index": 0
+              }
+            ],
+            [
+              {
+                "node": "Fallo Â· Validar respuesta",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Validar evidencia en Spring Boot": {
+          "main": [
+            [
+              {
+                "node": "Devolver respuesta",
+                "type": "main",
+                "index": 0
+              }
+            ],
+            [
+              {
+                "node": "Fallo Â· Validar evidencia en Spring Boot",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Supabase Â· ConfiguraciÃ³n del Ã­ndice": {
+          "main": [
+            [
+              {
+                "node": "Verificar Ã­ndice y conservar solicitud",
+                "type": "main",
+                "index": 0
+              }
+            ],
+            [
+              {
+                "node": "Fallo Â· Supabase Â· ConfiguraciÃ³n del Ã­ndice",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Verificar Ã­ndice y conservar solicitud": {
+          "main": [
+            [
+              {
+                "node": "Preparar contexto en Spring Boot",
+                "type": "main",
+                "index": 0
+              }
+            ],
+            [
+              {
+                "node": "Fallo Â· Verificar Ã­ndice y conservar solicitud",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Revisar borrador con evidencia": {
+          "main": [
+            [
+              {
+                "node": "Borrador respaldado",
+                "type": "main",
+                "index": 0
+              }
+            ],
+            [
+              {
+                "node": "Fallo Â· Revisar borrador con evidencia",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Borrador respaldado": {
+          "main": [
+            [
+              {
+                "node": "Validar evidencia en Spring Boot",
+                "type": "main",
+                "index": 0
+              }
+            ],
+            [
+              {
+                "node": "Corregir referencias sin nuevas consultas",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Corregir referencias sin nuevas consultas": {
+          "main": [
+            [
+              {
+                "node": "Validar respuesta corregida",
+                "type": "main",
+                "index": 0
+              }
+            ],
+            [
+              {
+                "node": "Fallo Â· Corregir referencias sin nuevas consultas",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Validar respuesta corregida": {
+          "main": [
+            [
+              {
+                "node": "Validar evidencia en Spring Boot",
+                "type": "main",
+                "index": 0
+              }
+            ],
+            [
+              {
+                "node": "Fallo Â· Validar respuesta corregida",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Iniciar mediciÃ³n del agente": {
+          "main": [
+            [
+              {
+                "node": "Analizar finanzas",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Registrar mediciÃ³n sin contenido": {
+          "main": [
+            [
+              {
+                "node": "Conservar respuesta del agente",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Conservar respuesta del agente": {
+          "main": [
+            [
+              {
+                "node": "Validar respuesta",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Iniciar orquestaciÃ³n autorizada": {
+          "main": [
+            [
+              {
+                "node": "Iniciar mediciÃ³n del agente",
+                "type": "main",
+                "index": 0
+              }
+            ],
+            [
+              {
+                "node": "Fallo Â· Preparar contexto en Spring Boot",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Delegar a Financiero": {
+          "ai_tool": [
+            [
+              {
+                "node": "Analizar finanzas",
+                "type": "ai_tool",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Delegar a Conocimiento y RAG": {
+          "ai_tool": [
+            [
+              {
+                "node": "Analizar finanzas",
+                "type": "ai_tool",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Delegar a Soporte": {
+          "ai_tool": [
+            [
+              {
+                "node": "Analizar finanzas",
+                "type": "ai_tool",
+                "index": 0
+              }
+            ]
+          ]
+        }
+      }
+    },
+    {
+      "id": "ceroaSupportAgent30",
+      "removedNodeIds": [
+        "mcp-public"
+      ],
+      "nodeOverrides": {},
+      "extraNodes": [],
+      "connections": {
+        "Recibir delegaciÃ³n": {
+          "main": [
+            [
+              {
+                "node": "Una solicitud por delegacion",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Una solicitud por delegacion": {
+          "main": [
+            [
+              {
+                "node": "Autorizar alcance",
+                "type": "main",
+                "index": 0
+              }
+            ],
+            [
+              {
+                "node": "Rechazar items ambiguos",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Autorizar alcance": {
+          "main": [
+            [
+              {
+                "node": "Resultado reutilizable",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Resultado reutilizable": {
+          "main": [
+            [
+              {
+                "node": "Devolver resultado autorizado",
+                "type": "main",
+                "index": 0
+              }
+            ],
+            [
+              {
+                "node": "Agente Soporte",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Gemini Ceroa": {
+          "ai_languageModel": [
+            [
+              {
+                "node": "Agente Soporte",
+                "type": "ai_languageModel",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Contrato del especialista": {
+          "ai_outputParser": [
+            [
+              {
+                "node": "Agente Soporte",
+                "type": "ai_outputParser",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Agente Soporte": {
+          "main": [
+            [
+              {
+                "node": "Resultado estructurado presente",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Resultado estructurado presente": {
+          "main": [
+            [
+              {
+                "node": "Validar resultado en Spring Boot",
+                "type": "main",
+                "index": 0
+              }
+            ],
+            [
+              {
+                "node": "Devolver fallo recuperable",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Validar resultado en Spring Boot": {
+          "main": [
+            [
+              {
+                "node": "Resultado autorizado presente",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Resultado autorizado presente": {
+          "main": [
+            [
+              {
+                "node": "Devolver resultado validado",
+                "type": "main",
+                "index": 0
+              }
+            ],
+            [
+              {
+                "node": "Devolver fallo recuperable",
+                "type": "main",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Consultar documentaciÃ³n aprobada": {
+          "ai_tool": [
+            [
+              {
+                "node": "Agente Soporte",
+                "type": "ai_tool",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "Proponer correo autorizado": {
+          "ai_tool": [
+            [
+              {
+                "node": "Agente Soporte",
+                "type": "ai_tool",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "consultar_disponibilidad_soporte": {
+          "ai_tool": [
+            [
+              {
+                "node": "Agente Soporte",
+                "type": "ai_tool",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "proponer_asesoria": {
+          "ai_tool": [
+            [
+              {
+                "node": "Agente Soporte",
+                "type": "ai_tool",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "consultar_asesoria": {
+          "ai_tool": [
+            [
+              {
+                "node": "Agente Soporte",
+                "type": "ai_tool",
+                "index": 0
+              }
+            ]
+          ]
+        },
+        "cancelar_asesoria": {
+          "ai_tool": [
+            [
+              {
+                "node": "Agente Soporte",
+                "type": "ai_tool",
+                "index": 0
+              }
+            ]
+          ]
+        }
+      }
+    }
+  ],
+  "n8nVersion": "2.40.7"
+}

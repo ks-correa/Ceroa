@@ -117,6 +117,15 @@ class AssistantIntegrationTest {
         }
         String support=callback.perform(post(base+"/delegations/SUPPORT/begin").header("X-Ceroa-Assistant",KEY).contentType("application/json").content("{\"task\":\"Ayuda\",\"evidenceRefs\":[]}")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
         String denied=JSON.readTree(support).path("scopeToken").asText();
+        if(question.contains("support-info")){
+            var guide=JSON.readTree(support).path("evidence");String procedure=null;
+            for(var entry:(Iterable<Map.Entry<String,com.fasterxml.jackson.databind.JsonNode>>)guide::fields)
+                if(entry.getValue().path("source").asText().endsWith("/advisoryProcedure"))procedure=entry.getKey();
+            org.junit.jupiter.api.Assertions.assertNotNull(procedure);String answer="{{"+procedure+"}}";
+            var result=Map.of("schemaVersion","1.1","role","SUPPORT","status","OK","answer",answer,"evidenceRefs",List.of(procedure),"sources",List.of(),"coverage","COMPLETE","missingData",List.of(),"requiresConfirmation",false);
+            callback.perform(post(base+"/delegations/"+denied+"/complete").header("X-Ceroa-Assistant",KEY).contentType("application/json").content(JSON.writeValueAsString(result))).andExpect(status().isOk());
+            callback.perform(post(base+"/complete").header("X-Ceroa-Assistant",KEY).contentType("application/json").content(JSON.writeValueAsString(Map.of("answer",answer,"transcript",question,"mode","personal","sources",List.of())))).andExpect(status().isOk());return;
+        }
         if(question.contains("booking")){
             var proposed=callback.perform(post(base+"/support/booking").header("X-Ceroa-Assistant",KEY).param("scope",denied).param("operation","propose").param("value",bookingSlot.toString())).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
             var facts=JSON.readTree(proposed).path("facts");String instruction=null;
@@ -166,6 +175,14 @@ class AssistantIntegrationTest {
         for(String question:List.of("Muéstrame mis próximos vencimientos","¿Cuál es mi estrategia activa?","¿Qué estrategia de pago tengo activa?","¿Qué estrategia tengo activa?")){
             lastJob=null;mvc.perform(post("/api/v1/assistant/messages").with(user(owner)).with(csrf()).contentType("application/json").content(JSON.writeValueAsString(Map.of("message",question)))).andExpect(status().isOk());org.junit.jupiter.api.Assertions.assertNull(lastJob);
         }
+    }
+    @Test void advisoryInformationDoesNotRequireCalendar()throws Exception {
+        org.mockito.Mockito.when(calendar.available(org.mockito.ArgumentMatchers.any(),org.mockito.ArgumentMatchers.any()))
+            .thenThrow(new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.SERVICE_UNAVAILABLE));
+        mvc.perform(post("/api/v1/assistant/messages").with(user(owner)).with(csrf()).contentType("application/json")
+            .content(JSON.writeValueAsString(Map.of("message","multiagent support-info como solicito una asesoria"))))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.answer").value(org.hamcrest.Matchers.containsString("Para solicitar una asesoría")));
+        org.mockito.Mockito.verifyNoInteractions(calendar);
     }
     @Test void assistantProposalRequiresUserConfirmationBeforeSyntheticCalendarCreation()throws Exception{
         bookingSlot=java.time.LocalDate.now(java.time.ZoneId.of("America/Bogota")).plusDays(2).atTime(10,0).atOffset(java.time.ZoneOffset.ofHours(-5));while(bookingSlot.getDayOfWeek().getValue()>5)bookingSlot=bookingSlot.plusDays(1);

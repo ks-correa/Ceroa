@@ -26,7 +26,8 @@ class SubscriptionPersistenceIntegrationTest {
     @Autowired UserRepository users;
     @Autowired IntegrationEventRepository events;
     MockRestServiceServer server;PlusSubscription subscription;
-    static final String FIRST="2026-12-08T10:00:00-05:00", SECOND="2027-01-08T10:00:00-05:00", THIRD="2027-02-08T10:00:00-05:00";
+    static final OffsetDateTime BOUNDARY=OffsetDateTime.now().plusMonths(1).withDayOfMonth(8).withHour(10).withMinute(0).withSecond(0).withNano(0);
+    static final String FIRST=BOUNDARY.toString(), SECOND=BOUNDARY.plusMonths(1).toString(), THIRD=BOUNDARY.plusMonths(2).toString();
     @BeforeEach void seed() {
         var builder=RestClient.builder();server=MockRestServiceServer.bindTo(builder).build();
         ReflectionTestUtils.setField(service,"client",builder.baseUrl("https://api.mercadopago.com").build());
