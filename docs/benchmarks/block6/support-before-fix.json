@@ -1,0 +1,21 @@
+[ {
+  "scenario" : "SUPPORT_BOOKING",
+  "sample" : 0,
+  "totalMs" : 5894,
+  "httpStatus" : 503,
+  "functionalStatus" : "",
+  "functionallyCorrect" : false,
+  "intent" : "",
+  "hasAnswer" : false,
+  "abstained" : false
+}, {
+  "scenario" : "SUPPORT_MISSING",
+  "sample" : 0,
+  "totalMs" : 5834,
+  "httpStatus" : 200,
+  "functionalStatus" : "COMPLETE",
+  "functionallyCorrect" : false,
+  "intent" : "analysis",
+  "hasAnswer" : true,
+  "abstained" : false
+} ]

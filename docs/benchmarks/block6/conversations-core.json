@@ -1,0 +1,61 @@
+[ {
+  "scenario" : "DETERMINISTIC",
+  "sample" : 0,
+  "totalMs" : 68,
+  "httpStatus" : 200,
+  "functionalStatus" : "COMPLETE",
+  "functionallyCorrect" : true,
+  "intent" : "upcoming",
+  "hasAnswer" : true,
+  "abstained" : false
+}, {
+  "scenario" : "FINANCIAL",
+  "sample" : 0,
+  "totalMs" : 8348,
+  "httpStatus" : 200,
+  "functionalStatus" : "COMPLETE",
+  "functionallyCorrect" : true,
+  "intent" : "analysis",
+  "hasAnswer" : true,
+  "abstained" : false
+}, {
+  "scenario" : "RAG",
+  "sample" : 0,
+  "totalMs" : 4248,
+  "httpStatus" : 200,
+  "functionalStatus" : "COMPLETE",
+  "functionallyCorrect" : true,
+  "intent" : "analysis",
+  "hasAnswer" : true,
+  "abstained" : false
+}, {
+  "scenario" : "SUPPORT",
+  "sample" : 0,
+  "totalMs" : 4489,
+  "httpStatus" : 200,
+  "functionalStatus" : "COMPLETE",
+  "functionallyCorrect" : true,
+  "intent" : "analysis",
+  "hasAnswer" : true,
+  "abstained" : false
+}, {
+  "scenario" : "COMPOSITE",
+  "sample" : 0,
+  "totalMs" : 10770,
+  "httpStatus" : 200,
+  "functionalStatus" : "COMPLETE",
+  "functionallyCorrect" : true,
+  "intent" : "analysis",
+  "hasAnswer" : true,
+  "abstained" : false
+}, {
+  "scenario" : "UNKNOWN",
+  "sample" : 0,
+  "totalMs" : 1230,
+  "httpStatus" : 200,
+  "functionalStatus" : "INSUFFICIENT",
+  "functionallyCorrect" : true,
+  "intent" : "analysis",
+  "hasAnswer" : true,
+  "abstained" : true
+} ]

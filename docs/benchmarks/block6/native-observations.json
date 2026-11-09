@@ -1,0 +1,137 @@
+{
+  "scope": "Disposable Spring/H2 + n8n + real Gemini Block 6: core, pre-fix Support and fixed Support; failures retained; no provider quota failure observed",
+  "exactProviderHttpCalls": null,
+  "notes": [
+    "Native language-model node invocations are observed, not inferred from tool counts.",
+    "Node duration includes transport and SDK overhead; provider-only latency and hidden retries remain unknown.",
+    "Root, specialist and tool durations can overlap and must not be summed as total latency."
+  ],
+  "observations": [
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 2247,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "FINANCIAL",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 4694,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 2028,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "RAG",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 1944,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 2060,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "SUPPORT",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 2161,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 3,
+      "modelNodeMs": 3450,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "RAG",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 2395,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "FINANCIAL",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 4548,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 1,
+      "modelNodeMs": 972,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 1955,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "SUPPORT",
+      "nativeModelInvocations": 3,
+      "modelNodeMs": 3146,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 2359,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "SUPPORT",
+      "nativeModelInvocations": 3,
+      "modelNodeMs": 3183,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 2338,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "SUPPORT",
+      "nativeModelInvocations": 3,
+      "modelNodeMs": 3278,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "ORCHESTRATOR",
+      "nativeModelInvocations": 2,
+      "modelNodeMs": 1903,
+      "modelNodeErrors": 0,
+      "executionError": false
+    },
+    {
+      "role": "SUPPORT",
+      "nativeModelInvocations": 3,
+      "modelNodeMs": 3356,
+      "modelNodeErrors": 0,
+      "executionError": false
+    }
+  ]
+}

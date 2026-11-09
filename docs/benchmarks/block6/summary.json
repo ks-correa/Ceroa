@@ -1,0 +1,106 @@
+{
+  "samples": 8,
+  "functionallyCorrect": 8,
+  "complete": 6,
+  "insufficient": 2,
+  "partial": 0,
+  "quotaErrorsObserved": 0,
+  "unexpectedDelegations": 0,
+  "percentiles": null,
+  "notes": [
+    "One sample per scenario; no conclusive percentiles or production availability claim.",
+    "Includes real provider and native workflows; approved knowledge is a synthetic service fixture, financial authority is Spring/H2.",
+    "Pre-fix Support failures are retained separately; the missing-knowledge pre-fix sample had an invalid constant retrieval fixture and is not a production accuracy estimate.",
+    "Document comparisons use controlled PostgreSQL regressions; repeated real-Gemini comparison benchmark remains pending."
+  ],
+  "results": [
+    {
+      "scenario": "DETERMINISTIC",
+      "sample": 0,
+      "totalMs": 68,
+      "httpStatus": 200,
+      "functionalStatus": "COMPLETE",
+      "functionallyCorrect": true,
+      "intent": "upcoming",
+      "hasAnswer": true,
+      "abstained": false
+    },
+    {
+      "scenario": "FINANCIAL",
+      "sample": 0,
+      "totalMs": 8348,
+      "httpStatus": 200,
+      "functionalStatus": "COMPLETE",
+      "functionallyCorrect": true,
+      "intent": "analysis",
+      "hasAnswer": true,
+      "abstained": false
+    },
+    {
+      "scenario": "RAG",
+      "sample": 0,
+      "totalMs": 4248,
+      "httpStatus": 200,
+      "functionalStatus": "COMPLETE",
+      "functionallyCorrect": true,
+      "intent": "analysis",
+      "hasAnswer": true,
+      "abstained": false
+    },
+    {
+      "scenario": "SUPPORT",
+      "sample": 0,
+      "totalMs": 4489,
+      "httpStatus": 200,
+      "functionalStatus": "COMPLETE",
+      "functionallyCorrect": true,
+      "intent": "analysis",
+      "hasAnswer": true,
+      "abstained": false
+    },
+    {
+      "scenario": "COMPOSITE",
+      "sample": 0,
+      "totalMs": 10770,
+      "httpStatus": 200,
+      "functionalStatus": "COMPLETE",
+      "functionallyCorrect": true,
+      "intent": "analysis",
+      "hasAnswer": true,
+      "abstained": false
+    },
+    {
+      "scenario": "UNKNOWN",
+      "sample": 0,
+      "totalMs": 1230,
+      "httpStatus": 200,
+      "functionalStatus": "INSUFFICIENT",
+      "functionallyCorrect": true,
+      "intent": "analysis",
+      "hasAnswer": true,
+      "abstained": true
+    },
+    {
+      "scenario": "SUPPORT_BOOKING",
+      "sample": 0,
+      "totalMs": 7071,
+      "httpStatus": 200,
+      "functionalStatus": "COMPLETE",
+      "functionallyCorrect": true,
+      "intent": "analysis",
+      "hasAnswer": true,
+      "abstained": false
+    },
+    {
+      "scenario": "SUPPORT_MISSING",
+      "sample": 0,
+      "totalMs": 5585,
+      "httpStatus": 200,
+      "functionalStatus": "INSUFFICIENT",
+      "functionallyCorrect": true,
+      "intent": "analysis",
+      "hasAnswer": true,
+      "abstained": true
+    }
+  ]
+}
