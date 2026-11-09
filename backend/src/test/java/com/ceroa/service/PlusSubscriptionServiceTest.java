@@ -42,7 +42,8 @@ class PlusSubscriptionServiceTest {
     private final CurrentUserService currentUser = mock(CurrentUserService.class);
     private final RestClient.Builder builder = RestClient.builder();
     private final MockRestServiceServer server = MockRestServiceServer.bindTo(builder).build();
-    private final PlusSubscriptionService service = new PlusSubscriptionService(subscriptions, users, currentUser, builder);
+    private final com.ceroa.repository.SubscriptionChargeRepository charges=mock(com.ceroa.repository.SubscriptionChargeRepository.class);
+    private final PlusSubscriptionService service = new PlusSubscriptionService(subscriptions, users, currentUser, builder,charges);
 
     private void configure() {
         ReflectionTestUtils.setField(service, "monthlyPrice", "19900");

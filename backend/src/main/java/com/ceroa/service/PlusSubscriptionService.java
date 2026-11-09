@@ -24,6 +24,8 @@ public class PlusSubscriptionService {
     private final UserRepository users;
     private final CurrentUserService currentUser;
     private final RestClient client;
+    private final com.ceroa.repository.SubscriptionChargeRepository charges;
+    @jakarta.persistence.PersistenceContext private jakarta.persistence.EntityManager entityManager;
     @org.springframework.beans.factory.annotation.Autowired(required=false) private IntegrationEventService workspaceEvents;
     @Value("${ceroa.plus.monthly-price:}") private String monthlyPrice;
     @Value("${ceroa.plus.yearly-price:}") private String yearlyPrice;
@@ -33,9 +35,10 @@ public class PlusSubscriptionService {
     @Value("${ceroa.frontend-url}") private String frontendUrl;
 
     public PlusSubscriptionService(PlusSubscriptionRepository subscriptions, UserRepository users, CurrentUserService currentUser,
-                                   RestClient.Builder clientBuilder) {
+                                   RestClient.Builder clientBuilder,com.ceroa.repository.SubscriptionChargeRepository charges) {
         this.subscriptions = subscriptions; this.users = users; this.currentUser = currentUser;
         this.client = clientBuilder.baseUrl("https://api.mercadopago.com").build();
+        this.charges=charges;
     }
 
     public record Offer(String periodicity, BigDecimal price, String currency, boolean automaticRenewal, boolean available) {}
@@ -152,7 +155,7 @@ public class PlusSubscriptionService {
 
     @Transactional
     public void refresh(String providerId) {
-        PlusSubscription s = subscriptions.findByProviderId(providerId).orElse(null);
+        PlusSubscription s = lockedSubscription(providerId);
         if (s == null) return;
         JsonNode data = client.get().uri("/preapproval/{id}", providerId)
                 .header("Authorization", "Bearer " + accessToken).retrieve().body(JsonNode.class);
@@ -164,6 +167,8 @@ public class PlusSubscriptionService {
                 || recurring.path("frequency").asInt() != (s.periodicity.equals("MONTHLY") ? 1 : 12)
                 || !"months".equals(recurring.path("frequency_type").asText())) return;
         String previousStatus=s.status;OffsetDateTime previousBoundary=s.nextPaymentAt;
+        if(previousBoundary!=null&&data.hasNonNull("next_payment_date")&&
+            OffsetDateTime.parse(data.get("next_payment_date").asText()).isBefore(previousBoundary))return;
         String status = switch (data.path("status").asText()) {
             case "authorized" -> "ACTIVE";
             case "cancelled", "canceled" -> "CANCELLED";
@@ -196,13 +201,28 @@ public class PlusSubscriptionService {
 
     @Transactional
     public void refreshAuthorizedPayment(String paymentId){
+        if(paymentId==null||!paymentId.matches("[A-Za-z0-9_-]{1,100}"))throw new IllegalArgumentException("Identificador de cobro inválido");
+        String receiptId="MERCADO_PAGO:"+paymentId;
+        if(charges.existsById(receiptId))return;
         JsonNode charge=client.get().uri("/authorized_payments/{id}",paymentId).header("Authorization","Bearer "+accessToken).retrieve().body(JsonNode.class);
         if(charge==null||!paymentId.equals(charge.path("id").asText())||!"processed".equals(charge.path("status").asText())||!"approved".equals(charge.path("payment").path("status").asText()))return;
-        var s=subscriptions.findByProviderId(charge.path("preapproval_id").asText()).orElse(null);
+        var s=lockedSubscription(charge.path("preapproval_id").asText());
         String amount=charge.path("transaction_amount").asText();
         if(s==null||!s.currency.equals(charge.path("currency_id").asText())||!amount.matches("[0-9]{1,15}(\\.[0-9]{1,8})?")||s.amount.compareTo(new BigDecimal(amount))!=0)return;
+        if(charges.existsById(receiptId))return; // recheck after acquiring the subscription row lock
         var previous=s.nextPaymentAt;boolean active="ACTIVE".equals(s.status);refresh(s.providerId);
+        var receipt=new com.ceroa.domain.SubscriptionCharge();receipt.id=receiptId;receipt.subscriptionId=s.id;
+        receipt.billingBoundary=s.nextPaymentAt;receipt.observedAt=OffsetDateTime.now();charges.saveAndFlush(receipt);
         if(active&&previous!=null&&"ACTIVE".equals(s.status)&&s.nextPaymentAt!=null&&s.nextPaymentAt.isAfter(previous))notifyWorkspace(s,IntegrationEventService.MailKind.PLUS_RENEWED,"payment:"+paymentId);
+    }
+    private PlusSubscription lockedSubscription(String providerId) {
+        var subscription=subscriptions.findByProviderId(providerId).orElse(null);
+        if(subscription!=null&&entityManager!=null) {
+            // Same lock order as checkout/cancellation and the outbox: owner, then subscription.
+            users.findByIdForUpdate(subscription.user.getId()).orElseThrow();
+            entityManager.refresh(subscription,jakarta.persistence.LockModeType.PESSIMISTIC_WRITE);
+        }
+        return subscription;
     }
     private void notifyWorkspace(PlusSubscription s,IntegrationEventService.MailKind kind,String boundary){
         if(workspaceEvents==null)return;var payload=new java.util.LinkedHashMap<String,Object>();payload.put("periodicity",s.periodicity);payload.put("accessUntil",s.accessUntil!=null?s.accessUntil.toString():s.nextPaymentAt==null?null:s.nextPaymentAt.toString());payload.put("automaticRenewal",s.automaticRenewal);

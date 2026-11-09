@@ -41,6 +41,30 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 })
 @AutoConfigureMockMvc
 class HybridDocumentIntegrationTest {
+    @Test void syntheticPdfAndWorkbookPersistIndexReprocessAndDelete()throws Exception {
+        byte[] pdf,xlsx;
+        try(var file=new org.apache.pdfbox.pdmodel.PDDocument();var out=new java.io.ByteArrayOutputStream()) {
+            var page=new org.apache.pdfbox.pdmodel.PDPage();file.addPage(page);
+            try(var text=new org.apache.pdfbox.pdmodel.PDPageContentStream(file,page)) {
+                text.beginText();text.setFont(new org.apache.pdfbox.pdmodel.font.PDType1Font(org.apache.pdfbox.pdmodel.font.Standard14Fonts.FontName.HELVETICA),12);
+                text.newLineAtOffset(50,700);text.showText("Saldo actual: 12345 COP fixture "+UUID.randomUUID());text.endText();
+            }
+            file.save(out);pdf=out.toByteArray();
+        }
+        try(var book=new org.apache.poi.xssf.usermodel.XSSFWorkbook();var out=new java.io.ByteArrayOutputStream()) {
+            var row=book.createSheet("Synthetic").createRow(0);row.createCell(0).setCellValue("Saldo actual: 23456 COP "+UUID.randomUUID());
+            book.write(out);xlsx=out.toByteArray();
+        }
+        for(var file:List.of(new MockMultipartFile("file","fixture.pdf","application/pdf",pdf),
+            new MockMultipartFile("file","fixture.xlsx","application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",xlsx))) {
+            as(a);var document=service.upload(file,metadata(Identification.CC,9),true,file.getOriginalFilename().endsWith("xlsx")?"Synthetic":null);
+            index();assertThat(service.get(document.id()).status()).isEqualTo("INDEXED");
+            assertThat(documents.indexedContent(a,document.id())).anyMatch(s->s.contains("Saldo actual"));
+            as(b);assertThatThrownBy(()->service.get(document.id())).isInstanceOf(com.ceroa.exception.ResourceNotFoundException.class);
+            as(a);service.reprocess(document.id());index();assertThat(service.get(document.id()).status()).isEqualTo("INDEXED");
+            service.delete(document.id());assertThat(db.queryForObject("SELECT count(*) FROM document_chunks WHERE document_id=?",Integer.class,document.id())).isZero();
+        }
+    }
     @Autowired DriveSyncService driveSync;
     @Autowired ApprovedDriveSourceRepository driveSources;
     @Test void approvedDriveVersionsReuseQueueAndInvalidateObsoleteChunks()throws Exception{
@@ -103,7 +127,7 @@ class HybridDocumentIntegrationTest {
     String vectorString(){return "["+String.join(",",vector().stream().map(Object::toString).toList())+"]";}
     Completion completion(Work work){var vectors=new ArrayList<Vector>();for(int i=0;i<work.chunks().size();i++)vectors.add(new Vector(i,vector()));return new Completion(work.attempt(),work.model(),vectors,List.of());}
     void index(){var w=service.claim().orElseThrow();service.complete(w.jobId(),completion(w));}
-    @Test void realMigrationsAreValidAndIdempotent(){assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("30");assertThat(flyway.validateWithResult().validationSuccessful).isTrue();assertThat(flyway.migrate().migrationsExecuted).isZero();}
+    @Test void realMigrationsAreValidAndIdempotent(){assertThat(flyway.info().current().getVersion().getVersion()).isEqualTo("31");assertThat(flyway.validateWithResult().validationSuccessful).isTrue();assertThat(flyway.migrate().migrationsExecuted).isZero();}
     long bindTelegram(UUID user){long sender=TELEGRAM_SEQUENCE.incrementAndGet();var link=new TelegramLink();link.userId=user;link.senderId=sender;link.chatId=sender;link.linkedAt=OffsetDateTime.now();telegramLinks.saveAndFlush(link);return sender;}
     TelegramService.Reply telegram(long sender,String text,TelegramService.Attachment file){return telegram.update(new TelegramService.Update(TELEGRAM_SEQUENCE.incrementAndGet(),sender,sender,true,text,null,null,file));}
     TelegramService.Attachment telegramFile(String text)throws Exception{return new TelegramService.Attachment("synthetic.docx","application/vnd.openxmlformats-officedocument.wordprocessingml.document",Base64.getEncoder().encodeToString(DocumentTextExtractorTest.word(text+" "+UUID.randomUUID())));}
