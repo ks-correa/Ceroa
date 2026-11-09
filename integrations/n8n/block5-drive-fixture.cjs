@@ -1,6 +1,7 @@
 // Explicit one-file synthetic test in the previously approved Block 4 folder.
 // Run only inside trusted n8n. Never prints tokens, document content or owner identifiers.
 const fs=require('fs'),crypto=require('crypto');
+const block6=process.argv[3]==='block6';if(process.argv[3]&&!block6)throw Error('Unknown test scope');
 const action=process.argv[2];if(!['create','update','prepare'].includes(action))throw Error('Explicit test action required');
 const root='/usr/local/lib/node_modules/n8n/node_modules/.pnpm/';
 const sqlite=require(root+fs.readdirSync(root).find(x=>x.startsWith('sqlite3@'))+'/node_modules/sqlite3');
@@ -9,9 +10,9 @@ const {Cipher}=require(dir+'cipher'),{CipherAes256CBC}=require(dir+'aes-256-cbc'
 const cipher=new Cipher(JSON.parse(fs.readFileSync('/home/node/.n8n/config')),new CipherAes256GCM(),new CipherAes256CBC(),null);
 const db=new sqlite.Database('/home/node/.n8n/database.sqlite',sqlite.OPEN_READONLY);
 const query=(sql,args=[])=>new Promise((resolve,reject)=>db.get(sql,args,(e,r)=>e?reject(e):resolve(r)));
-const statePath='/home/node/.n8n/block5-drive-test.json';
+const statePath='/home/node/.n8n/'+(block6?'block6':'block5')+'-drive-test.json';
 function pdf(version){
- const text='CEROABLOCK5VALIDATION. Synthetic private support reference. Revision '+version+'. The verification code is '+(version===1?'COBALTO':'ESMERALDA')+'. No financial or personal information.';
+ const text=(block6?'CEROABLOCK6VALIDATION':'CEROABLOCK5VALIDATION')+'. Synthetic private support reference. Revision '+version+'. The verification code is '+(block6?(version===1?'AMATISTA':'TURQUESA'):(version===1?'COBALTO':'ESMERALDA'))+'. No financial or personal information.';
  const stream='BT /F1 12 Tf 50 750 Td ('+text+') Tj ET';
  const objects=['<< /Type /Catalog /Pages 2 0 R >>','<< /Type /Pages /Kids [3 0 R] /Count 1 >>','<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 4 0 R >> >> /Contents 5 0 R >>','<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>','<< /Length '+Buffer.byteLength(stream)+' >>\nstream\n'+stream+'\nendstream'];
  let body='%PDF-1.4\n',offsets=[0];objects.forEach((o,i)=>{offsets.push(Buffer.byteLength(body));body+=(i+1)+' 0 obj\n'+o+'\nendobj\n';});const offset=Buffer.byteLength(body);body+='xref\n0 6\n0000000000 65535 f \n'+offsets.slice(1).map(o=>String(o).padStart(10,'0')+' 00000 n \n').join('')+'trailer\n<< /Size 6 /Root 1 0 R >>\nstartxref\n'+offset+'\n%%EOF\n';return Buffer.from(body);
@@ -32,7 +33,7 @@ function pdf(version){
   const approved=await request('https://www.googleapis.com/drive/v3/files/'+folder+'?fields=id,name,mimeType,trashed');if(approved.name!=='Ceroa - Pruebas Bloque 4'||approved.trashed||approved.mimeType!=='application/vnd.google-apps.folder')throw Error('Previously approved test folder mismatch');
   const revision=action==='create'?1:2;const bytes=pdf(revision);const checksum=crypto.createHash('md5').update(bytes).digest('hex');
   if(action==='create'){
-   state={status:'CREATE_STARTED_REVIEW_BEFORE_RETRY',folder,revision:0,name:'Ceroa - Prueba integral Bloque 5.pdf'};fs.writeFileSync(statePath,JSON.stringify(state),{flag:'wx',mode:0o600});
+   state={status:'CREATE_STARTED_REVIEW_BEFORE_RETRY',folder,revision:0,name:block6?'Ceroa - Prueba integral Bloque 6.pdf':'Ceroa - Prueba integral Bloque 5.pdf'};fs.writeFileSync(statePath,JSON.stringify(state),{flag:'wx',mode:0o600});
    const boundary='ceroa-block5-'+crypto.randomBytes(12).toString('hex');const body=Buffer.concat([Buffer.from('--'+boundary+'\r\nContent-Type: application/json\r\n\r\n'+JSON.stringify({name:state.name,parents:[folder],mimeType:'application/pdf'})+'\r\n--'+boundary+'\r\nContent-Type: application/pdf\r\n\r\n'),bytes,Buffer.from('\r\n--'+boundary+'--')]);
    const created=await request('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,md5Checksum,version',{method:'POST',headers:{'Content-Type':'multipart/related; boundary='+boundary},body});state.fileId=created.id;
   }else{
