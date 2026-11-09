@@ -1,0 +1,14 @@
+import fs from 'node:fs';
+const text=file=>{const b=fs.readFileSync(file);return (b[0]===255&&b[1]===254?b.toString('utf16le'):b.toString('utf8')).replace(/^\uFEFF/,'');};
+const quantile=(a,q)=>a.length?[...a].sort((x,y)=>x-y)[Math.max(0,Math.ceil(a.length*q)-1)]:null;
+const sources=[['unpaced','tmp/block5-real/spring-samples-unpaced.json','tmp/block5-real-spring.log'],['paced','tmp/block5-real/spring-samples-paced.json','tmp/block5-real-spring-paced.log']];
+if(fs.existsSync('tmp/block5-real/spring-samples-final.json'))sources.push(['finalSmoke','tmp/block5-real/spring-samples-final.json','tmp/block5-real-final-smoke.log']);
+const batches=sources.map(([name,samplesFile,logFile])=>{
+ const samples=JSON.parse(text(samplesFile));const traces=text(logFile).split(/\r?\n/).filter(l=>l.includes('CEROA_QUERY_METRICS ')).map(l=>JSON.parse(l.slice(l.indexOf('CEROA_QUERY_METRICS ')+20)));
+ const records=samples.map((s,i)=>{const t=traces[i];return{...s,delegations:t?.multiagent?.delegations??0,agents:t?.multiagent?.agents??[],stagesMs:t?.stagesMs??{},contextCharacters:t?.contextCharacters??null,fragments:t?.fragments??null,errors:t?.errors??null,allSpecialistsOK:t?.multiagent?.agents?.every(a=>a.status==='OK')??s.scenario==='DETERMINISTIC'};});
+ const scenarios=Object.fromEntries([...new Set(records.map(r=>r.scenario))].map(scenario=>{const rows=records.filter(r=>r.scenario===scenario),ok=rows.filter(r=>r.httpStatus===200),complete=ok.filter(r=>r.allSpecialistsOK);return[scenario,{attempts:rows.length,http200:ok.length,allSpecialistsOK:complete.length,http200LatencyMs:{p50:quantile(ok.map(r=>r.totalMs),.5),p95:quantile(ok.map(r=>r.totalMs),.95)},fullyValidatedSpecialistsLatencyMs:{p50:quantile(complete.map(r=>r.totalMs),.5),p95:quantile(complete.map(r=>r.totalMs),.95)},percentilesPreliminary:complete.length<20}];}));
+ return{name,scenarios,records};
+});
+const result={capturedAt:new Date().toISOString(),provider:'REAL_GEMINI',spring:'REAL_HTTP_CALLBACKS_AND_H2_SYNTHETIC_ACCOUNTS',knowledgeStore:'SIMULATED_APPROVED_KNOWLEDGE',reactBrowserTested:false,exactProviderHttpCalls:null,providerOnlyDurationMs:null,notes:['HTTP 200 may carry a partial response; specialist status is reported separately.','Initial unpaced batch hit actual Gemini free-tier quota: 15 generateContent requests per minute.','Paced batch waited 35 seconds between conversational requests. Small successful sample counts do not establish a production p95.','No prompts, responses, financial data, credentials or owner IDs are exported.','No same-scenario legacy architecture comparison with real Gemini was performed.'],batches};
+fs.mkdirSync('docs/benchmarks',{recursive:true});fs.writeFileSync('docs/benchmarks/block5-real-2026-11-09.json',JSON.stringify(result,null,2)+'\n');
+console.log(JSON.stringify(batches.map(b=>({name:b.name,scenarios:b.scenarios})),null,2));

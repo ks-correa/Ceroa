@@ -37,3 +37,13 @@ test('new inline expressions do not prematurely close n8n interpolation',()=>{
  const walk=value=>{if(typeof value==='string'&&value.startsWith('={{'))assert.equal(value.indexOf('}}'),value.length-2,value);else if(Array.isArray(value))value.forEach(walk);else if(value&&typeof value==='object')Object.values(value).forEach(walk);};
  for(const w of buildMultiagent(baseline).slice(1))walk(w.nodes);
 });
+
+test('Gemini specialist schemas avoid literals converted to unsupported const',()=>{
+ for(const w of buildMultiagent(baseline).slice(1)){
+  const schema=JSON.parse(w.nodes.find(n=>n.type.endsWith('.outputParserStructured')).parameters.inputSchema);
+  assert(!JSON.stringify(schema).includes('"const":'));
+  assert.deepEqual(schema.properties.schemaVersion,{type:'string',pattern:'^1[.]1$'});
+  assert(['^FINANCIAL$','^RAG$','^SUPPORT$'].includes(schema.properties.role.pattern));
+  assert.deepEqual(schema.properties.advisoryProposal.oneOf[1].properties.status,{type:'string',pattern:'^PROPOSED$'});
+ }
+});

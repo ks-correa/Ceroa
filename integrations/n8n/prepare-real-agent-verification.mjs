@@ -20,7 +20,7 @@ fs.writeFileSync(path.join(dir,'credentials.json'),JSON.stringify([...encrypted,
 const workflows=JSON.parse(fs.readFileSync('tmp/n8n-multiagent-runtime/workflows.json','utf8'));
 const children=buildMultiagent(published).slice(1);
 for(const child of children){for(const n of child.nodes)if(n.type.includes('httpRequest')){n.parameters.url=n.parameters.url.replaceAll('http://backend:8080','http://127.0.0.1:18080');n.credentials={httpHeaderAuth:{id:'fixture-worker',name:'Synthetic worker only'}};}}
-const cases={FINANCIAL:'Analiza el saldo registrado de mis obligaciones y aclara si la evidencia disponible permite priorizarlas.',SUPPORT:'Explícame cómo registrar un pago en Ceroa usando únicamente documentación aprobada.'};
+const cases={FINANCIAL:'Interpreta el saldo de mis obligaciones registradas usando solo mis datos financieros actuales. No necesito conceptos generales ni ayuda de navegación.',SUPPORT:'Explícame cómo registrar un pago en Ceroa usando únicamente documentación aprobada.'};
 const roots=Object.entries(cases).map(([scenario,message])=>{
  const root=structuredClone(workflows.find(w=>w.id==='ceroaMultiagentFixture30'+scenario));
  const model=root.nodes.find(n=>n.name==='Gemini Ceroa');Object.assign(model,{type:lm.type,typeVersion:lm.typeVersion,parameters:structuredClone(lm.parameters),credentials:structuredClone(lm.credentials)});

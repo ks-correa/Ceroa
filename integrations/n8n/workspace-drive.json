@@ -94,7 +94,7 @@
         "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({sourceId:$env.CEROA_APPROVED_DRIVE_SOURCE_ID,metadata:{...$json,size:Number($json.size)}}) }}",
+        "jsonBody": "={{ JSON.stringify({sourceId:$env.CEROA_APPROVED_DRIVE_SOURCE_ID,metadata:{...$json,size:Number($json.size)} }) }}",
         "options": {
           "timeout": 15000
         }
