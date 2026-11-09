@@ -36,5 +36,6 @@ describe('Ceroa Plus offer', () => {
     expect(screen.getByText(/900 por año/)).toBeTruthy();
     expect(screen.getByText(/Renovación automática/)).toBeTruthy();
     expect(screen.getByText(/Plan vigente: Cero/)).toBeTruthy();
+    expect(document.querySelector('main')).toBeNull();
   });
 });

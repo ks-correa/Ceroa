@@ -144,7 +144,7 @@ public class PaymentService {
                 debt.getName(),
                 oldAmount,
                 debt.getCurrentBalance(),
-                debt.getStatus(),
+                debtService.calculateSystemStatus(debt) != null ? debtService.calculateSystemStatus(debt) : debt.getStatus(),
                 debt.getOriginalAmount(),
                 "Pago eliminado y saldo de la obligación recalculado correctamente."
         );
@@ -229,7 +229,7 @@ public class PaymentService {
                 "completed",
                 payment.getNotes(),
                 debt.getCurrentBalance(),
-                debt.getStatus(),
+                debtService.calculateSystemStatus(debt) != null ? debtService.calculateSystemStatus(debt) : debt.getStatus(),
                 debt.getOriginalAmount()
         );
     }

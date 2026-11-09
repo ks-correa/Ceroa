@@ -51,4 +51,12 @@ class SecurityConfigTest {
         mockMvc.perform(post("/api/v1/auth/logout").with(csrf()))
                 .andExpect(status().isNoContent());
     }
+
+    @Test
+    void returnsNotFoundInsteadOfInternalErrorForNonexistentAuthenticatedApiRoute() throws Exception {
+        mockMvc.perform(get("/api/v1/endpoint-inexistente")
+                        .with(org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user("00000000-0000-0000-0000-000000000001")))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("NOT_FOUND"));
+    }
 }

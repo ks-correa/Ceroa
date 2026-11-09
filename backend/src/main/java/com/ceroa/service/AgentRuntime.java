@@ -86,7 +86,8 @@ public final class AgentRuntime {
     public boolean limited(){return scopes.values().stream().anyMatch(s->s.result==null||!s.result.status().equals("OK")||!s.result.coverage().equals("COMPLETE"));}
     public boolean noUsableResult(){return scopes.values().stream().noneMatch(s->s.result!=null&&Set.of("OK","PARTIAL").contains(s.result.status())&&(!s.result.evidenceRefs().isEmpty()||!s.result.sources().isEmpty()));}
     public boolean hasDelegations(){return !scopes.isEmpty();}
-    public Set<String> operationalReferences(){var refs=new HashSet<String>();for(var s:scopes.values())if(s.result!=null&&Set.of("OK","PARTIAL").contains(s.result.status())&&(s.tools.containsKey("support.booking")||s.tools.containsKey("communications.propose")))refs.addAll(s.result.evidenceRefs());return Set.copyOf(refs);}
+    public Set<String> operationalReferences(){var refs=new HashSet<String>();for(var s:scopes.values())if(s.result!=null&&Set.of("OK","PARTIAL").contains(s.result.status())&&(s.role==AgentContracts.Role.SUPPORT||s.tools.containsKey("support.booking")||s.tools.containsKey("communications.propose")))refs.addAll(s.result.evidenceRefs());return Set.copyOf(refs);}
+    public boolean usedLibraryEvidence(Map<String,AssistantAnalysisService.Fact> facts){return scopes.values().stream().anyMatch(s->s.result!=null&&Set.of("OK","PARTIAL").contains(s.result.status())&&(s.role==AgentContracts.Role.RAG&&(s.tools.containsKey("documents.facts")||s.tools.containsKey("documents.retrieve"))||s.result.evidenceRefs().stream().map(facts::get).filter(Objects::nonNull).anyMatch(f->f.source().startsWith("financialDocuments/"))));}
     public String functionalStatus(Set<AgentContracts.Role> expected){
         if(scopes.isEmpty())return "INSUFFICIENT";
         if(noUsableResult())return scopes.values().stream().anyMatch(s->s.result!=null&&s.result.status().equals("FAILED"))?"FAILED":"INSUFFICIENT";

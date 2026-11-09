@@ -33,7 +33,7 @@ export const MonthlyProgressView: React.FC = () => {
   };
   const indicator = (label: string, value: number | null | undefined, format: 'money' | 'number' | 'percent' = 'money') =>
     value == null ? null : <div className="rounded-xl border border-slate-200 dark:border-slate-700 p-4"><dt className="text-sm text-slate-500 dark:text-slate-300">{label}</dt><dd className="mt-1 text-lg font-bold text-slate-900 dark:text-white">{format === 'money' ? money(value) : format === 'percent' ? `${value}%` : value}</dd></div>;
-  return <main className="w-full max-w-5xl mx-auto p-4 sm:p-6 space-y-6">
+  return <div className="w-full max-w-5xl mx-auto p-4 sm:p-6 space-y-6">
     <button onClick={() => setCurrentScreen('dashboard')} className="text-sm font-semibold text-teal-700 dark:text-cyan-400 focus-visible:outline-2">← Inicio</button>
     <header><h1 className="text-2xl font-bold text-slate-900 dark:text-white">Resumen mensual de progreso</h1><p className="text-sm text-slate-500">Evolución de tus deudas registrada por Ceroa</p></header>
     <section aria-label="Seleccionar mes" className="flex items-center gap-3 flex-wrap">
@@ -59,5 +59,5 @@ export const MonthlyProgressView: React.FC = () => {
       </section>
       {data.detailLevel === 'BASIC' && showRestriction && <aside className="rounded-xl border border-teal-300 p-4"><h2 className="font-bold">Detalle mensual avanzado de Ceroa Plus</h2><p className="text-sm my-2">Tu plan Cero muestra el resumen básico. Los indicadores adicionales requieren Ceroa Plus activo.</p><div className="flex gap-3"><button onClick={() => setCurrentScreen('subscription')} className="rounded-lg bg-teal-700 px-3 py-2 text-white">Conocer Ceroa Plus</button><button onClick={() => setShowRestriction(false)} className="underline">Cerrar</button></div></aside>}
     </>}
-  </main>;
+  </div>;
 };

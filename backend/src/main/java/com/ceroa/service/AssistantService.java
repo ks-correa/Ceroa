@@ -50,6 +50,7 @@ public class AssistantService {
         final Map<com.ceroa.api.dto.DocumentContracts.Filters,NavigableMap<Integer,com.ceroa.api.dto.DocumentContracts.Result>> periodPages=new HashMap<>();
         final Map<UUID,com.ceroa.api.dto.DocumentContracts.Document> libraryDocuments=new LinkedHashMap<>();
         final Map<com.ceroa.api.dto.DocumentContracts.Query,CachedLibrary> libraryCache=new HashMap<>();
+        final Set<String> partialLibraryFacts=new HashSet<>();
         AgentRuntime runtime;
         DocumentEvidence approvedKnowledge;
         int providerReservation;
@@ -121,18 +122,33 @@ public class AssistantService {
         }
         if (selected==null && hasText && message.trim().matches("(?iu)^(?:[¿?]\\s*)?(?:qué|que)\\s+(?:información\\s+)?(?:dice|contiene)\\s+(?:esto|este|esta)(?:\\s+documento)?[?.!\\s]*$"))
             return new Reply("¿A cuál documento te refieres? Indica el nombre del archivo o selecciónalo en la biblioteca para poder describir su contenido.","analysis");
+        UUID existingConvId=conversations.get(audience);
+        var existingContext=existingConvId==null?null:history.get(new Conversation(userId,channel,existingConvId));
+        String previousQuestion=existingContext!=null&&existingContext.expires.isAfter(Instant.now())&&!existingContext.turns.isEmpty()?existingContext.turns.get(existingContext.turns.size()-1).question:"";
         if (hasText && selected==null) {
             Intent direct=deterministicIntent(message);
             if(direct!=null){
-                var metrics=new AssistantTrace(UUID.randomUUID());try{return new Reply(render(direct,null,null),direct.name());}finally{metrics.log(log,json,"DETERMINISTIC");}
+                var metrics=new AssistantTrace(UUID.randomUUID());
+                try{
+                    String directAnswer=render(direct,null,null);
+                    var directConv=new Conversation(userId,channel,conversations.computeIfAbsent(audience,a->UUID.randomUUID()));
+                    recordTurn(directConv,existingContext,direct.name(),message,directAnswer);
+                    return new Reply(directAnswer,direct.name());
+                }finally{metrics.log(log,json,"DETERMINISTIC");}
+            }
+            if(AgentContracts.requiresContextualClarification(message,previousQuestion)){
+                String clarification="No encuentro a qué opción o elemento anterior te refieres en el contexto reciente. ¿Podrías indicar específicamente cuál opción, estrategia o deuda deseas que te explique?";
+                var clarConv=new Conversation(userId,channel,conversations.computeIfAbsent(audience,a->UUID.randomUUID()));
+                recordTurn(clarConv,existingContext,"clarification",message,clarification);
+                return new Reply(clarification,"clarification",List.of(),null,"PARTIAL");
             }
         }
         UUID id=UUID.randomUUID(); var job=start(userId,id);
         job.metrics=new AssistantTrace(id);job.budget=AgentContracts.budget(hasAudio?AgentContracts.Intent.COMPOSITE:AgentContracts.intent(message,selected!=null));
         job.selectedDocument=selected;job.channel=channel;
         var conversation=new Conversation(userId,channel,conversations.computeIfAbsent(audience,a->UUID.randomUUID()));
-        job.question=hasText?message:"";
         var context=history.get(conversation);
+        job.question=hasText?message:"";
         job.previousQuestion=context!=null&&context.expires.isAfter(Instant.now())&&!context.turns.isEmpty()?context.turns.get(context.turns.size()-1).question:"";
         if(hasText)job.budget=AgentContracts.budget(AgentContracts.intent(routingQuestion(job),selected!=null));
         job.providerReservation=hasAudio?14:AssistantProviderGate.reservation(job.budget,AgentContracts.selectedRoles(routingQuestion(job),selected!=null));
@@ -165,13 +181,7 @@ public class AssistantService {
                 }catch(Exception ignored){/* Do not log provider payloads or user data. */}
                 throw unavailable();
             }
-            List<Turn> turns=new ArrayList<>(context!=null && context.expires.isAfter(Instant.now())?context.turns:List.of());
-            turns.add(new Turn(questionContext(job.question),contextOnly(job.result.answer)));
-            if(turns.size()>3) turns=new ArrayList<>(turns.subList(turns.size()-3,turns.size()));
-            synchronized(this) {
-                if(history.size()>=100 && !history.containsKey(conversation)) history.keySet().stream().findFirst().ifPresent(history::remove);
-                history.put(conversation,new Context(job.result.intent,List.copyOf(turns),Instant.now().plusSeconds(300)));
-            }
+            recordTurn(conversation,context,job.result.intent,job.question,job.result.answer);
             return job.result;
         } catch (InterruptedException e) { Thread.currentThread().interrupt(); throw unavailable();
         } catch (ResponseStatusException e) { throw e;
@@ -179,7 +189,16 @@ public class AssistantService {
             log.warn("Assistant request failed before workflow completion: type={}, cause={}",
                 e.getClass().getSimpleName(),e.getCause()==null?"none":e.getCause().getClass().getSimpleName());
             throw unavailable();
-        } finally {job.metrics.outcome(job.result==null?"FAILED":job.result.functionalStatus());if(job.runtime!=null)job.metrics.agents(job.runtime.metrics());job.metrics.log(log,json,AgentContracts.intent(job.question,job.selectedDocument!=null).name());jobs.remove(id); }
+        } finally {job.metrics.outcome(job.result==null?"FAILED":job.result.functionalStatus());if(job.runtime!=null)job.metrics.agents(job.runtime.metrics());job.metrics.log(log,json,AgentContracts.intent(routingQuestion(job),job.selectedDocument!=null).name());jobs.remove(id); }
+    }
+    private void recordTurn(Conversation conversation,Context context,String intent,String question,String answer){
+        List<Turn> turns=new ArrayList<>(context!=null && context.expires.isAfter(Instant.now())?context.turns:List.of());
+        turns.add(new Turn(questionContext(question),contextOnly(answer)));
+        if(turns.size()>3) turns=new ArrayList<>(turns.subList(turns.size()-3,turns.size()));
+        synchronized(this) {
+            if(history.size()>=100 && !history.containsKey(conversation)) history.keySet().stream().findFirst().ifPresent(history::remove);
+            history.put(conversation,new Context(intent,List.copyOf(turns),Instant.now().plusSeconds(300)));
+        }
     }
     private Intent deterministicIntent(String question){
         if(isDebtListQuestion(question))return Intent.debts;
@@ -400,8 +419,18 @@ public class AssistantService {
                         BigDecimal number=documentNumber(raw);if(number!=null)value.put("numericValue",number);
                     }
                 }
+                var extra=Pattern.compile("(?:\\*{2,4})?\\b\\d+(?:[.,/-]\\d+)*\\b").matcher(source.content());
+                while(extra.find()&&values.size()<250){
+                    if(captured.stream().anyMatch(span->span[0]<=extra.start()&&extra.end()<=span[1]))continue;
+                    captured.add(new int[]{extra.start(),extra.end()});
+                    var value=values.addObject();value.put("documentId",source.documentId().toString());
+                    if(source.page()!=null)value.put("page",source.page());
+                    value.put("literal",extra.group());
+                }
             }
             var evidence=analysis.evidence(job.facts,minimized,"financialDocuments/"+result.traceId());
+            if(!Set.of("AVAILABLE","COMPLETE","SUFFICIENT").contains(result.evidenceStatus())||incompletePeriods(job))
+                job.partialLibraryFacts.addAll(evidence.facts().keySet());
             // Give the model one evidence representation, just like the established financial tools.
             // Duplicating raw result fields encouraged literal dates/IDs outside the fID contract.
             var response=new LibraryEvidence(result.evidenceStatus(),evidence,result.sources().stream().map(source->new LibrarySnippet(source.documentId(),source.page(),source.content())).toList());
@@ -493,6 +522,7 @@ public class AssistantService {
             library.assertCurrent(job.libraryDocuments.values());
             if(transcript==null || transcript.isBlank() || transcript.length()>2000) throw new IllegalArgumentException("Transcripción vacía o demasiado extensa");
             if(!job.question.isEmpty() && !job.question.equals(transcript)) throw new IllegalArgumentException("La transcripción no coincide con la pregunta preparada");
+            boolean libraryActive=job.libraryResult!=null&&(job.runtime==null||job.selectedDocument!=null||job.runtime.usedLibraryEvidence(job.facts));
             String resolved;
             if(job.runtime!=null&&!job.runtime.hasDelegations()&&!RagRetrievalService.ABSTENTION.equals(answer==null?"":answer.strip()))throw new IllegalArgumentException("Sin delegación solo se permite abstención canónica");
             if(job.runtime!=null&&job.runtime.noUsableResult())resolved=RagRetrievalService.ABSTENTION;
@@ -503,17 +533,17 @@ public class AssistantService {
                     ?"No encontré fragmentos indexados de este archivo para confirmar ese dato. "+selectedMetadataSummary(selected)
                     :finalizeAnswer(job,answer);
                 job.libraryDocuments.clear();job.libraryDocuments.put(selected.id(),selected);
-            }else if(job.libraryResult!=null && job.libraryIntent==com.ceroa.api.dto.DocumentContracts.Intent.METADATA_SEARCH && !job.hadContentSearch) {
+            }else if(libraryActive && job.libraryIntent==com.ceroa.api.dto.DocumentContracts.Intent.METADATA_SEARCH && !job.hadContentSearch) {
                 // Metadata lists need no model-generated prose/citations. Only the authenticated,
                 // typed database results below become references; ignore proposed LLM citations.
                 resolved=job.libraryDocuments.isEmpty()?"No hay documentos que coincidan con los filtros consultados.":"Encontré documentos que coinciden con los filtros consultados. Revisa las referencias adjuntas.";
-            }else if(job.libraryResult!=null) {
+            }else if(libraryActive) {
                 // Private documents are already authorized by the library. Public RAG
                 // citations from the model must not turn a private follow-up into a 400.
                 resolved=finalizeAnswer(job,answer);
             }else if(rag.enabled()) {
                 if(!Set.of("documentary","personal","mixed").contains(mode==null?"":mode)||citations.size()>8||new HashSet<>(citations).size()!=citations.size())throw new IllegalArgumentException();
-                boolean operational=job.runtime!=null&&citations.isEmpty()&&job.runtime.operationalReferences().stream().map(job.facts::get).filter(Objects::nonNull).anyMatch(f->f.source().startsWith("supportBooking/")||f.source().startsWith("workspaceProposal/"));
+                boolean operational=job.runtime!=null&&citations.isEmpty()&&job.runtime.operationalReferences().stream().map(job.facts::get).filter(Objects::nonNull).anyMatch(f->f.source().startsWith("supportBooking/")||f.source().startsWith("workspaceProposal/")||f.source().startsWith("supportGuide/"));
                 String effectiveMode=operational?"personal":mode;
                 boolean pureAbstention=job.runtime!=null&&effectiveMode.equals("documentary")&&citations.isEmpty()&&RagRetrievalService.ABSTENTION.equals(answer==null?"":answer.strip());
                 if(!effectiveMode.equals("personal")&&job.documentCalls==0&&!pureAbstention)throw new IllegalArgumentException("Falta consultar documentación");
@@ -530,13 +560,15 @@ public class AssistantService {
             }else resolved=finalizeAnswer(job,answer);
             if(job.runtime!=null&&job.runtime.limited())resolved+="\nEl análisis se limita a la evidencia disponible; alguna parte de la consulta quedó incompleta o requiere aclaración.";
             job.question=transcript;
-            if(job.libraryResult!=null) {
+            if(libraryActive) {
                 var result=job.libraryResult;
                 // Revalidate grants and versions before returning evidence to either channel.
                 var documents=List.copyOf(job.libraryDocuments.values());
                 for(var d:documents){var fresh=library.get(d.id());if(fresh.version()!=d.version()||fresh.status().equals("DELETING"))throw new IllegalArgumentException("Documento modificado; consulta de nuevo");}
                 if(!documents.isEmpty())resolved+="\n\nFuentes documentales:\n"+documents.stream().map(d->"• "+d.documentType()+" · "+(d.financialEntity()==null?"Entidad no identificada":d.financialEntity())+" · "+d.id()).collect(java.util.stream.Collectors.joining("\n"));
-                if(incompletePeriods(job))resolved+="\nLa comparación es parcial: faltan páginas de resultados o contenido legible de algunos archivos. No se puede confirmar un total completo del período.";
+                var effectiveIntent=AgentContracts.intent(routingQuestion(job),job.selectedDocument!=null);
+                boolean periodComparison=job.runtime==null||job.libraryIntent==com.ceroa.api.dto.DocumentContracts.Intent.PERIOD_ANALYSIS||effectiveIntent==AgentContracts.Intent.DOCUMENT_PERIOD||effectiveIntent==AgentContracts.Intent.DOCUMENT_COMPARISON;
+                if(periodComparison&&incompletePeriods(job))resolved+="\nLa comparación es parcial: faltan páginas de resultados o contenido legible de algunos archivos. No se puede confirmar un total completo del período.";
                 else if(job.periodPages.isEmpty()&&Set.of("INSUFFICIENT","PARTIAL").contains(result.evidenceStatus()))resolved+="\nLa evidencia de esta búsqueda es parcial o insuficiente; los hallazgos anteriores se limitan a las fuentes disponibles.";
                 job.result=new Reply(resolved,"analysis",documents,result.traceId());
             }else job.result=job.selectedDocument==null?new Reply(resolved,"analysis"):new Reply(resolved,"analysis",List.of(job.selectedDocument),null);
@@ -590,7 +622,19 @@ public class AssistantService {
         if(job.runtime==null)throw AgentRuntime.denied();library.assertCurrent(job.libraryDocuments.values());
         if(!AgentContracts.selectedRoles(routingQuestion(job),job.selectedDocument!=null).contains(role)){job.runtime.deniedDelegation();throw AgentRuntime.denied();}
         if(job.retrieval!=null&&!job.documents.isEmpty()&&!rag.current(job.retrieval,job.documents.values().stream().map(RagVectorStore.Chunk::chunkId).toList()))throw AgentRuntime.denied();
-        return job.runtime.context(job.runtime.begin(role,task,job.selectedDocument!=null),job.facts,job.channel==null?"web":job.channel.name(),AgentContracts.context(id,routingQuestion(job),job.selectedDocument!=null).tools().get(role));
+        var grant=job.runtime.begin(role,task,job.selectedDocument!=null);
+        if(role==AgentContracts.Role.SUPPORT){
+            var supportGuide=job.cache.computeIfAbsent("supportGuide",k->{
+                var guide=json.createObjectNode();
+                guide.put("debtRegistration","Para registrar una deuda en Ceroa, ingresa a la sección Deudas en el menú lateral, pulsa Nueva deuda o Registrar obligación y completa entidad o acreedor, tipo de deuda, monto original, saldo actual, tasa de interés (EA, MV o sin intereses), cuota mensual y fecha de próximo vencimiento.");
+                guide.put("simulatorUsage","El simulador de Ceroa (sección Simular) permite seleccionar una obligación registrada o el portafolio, elegir una estrategia (Avalancha o Bola de Nieve) y agregar abonos extraordinarios hipotéticos por período para proyectar el ahorro en intereses y la reducción de meses sin modificar tus saldos reales.");
+                guide.put("plansComparison","El plan Cero incluye el registro y seguimiento de deudas, control de pagos, próximos vencimientos, progreso mensual y simulaciones básicas. Ceroa Plus desbloquea la Estrategia de Pago personalizada completa (comparativa detallada Avalancha vs. Bola de Nieve, orden de priorización y hoja de ruta), Biblioteca Documental con análisis RAG de extractos y monitoreo avanzado.");
+                guide.put("advisoryProcedure","Para solicitar una asesoría en Ceroa, indica en el chat del asistente la fecha y hora deseada en horario hábil de Bogotá (lunes a viernes, en bloques de treinta minutos) junto con el tema a revisar. El Agente de Soporte verificará disponibilidad y generará una propuesta con código de confirmación; la sesión de Google Calendar y Google Meet solo se crea cuando confirmas explícitamente ese código.");
+                return analysis.evidence(job.facts,guide,"supportGuide");
+            });
+            job.runtime.scope(grant.scopeToken()).issued.addAll(supportGuide.facts().keySet());
+        }
+        return job.runtime.context(grant,job.facts,job.channel==null?"web":job.channel.name(),AgentContracts.context(id,routingQuestion(job),job.selectedDocument!=null).tools().get(role));
     });}
     public <T> T scoped(UUID id,UUID token,java.util.function.Supplier<T> action){
         if(token==null)return action.get();
@@ -598,8 +642,8 @@ public class AssistantService {
             if(job.runtime==null)throw AgentRuntime.denied();var scope=job.runtime.scope(token);activeScope.set(scope);long start=System.nanoTime();
             try{T value=action.get();String encoded=json.valueToTree(value).toString();job.runtime.delivered(scope,encoded.length());
                 if(value instanceof AssistantAnalysisService.Evidence evidence)scope.issued.addAll(evidence.facts().keySet());
-                if(value instanceof LibraryEvidence evidence){scope.issued.addAll(evidence.evidence().facts().keySet());scope.partial|=!Set.of("AVAILABLE","COMPLETE","SUFFICIENT").contains(evidence.status())||incompletePeriods(job);}
-                if(value instanceof DocumentEvidence evidence){scope.issued.addAll(evidence.sources().keySet());scope.partial|=evidence.sources().isEmpty();}
+                if(value instanceof LibraryEvidence evidence){scope.issued.addAll(evidence.evidence().facts().keySet());if(scope.role!=AgentContracts.Role.FINANCIAL)scope.partial|=!Set.of("AVAILABLE","COMPLETE","SUFFICIENT").contains(evidence.status())||incompletePeriods(job);}
+                if(value instanceof DocumentEvidence evidence){scope.issued.addAll(evidence.sources().keySet());if(scope.role!=AgentContracts.Role.SUPPORT)scope.partial|=evidence.sources().isEmpty();}
                 return value;
             }finally{scope.toolNanos+=System.nanoTime()-start;activeScope.remove();}
         });
@@ -608,7 +652,21 @@ public class AssistantService {
         if(job.runtime==null)throw AgentRuntime.denied();var scope=job.runtime.scope(token);library.assertCurrent(job.libraryDocuments.values());
         if(failed)return job.runtime.fail(scope);
         if(result==null)throw new IllegalArgumentException("Resultado ausente");
-        analysis.resolve(job.facts,result.answer());return job.runtime.complete(scope,result);
+        var scopedFacts=new LinkedHashMap<String,AssistantAnalysisService.Fact>();
+        for(String ref:scope.issued)if(job.facts.containsKey(ref))scopedFacts.put(ref,job.facts.get(ref));
+        var updatedRefs=new LinkedHashSet<String>(result.evidenceRefs()==null?List.of():result.evidenceRefs());
+        var rawMatcher=Pattern.compile("\\{\\{(f[1-9][0-9]*)\\}\\}").matcher(result.answer()==null?"":result.answer());
+        while(rawMatcher.find())if(scope.issued.contains(rawMatcher.group(1))&&updatedRefs.size()<100)updatedRefs.add(rawMatcher.group(1));
+        String groundedAnswer=analysis.groundForDelegation(scopedFacts,result.answer());
+        var matcher=Pattern.compile("\\{\\{(f[1-9][0-9]*)\\}\\}").matcher(groundedAnswer==null?"":groundedAnswer);
+        while(matcher.find())if(scope.issued.contains(matcher.group(1))&&updatedRefs.size()<100)updatedRefs.add(matcher.group(1));
+        if(scope.role==AgentContracts.Role.SUPPORT&&updatedRefs.isEmpty()&&(result.sources()==null||result.sources().isEmpty())){
+            scope.issued.stream().filter(r->job.facts.containsKey(r)&&job.facts.get(r).source().startsWith("supportGuide/")).findFirst().ifPresent(updatedRefs::add);
+        }
+        if(updatedRefs.stream().anyMatch(job.partialLibraryFacts::contains))scope.partial=true;
+        String coverage=scope.partial&&"COMPLETE".equals(result.coverage())?"PARTIAL":result.coverage();
+        var normalized=new AgentRuntime.Result(result.schemaVersion(),result.role(),result.status(),groundedAnswer,List.copyOf(updatedRefs),result.sources(),coverage,result.missingData(),result.requiresConfirmation(),result.requestId(),result.correlationId(),result.advisoryProposal(),result.requiresClarification(),result.errorCode(),result.metrics());
+        analysis.resolve(job.facts,normalized.answer());return job.runtime.complete(scope,normalized);
     });}
     public AgentRuntime.Result failDelegation(UUID id,UUID token,String code){return withJob(id,job->{if(job.runtime==null)throw AgentRuntime.denied();if(!AgentRuntime.FAILURE_CODES.contains(code))throw new IllegalArgumentException();var scope=job.runtime.scope(token);if(code.equals("PROVIDER_QUOTA"))providerGate.quotaFailure();return job.runtime.fail(scope,code);});}
     private int toolLimit(Job job){return job.budget==null?16:job.budget.maxToolCalls();}

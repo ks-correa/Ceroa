@@ -15,41 +15,74 @@ public final class AgentContracts {
         case RAG -> List.of("documents.facts","documents.retrieve","knowledge.approved");
         case SUPPORT -> List.of("knowledge.approved","support.propose","communications.propose","support.booking","support.external");
     };}
+    private static final java.util.regex.Pattern FOLLOW_UP = java.util.regex.Pattern.compile(
+        "(?iu)\\b(eso|esa|ese|esas|esos|aquel|aquella|aquello|entonces|anterior|anteriores)\\b"
+        + "|\\b(?:la|el)\\s+(?:primera?|segunda?|tercera?|otra|otro|misma|mismo)(?:\\s+(?:opci[oó]n|alternativa|estrategia|deuda|obligaci[oó]n|punto|caso))?\\b"
+        + "|\\b(?:primera|segunda|tercera)\\s+(?:opci[oó]n|alternativa|estrategia)\\b"
+        + "|\\b(?:expl[ií]came|detalla|ampl[ií]a|profundiza|aclara)\\s+(?:mejor|m[aá]s)\\b"
+        + "|^\\s*[¿?]?\\s*y\\s+(?:cu[aá]l|qu[eé]|c[oó]mo|cu[aá]ndo|cu[aá]nto|d[oó]nde|por\\s+qu[eé]|si|la|el|las|los|en)\\b"
+        + "|\\b(?:m[aá]s\\s+pr[oó]xim[oa]|cu[aá]l\\s+de\\s+(?:ellas|ellos|las\\s+dos|los\\s+dos))\\b"
+        + "|y\\s+ahora");
+    private static final java.util.regex.Pattern AMBIGUOUS_OPTION = java.util.regex.Pattern.compile(
+        "(?iu).*\\b(?:(?:la|el)\\s+(?:primera?|segunda?|tercera?)(?:\\s+(?:opci[oó]n|alternativa))?|(?:primera|segunda|tercera)\\s+(?:opci[oó]n|alternativa)|esa\\s+(?:opci[oó]n|alternativa))\\b.*");
+    private static String normalize(String text){
+        return java.text.Normalizer.normalize(text==null?"":text.toLowerCase(Locale.ROOT),java.text.Normalizer.Form.NFD).replaceAll("\\p{M}","");
+    }
+    public static boolean isFollowUp(String question){
+        return question!=null&&FOLLOW_UP.matcher(question).find();
+    }
+    public static boolean requiresContextualClarification(String question,String previous){
+        if(question==null||question.isBlank()||!selectedRoles(question,false).isEmpty()||!isFollowUp(question))return false;
+        if(previous==null||previous.isBlank())return true;
+        if(AMBIGUOUS_OPTION.matcher(question).matches()){
+            String prev=normalize(previous);
+            return !prev.matches("(?s).*(?:opci|alternativa|bola de nieve|avalancha|plan(?:es)?\\s+cero|ceroa\\s+plus|diferencia|compar).*");
+        }
+        return false;
+    }
     public static Intent intent(String question,boolean selected){
         if(selected)return Intent.DOCUMENT_SINGLE;
-        String q=java.text.Normalizer.normalize(question==null?"":question.toLowerCase(Locale.ROOT),java.text.Normalizer.Form.NFD).replaceAll("\\p{M}","");
-        if(q.matches("(?s).*(extracto|documento|archivo).*")){
+        var roles=selectedRoles(question,false);
+        if(roles.size()>1)return Intent.COMPOSITE;
+        if(roles.equals(Set.of(Role.SUPPORT)))return Intent.SUPPORT;
+        String q=normalize(question);
+        if(q.matches("(?s).*\\b(extractos?|documentos?|archivos?|pdfs?)\\b.*")){
             if(q.contains("compara")||q.contains("diferencia"))return Intent.DOCUMENT_COMPARISON;
             if(q.contains("mes")||q.contains("periodo")||q.contains("extractos"))return Intent.DOCUMENT_PERIOD;
             return Intent.DOCUMENT_SINGLE;
         }
-        var roles=selectedRoles(question,false);
-        if(roles.size()>1)return Intent.COMPOSITE;
-        if(roles.equals(Set.of(Role.SUPPORT)))return Intent.SUPPORT;
         if(roles.equals(Set.of(Role.RAG)))return Intent.KNOWLEDGE;
         if(roles.isEmpty())return Intent.UNKNOWN;
         return Intent.FINANCIAL;
     }
     /** Conservative lexical routing, not an authorization substitute. Unknown turns cannot acquire tools. */
     public static String routingQuestion(String question,String previous,boolean selected){
-        return previous!=null&&!previous.isBlank()&&selectedRoles(question,selected).isEmpty()&&java.util.regex.Pattern.compile("(?iu)\\b(eso|esa|ese|esas|esos|entonces)\\b|y ahora").matcher(question==null?"":question).find()?previous+"\n"+question:question;
+        return previous!=null&&!previous.isBlank()&&selectedRoles(question,selected).isEmpty()&&isFollowUp(question)?previous+"\n"+question:question;
     }
     public static Set<Role> selectedRoles(String question,boolean selected){
         if(selected)return Set.of(Role.RAG);
-        String q=java.text.Normalizer.normalize(question==null?"":question.toLowerCase(Locale.ROOT),java.text.Normalizer.Form.NFD).replaceAll("\\p{M}","")
-            .replaceAll("\\b(?:no necesito|no quiero|sin necesidad de)\\b[^.;!?]*","");
-        boolean document=q.matches("(?s).*\\b(extractos?|documentos?|archivos?)\\b.*");
-        boolean operational=q.matches("(?s).*(registrar (?:un |el |una |la )?(?:pago|obligacion)|soporte|ayuda con (?:la|mi) cuenta|asesoria|\\bcita\\b|contrasena|iniciar sesion|navegacion|suscripcion|\\bmcp\\b).*" );
-        boolean concept=q.matches("(?s).*(concepto|bola de nieve|avalancha|que es |que significa|como funciona).*" );
-        boolean personal=q.matches("(?s).*(\\bmis? (?:deudas|obligaciones|finanzas|pagos|vencimientos|saldos|estrategias)|obligaciones registradas|datos financieros actuales).*" );
-        boolean finance=q.matches("(?s).*(saldo|deuda|obligacion|tasa|pago|capacidad|estrategia|ingreso|gasto|financial|finance|analysis).*" );
+        String q=normalize(question)
+            .replaceAll("\\b(?:no necesito|no quiero|no busco|sin necesidad de|sin consultar|no me expliques)\\b[^.;!?]*","");
+        boolean document=q.matches("(?s).*\\b(extractos?|documentos?|archivos?|pdfs?)\\b.*");
+        boolean operational=q.matches("(?s).*("
+            + "registr(?:ar|o|e|as|an|amos)\\s+(?:un |el |una |la |mis |las |los )?(?:pagos?|obligaciones?|deudas?|abonos?)"
+            + "|(?:como|donde|pasos para|manera de|forma de|quiero saber como|explicame como)\\s+(?:se\\s+|puedo\\s+)?(?:registr\\w*|agreg\\w*|cre\\w*|anad\\w*|carg\\w*|sub\\w*|edit\\w*|modific\\w*|actualiz\\w*|elimin\\w*|borr\\w*)\\s+(?:un |el |una |la |mis |las |los )?(?:pagos?|obligaciones?|deudas?|abonos?|extractos?|documentos?|archivos?)"
+            + "|(?:como\\s+funciona|para\\s+que\\s+sirve|como\\s+se\\s+usa|como\\s+uso|como\\s+utiliz\\w*)\\s+(?:el\\s+|la\\s+)?(?:simulador|seccion\\s+simular|biblioteca|centinela)"
+            + "|\\bplan(?:es)?\\s+cero\\b|\\bceroa\\s+plus\\b|(?:diferencias?|compar\\w*)\\s+entre\\s+(?:el\\s+|los\\s+)?plan(?:es)?"
+            + "|soporte|ayuda con (?:la|mi) cuenta|asesori\\w*|\\bcitas?\\b|contrasen\\w*|iniciar sesion|cerrar sesion|navegacion|suscripcion\\w*|\\bmcp\\b"
+            + ").*");
+        boolean concept=q.matches("(?s).*(concepto|bola de nieve|avalancha|amortizacion|(?:que es |que significa|como se interpreta)(?![^.;!?]*(?:plan cero|ceroa plus|simulador|asesoria|soporte|cuenta))).*")
+            ||(q.matches("(?s).*como funciona.*")&&!operational);
+        boolean personal=q.matches("(?s).*(\\bmis? (?:deudas?|obligaciones?|finanzas|pagos?|vencimientos?|saldos?|estrategias?|capacidad|progreso|ingresos?|gastos?)\\b|(?:obligaciones?|deudas?|pagos?|saldos?|vencimientos?)\\s+registrad[oa]s?|datos financieros actuales|(?:mas\\s+proxim[oa]|cual|que)\\s+(?:a\\s+)?venc(?:er|e|en)).*");
+        boolean finance=q.matches("(?s).*(saldo|deuda|obligacion|tasa|pago|capacidad|estrategia|ingreso|gasto|vencimiento|vencer|vence|vencen|priorizar|financial|finance|analysis).*");
         var roles=EnumSet.noneOf(Role.class);
         if(document||concept)roles.add(Role.RAG);
         if(operational)roles.add(Role.SUPPORT);
         if(!operational&&!document&&(personal||finance&&!concept))roles.add(Role.FINANCIAL);
         if(personal&&concept&&!document)roles.add(Role.FINANCIAL);
-        if(personal&&operational&&q.matches("(?s).*(analiza|interpreta|contrasta|compara|saldo).*"))roles.add(Role.FINANCIAL);
-        if(operational&&!concept&&!document)roles.remove(Role.RAG);
+        if(personal&&document&&!operational)roles.add(Role.FINANCIAL);
+        if(personal&&operational&&q.matches("(?s).*(analiza|interpreta|contrasta|compara|saldo|vencimiento|vencer).*"))roles.add(Role.FINANCIAL);
+        if(operational&&!concept&&(!document||q.matches("(?s).*(?:como|donde)\\s+(?:se\\s+|puedo\\s+)?(?:carg\\w*|sub\\w*|elimin\\w*|borr\\w*).*")))roles.remove(Role.RAG);
         return Collections.unmodifiableSet(roles);
     }
     public static Budget budget(Intent intent){return switch(intent){

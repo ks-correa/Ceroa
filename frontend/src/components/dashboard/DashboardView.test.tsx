@@ -317,5 +317,39 @@ describe('EP-08 — Panel financiero principal (HU-037 y HU-038)', () => {
 
       expect(screen.queryByRole('note', { name: /Advertencia de cobertura parcial/i })).toBeNull();
     });
+
+    it('Sección 11: Presenta obligaciones vencidas como En mora y Venció el en lugar de fecha futura con días negativos', () => {
+      setupAppContext({
+        dashboardSummary: {
+          ...sampleSummary,
+          nextDue: {
+            debtId: 'debt-card-1',
+            debtName: 'Tarjeta Visa',
+            entity: 'Bancolombia',
+            debtType: 'credit_card',
+            amount: 150000,
+            dueDate: '2026-09-05',
+            daysUntilDue: -65,
+            status: 'en_mora'
+          },
+          upcomingDues: [
+            {
+              debtId: 'debt-card-1',
+              debtName: 'Tarjeta Visa',
+              entity: 'Bancolombia',
+              debtType: 'credit_card',
+              amount: 150000,
+              dueDate: '2026-09-05',
+              daysUntilDue: -65,
+              status: 'en_mora'
+            }
+          ]
+        }
+      });
+      render(<DashboardView />);
+
+      expect(screen.getByTestId('dashboard-milestone-overdue').textContent).toContain('En mora (65 días)');
+      expect(screen.getAllByText(/Venció el 2026-09-05 \(hace 65/i).length).toBeGreaterThanOrEqual(2);
+    });
   });
 });

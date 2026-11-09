@@ -174,13 +174,18 @@ export function DocumentLibraryPanel({ view = 'upload', onDiscuss }: { view?: Do
     {busy && <p role="status">Procesando solicitud…</p>}{error && <p role="alert" className="text-red-700">{error}</p>}{status && <p role="status">{status}</p>}
     {view === 'search' && result && <>
       {!result.documents.length && <p>No se encontraron documentos con estos filtros.</p>}
-      <DocumentReferences documents={result.documents} onDiscuss={onDiscuss} />
-      {result.documents.map(document => <div key={document.id} className="flex flex-wrap gap-3 text-xs">
-        <DocumentVersionManager document={document} onChanged={()=>search(query(offset))}/>
-        <button type="button" className="underline" onClick={() => review(document)}>Corregir metadatos · {document.financialEntity || 'Documento'}</button>
-        <button type="button" disabled={busy} className="underline" onClick={() => void run(async () => { const saved=await documentLibraryService.reprocess(document.id);setUploaded(saved); await search(query(offset)); })}>Reprocesar</button>
-        <button type="button" disabled={busy} className="underline" onClick={() => { if (window.confirm('¿Eliminar este documento y sus fragmentos?')) void run(async () => { await documentLibraryService.remove(document.id); if(uploaded?.id===document.id)setUploaded(null);await search(query(offset)); }); }}>Eliminar</button>
-      </div>)}
+      <DocumentReferences
+        documents={result.documents}
+        onDiscuss={onDiscuss}
+        renderActions={document => (
+          <>
+            <DocumentVersionManager document={document} onChanged={()=>search(query(offset))}/>
+            <button type="button" className="underline" onClick={() => review(document)}>Corregir metadatos · {document.financialEntity || 'Documento'}</button>
+            <button type="button" disabled={busy} className="underline" onClick={() => void run(async () => { const saved=await documentLibraryService.reprocess(document.id);setUploaded(saved); await search(query(offset)); })}>Reprocesar</button>
+            <button type="button" disabled={busy} className="underline" onClick={() => { if (window.confirm('¿Eliminar este documento y sus fragmentos?')) void run(async () => { await documentLibraryService.remove(document.id); if(uploaded?.id===document.id)setUploaded(null);await search(query(offset)); }); }}>Eliminar</button>
+          </>
+        )}
+      />
       {result.sources.map(source => <blockquote key={source.chunkId} className="border-l-2 pl-2"><p>{source.content}</p><small>{source.location} · Fragmento {source.chunkId.slice(0, 8)}</small></blockquote>)}
       <div className="flex gap-3"><button type="button" disabled={busy || offset === 0} onClick={() => { setOffset(offset - 10); void search(query(offset - 10)); }}>Anterior</button><button type="button" disabled={busy || result.documents.length < 10} onClick={() => { setOffset(offset + 10); void search(query(offset + 10)); }}>Siguiente</button></div>
     </>}

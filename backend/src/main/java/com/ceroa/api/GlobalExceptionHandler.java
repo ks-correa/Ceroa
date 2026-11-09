@@ -27,6 +27,14 @@ public class GlobalExceptionHandler {
         return response(HttpStatus.NOT_FOUND, "NOT_FOUND", exception.getMessage(), Map.of());
     }
 
+    @ExceptionHandler({
+            org.springframework.web.servlet.resource.NoResourceFoundException.class,
+            org.springframework.web.servlet.NoHandlerFoundException.class
+    })
+    ResponseEntity<ApiError> handleNoResourceFound(Exception exception) {
+        return response(HttpStatus.NOT_FOUND, "NOT_FOUND", "Recurso no encontrado.", Map.of());
+    }
+
     @ExceptionHandler(BusinessRuleException.class)
     ResponseEntity<ApiError> handleBusinessRule(BusinessRuleException exception) {
         return response(HttpStatus.UNPROCESSABLE_ENTITY, exception.getCode(), exception.getMessage(), Map.of());

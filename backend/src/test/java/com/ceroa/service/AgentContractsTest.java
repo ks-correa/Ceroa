@@ -14,6 +14,19 @@ class AgentContractsTest {
         assertEquals(Set.of(AgentContracts.Role.RAG),AgentContracts.selectedRoles("Compara mis extractos",false));
         assertEquals(Set.of(AgentContracts.Role.RAG),AgentContracts.selectedRoles("Consulta financiera y soporte",true));
     }
+    @Test void routesOperationalSupportFollowUpAndCompositeDocumentFinancialQuestions(){
+        assertEquals(Set.of(AgentContracts.Role.SUPPORT),AgentContracts.selectedRoles("¿Cómo registro una deuda en Ceroa?",false));
+        assertEquals(Set.of(AgentContracts.Role.SUPPORT),AgentContracts.selectedRoles("¿Cómo funciona el simulador?",false));
+        assertEquals(Set.of(AgentContracts.Role.SUPPORT),AgentContracts.selectedRoles("¿Qué diferencia hay entre el plan Cero y Ceroa Plus?",false));
+        assertEquals(Set.of(AgentContracts.Role.SUPPORT),AgentContracts.selectedRoles("Quiero conocer cómo puedo solicitar una asesoría",false));
+        assertEquals(Set.of(AgentContracts.Role.FINANCIAL),AgentContracts.selectedRoles(AgentContracts.routingQuestion("¿Y cuál es la más próxima a vencer?","¿Cuáles son mis deudas?",false),false));
+        assertEquals(Set.of(AgentContracts.Role.RAG,AgentContracts.Role.FINANCIAL),AgentContracts.selectedRoles("Consulta mis vencimientos y explícame qué significa la tasa de interés que aparece en un extracto",false));
+        assertEquals(AgentContracts.Intent.COMPOSITE,AgentContracts.intent("Consulta mis vencimientos y explícame qué significa la tasa de interés que aparece en un extracto",false));
+        assertTrue(AgentContracts.requiresContextualClarification("Explícame mejor la segunda opción",""));
+        assertTrue(AgentContracts.requiresContextualClarification("Explícame mejor la segunda opción","¿Y cuál es la más próxima a vencer?"));
+        assertFalse(AgentContracts.requiresContextualClarification("Explícame mejor la segunda opción","Compara mis estrategias de pago"));
+        assertEquals(Set.of(AgentContracts.Role.FINANCIAL),AgentContracts.selectedRoles(AgentContracts.routingQuestion("Explícame mejor la segunda opción","Compara mis estrategias de pago",false),false));
+    }
     @Test void budgetsAreBoundedAndSelectedDocumentsCannotAcquireFinanceTools(){
         var context=AgentContracts.context(UUID.randomUUID(),"compara mis extractos",true);
         assertFalse(context.tools().containsKey(AgentContracts.Role.FINANCIAL));

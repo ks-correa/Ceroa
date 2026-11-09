@@ -91,4 +91,18 @@ describe('Document library', () => {
     expect(screen.getByText(/26\/10\/2026, 9:00/)).toBeTruthy();
     expect(screen.getByText(/27\/10\/2026, 9:00/)).toBeTruthy();
   });
+  it('DEF-07: groups each document actions and version/ID metadata inside its own card', async () => {
+    vi.mocked(documentLibraryService.search).mockResolvedValue({documents:[
+      {id:'doc11111-aaaa',version:2,status:'INDEXED',documentType:'BANK_STATEMENT',financialEntity:'Bancolombia',identificationType:'CC',periodStart:'2026-08-01',periodEnd:'2026-09-01'},
+      {id:'doc22222-bbbb',version:1,status:'FAILED',documentType:'BANK_STATEMENT',financialEntity:'Bancolombia',identificationType:'CC',periodStart:'2026-09-01',periodEnd:'2026-10-01'},
+    ] as FinancialDocument[],sources:[]} as never);
+    render(<DocumentLibraryPanel view="search" />);
+    fireEvent.click(screen.getByText('Ver mis documentos'));
+    const firstCard = await screen.findByTestId('document-card-doc11111-aaaa');
+    const secondCard = await screen.findByTestId('document-card-doc22222-bbbb');
+    expect(firstCard.textContent).toContain('v2 · ID doc11111');
+    expect(firstCard.textContent).toContain('Corregir metadatos');
+    expect(secondCard.textContent).toContain('v1 · ID doc22222');
+    expect(secondCard.textContent).toContain('Reprocesar');
+  });
 });

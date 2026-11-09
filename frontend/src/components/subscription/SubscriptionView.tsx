@@ -12,16 +12,16 @@ export const SubscriptionView: React.FC = () => {
   const [selected, setSelected] = useState<Periodicity>('MONTHLY');
   const [phase, setPhase] = useState('LOADING');
   const [error, setError] = useState('');
-  const load = async () => {
+  const load = async (refresh = false) => {
     try {
       const [catalog, current, capabilities, cero] = await Promise.all([subscriptionService.offers(), subscriptionService.current(), subscriptionService.capabilities(), subscriptionService.ceroCapabilities()]);
       setPlusCapabilities(capabilities);
       setCeroCapabilities(cero);
       setOffers(catalog); setSubscription(current); setPhase(current?.status ?? 'READY');
-      if (current?.status === 'ACTIVE') await refreshAllData();
+      if (current?.status === 'ACTIVE' && (refresh || !planAccess?.plusActive)) await refreshAllData();
     } catch (cause) { setError(cause instanceof Error ? cause.message : 'No fue posible cargar la oferta.'); setPhase('ERROR'); }
   };
-  useEffect(() => { void load(); }, []);
+  useEffect(() => { void load(false); }, []);
   const checkout = async () => {
     setPhase('CREATING'); setError('');
     try {
@@ -33,7 +33,7 @@ export const SubscriptionView: React.FC = () => {
     } catch (cause) { setError(cause instanceof Error ? cause.message : 'No fue posible iniciar el pago.'); setPhase('ERROR'); }
   };
   const chosen = offers.find(offer => offer.periodicity === selected);
-  return <main className="max-w-3xl mx-auto px-4 py-8 space-y-6">
+  return <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
     <button type="button" onClick={() => setCurrentScreen('profile')} className="underline focus-visible:outline-2">Volver a Perfil</button>
     <h1 className="text-3xl font-bold">Ceroa Plus</h1>
     <p>Plan vigente: {planAccess?.plusActive ? 'Ceroa Plus' : 'Cero'}</p>
@@ -46,9 +46,9 @@ export const SubscriptionView: React.FC = () => {
         {offers.map(offer => <label key={offer.periodicity} className="rounded-lg border p-3 cursor-pointer"><input type="radio" name="periodicity" checked={selected === offer.periodicity} onChange={() => setSelected(offer.periodicity)} /> {offer.periodicity === 'MONTHLY' ? 'Mensual' : 'Anual'}</label>)}
       </div></fieldset>
       {chosen && <p>{chosen.price != null ? new Intl.NumberFormat('es-CO', { style: 'currency', currency: chosen.currency }).format(chosen.price) : 'Precio no configurado'} por {selected === 'MONTHLY' ? 'mes' : 'año'}. Renovación automática al finalizar cada periodo mientras la suscripción esté activa y no cancelada.</p>}
-      {phase === 'PENDING' ? <div className="flex gap-4"><button type="button" className="underline" onClick={() => void load()}>Consultar confirmación</button>{subscription?.checkoutUrl && <a href={subscription.checkoutUrl} className="underline">Volver a Mercado Pago</a>}</div> : <button type="button" disabled={!chosen?.available || phase === 'LOADING' || phase === 'CREATING' || phase === 'REDIRECTING'} onClick={() => void checkout()} className="rounded-lg bg-teal-700 text-white px-4 py-2 disabled:opacity-50 focus-visible:outline-2">Continuar con Mercado Pago</button>}
+      {phase === 'PENDING' ? <div className="flex gap-4"><button type="button" className="underline" onClick={() => void load(true)}>Consultar confirmación</button>{subscription?.checkoutUrl && <a href={subscription.checkoutUrl} className="underline">Volver a Mercado Pago</a>}</div> : <button type="button" disabled={!chosen?.available || phase === 'LOADING' || phase === 'CREATING' || phase === 'REDIRECTING'} onClick={() => void checkout()} className="rounded-lg bg-teal-700 text-white px-4 py-2 disabled:opacity-50 focus-visible:outline-2">Continuar con Mercado Pago</button>}
     </section>}
     <p role={phase === 'ERROR' ? 'alert' : 'status'} aria-live="polite">{error || ({ LOADING: 'Cargando oferta…', CREATING: 'Creando operación…', REDIRECTING: 'Continuando con Mercado Pago…', PENDING: 'Esperando confirmación de Mercado Pago. Plus aún no está activo.', ACTIVE: 'Suscripción confirmada.', REJECTED: 'Operación rechazada.', CANCELLED: 'Operación cancelada.', ERROR: 'Ocurrió un error. Puedes reintentar.' } as Record<string, string>)[phase]}</p>
     {subscription?.status === 'ACTIVE' && <p>{subscription.periodicity === 'MONTHLY' ? 'Mensual' : 'Anual'} · Renovación automática {subscription.nextPaymentAt ? `· Próximo cobro ${new Date(subscription.nextPaymentAt).toLocaleDateString('es-CO')}` : ''}</p>}
-  </main>;
+  </div>;
 };

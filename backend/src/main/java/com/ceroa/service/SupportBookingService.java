@@ -17,7 +17,17 @@ public class SupportBookingService {
  public SupportBookingService(SupportBookingRepository bookings,CurrentUserService current,WorkspaceCalendarGateway calendar,PlatformTransactionManager tm,IntegrationEventService events){this.bookings=bookings;this.current=current;this.calendar=calendar;this.events=events;tx=new TransactionTemplate(tm);}
  private static String code(){var random=new SecureRandom();var s=new StringBuilder();for(int i=0;i<20;i++)s.append((char)('A'+random.nextInt(26)));return s.toString();}
  private void slot(OffsetDateTime start){if(start==null)throw new IllegalArgumentException();var local=start.atZoneSameInstant(ZoneId.of("America/Bogota"));if(start.isBefore(OffsetDateTime.now().plusHours(1))||start.isAfter(OffsetDateTime.now().plusDays(14))||local.getDayOfWeek().getValue()>5||local.getHour()<9||local.getHour()>=17||local.getMinute()%30!=0||local.getSecond()!=0||local.getNano()!=0)throw new IllegalArgumentException("Selecciona un horario habil de treinta minutos en Bogota");}
- public Map<String,Object> availability(OffsetDateTime start){slot(start);return Map.of("start",start,"end",start.plusMinutes(30),"available",calendar.available(start,start.plusMinutes(30)),"timezone","America/Bogota");}
+ public Map<String,Object> availability(OffsetDateTime start){
+  slot(start);
+  try{
+   return Map.of("start",start,"end",start.plusMinutes(30),"available",calendar.available(start,start.plusMinutes(30)),"calendarConfigured",true,"timezone","America/Bogota");
+  }catch(ResponseStatusException ex){
+   if(ex.getStatusCode()==HttpStatus.SERVICE_UNAVAILABLE){
+    return Map.of("start",start,"end",start.plusMinutes(30),"available",false,"calendarConfigured",false,"status","CALENDAR_DISABLED","timezone","America/Bogota","message","La integracion con Google Calendar permanece desactivada en este entorno. Indica al usuario el procedimiento de solicitud de asesoria en horario habil de Bogota (lunes a viernes de 09:00 a 16:30, bloques de 30 minutos) y que la confirmacion de agenda requiere habilitar el conector de Calendar.");
+   }
+   throw ex;
+  }
+ }
  public View propose(OffsetDateTime start){slot(start);var owner=current.entity();if(!owner.isActive())throw new ResponseStatusException(HttpStatus.FORBIDDEN);if(!calendar.available(start,start.plusMinutes(30)))throw new ResponseStatusException(HttpStatus.CONFLICT,"Horario no disponible");return tx.execute(t->{var b=new SupportBooking();b.ownerId=owner.getId();b.code=code();b.start=start;b.end=start.plusMinutes(30);b.expiresAt=OffsetDateTime.now().plusMinutes(10);b.status="PROPOSED";return view(bookings.saveAndFlush(b));});}
  private SupportBooking owned(String code){if(code==null||!code.matches("[A-Z]{20}"))throw new IllegalArgumentException();return bookings.owned(current.id(),code).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));}
  private View view(SupportBooking b){String instruction=b.status.equals("PROPOSED")?"Confirmar asesoria "+b.code:b.cancelCode!=null?"Confirmar cancelacion "+b.code+" "+b.cancelCode:"";return new View(b.code,b.status,b.start,b.end,b.expiresAt,b.meetUrl,instruction);}

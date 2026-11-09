@@ -19,5 +19,6 @@ public class WorkspaceCalendarGateway {
   JsonNode result=RestClient.builder().requestFactory(factory).build().post().uri(url).header("X-Ceroa-Workspace",key).contentType(MediaType.APPLICATION_JSON).body(body).retrieve().body(JsonNode.class);
   if(result==null||result.toString().length()>24000)throw new IllegalStateException("Respuesta Calendar invalida");return result;
  }
+ public boolean isEnabled(){return enabled&&key.length()>=32&&url.matches("http://n8n:5678/webhook/[A-Za-z0-9/_-]+");}
  public boolean available(OffsetDateTime start,OffsetDateTime end){return call("availability",start,end,null,null).path("available").asBoolean(false);}
 }

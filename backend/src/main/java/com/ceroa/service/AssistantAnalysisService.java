@@ -131,7 +131,7 @@ public class AssistantAnalysisService {
     /** Substitute only facts emitted for this request. Reject unsupported numerical claims. */
     public String resolve(Map<String,Fact> facts,String answer) {
         if(answer==null || answer.isBlank() || answer.length()>12000) throw new IllegalArgumentException();
-        answer=groundExactLiterals(facts,answer.replaceAll("(?m)^(\\s*)\\d+[.)]\\s+","$1• "));
+        answer=groundExactLiterals(facts,normalizeInlineArtifacts(facts,answer).replaceAll("(?m)^(\\s*)\\d+[.)]\\s+","$1• "));
         var matcher=REFERENCE.matcher(answer); StringBuffer rendered=new StringBuffer();
         while(matcher.find()) {
             Fact fact=facts.get(matcher.group(1));
@@ -153,12 +153,15 @@ public class AssistantAnalysisService {
         return rendered.toString()
             .replaceAll("(?i)([\\d.,]+%\\s*EA)\\s*\\((?:y una )?tasa (?:anual comparable|comparable anual) (?:de )?\\1\\)","$1")
             .replaceAll("(?i)sin intereses con una tasa (?:del|de) 0% sin intereses","sin intereses")
-            .replaceAll("(?i)0% sin intereses","sin intereses");
+            .replaceAll("(?i)0% sin intereses","sin intereses")
+            .replaceAll("(?iu)\\b(?:avalancha|avalanche)\\s+avalancha\\b","Avalancha")
+            .replaceAll("(?iu)\\b(?:bola\\s+de\\s+nieve|snowball)\\s+bola\\s+de\\s+nieve\\b","Bola de nieve")
+            .replaceAll("(?i)(%\\s*)\\b(?:true|false)\\b","$1");
     }
     /** Final fallback after model repair: preserve supported facts without displaying unsupported numbers. */
     public String resolveConservatively(Map<String,Fact> facts,String answer) {
         if(answer==null||answer.isBlank()||answer.length()>12000)throw new IllegalArgumentException();
-        String grounded=groundExactLiterals(facts,answer.replaceAll("(?m)^(\\s*)\\d+[.)]\\s+","$1• "));
+        String grounded=groundExactLiterals(facts,normalizeInlineArtifacts(facts,answer).replaceAll("(?m)^(\\s*)\\d+[.)]\\s+","$1• "));
         var references=REFERENCE.matcher(grounded);
         var safe=new StringBuilder();int cursor=0;boolean omitted=false;
         while(references.find()) {
@@ -177,6 +180,45 @@ public class AssistantAnalysisService {
         omitted|=!cleaned.equals(tail);safe.append(cleaned);
         String resolved=resolve(facts,safe.toString());
         return omitted?resolved+"\n\nAlgunas cifras o referencias no pudieron verificarse y se omitieron.":resolved;
+    }
+    String groundForDelegation(Map<String,Fact> facts,String answer) {
+        if(answer==null||answer.isBlank())return answer;
+        return groundExactLiterals(facts,normalizeInlineArtifacts(facts,answer).replaceAll("(?m)^(\\s*)\\d+[.)]\\s+","$1• "));
+    }
+    private String normalizeInlineArtifacts(Map<String,Fact> facts,String answer) {
+        String cleaned=answer
+            .replaceAll("(?i)\\s*\\{\\{d[1-8]\\}\\}","")
+            .replaceAll("(?i)\\s*\\[\\s*d[1-8](?:\\s*,\\s*d[1-8])*\\s*\\]","")
+            .replaceAll("(?i)\\s*\\(\\s*d[1-8](?:\\s*,\\s*d[1-8])*\\s*\\)","");
+        var pctMatcher=Pattern.compile("\\{\\{(f[1-9][0-9]*)\\}\\}(%?)\\s*\\{\\{(f[1-9][0-9]*)\\}\\}").matcher(cleaned);
+        StringBuffer pctBuf=new StringBuffer();
+        while(pctMatcher.find()) {
+            Fact second=facts.get(pctMatcher.group(3));
+            if(second!=null && second.source().endsWith("inputs/percentScale")) {
+                pctMatcher.appendReplacement(pctBuf,Matcher.quoteReplacement("{{"+pctMatcher.group(1)+"}}%"));
+            } else if(second!=null && second.source().endsWith("/comparable")) {
+                pctMatcher.appendReplacement(pctBuf,Matcher.quoteReplacement("{{"+pctMatcher.group(1)+"}}"+pctMatcher.group(2)));
+            } else {
+                pctMatcher.appendReplacement(pctBuf,Matcher.quoteReplacement(pctMatcher.group()));
+            }
+        }
+        pctMatcher.appendTail(pctBuf);
+        String proseOnly=pctBuf.toString().replaceAll("\\{\\{f[1-9][0-9]*\\}\\}","").replaceAll("[^\\p{L}]","");
+        if(proseOnly.length()>=25) {
+            var guideMatcher=Pattern.compile("\\s*\\(?\\{\\{(f[1-9][0-9]*)\\}\\}\\)?").matcher(pctBuf.toString());
+            StringBuffer guideBuf=new StringBuffer();
+            while(guideMatcher.find()) {
+                Fact fact=facts.get(guideMatcher.group(1));
+                if(fact!=null && fact.source().startsWith("supportGuide/")) {
+                    guideMatcher.appendReplacement(guideBuf,"");
+                } else {
+                    guideMatcher.appendReplacement(guideBuf,Matcher.quoteReplacement(guideMatcher.group()));
+                }
+            }
+            guideMatcher.appendTail(guideBuf);
+            return guideBuf.toString();
+        }
+        return pctBuf.toString();
     }
     private String groundExactLiterals(Map<String,Fact> facts,String answer) {
         var literals=new ArrayList<Map.Entry<String,String>>();
@@ -197,7 +239,7 @@ public class AssistantAnalysisService {
                 }
             }
             for(String candidate:candidates)
-                if(candidate.length()>=2&&candidate.length()<=120&&!candidate.matches("f[1-9][0-9]*")&&candidate.codePoints().anyMatch(Character::isDigit))
+                if(candidate.length()>=1&&candidate.length()<=120&&!candidate.matches("f[1-9][0-9]*")&&candidate.codePoints().anyMatch(Character::isDigit))
                     literals.add(Map.entry(candidate,entry.getKey()));
         }
         literals.sort(Comparator.comparingInt((Map.Entry<String,String> literal)->literal.getKey().length()).reversed());

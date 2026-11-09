@@ -286,12 +286,20 @@ export const DashboardView: React.FC = () => {
                   </div>
                   <div className="flex items-center justify-between mt-1 text-xs">
                     <span className="text-slate-500 dark:text-slate-400 font-medium">
-                      {formatDate(nextDue.dueDate)} ({nextDue.daysUntilDue} d)
+                      {nextDue.daysUntilDue < 0
+                        ? `Venció el ${formatDate(nextDue.dueDate)} (hace ${Math.abs(nextDue.daysUntilDue)} d)`
+                        : `${formatDate(nextDue.dueDate)} (${nextDue.daysUntilDue} d)`}
                     </span>
                     <span className="font-bold text-teal-700 dark:text-cyan-400">
                       {maskValue(formatCurrency(nextDue.amount))}
                     </span>
                   </div>
+                  {nextDue.daysUntilDue < 0 && (
+                    <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-50 text-rose-700 dark:bg-rose-950/70 dark:text-rose-300 border border-rose-200 dark:border-rose-800" data-testid="dashboard-milestone-overdue">
+                      <AlertCircle className="w-3 h-3" />
+                      <span>En mora ({Math.abs(nextDue.daysUntilDue)} {Math.abs(nextDue.daysUntilDue) === 1 ? 'día' : 'días'})</span>
+                    </div>
+                  )}
                   {/* Hitos aprobados 7, 3 y 0 días (HU-048 CA-03) */}
                   {nextDue.daysUntilDue === 7 && (
                     <div className="mt-2 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-50 text-blue-700 dark:bg-blue-950/70 dark:text-blue-300 border border-blue-200 dark:border-blue-800" data-testid="dashboard-milestone-7">
@@ -546,9 +554,17 @@ export const DashboardView: React.FC = () => {
                             Vence hoy
                           </span>
                         )}
+                        {due.daysUntilDue < 0 && (
+                          <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-50 text-rose-700 dark:bg-rose-950/70 dark:text-rose-300 border border-rose-200 dark:border-rose-800">
+                            <AlertCircle className="w-2.5 h-2.5" />
+                            En mora
+                          </span>
+                        )}
                       </div>
                       <span className="text-[11px] font-medium text-slate-500 dark:text-slate-400">
-                        {due.entity || 'Entidad no especificada'} • Vence el {formatDate(due.dueDate)} ({due.daysUntilDue} {due.daysUntilDue === 1 ? 'día' : 'días'})
+                        {due.entity || 'Entidad no especificada'} • {due.daysUntilDue < 0
+                          ? `Venció el ${formatDate(due.dueDate)} (hace ${Math.abs(due.daysUntilDue)} ${Math.abs(due.daysUntilDue) === 1 ? 'día' : 'días'})`
+                          : `Vence el ${formatDate(due.dueDate)} (${due.daysUntilDue} ${due.daysUntilDue === 1 ? 'día' : 'días'})`}
                       </span>
                     </div>
                   </div>

@@ -530,7 +530,18 @@ describe('EP-09 — Estrategias de pago (HU-039, HU-040, HU-041)', () => {
       render(<StrategicPlanView />);
 
       await waitFor(() => {
-        expect(screen.getByText(/Existen obligaciones con tasa indexada o no disponible/i)).not.toBeNull();
+        expect(screen.getByText(/Existen obligaciones con tasa indexada o no disponible/i)).not.toBeNull();
+      });
+    });
+
+    it('DEF-04: No muestra etiqueta ni restricciones de Plan Cero mientras carga para un usuario Ceroa Plus', async () => {
+      setupAppContext('plus', 'snowball');
+      vi.mocked(strategyService.getActiveStrategy).mockReturnValue(new Promise(() => {}));
+      render(<StrategicPlanView />);
+      await waitFor(() => {
+        expect(screen.getByText('Ceroa Plus')).not.toBeNull();
+        expect(screen.queryByText('Plan Cero')).toBeNull();
+        expect(screen.queryByText(/El plan Cero prioriza hasta 2 obligaciones/i)).toBeNull();
       });
     });
   });

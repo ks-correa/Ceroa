@@ -95,8 +95,8 @@ const AppContent: React.FC = () => {
         </main>
       </div>
       <BottomNav />
-      <AssistantFab key={userProfile.id} />
-      <SentinelFab key={userProfile.id} />
+      <AssistantFab key={`assistant-${userProfile.id}`} />
+      <SentinelFab key={`sentinel-${userProfile.id}`} />
       <NotificationsDrawer />
       <AsyncModals />
       {plusOfferOpen && !planAccess?.plusActive && <div className="fixed inset-0 z-50 bg-slate-900/60 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="plus-offer-title">

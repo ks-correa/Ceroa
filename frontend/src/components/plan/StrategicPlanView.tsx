@@ -20,7 +20,9 @@ export const StrategicPlanView: React.FC = () => {
     activeStrategy, 
     formatCurrency, 
     setIsExportReportOpen,
-    setCurrentScreen
+    setCurrentScreen,
+    userProfile,
+    planAccess
   } = useApp();
 
   const {
@@ -45,7 +47,17 @@ export const StrategicPlanView: React.FC = () => {
     );
   }
 
-  const isPlus = data?.plan?.toLowerCase() === 'plus';
+  const resolvedPlan = data?.plan
+    ? data.plan.toLowerCase()
+    : planAccess
+      ? (planAccess.plusActive ? 'plus' : 'cero')
+      : userProfile?.plan?.toLowerCase() === 'plus'
+        ? 'plus'
+        : userProfile?.plan?.toLowerCase() === 'cero'
+          ? 'cero'
+          : null;
+  const isPlus = resolvedPlan === 'plus';
+  const isConfirmedCero = resolvedPlan === 'cero' && (!isLoading || data !== null);
   const effectiveStrategy = data?.activeStrategy ?? activeStrategy;
   const orderedDebts = data?.orderedDebts ?? [];
   const summaryProj = data?.summaryProjection;
@@ -72,7 +84,7 @@ export const StrategicPlanView: React.FC = () => {
                 ? 'bg-gradient-to-r from-amber-500 to-yellow-500 text-slate-900 shadow-xs'
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700'
             }`}>
-              {isPlus ? 'Ceroa Plus' : 'Plan Cero'}
+              {isPlus ? 'Ceroa Plus' : isConfirmedCero ? 'Plan Cero' : 'Verificando plan...'}
             </span>
           </div>
           <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
@@ -360,7 +372,7 @@ export const StrategicPlanView: React.FC = () => {
             <p className="text-xs text-slate-500 dark:text-slate-400">
               {isPlus 
                 ? 'Orden completo optimizado para todas tus obligaciones'
-                : 'Orden básico optimizado (máximo 2 deudas consideradas en plan Cero)'}
+                : isConfirmedCero ? 'Orden básico optimizado (máximo 2 deudas consideradas en plan Cero)' : 'Calculando orden de priorización según tu estrategia activa'}
             </p>
           </div>
 
@@ -370,7 +382,7 @@ export const StrategicPlanView: React.FC = () => {
         </div>
 
         {/* Notificación de plan Cero */}
-        {!isPlus && (
+        {isConfirmedCero && (
           <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs">
             <span className="text-slate-600 dark:text-slate-300">
               El plan Cero prioriza hasta 2 obligaciones. Mejora a Ceroa Plus para priorizar todas tus deudas y consultar proyecciones detalladas.

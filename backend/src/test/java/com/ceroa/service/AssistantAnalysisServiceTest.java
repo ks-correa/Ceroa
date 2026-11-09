@@ -88,4 +88,15 @@ class AssistantAnalysisServiceTest {
         assertThrows(ArithmeticException.class,()->service.calculate(facts,AssistantAnalysisService.Operation.divide,List.of("f1","f2")));
         assertEquals(2,facts.size());
     }
+    @Test void stripsInlineDocumentCitationsNormalizesPercentScaleAndDeduplicatesStrategyLabels() {
+        var facts=new LinkedHashMap<String,AssistantAnalysisService.Fact>();
+        facts.put("f1",new AssistantAnalysisService.Fact("rate",DecimalNode.valueOf(new BigDecimal("28.7"))));
+        facts.put("f2",new AssistantAnalysisService.Fact("inputs/percentScale",DecimalNode.valueOf(new BigDecimal("100"))));
+        facts.put("f3",new AssistantAnalysisService.Fact("strategy/type",TextNode.valueOf("avalanche")));
+        facts.put("f4",new AssistantAnalysisService.Fact("financialDocuments/trace/documentValues/0/literal",TextNode.valueOf("****9840")));
+        facts.put("f5",new AssistantAnalysisService.Fact("financialDocuments/trace/documentValues/1/literal",TextNode.valueOf("1")));
+        facts.put("f6",new AssistantAnalysisService.Fact("strategyActive/debts/0/comparable",com.fasterxml.jackson.databind.node.BooleanNode.TRUE));
+        assertEquals("La estrategia Avalancha prioriza la tasa de 28,7% EA (comparable 28,7%) en la cuenta ****9840 (página 1).",
+            service.resolve(facts,"La estrategia avalanche {{f3}} [d1] prioriza la tasa de {{f1}} {{f2}} EA (comparable {{f1}}% {{f6}}) en la cuenta ****9840 (página 1) (d2)."));
+    }
 }
