@@ -541,7 +541,7 @@ describe('EP-09 — Estrategias de pago (HU-039, HU-040, HU-041)', () => {
       await waitFor(() => {
         expect(screen.getByText('Ceroa Plus')).not.toBeNull();
         expect(screen.queryByText('Plan Cero')).toBeNull();
-        expect(screen.queryByText(/El plan Cero prioriza hasta 2 obligaciones/i)).toBeNull();
+        expect(screen.queryByText(/El plan Cero prioriza hasta 2 obligaciones/i)).toBeNull();
       });
     });
   });

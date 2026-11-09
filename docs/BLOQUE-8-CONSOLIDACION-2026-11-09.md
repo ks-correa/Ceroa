@@ -142,7 +142,8 @@ Cadena local a revisar desde `origin/main`:
 2. `bfb04b6`: grounding contextual y monedas, con regresiones.
 3. `8aacb7e`: recibos durables, frontera monotónica y V31.
 4. `ec6d4f5`: Chromium aislado, conciliación de plantillas, perfil por API, asesoría informativa y recuperación segura.
-5. Commit documental de este informe y sus evidencias; consultar `git log --oneline origin/main..HEAD` para su identificador.
+5. `bcb997c`: informe técnico y evidencias.
+6. Commit de higiene final: eliminación de caracteres CR/espacios finales heredados exclusivamente en las líneas de Estrategia modificadas por el Bloque 7. Consultar `git log --oneline origin/main..HEAD` para su identificador.
 
 No hay un conflicto con el `origin/main` observado: continúa siendo ancestro. Antes de integrar hay que volver a consultar el remoto; esta conclusión no autoriza sobrescribir cambios que aparezcan después.
 
@@ -209,3 +210,5 @@ Las primeras ejecuciones presentaron errores intermitentes de carga de clases so
 Chromium comprobó además ausencia de advertencias React de claves duplicadas y anidamiento HTML en los recorridos ejecutados. Los conteos generales Java se conservan como observados: una regresión adicional de información de asesoría se añadió después y se verificó en una ejecución focalizada de `AssistantIntegrationTest`; se registra por separado para no inflar el total general.
 
 Las fechas de las pruebas nuevas de suscripción se hacen relativas al momento de ejecución para evitar que caduquen los fixtures de acceso pagado; sus cuatro casos se volvieron a aprobar contra PostgreSQL tras ese ajuste exclusivo de pruebas. Al terminar se retiraron los contenedores, la red y el servidor frontend desechables; se conservaron el runtime original, las evidencias y el respaldo cifrado privado.
+
+La comprobación final contra `origin/main` detectó CR repetidos heredados en dos archivos de Estrategia. Se limpiaron solo las líneas añadidas/modificadas en el conjunto que se integrará; `git diff --ignore-space-at-eol` confirmó ausencia de diferencias funcionales en esa limpieza y `git diff --check origin/main` quedó correcto. No se reformatearon los archivos completos.
