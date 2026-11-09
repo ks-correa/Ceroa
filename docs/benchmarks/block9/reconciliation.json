@@ -1,0 +1,43 @@
+{
+  "date": "2026-11-09",
+  "timezone": "America/Bogota",
+  "sourceWorkbook": {
+    "path": "CEROA_Matriz_E2E_63_Escenarios.xlsx",
+    "sha256": "00962dbde8a388bb289161ff50061c57a06b662ed5d037bddebf2c19a1594604"
+  },
+  "sourceMarkdown": {
+    "path": "CEROA_Trazabilidad_63_E2E_DEF_Bloques_7_8.md",
+    "sha256": "c9a05104a6fc7b2c56b84fe25707f46a051dab464c7f8ca9dc8d33ed0022cd64"
+  },
+  "uniqueScenarios": 63,
+  "original": {
+    "APROBADA": 40,
+    "PARCIAL": 6,
+    "NO EJECUTADA": 7,
+    "FALLIDA": 8,
+    "BLOQUEADA": 2
+  },
+  "block7": {
+    "APROBADA": 54,
+    "NO EJECUTADA": 7,
+    "BLOQUEADA": 2
+  },
+  "nominalDefects": 9,
+  "workbookMarkdownStatesAgree": true,
+  "n8nWorkflowsUnchangedFromBlock8": true,
+  "profileTest": {
+    "tests": 1,
+    "passed": 1
+  },
+  "newFunctionalE2ERuns": 0,
+  "git": {
+    "branch": "fix/bloque-8-security-consolidation",
+    "head": "c5e33229ad3bcb6e7c8e65dd9ec197f2878dc641",
+    "originMain": "ed316f97f5068c0fc1150cc158087e85d1b26547",
+    "behind": 0,
+    "ahead": 6,
+    "fetch": "PASS",
+    "diffCheck": "PASS"
+  },
+  "prohibitedActionsExecuted": false
+}

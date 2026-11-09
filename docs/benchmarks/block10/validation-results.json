@@ -1,0 +1,1102 @@
+{
+  "date": "2026-11-09",
+  "timezone": "America/Bogota",
+  "candidate": "c5e33229ad3bcb6e7c8e65dd9ec197f2878dc641",
+  "originMainBefore": "ed316f97f5068c0fc1150cc158087e85d1b26547",
+  "backend": {
+    "package": "PASS",
+    "java": {
+      "tests": 437,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 34
+    },
+    "classes": [
+      {
+        "name": "com.ceroa.api.PlusSubscriptionControllerTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.api.PlusSubscriptionControllerTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.config.AssistantIntegrationTest",
+        "tests": 21,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.config.AssistantIntegrationTest",
+          "com.ceroa.config.AssistantIntegrationTest",
+          "com.ceroa.config.AssistantIntegrationTest",
+          "com.ceroa.config.AssistantIntegrationTest",
+          "com.ceroa.config.AssistantIntegrationTest",
+          "com.ceroa.config.AssistantIntegrationTest",
+          "com.ceroa.config.AssistantIntegrationTest",
+          "com.ceroa.config.AssistantIntegrationTest",
+          "com.ceroa.config.AssistantIntegrationTest",
+          "com.ceroa.config.AssistantIntegrationTest",
+          "com.ceroa.config.AssistantIntegrationTest",
+          "com.ceroa.config.AssistantIntegrationTest",
+          "com.ceroa.config.AssistantIntegrationTest",
+          "com.ceroa.config.AssistantIntegrationTest",
+          "com.ceroa.config.AssistantIntegrationTest",
+          "com.ceroa.config.AssistantIntegrationTest",
+          "com.ceroa.config.AssistantIntegrationTest",
+          "com.ceroa.config.AssistantIntegrationTest",
+          "com.ceroa.config.AssistantIntegrationTest",
+          "com.ceroa.config.AssistantIntegrationTest",
+          "com.ceroa.config.AssistantIntegrationTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.config.AssistantLibraryIntegrationTest",
+        "tests": 10,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.config.AssistantLibraryIntegrationTest",
+          "com.ceroa.config.AssistantLibraryIntegrationTest",
+          "com.ceroa.config.AssistantLibraryIntegrationTest",
+          "com.ceroa.config.AssistantLibraryIntegrationTest",
+          "com.ceroa.config.AssistantLibraryIntegrationTest",
+          "com.ceroa.config.AssistantLibraryIntegrationTest",
+          "com.ceroa.config.AssistantLibraryIntegrationTest",
+          "com.ceroa.config.AssistantLibraryIntegrationTest",
+          "com.ceroa.config.AssistantLibraryIntegrationTest",
+          "com.ceroa.config.AssistantLibraryIntegrationTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.config.AuthIntegrationTest",
+        "tests": 27,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.config.AuthIntegrationTest",
+          "com.ceroa.config.AuthIntegrationTest",
+          "com.ceroa.config.AuthIntegrationTest",
+          "com.ceroa.config.AuthIntegrationTest",
+          "com.ceroa.config.AuthIntegrationTest",
+          "com.ceroa.config.AuthIntegrationTest",
+          "com.ceroa.config.AuthIntegrationTest",
+          "com.ceroa.config.AuthIntegrationTest",
+          "com.ceroa.config.AuthIntegrationTest",
+          "com.ceroa.config.AuthIntegrationTest",
+          "com.ceroa.config.AuthIntegrationTest",
+          "com.ceroa.config.AuthIntegrationTest",
+          "com.ceroa.config.AuthIntegrationTest",
+          "com.ceroa.config.AuthIntegrationTest",
+          "com.ceroa.config.AuthIntegrationTest",
+          "com.ceroa.config.AuthIntegrationTest",
+          "com.ceroa.config.AuthIntegrationTest",
+          "com.ceroa.config.AuthIntegrationTest",
+          "com.ceroa.config.AuthIntegrationTest",
+          "com.ceroa.config.AuthIntegrationTest",
+          "com.ceroa.config.AuthIntegrationTest",
+          "com.ceroa.config.AuthIntegrationTest",
+          "com.ceroa.config.AuthIntegrationTest",
+          "com.ceroa.config.AuthIntegrationTest",
+          "com.ceroa.config.AuthIntegrationTest",
+          "com.ceroa.config.AuthIntegrationTest",
+          "com.ceroa.config.AuthIntegrationTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.config.AutomationIntegrationTest",
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.config.AutomationIntegrationTest",
+          "com.ceroa.config.AutomationIntegrationTest",
+          "com.ceroa.config.AutomationIntegrationTest",
+          "com.ceroa.config.AutomationIntegrationTest",
+          "com.ceroa.config.AutomationIntegrationTest",
+          "com.ceroa.config.AutomationIntegrationTest",
+          "com.ceroa.config.AutomationIntegrationTest",
+          "com.ceroa.config.AutomationIntegrationTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.config.Block6GoogleEndToEndTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 1,
+        "cases": [
+          "com.ceroa.config.Block6GoogleEndToEndTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.config.DashboardIntegrationTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.config.DashboardIntegrationTest",
+          "com.ceroa.config.DashboardIntegrationTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.config.DebtIntegrationTest",
+        "tests": 12,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.config.DebtIntegrationTest",
+          "com.ceroa.config.DebtIntegrationTest",
+          "com.ceroa.config.DebtIntegrationTest",
+          "com.ceroa.config.DebtIntegrationTest",
+          "com.ceroa.config.DebtIntegrationTest",
+          "com.ceroa.config.DebtIntegrationTest",
+          "com.ceroa.config.DebtIntegrationTest",
+          "com.ceroa.config.DebtIntegrationTest",
+          "com.ceroa.config.DebtIntegrationTest",
+          "com.ceroa.config.DebtIntegrationTest",
+          "com.ceroa.config.DebtIntegrationTest",
+          "com.ceroa.config.DebtIntegrationTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.config.DocumentIngestionIntegrationTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.config.DocumentIngestionIntegrationTest",
+          "com.ceroa.config.DocumentIngestionIntegrationTest",
+          "com.ceroa.config.DocumentIngestionIntegrationTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.config.DrivePipelineIntegrationTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.config.DrivePipelineIntegrationTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.config.DriveSyncIntegrationTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.config.DriveSyncIntegrationTest",
+          "com.ceroa.config.DriveSyncIntegrationTest",
+          "com.ceroa.config.DriveSyncIntegrationTest",
+          "com.ceroa.config.DriveSyncIntegrationTest",
+          "com.ceroa.config.DriveSyncIntegrationTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.config.HybridDocumentIntegrationTest",
+        "tests": 27,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 27,
+        "cases": [
+          "com.ceroa.config.HybridDocumentIntegrationTest",
+          "com.ceroa.config.HybridDocumentIntegrationTest",
+          "com.ceroa.config.HybridDocumentIntegrationTest",
+          "com.ceroa.config.HybridDocumentIntegrationTest",
+          "com.ceroa.config.HybridDocumentIntegrationTest",
+          "com.ceroa.config.HybridDocumentIntegrationTest",
+          "com.ceroa.config.HybridDocumentIntegrationTest",
+          "com.ceroa.config.HybridDocumentIntegrationTest",
+          "com.ceroa.config.HybridDocumentIntegrationTest",
+          "com.ceroa.config.HybridDocumentIntegrationTest",
+          "com.ceroa.config.HybridDocumentIntegrationTest",
+          "com.ceroa.config.HybridDocumentIntegrationTest",
+          "com.ceroa.config.HybridDocumentIntegrationTest",
+          "com.ceroa.config.HybridDocumentIntegrationTest",
+          "com.ceroa.config.HybridDocumentIntegrationTest",
+          "com.ceroa.config.HybridDocumentIntegrationTest",
+          "com.ceroa.config.HybridDocumentIntegrationTest",
+          "com.ceroa.config.HybridDocumentIntegrationTest",
+          "com.ceroa.config.HybridDocumentIntegrationTest",
+          "com.ceroa.config.HybridDocumentIntegrationTest",
+          "com.ceroa.config.HybridDocumentIntegrationTest",
+          "com.ceroa.config.HybridDocumentIntegrationTest",
+          "com.ceroa.config.HybridDocumentIntegrationTest",
+          "com.ceroa.config.HybridDocumentIntegrationTest",
+          "com.ceroa.config.HybridDocumentIntegrationTest",
+          "com.ceroa.config.HybridDocumentIntegrationTest",
+          "com.ceroa.config.HybridDocumentIntegrationTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.config.McpIntegrationTest",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.config.McpIntegrationTest",
+          "com.ceroa.config.McpIntegrationTest",
+          "com.ceroa.config.McpIntegrationTest",
+          "com.ceroa.config.McpIntegrationTest",
+          "com.ceroa.config.McpIntegrationTest",
+          "com.ceroa.config.McpIntegrationTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.config.MonthlyProgressIntegrationTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.config.MonthlyProgressIntegrationTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.config.MultiagentEndToEndTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 2,
+        "cases": [
+          "com.ceroa.config.MultiagentEndToEndTest",
+          "com.ceroa.config.MultiagentEndToEndTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.config.NotificationIntegrationTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.config.NotificationIntegrationTest",
+          "com.ceroa.config.NotificationIntegrationTest",
+          "com.ceroa.config.NotificationIntegrationTest",
+          "com.ceroa.config.NotificationIntegrationTest",
+          "com.ceroa.config.NotificationIntegrationTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.config.OAuthFlowTest",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.config.OAuthFlowTest",
+          "com.ceroa.config.OAuthFlowTest",
+          "com.ceroa.config.OAuthFlowTest",
+          "com.ceroa.config.OAuthFlowTest",
+          "com.ceroa.config.OAuthFlowTest",
+          "com.ceroa.config.OAuthFlowTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.config.PaymentIntegrationTest",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.config.PaymentIntegrationTest",
+          "com.ceroa.config.PaymentIntegrationTest",
+          "com.ceroa.config.PaymentIntegrationTest",
+          "com.ceroa.config.PaymentIntegrationTest",
+          "com.ceroa.config.PaymentIntegrationTest",
+          "com.ceroa.config.PaymentIntegrationTest",
+          "com.ceroa.config.PaymentIntegrationTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.config.PostgresMigrationIntegrationTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 3,
+        "cases": [
+          "com.ceroa.config.PostgresMigrationIntegrationTest",
+          "com.ceroa.config.PostgresMigrationIntegrationTest",
+          "com.ceroa.config.PostgresMigrationIntegrationTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.config.ProfileIntegrationTest",
+        "tests": 17,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.config.ProfileIntegrationTest",
+          "com.ceroa.config.ProfileIntegrationTest",
+          "com.ceroa.config.ProfileIntegrationTest",
+          "com.ceroa.config.ProfileIntegrationTest",
+          "com.ceroa.config.ProfileIntegrationTest",
+          "com.ceroa.config.ProfileIntegrationTest",
+          "com.ceroa.config.ProfileIntegrationTest",
+          "com.ceroa.config.ProfileIntegrationTest",
+          "com.ceroa.config.ProfileIntegrationTest",
+          "com.ceroa.config.ProfileIntegrationTest",
+          "com.ceroa.config.ProfileIntegrationTest",
+          "com.ceroa.config.ProfileIntegrationTest",
+          "com.ceroa.config.ProfileIntegrationTest",
+          "com.ceroa.config.ProfileIntegrationTest",
+          "com.ceroa.config.ProfileIntegrationTest",
+          "com.ceroa.config.ProfileIntegrationTest",
+          "com.ceroa.config.ProfileIntegrationTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.config.RagAssistantIntegrationTest",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.config.RagAssistantIntegrationTest",
+          "com.ceroa.config.RagAssistantIntegrationTest",
+          "com.ceroa.config.RagAssistantIntegrationTest",
+          "com.ceroa.config.RagAssistantIntegrationTest",
+          "com.ceroa.config.RagAssistantIntegrationTest",
+          "com.ceroa.config.RagAssistantIntegrationTest",
+          "com.ceroa.config.RagAssistantIntegrationTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.config.RealMultiagentEndToEndTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 1,
+        "cases": [
+          "com.ceroa.config.RealMultiagentEndToEndTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.config.RecoveryIntegrationTest",
+        "tests": 16,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.config.RecoveryIntegrationTest",
+          "com.ceroa.config.RecoveryIntegrationTest",
+          "com.ceroa.config.RecoveryIntegrationTest",
+          "com.ceroa.config.RecoveryIntegrationTest",
+          "com.ceroa.config.RecoveryIntegrationTest",
+          "com.ceroa.config.RecoveryIntegrationTest",
+          "com.ceroa.config.RecoveryIntegrationTest",
+          "com.ceroa.config.RecoveryIntegrationTest",
+          "com.ceroa.config.RecoveryIntegrationTest",
+          "com.ceroa.config.RecoveryIntegrationTest",
+          "com.ceroa.config.RecoveryIntegrationTest",
+          "com.ceroa.config.RecoveryIntegrationTest",
+          "com.ceroa.config.RecoveryIntegrationTest",
+          "com.ceroa.config.RecoveryIntegrationTest",
+          "com.ceroa.config.RecoveryIntegrationTest",
+          "com.ceroa.config.RecoveryIntegrationTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.config.RecoveryUnavailableTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.config.RecoveryUnavailableTest",
+          "com.ceroa.config.RecoveryUnavailableTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.config.SecurityConfigTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.config.SecurityConfigTest",
+          "com.ceroa.config.SecurityConfigTest",
+          "com.ceroa.config.SecurityConfigTest",
+          "com.ceroa.config.SecurityConfigTest",
+          "com.ceroa.config.SecurityConfigTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.config.SimulationIntegrationTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.config.SimulationIntegrationTest",
+          "com.ceroa.config.SimulationIntegrationTest",
+          "com.ceroa.config.SimulationIntegrationTest",
+          "com.ceroa.config.SimulationIntegrationTest",
+          "com.ceroa.config.SimulationIntegrationTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.config.StrategyIntegrationTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.config.StrategyIntegrationTest",
+          "com.ceroa.config.StrategyIntegrationTest",
+          "com.ceroa.config.StrategyIntegrationTest",
+          "com.ceroa.config.StrategyIntegrationTest",
+          "com.ceroa.config.StrategyIntegrationTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.config.SubscriptionPersistenceIntegrationTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.config.SubscriptionPersistenceIntegrationTest",
+          "com.ceroa.config.SubscriptionPersistenceIntegrationTest",
+          "com.ceroa.config.SubscriptionPersistenceIntegrationTest",
+          "com.ceroa.config.SubscriptionPersistenceIntegrationTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.config.SupportBookingIntegrationTest",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.config.SupportBookingIntegrationTest",
+          "com.ceroa.config.SupportBookingIntegrationTest",
+          "com.ceroa.config.SupportBookingIntegrationTest",
+          "com.ceroa.config.SupportBookingIntegrationTest",
+          "com.ceroa.config.SupportBookingIntegrationTest",
+          "com.ceroa.config.SupportBookingIntegrationTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.config.TelegramIntegrationTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.config.TelegramIntegrationTest",
+          "com.ceroa.config.TelegramIntegrationTest",
+          "com.ceroa.config.TelegramIntegrationTest",
+          "com.ceroa.config.TelegramIntegrationTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.config.WorkspaceEventIntegrationTest",
+        "tests": 9,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.config.WorkspaceEventIntegrationTest",
+          "com.ceroa.config.WorkspaceEventIntegrationTest",
+          "com.ceroa.config.WorkspaceEventIntegrationTest",
+          "com.ceroa.config.WorkspaceEventIntegrationTest",
+          "com.ceroa.config.WorkspaceEventIntegrationTest",
+          "com.ceroa.config.WorkspaceEventIntegrationTest",
+          "com.ceroa.config.WorkspaceEventIntegrationTest",
+          "com.ceroa.config.WorkspaceEventIntegrationTest",
+          "com.ceroa.config.WorkspaceEventIntegrationTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.service.AgentContractsTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.service.AgentContractsTest",
+          "com.ceroa.service.AgentContractsTest",
+          "com.ceroa.service.AgentContractsTest",
+          "com.ceroa.service.AgentContractsTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.service.AgentRuntimeTest",
+        "tests": 13,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.service.AgentRuntimeTest",
+          "com.ceroa.service.AgentRuntimeTest",
+          "com.ceroa.service.AgentRuntimeTest",
+          "com.ceroa.service.AgentRuntimeTest",
+          "com.ceroa.service.AgentRuntimeTest",
+          "com.ceroa.service.AgentRuntimeTest",
+          "com.ceroa.service.AgentRuntimeTest",
+          "com.ceroa.service.AgentRuntimeTest",
+          "com.ceroa.service.AgentRuntimeTest",
+          "com.ceroa.service.AgentRuntimeTest",
+          "com.ceroa.service.AgentRuntimeTest",
+          "com.ceroa.service.AgentRuntimeTest",
+          "com.ceroa.service.AgentRuntimeTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.service.AssistantAnalysisServiceTest",
+        "tests": 11,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.service.AssistantAnalysisServiceTest",
+          "com.ceroa.service.AssistantAnalysisServiceTest",
+          "com.ceroa.service.AssistantAnalysisServiceTest",
+          "com.ceroa.service.AssistantAnalysisServiceTest",
+          "com.ceroa.service.AssistantAnalysisServiceTest",
+          "com.ceroa.service.AssistantAnalysisServiceTest",
+          "com.ceroa.service.AssistantAnalysisServiceTest",
+          "com.ceroa.service.AssistantAnalysisServiceTest",
+          "com.ceroa.service.AssistantAnalysisServiceTest",
+          "com.ceroa.service.AssistantAnalysisServiceTest",
+          "com.ceroa.service.AssistantAnalysisServiceTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.service.AssistantProviderGateTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.service.AssistantProviderGateTest",
+          "com.ceroa.service.AssistantProviderGateTest",
+          "com.ceroa.service.AssistantProviderGateTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.service.DashboardServiceTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.service.DashboardServiceTest",
+          "com.ceroa.service.DashboardServiceTest",
+          "com.ceroa.service.DashboardServiceTest",
+          "com.ceroa.service.DashboardServiceTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.service.DebtServiceTest",
+        "tests": 12,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.service.DebtServiceTest",
+          "com.ceroa.service.DebtServiceTest",
+          "com.ceroa.service.DebtServiceTest",
+          "com.ceroa.service.DebtServiceTest",
+          "com.ceroa.service.DebtServiceTest",
+          "com.ceroa.service.DebtServiceTest",
+          "com.ceroa.service.DebtServiceTest",
+          "com.ceroa.service.DebtServiceTest",
+          "com.ceroa.service.DebtServiceTest",
+          "com.ceroa.service.DebtServiceTest",
+          "com.ceroa.service.DebtServiceTest",
+          "com.ceroa.service.DebtServiceTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.service.DocumentBatchAuthorizationTest",
+        "tests": 1,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.service.DocumentBatchAuthorizationTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.service.DocumentDraftValidatorTest",
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.service.DocumentDraftValidatorTest",
+          "com.ceroa.service.DocumentDraftValidatorTest",
+          "com.ceroa.service.DocumentDraftValidatorTest",
+          "com.ceroa.service.DocumentDraftValidatorTest",
+          "com.ceroa.service.DocumentDraftValidatorTest",
+          "com.ceroa.service.DocumentDraftValidatorTest",
+          "com.ceroa.service.DocumentDraftValidatorTest",
+          "com.ceroa.service.DocumentDraftValidatorTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.service.DocumentFactTest",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.service.DocumentFactTest",
+          "com.ceroa.service.DocumentFactTest",
+          "com.ceroa.service.DocumentFactTest",
+          "com.ceroa.service.DocumentFactTest",
+          "com.ceroa.service.DocumentFactTest",
+          "com.ceroa.service.DocumentFactTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.service.DocumentMetadataInferenceTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.service.DocumentMetadataInferenceTest",
+          "com.ceroa.service.DocumentMetadataInferenceTest",
+          "com.ceroa.service.DocumentMetadataInferenceTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.service.DocumentOcrClientTest",
+        "tests": 3,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.service.DocumentOcrClientTest",
+          "com.ceroa.service.DocumentOcrClientTest",
+          "com.ceroa.service.DocumentOcrClientTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.service.DocumentPeriodAnalysisTest",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.service.DocumentPeriodAnalysisTest",
+          "com.ceroa.service.DocumentPeriodAnalysisTest",
+          "com.ceroa.service.DocumentPeriodAnalysisTest",
+          "com.ceroa.service.DocumentPeriodAnalysisTest",
+          "com.ceroa.service.DocumentPeriodAnalysisTest",
+          "com.ceroa.service.DocumentPeriodAnalysisTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.service.DocumentPrivacyTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.service.DocumentPrivacyTest",
+          "com.ceroa.service.DocumentPrivacyTest",
+          "com.ceroa.service.DocumentPrivacyTest",
+          "com.ceroa.service.DocumentPrivacyTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.service.DocumentTextExtractorTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.service.DocumentTextExtractorTest",
+          "com.ceroa.service.DocumentTextExtractorTest",
+          "com.ceroa.service.DocumentTextExtractorTest",
+          "com.ceroa.service.DocumentTextExtractorTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.service.FinancialClaimGroundingTest",
+        "tests": 11,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.service.FinancialClaimGroundingTest",
+          "com.ceroa.service.FinancialClaimGroundingTest",
+          "com.ceroa.service.FinancialClaimGroundingTest",
+          "com.ceroa.service.FinancialClaimGroundingTest",
+          "com.ceroa.service.FinancialClaimGroundingTest",
+          "com.ceroa.service.FinancialClaimGroundingTest",
+          "com.ceroa.service.FinancialClaimGroundingTest",
+          "com.ceroa.service.FinancialClaimGroundingTest",
+          "com.ceroa.service.FinancialClaimGroundingTest",
+          "com.ceroa.service.FinancialClaimGroundingTest",
+          "com.ceroa.service.FinancialClaimGroundingTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.service.FinancialProfileServiceTest",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.service.FinancialProfileServiceTest",
+          "com.ceroa.service.FinancialProfileServiceTest",
+          "com.ceroa.service.FinancialProfileServiceTest",
+          "com.ceroa.service.FinancialProfileServiceTest",
+          "com.ceroa.service.FinancialProfileServiceTest",
+          "com.ceroa.service.FinancialProfileServiceTest",
+          "com.ceroa.service.FinancialProfileServiceTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.service.MonthlyProgressServiceTest",
+        "tests": 2,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.service.MonthlyProgressServiceTest",
+          "com.ceroa.service.MonthlyProgressServiceTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.service.PaymentScheduleTest",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.service.PaymentScheduleTest",
+          "com.ceroa.service.PaymentScheduleTest",
+          "com.ceroa.service.PaymentScheduleTest",
+          "com.ceroa.service.PaymentScheduleTest",
+          "com.ceroa.service.PaymentScheduleTest",
+          "com.ceroa.service.PaymentScheduleTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.service.PaymentServiceTest",
+        "tests": 14,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.service.PaymentServiceTest",
+          "com.ceroa.service.PaymentServiceTest",
+          "com.ceroa.service.PaymentServiceTest",
+          "com.ceroa.service.PaymentServiceTest",
+          "com.ceroa.service.PaymentServiceTest",
+          "com.ceroa.service.PaymentServiceTest",
+          "com.ceroa.service.PaymentServiceTest",
+          "com.ceroa.service.PaymentServiceTest",
+          "com.ceroa.service.PaymentServiceTest",
+          "com.ceroa.service.PaymentServiceTest",
+          "com.ceroa.service.PaymentServiceTest",
+          "com.ceroa.service.PaymentServiceTest",
+          "com.ceroa.service.PaymentServiceTest",
+          "com.ceroa.service.PaymentServiceTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.service.PaymentStatusLifecycleTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.service.PaymentStatusLifecycleTest",
+          "com.ceroa.service.PaymentStatusLifecycleTest",
+          "com.ceroa.service.PaymentStatusLifecycleTest",
+          "com.ceroa.service.PaymentStatusLifecycleTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.service.PlanAccessServiceTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.service.PlanAccessServiceTest",
+          "com.ceroa.service.PlanAccessServiceTest",
+          "com.ceroa.service.PlanAccessServiceTest",
+          "com.ceroa.service.PlanAccessServiceTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.service.PlusSubscriptionServiceTest",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.service.PlusSubscriptionServiceTest",
+          "com.ceroa.service.PlusSubscriptionServiceTest",
+          "com.ceroa.service.PlusSubscriptionServiceTest",
+          "com.ceroa.service.PlusSubscriptionServiceTest",
+          "com.ceroa.service.PlusSubscriptionServiceTest",
+          "com.ceroa.service.PlusSubscriptionServiceTest",
+          "com.ceroa.service.PlusSubscriptionServiceTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.service.RagRetrievalServiceTest",
+        "tests": 4,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.service.RagRetrievalServiceTest",
+          "com.ceroa.service.RagRetrievalServiceTest",
+          "com.ceroa.service.RagRetrievalServiceTest",
+          "com.ceroa.service.RagRetrievalServiceTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.service.RateNormalizationServiceTest",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.service.RateNormalizationServiceTest",
+          "com.ceroa.service.RateNormalizationServiceTest",
+          "com.ceroa.service.RateNormalizationServiceTest",
+          "com.ceroa.service.RateNormalizationServiceTest",
+          "com.ceroa.service.RateNormalizationServiceTest",
+          "com.ceroa.service.RateNormalizationServiceTest",
+          "com.ceroa.service.RateNormalizationServiceTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.service.ScheduledReminderIntegrationTest",
+        "tests": 12,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.service.ScheduledReminderIntegrationTest",
+          "com.ceroa.service.ScheduledReminderIntegrationTest",
+          "com.ceroa.service.ScheduledReminderIntegrationTest",
+          "com.ceroa.service.ScheduledReminderIntegrationTest",
+          "com.ceroa.service.ScheduledReminderIntegrationTest",
+          "com.ceroa.service.ScheduledReminderIntegrationTest",
+          "com.ceroa.service.ScheduledReminderIntegrationTest",
+          "com.ceroa.service.ScheduledReminderIntegrationTest",
+          "com.ceroa.service.ScheduledReminderIntegrationTest",
+          "com.ceroa.service.ScheduledReminderIntegrationTest",
+          "com.ceroa.service.ScheduledReminderIntegrationTest",
+          "com.ceroa.service.ScheduledReminderIntegrationTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.service.SentinelIntegrationTest",
+        "tests": 6,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.service.SentinelIntegrationTest",
+          "com.ceroa.service.SentinelIntegrationTest",
+          "com.ceroa.service.SentinelIntegrationTest",
+          "com.ceroa.service.SentinelIntegrationTest",
+          "com.ceroa.service.SentinelIntegrationTest",
+          "com.ceroa.service.SentinelIntegrationTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.service.SimulationServiceTest",
+        "tests": 8,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.service.SimulationServiceTest",
+          "com.ceroa.service.SimulationServiceTest",
+          "com.ceroa.service.SimulationServiceTest",
+          "com.ceroa.service.SimulationServiceTest",
+          "com.ceroa.service.SimulationServiceTest",
+          "com.ceroa.service.SimulationServiceTest",
+          "com.ceroa.service.SimulationServiceTest",
+          "com.ceroa.service.SimulationServiceTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.service.StrategyEngineTest",
+        "tests": 7,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.service.StrategyEngineTest",
+          "com.ceroa.service.StrategyEngineTest",
+          "com.ceroa.service.StrategyEngineTest",
+          "com.ceroa.service.StrategyEngineTest",
+          "com.ceroa.service.StrategyEngineTest",
+          "com.ceroa.service.StrategyEngineTest",
+          "com.ceroa.service.StrategyEngineTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.service.UpcomingDueServiceTest",
+        "tests": 5,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "com.ceroa.service.UpcomingDueServiceTest",
+          "com.ceroa.service.UpcomingDueServiceTest",
+          "com.ceroa.service.UpcomingDueServiceTest",
+          "com.ceroa.service.UpcomingDueServiceTest",
+          "com.ceroa.service.UpcomingDueServiceTest"
+        ]
+      },
+      {
+        "name": "com.ceroa.service.validation.DebtValidatorTest",
+        "tests": 22,
+        "failures": 0,
+        "errors": 0,
+        "skipped": 0,
+        "cases": [
+          "HU-032 &amp; HU-033: Deuda familiar y Otra obligación",
+          "HU-032 &amp; HU-033: Deuda familiar y Otra obligación",
+          "HU-032 &amp; HU-033: Deuda familiar y Otra obligación",
+          "HU-031: Factura u obligación vencida",
+          "HU-031: Factura u obligación vencida",
+          "HU-029 &amp; HU-030: Crédito comercial y Compra a cuotas",
+          "HU-029 &amp; HU-030: Crédito comercial y Compra a cuotas",
+          "HU-028: Crédito educativo",
+          "HU-028: Crédito educativo",
+          "HU-027: Crédito de vehículo",
+          "HU-026: Crédito hipotecario / vivienda",
+          "HU-026: Crédito hipotecario / vivienda",
+          "HU-025: Préstamo personal / libre inversión",
+          "HU-025: Préstamo personal / libre inversión",
+          "HU-024: Tarjeta de crédito",
+          "HU-024: Tarjeta de crédito",
+          "HU-024: Tarjeta de crédito",
+          "HU-024: Tarjeta de crédito",
+          "HU-023: Seleccionar tipo y validaciones comunes",
+          "HU-023: Seleccionar tipo y validaciones comunes",
+          "HU-023: Seleccionar tipo y validaciones comunes",
+          "HU-023: Seleccionar tipo y validaciones comunes"
+        ]
+      }
+    ]
+  },
+  "frontend": {
+    "typescript": "PASS",
+    "vite": "PASS",
+    "tests": 190,
+    "passed": 190,
+    "failed": 0
+  },
+  "n8n": {
+    "contracts": {
+      "tests": 22,
+      "passed": 22,
+      "failures": 0
+    },
+    "runtimeUnchangedFromBlock9": true,
+    "generalConnectorsActive": 0,
+    "generalConnectorsPublished": 0
+  },
+  "isolatedPostgres": {
+    "version": 17,
+    "migratedDatabases": 2,
+    "flywayVersion": "31",
+    "migration": {
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "classes": [
+        {
+          "name": "com.ceroa.config.PostgresMigrationIntegrationTest",
+          "tests": 3,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            "com.ceroa.config.PostgresMigrationIntegrationTest",
+            "com.ceroa.config.PostgresMigrationIntegrationTest",
+            "com.ceroa.config.PostgresMigrationIntegrationTest"
+          ]
+        }
+      ]
+    },
+    "durableCharges": {
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "classes": [
+        {
+          "name": "com.ceroa.config.SubscriptionPersistenceIntegrationTest",
+          "tests": 4,
+          "failures": 0,
+          "errors": 0,
+          "skipped": 0,
+          "cases": [
+            "com.ceroa.config.SubscriptionPersistenceIntegrationTest",
+            "com.ceroa.config.SubscriptionPersistenceIntegrationTest",
+            "com.ceroa.config.SubscriptionPersistenceIntegrationTest",
+            "com.ceroa.config.SubscriptionPersistenceIntegrationTest"
+          ]
+        }
+      ]
+    },
+    "network": "Dedicated internal Docker network; no published ports, no production volumes or environment files",
+    "providers": "HTTP intercepted by test double"
+  },
+  "documentation": {
+    "rows": 63,
+    "nominalDefects": 9,
+    "original": {
+      "APROBADA": 40,
+      "PARCIAL": 6,
+      "FALLIDA": 8,
+      "BLOQUEADA": 2,
+      "NO EJECUTADA": 7
+    },
+    "block7": {
+      "APROBADA": 54,
+      "BLOQUEADA": 2,
+      "NO EJECUTADA": 7
+    },
+    "newRealE2ERuns": 0,
+    "rawSources": "Archived outside Git after SHA-256 equality check; original hashes in block9/reconciliation.json"
+  },
+  "limitations": [
+    "34 opt-in backend cases omitted in package suite; V31 migration separately enabled, 3/3; durable charge suite separately passed on migrated PostgreSQL, 4/4",
+    "Backend package suite contains 437 cases; historical block8 javaClean had 436; advisoryInformationDoesNotRequireCalendar appears in the final package and earlier assistant supplement",
+    "Counts overlap and must not be added as unique E2E scenarios",
+    "No new full browser E2E run or external provider validation",
+    "Initial offline packaging failed before compilation because maven-jar-plugin was absent from cache; retry with disposable cache/download succeeded"
+  ],
+  "productionActions": {
+    "deploy": false,
+    "supabaseMigration": false,
+    "workflowMutation": false,
+    "connectorActivation": false,
+    "gmail": false,
+    "calendar": false,
+    "mercadoPago": false
+  }
+}
