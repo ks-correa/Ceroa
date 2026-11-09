@@ -163,7 +163,7 @@ class AssistantIntegrationTest {
         for(String message:List.of("multiagent finance-only saldo de mis obligaciones","multiagent parser-error saldo de mis obligaciones"))mvc.perform(post("/api/v1/assistant/messages").with(user(owner)).with(csrf()).contentType("application/json").content(JSON.writeValueAsString(Map.of("message",message)))).andExpect(status().isOk()).andExpect(jsonPath("$.functionalStatus").value(message.contains("parser-error")?"FAILED":"INSUFFICIENT")).andExpect(jsonPath("$.answer").value(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("999999"))));
     }
     @Test void simpleUpcomingAndStrategyAvoidTheWebhook() throws Exception {
-        for(String question:List.of("Muéstrame mis próximos vencimientos","¿Cuál es mi estrategia activa?")){
+        for(String question:List.of("Muéstrame mis próximos vencimientos","¿Cuál es mi estrategia activa?","¿Qué estrategia de pago tengo activa?","¿Qué estrategia tengo activa?")){
             lastJob=null;mvc.perform(post("/api/v1/assistant/messages").with(user(owner)).with(csrf()).contentType("application/json").content(JSON.writeValueAsString(Map.of("message",question)))).andExpect(status().isOk());org.junit.jupiter.api.Assertions.assertNull(lastJob);
         }
     }

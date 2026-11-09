@@ -133,8 +133,8 @@ class AssistantLibraryIntegrationTest {
             org.junit.jupiter.api.Assertions.assertEquals(Intent.PERIOD_ANALYSIS,query.intent());
             org.junit.jupiter.api.Assertions.assertEquals(Kind.BANK_STATEMENT,query.filters().documentType());
             org.junit.jupiter.api.Assertions.assertEquals(LocalDate.of(2026,9,1),query.filters().periodFrom());
-            var sources=List.of(new Source(docId,UUID.randomUUID(),1,"page 1","Pago $100.000",0,1),
-                new Source(second,UUID.randomUUID(),1,"page 1","Pago 50000",0,1));
+            var sources=List.of(new Source(docId,UUID.randomUUID(),1,"page 1","Pago $100.000 COP",0,1),
+                new Source(second,UUID.randomUUID(),1,"page 1","Pago 50000 COP",0,1));
             return new Result("Cobertura completa",Map.of("complete",true,"hasMoreDocuments",false),query.filters(),sources,List.of(library.get(docId),other),"AVAILABLE",UUID.randomUUID(),1);
         }).when(library).query(any());
         mvc.perform(post("/api/v1/assistant/messages").with(user(actor.toString())).with(csrf()).contentType("application/json")
@@ -150,7 +150,7 @@ class AssistantLibraryIntegrationTest {
             Query query=call.getArgument(0);org.junit.jupiter.api.Assertions.assertEquals(Intent.PERIOD_ANALYSIS,query.intent());
             boolean first=query.filters().periodFrom().getMonthValue()==8;
             var document=first?august:library.get(docId);
-            var source=new Source(document.id(),UUID.randomUUID(),1,"page 1",first?"Pago $100.000\nTasa 2%":"Pago $150.000\nTasa 2,5%",0,1);
+            var source=new Source(document.id(),UUID.randomUUID(),1,"page 1",first?"Pago $100.000 COP\nTasa 2%":"Pago $150.000 COP\nTasa 2,5%",0,1);
             return new Result("Cobertura completa",Map.of("complete",true,"hasMoreDocuments",false,"documentsWithoutContent",0),query.filters(),List.of(source),List.of(document),"AVAILABLE",UUID.randomUUID(),1);
         }).when(library).query(any());
         mvc.perform(post("/api/v1/assistant/messages").with(user(actor.toString())).with(csrf()).contentType("application/json").content("{\"message\":\"compare-periods\"}"))

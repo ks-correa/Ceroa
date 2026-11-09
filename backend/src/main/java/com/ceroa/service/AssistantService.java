@@ -204,7 +204,7 @@ public class AssistantService {
         if(isDebtListQuestion(question))return Intent.debts;
         String q=java.text.Normalizer.normalize(question.toLowerCase(Locale.ROOT),java.text.Normalizer.Form.NFD).replaceAll("\\p{M}","").replaceAll("[^a-z ]"," ").trim().replaceAll("\\s+"," ");
         if(q.matches("(?:muestrame mis proximos vencimientos|cuales son mis proximos vencimientos|mis proximos vencimientos)"))return Intent.upcoming;
-        if(q.matches("(?:cual es mi estrategia activa|muestrame mi estrategia activa)"))return Intent.strategy;
+        if(q.matches("(?:cual es mi estrategia activa|muestrame mi estrategia activa|que estrategia(?: de pago)? tengo activa|cual es mi estrategia de pago activa)"))return Intent.strategy;
         return null;
     }
     private Reply workspaceMessage(String message){
@@ -414,7 +414,10 @@ public class AssistantService {
                     var value=values.addObject();value.put("documentId",source.documentId().toString());
                     if(source.page()!=null)value.put("page",source.page());
                     value.put("literal",raw);value.put("kindHint",nearby.group().toLowerCase(Locale.ROOT).startsWith("tasa")?"rate":"amount");
-                    value.put("context",nearby.group());
+                    int lineStart=source.content().lastIndexOf('\n',nearby.start())+1;
+                    int lineEnd=source.content().indexOf('\n',nearby.end());
+                    if(lineEnd<0)lineEnd=source.content().length();
+                    value.put("context",source.content().substring(lineStart,Math.min(lineEnd,lineStart+300)));
                     if(!raw.matches("-?\\d+[,.-]\\d{3}" )||raw.contains(".")){
                         BigDecimal number=documentNumber(raw);if(number!=null)value.put("numericValue",number);
                     }
@@ -426,6 +429,10 @@ public class AssistantService {
                     var value=values.addObject();value.put("documentId",source.documentId().toString());
                     if(source.page()!=null)value.put("page",source.page());
                     value.put("literal",extra.group());
+                    int lineStart=source.content().lastIndexOf('\n',extra.start())+1;
+                    int lineEnd=source.content().indexOf('\n',extra.end());
+                    if(lineEnd<0)lineEnd=source.content().length();
+                    value.put("context",source.content().substring(lineStart,Math.min(lineEnd,lineStart+300)));
                 }
             }
             var evidence=analysis.evidence(job.facts,minimized,"financialDocuments/"+result.traceId());

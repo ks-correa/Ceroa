@@ -112,6 +112,7 @@ public class AssistantAnalysisService {
     }
     public Evidence calculate(Map<String,Fact> facts,Operation operation,List<String> refs) {
         if(refs==null || refs.size()<2 || refs.size()>50) throw new IllegalArgumentException();
+        FinancialClaimGrounding.arithmetic(facts,refs,operation);
         var values=refs.stream().map(id->{
             Fact fact=facts.get(id); if(fact==null || !fact.value().isNumber()||fact.source().contains("/verifiedData/analysis/")) throw new IllegalArgumentException();
             return fact.value().decimalValue();
@@ -136,6 +137,8 @@ public class AssistantAnalysisService {
         while(matcher.find()) {
             Fact fact=facts.get(matcher.group(1));
             if(fact==null || fact.value().isNull()) throw new IllegalArgumentException("Referencia de evidencia inexistente o sin valor: "+matcher.group(1));
+            if(!FinancialClaimGrounding.permits(facts,fact,answer,matcher.start(),matcher.end()))
+                throw new IllegalArgumentException("La referencia no acredita el concepto financiero, unidad o documento de la afirmación: "+matcher.group(1));
             if(fact.source().matches("(?i).*/(?:id|documentId|chunkId|ownerId)$")) {
                 matcher.appendReplacement(rendered,Matcher.quoteReplacement("[referencia interna omitida]"));
                 continue;
@@ -170,7 +173,7 @@ public class AssistantAnalysisService {
                 .replaceAll("[$]?\\p{N}+(?:[.,/\\-]\\p{N}+)*%?","[dato sin evidencia]");
             omitted|=!cleaned.equals(prose);safe.append(cleaned);
             Fact fact=facts.get(references.group(1));
-            if(fact==null||fact.value().isNull()) {safe.append("[dato sin evidencia]");omitted=true;}
+            if(!FinancialClaimGrounding.permits(facts,fact,grounded,references.start(),references.end())) {safe.append("[dato sin evidencia]");omitted=true;}
             else safe.append(references.group());
             cursor=references.end();
         }
@@ -245,17 +248,21 @@ public class AssistantAnalysisService {
         literals.sort(Comparator.comparingInt((Map.Entry<String,String> literal)->literal.getKey().length()).reversed());
         var references=REFERENCE.matcher(answer);var grounded=new StringBuilder();int cursor=0;
         while(references.find()) {
-            grounded.append(groundProse(answer.substring(cursor,references.start()),literals));
+            grounded.append(groundProse(answer.substring(cursor,references.start()),literals,facts));
             grounded.append(references.group());cursor=references.end();
         }
-        grounded.append(groundProse(answer.substring(cursor),literals));
+        grounded.append(groundProse(answer.substring(cursor),literals,facts));
         return grounded.toString();
     }
-    private String groundProse(String prose,List<Map.Entry<String,String>> literals) {
+    private String groundProse(String prose,List<Map.Entry<String,String>> literals,Map<String,Fact> facts) {
         String result=prose;
         for(var literal:literals) {
-            result=Pattern.compile("(?<![\\p{L}\\p{N}])"+Pattern.quote(literal.getKey())+"(?![\\p{L}\\p{N}])")
-                .matcher(result).replaceAll(Matcher.quoteReplacement("{{"+literal.getValue()+"}}"));
+            var matches=Pattern.compile("(?<![\\p{L}\\p{N}.,*/-])"+Pattern.quote(literal.getKey())+"(?![\\p{L}\\p{N}]|[.,/-]\\d)").matcher(result);
+            var replacement=new StringBuffer();
+            while(matches.find())matches.appendReplacement(replacement,Matcher.quoteReplacement(
+                FinancialClaimGrounding.permits(facts,facts.get(literal.getValue()),result,matches.start(),matches.end())
+                    ?"{{"+literal.getValue()+"}}":matches.group()));
+            matches.appendTail(replacement);result=replacement.toString();
         }
         return result;
     }

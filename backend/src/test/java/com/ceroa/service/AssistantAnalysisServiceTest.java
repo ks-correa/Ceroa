@@ -41,6 +41,7 @@ class AssistantAnalysisServiceTest {
     @Test void groundsExactDocumentLiteralsAndListMarkersButRejectsInventedNumbers() {
         var facts=new LinkedHashMap<String,AssistantAnalysisService.Fact>();
         facts.put("f1",new AssistantAnalysisService.Fact("financialDocuments/documentValues/0/literal",TextNode.valueOf("2,5%")));
+        facts.put("f3",new AssistantAnalysisService.Fact("financialDocuments/documentValues/0/context",TextNode.valueOf("Tasa indicada: 2,5%")));
         facts.put("f2",new AssistantAnalysisService.Fact("financialDocuments/documents/0/periodStart",TextNode.valueOf("2026-08-01")));
         assertEquals("La tasa indicada es 2,5% en el documento del 2026-08-01.",
             service.resolve(facts,"La tasa indicada es 2,5% en el documento del 2026-08-01."));
@@ -67,7 +68,8 @@ class AssistantAnalysisServiceTest {
         assertEquals("El documento es [referencia interna omitida].",service.resolve(facts,"El documento es {{f3}}."));
     }
     @Test void finalFallbackKeepsVerifiedFactsAndMasksUnsupportedNumbers() {
-        var facts=Map.of("f1",new AssistantAnalysisService.Fact("financialDocuments/documentValues/0/literal",TextNode.valueOf("2,5%")));
+        var facts=Map.of("f1",new AssistantAnalysisService.Fact("financialDocuments/documentValues/0/literal",TextNode.valueOf("2,5%")),
+            "f2",new AssistantAnalysisService.Fact("financialDocuments/documentValues/0/context",TextNode.valueOf("Tasa confirmada: 2,5%")));
         assertEquals("Tasa confirmada: 2,5%. Otro valor: [dato sin evidencia]. Referencia: [dato sin evidencia].\n\nAlgunas cifras o referencias no pudieron verificarse y se omitieron.",
             service.resolveConservatively(facts,"Tasa confirmada: {{f1}}. Otro valor: 9,9%. Referencia: {{f99}}."));
     }
@@ -95,6 +97,7 @@ class AssistantAnalysisServiceTest {
         facts.put("f3",new AssistantAnalysisService.Fact("strategy/type",TextNode.valueOf("avalanche")));
         facts.put("f4",new AssistantAnalysisService.Fact("financialDocuments/trace/documentValues/0/literal",TextNode.valueOf("****9840")));
         facts.put("f5",new AssistantAnalysisService.Fact("financialDocuments/trace/documentValues/1/literal",TextNode.valueOf("1")));
+        facts.put("f7",new AssistantAnalysisService.Fact("financialDocuments/trace/documentValues/1/context",TextNode.valueOf("Página: 1")));
         facts.put("f6",new AssistantAnalysisService.Fact("strategyActive/debts/0/comparable",com.fasterxml.jackson.databind.node.BooleanNode.TRUE));
         assertEquals("La estrategia Avalancha prioriza la tasa de 28,7% EA (comparable 28,7%) en la cuenta ****9840 (página 1).",
             service.resolve(facts,"La estrategia avalanche {{f3}} [d1] prioriza la tasa de {{f1}} {{f2}} EA (comparable {{f1}}% {{f6}}) en la cuenta ****9840 (página 1) (d2)."));
