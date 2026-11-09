@@ -44,6 +44,6 @@ test('Gemini specialist schemas avoid literals converted to unsupported const',(
   assert(!JSON.stringify(schema).includes('"const":'));
   assert.deepEqual(schema.properties.schemaVersion,{type:'string',pattern:'^1[.]1$'});
   assert(['^FINANCIAL$','^RAG$','^SUPPORT$'].includes(schema.properties.role.pattern));
-  assert.deepEqual(schema.properties.advisoryProposal.oneOf[1].properties.status,{type:'string',pattern:'^PROPOSED$'});
+  assert.equal(schema.properties.advisoryProposal,undefined);assert(schema.required.includes('requiresClarification'));
  }
 });
