@@ -1,0 +1,16 @@
+{
+  "operationalRuntimeIdentityUnchangedAcrossPreparation": true,
+  "operationalV31StillAbsent": true,
+  "operationalOutbox": [
+    {
+      "count": 7,
+      "status": "PENDING",
+      "channel": "SHEETS"
+    }
+  ],
+  "operationalSubscriptions": 0,
+  "newReportAndToolFilesScanned": 27,
+  "configuredBackendSecretLiteralMatches": 0,
+  "financialBackupInGit": false,
+  "sourceCodeFunctionalChanges": false
+}

@@ -1,0 +1,11 @@
+{
+  "localDatabaseContainerRemoved": true,
+  "financialWorkDirectoriesLogicallyDeleted": true,
+  "sourceCredentialFilesRemoved": true,
+  "luksMappingClosed": true,
+  "loopDevicesDetached": true,
+  "encryptedBackupsRetained": true,
+  "financialKeyRetainedSeparately": true,
+  "cleanEncryptedWorkspaceRetainedForReuse": true,
+  "forensicSecureDeletionClaimed": false
+}

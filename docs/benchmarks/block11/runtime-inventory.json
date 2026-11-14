@@ -1,0 +1,244 @@
+[
+  {
+    "name": "ceroa-backend",
+    "id": "b9da1a70d690df6f0282ab8d0c0bb4535b953ef003ccdee877f07db44f29d232",
+    "imageId": "sha256:ed6d9ae228bbaf5371f546c9afd6278e303e467caf5e6b4c88197965657ce71b",
+    "imageReference": "ceroa-backend",
+    "repoDigests": [
+      "ceroa-backend@sha256:ed6d9ae228bbaf5371f546c9afd6278e303e467caf5e6b4c88197965657ce71b"
+    ],
+    "startedAt": "2026-11-09T18:23:22.621968043Z",
+    "restarts": 0,
+    "status": "running",
+    "health": "not configured",
+    "ports": {
+      "8080/tcp": [
+        {
+          "HostIp": "0.0.0.0",
+          "HostPort": "8080"
+        },
+        {
+          "HostIp": "::",
+          "HostPort": "8080"
+        }
+      ]
+    },
+    "mounts": [],
+    "environment": [
+      {
+        "name": "SPRING_PROFILES_ACTIVE",
+        "configured": true,
+        "value": "supabase"
+      },
+      {
+        "name": "DB_URL",
+        "configured": true
+      },
+      {
+        "name": "DB_USERNAME",
+        "configured": true
+      },
+      {
+        "name": "DB_PASSWORD",
+        "configured": true
+      },
+      {
+        "name": "DB_SCHEMA",
+        "configured": true,
+        "value": "ceroa"
+      },
+      {
+        "name": "SESSION_SECURE_COOKIE",
+        "configured": true,
+        "value": "false"
+      },
+      {
+        "name": "WORKSPACE_WORKER_KEY",
+        "configured": true
+      },
+      {
+        "name": "WORKSPACE_GMAIL_ENABLED",
+        "configured": true,
+        "value": "false"
+      },
+      {
+        "name": "WORKSPACE_SHEETS_ENABLED",
+        "configured": true,
+        "value": "false"
+      },
+      {
+        "name": "WORKSPACE_CALENDAR_ENABLED",
+        "configured": true,
+        "value": "false"
+      },
+      {
+        "name": "WORKSPACE_CALENDAR_URL",
+        "configured": true
+      },
+      {
+        "name": "ASSISTANT_ENABLED",
+        "configured": true,
+        "value": "true"
+      },
+      {
+        "name": "ASSISTANT_WEBHOOK_URL",
+        "configured": true
+      },
+      {
+        "name": "ASSISTANT_WORKER_KEY",
+        "configured": true
+      },
+      {
+        "name": "DOCUMENT_LIBRARY_ENABLED",
+        "configured": true,
+        "value": "true"
+      },
+      {
+        "name": "DOCUMENT_LIBRARY_STORAGE_URL",
+        "configured": true
+      },
+      {
+        "name": "DOCUMENT_LIBRARY_STORAGE_KEY",
+        "configured": true
+      },
+      {
+        "name": "MERCADOPAGO_ACCESS_TOKEN",
+        "configured": false
+      },
+      {
+        "name": "MAIL_HOST",
+        "configured": false
+      },
+      {
+        "name": "MAIL_PASSWORD",
+        "configured": false
+      },
+      {
+        "name": "VITE_API_URL",
+        "configured": true
+      },
+      {
+        "name": "RAG_ENABLED",
+        "configured": true,
+        "value": "true"
+      },
+      {
+        "name": "RAG_DB_URL",
+        "configured": true
+      },
+      {
+        "name": "RAG_DB_PASSWORD",
+        "configured": true
+      }
+    ]
+  },
+  {
+    "name": "ceroa-frontend",
+    "id": "d73c5ed2396161752ba8e545ba02938aafdf70c4a376ec372e625c55f60703a3",
+    "imageId": "sha256:a3a5556a7fe159e31b99734dc4e5d8394b1a78d406d1523158c2f7cf232d2f85",
+    "imageReference": "ceroa-frontend",
+    "repoDigests": [
+      "ceroa-frontend@sha256:a3a5556a7fe159e31b99734dc4e5d8394b1a78d406d1523158c2f7cf232d2f85"
+    ],
+    "startedAt": "2026-11-09T17:44:25.016393405Z",
+    "restarts": 0,
+    "status": "running",
+    "health": "not configured",
+    "ports": {
+      "3000/tcp": [
+        {
+          "HostIp": "0.0.0.0",
+          "HostPort": "3000"
+        },
+        {
+          "HostIp": "::",
+          "HostPort": "3000"
+        }
+      ]
+    },
+    "mounts": [],
+    "command": [
+      "npm",
+      "run",
+      "dev"
+    ],
+    "environment": [
+      {
+        "name": "VITE_API_URL",
+        "configured": true
+      }
+    ]
+  },
+  {
+    "name": "ceroa-n8n",
+    "id": "00f392986cb76aa4ec51c9c95dc91b14106d72424cfe585d9588233ab5dae68d",
+    "imageId": "sha256:ffeb52485f78b1b06c9a832205853cf75da72a07a514c9a27724df85979d6c34",
+    "imageReference": "docker.n8n.io/n8nio/n8n:stable@sha256:ffeb52485f78b1b06c9a832205853cf75da72a07a514c9a27724df85979d6c34",
+    "repoDigests": [
+      "docker.n8n.io/n8nio/n8n@sha256:ffeb52485f78b1b06c9a832205853cf75da72a07a514c9a27724df85979d6c34"
+    ],
+    "startedAt": "2026-11-09T18:08:04.234464342Z",
+    "restarts": 0,
+    "status": "running",
+    "health": "healthy",
+    "ports": {
+      "5678/tcp": [
+        {
+          "HostIp": "127.0.0.1",
+          "HostPort": "5678"
+        }
+      ]
+    },
+    "mounts": [
+      {
+        "type": "bind",
+        "destination": "/opt/ceroa-workflows",
+        "readWrite": false
+      },
+      {
+        "type": "volume",
+        "destination": "/home/node/.n8n",
+        "readWrite": true
+      }
+    ],
+    "environment": []
+  },
+  {
+    "name": "ceroa-telegram-proxy",
+    "id": "3c20136e32eef150e389b0580710e6df44d32930aff5395a8d81cc5e9ad8eb53",
+    "imageId": "sha256:0a7108bf6c7bf5de370ffb1a3ed6be93d405b43ff159f681a8d18c0e2bc2e402",
+    "imageReference": "node:22-alpine@sha256:0a7108bf6c7bf5de370ffb1a3ed6be93d405b43ff159f681a8d18c0e2bc2e402",
+    "repoDigests": [
+      "node@sha256:0a7108bf6c7bf5de370ffb1a3ed6be93d405b43ff159f681a8d18c0e2bc2e402"
+    ],
+    "startedAt": "2026-11-09T13:20:20.766039983Z",
+    "restarts": 0,
+    "status": "running",
+    "health": "not configured",
+    "ports": {},
+    "mounts": [
+      {
+        "type": "bind",
+        "destination": "/app/telegram-proxy.mjs",
+        "readWrite": false
+      }
+    ],
+    "environment": []
+  },
+  {
+    "name": "ceroa-telegram-tunnel",
+    "id": "551b46c423eb4315f71f3c17219958db33897493ec7c6a6097d20ff99349a1d2",
+    "imageId": "sha256:072c067d25ccbe61d46e18f0d0723255f2bb5304f7317caa95b27031520ff92c",
+    "imageReference": "cloudflare/cloudflared@sha256:072c067d25ccbe61d46e18f0d0723255f2bb5304f7317caa95b27031520ff92c",
+    "repoDigests": [
+      "cloudflare/cloudflared@sha256:072c067d25ccbe61d46e18f0d0723255f2bb5304f7317caa95b27031520ff92c"
+    ],
+    "startedAt": "2026-11-09T13:20:20.777813054Z",
+    "restarts": 0,
+    "status": "running",
+    "health": "not configured",
+    "ports": {},
+    "mounts": [],
+    "environment": []
+  }
+]

@@ -1,0 +1,36 @@
+{
+  "authorization": "User explicitly approved cryptsetup and local LUKS2 preparation",
+  "cryptsetup": "2.7.0 Ubuntu official packages",
+  "luks": {
+    "type": "LUKS2",
+    "cipher": "aes-xts-plain64",
+    "keyBits": 512,
+    "bytes": 1073741824,
+    "syntheticWrongKeyRejected": true,
+    "syntheticReopenHashMatched": true,
+    "containerBackingDeviceVerified": "/dev/mapper/ceroa12c_private"
+  },
+  "swap": {
+    "hostStillActive": true,
+    "globalSettingChanged": false,
+    "processingContainersCgroupV2MemorySwapMax": "0"
+  },
+  "docker": {
+    "restorationDaemon": "Ubuntu native; independent from operational Docker Desktop",
+    "localImageCopiesOnly": true,
+    "publishedPorts": 0,
+    "restorationNetwork": "none",
+    "javaNetwork": "shares isolated restoration container namespace"
+  },
+  "cleanup": {
+    "localDatabaseContainerRemoved": true,
+    "financialWorkDirectoriesLogicallyDeleted": true,
+    "sourceCredentialFilesRemoved": true,
+    "luksMappingClosed": true,
+    "loopDevicesDetached": true,
+    "encryptedBackupsRetained": true,
+    "financialKeyRetainedSeparately": true,
+    "cleanEncryptedWorkspaceRetainedForReuse": true,
+    "forensicSecureDeletionClaimed": false
+  }
+}

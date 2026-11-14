@@ -1,0 +1,1 @@
+{"flywayBefore":"30","validateBefore":true,"flywayAfter":"31","validateAfter":true,"secondMigrateExecuted":0,"tablePkFkIndex":true,"historicalReceiptsCreated":0,"newTablePublicApiGrants":0,"hibernateSchemaValidation":true,"mappedEntities":27}
