@@ -1,0 +1,223 @@
+{
+  "candidate": "RC1",
+  "sha256": "4c2f954c53399ae5b8f1e050f5ec10aa0c0ce0a2b39187a744105422010c7004",
+  "cases": [
+    {
+      "id": "RC1-01",
+      "question": "¿Cuál de mis deudas debería pagar primero y por qué?",
+      "status": 200,
+      "body": {
+        "answer": "La prioridad de las deudas del usuario se establece según la estrategia activa de avalancha. La primera deuda a pagar es Tarjeta principal, con un saldo de 5.240.000 y una tasa de 28,7%. La segunda deuda es Crédito de libre inversión, con un saldo de 8.900.000 y una tasa de 19,5%. La tercera deuda es Compra de computador, con un saldo de 1.280.000 y una tasa de 0%.",
+        "intent": "analysis",
+        "documents": [],
+        "traceId": null,
+        "functionalStatus": "COMPLETE"
+      }
+    },
+    {
+      "id": "RC1-02",
+      "question": "Analiza el extracto financiero que cargué.",
+      "status": 200,
+      "body": {
+        "answer": "El análisis del extracto financiero de la entidad Banco Andino muestra los siguientes datos registrados:\n\nEntidad financiera: Banco Andino\nSaldo actual: 5.240.000 COP\nTasa de interés efectiva anual: 28,7% EA\nPago mínimo: 310.000 COP\n\nFuentes documentales:\n• BANK_STATEMENT · Banco Andino · d26f7f5e-1d94-4fdd-b301-8bd9ad5dea7a",
+        "intent": "analysis",
+        "documents": [
+          {
+            "id": "d26f7f5e-1d94-4fdd-b301-8bd9ad5dea7a",
+            "ownerId": "00000000-0000-0000-0000-000000000001",
+            "identificationType": "OTHER",
+            "documentType": "BANK_STATEMENT",
+            "financialEntity": "Banco Andino",
+            "periodStart": "2026-11-01",
+            "periodEnd": "2026-12-01",
+            "issuedAt": "2026-11-14",
+            "status": "INDEXED",
+            "version": 2,
+            "uploadedAt": "2026-11-14T15:06:11.799014-05:00"
+          }
+        ],
+        "traceId": "dd8a3f9d-1b13-4a92-ba60-da3ed3592416",
+        "functionalStatus": "COMPLETE"
+      }
+    },
+    {
+      "id": "RC1-03",
+      "question": "Compara mi extracto financiero con mis obligaciones registradas y dime qué deuda debería priorizar.",
+      "status": 200,
+      "body": {
+        "answer": "Entidad financiera: Banco Andino. Saldo actual: 5.240.000 COP. Tasa de interes efectiva anual: 28,7%. Pago minimo: 310.000 COP.\n\nLa deuda prioritaria para atender es la Tarjeta principal, con saldo de 5.240.000 y tasa de 28,7% EA. En segundo lugar se encuentra el Crédito de libre inversión, con saldo de 8.900.000 y tasa de 19,5% EA. Finalmente, la Compra de computador cuenta con un saldo de 1.280.000 y tasa de sin intereses.\n\nFuentes documentales:\n• BANK_STATEMENT · Banco Andino · d26f7f5e-1d94-4fdd-b301-8bd9ad5dea7a",
+        "intent": "analysis",
+        "documents": [
+          {
+            "id": "d26f7f5e-1d94-4fdd-b301-8bd9ad5dea7a",
+            "ownerId": "00000000-0000-0000-0000-000000000001",
+            "identificationType": "OTHER",
+            "documentType": "BANK_STATEMENT",
+            "financialEntity": "Banco Andino",
+            "periodStart": "2026-11-01",
+            "periodEnd": "2026-12-01",
+            "issuedAt": "2026-11-14",
+            "status": "INDEXED",
+            "version": 2,
+            "uploadedAt": "2026-11-14T15:06:11.799014-05:00"
+          }
+        ],
+        "traceId": "317df7ba-8b89-4d95-b28a-ab847f531fee",
+        "functionalStatus": "COMPLETE"
+      }
+    },
+    {
+      "id": "RC1-04",
+      "question": "Compara mi extracto financiero con mis obligaciones registradas para decirme qué deuda priorizar y explícame cómo registrar un pago en Ceroa.",
+      "status": 200,
+      "body": {
+        "answer": "Entidad financiera: Banco Andino. Saldo actual: 5.240.000 COP. Tasa de interés efectiva anual: 28,7% EA. Pago mínimo: 310.000 COP. Las obligaciones registradas incluyen Tarjeta principal con saldo 5.240.000, tasa 28,7% de tipo EA y prioridad 1. Crédito de libre inversión con saldo 8.900.000, tasa 19,5% de tipo EA y prioridad 2. Compra de computador con saldo 1.280.000, tasa 0% de tipo sin intereses y prioridad 3. La priorización actual bajo la estrategia activa Avalancha sitúa en primer lugar a Tarjeta principal. Para registrar un pago o abono en Ceroa, ingresa a la sección Deudas en el menú lateral, selecciona la obligación correspondiente, pulsa Registrar pago e ingresa el monto pagado, la fecha de pago y el tipo de abono.\n\nFuentes documentales:\n• BANK_STATEMENT · Banco Andino · d26f7f5e-1d94-4fdd-b301-8bd9ad5dea7a",
+        "intent": "analysis",
+        "documents": [
+          {
+            "id": "d26f7f5e-1d94-4fdd-b301-8bd9ad5dea7a",
+            "ownerId": "00000000-0000-0000-0000-000000000001",
+            "identificationType": "OTHER",
+            "documentType": "BANK_STATEMENT",
+            "financialEntity": "Banco Andino",
+            "periodStart": "2026-11-01",
+            "periodEnd": "2026-12-01",
+            "issuedAt": "2026-11-14",
+            "status": "INDEXED",
+            "version": 2,
+            "uploadedAt": "2026-11-14T15:06:11.799014-05:00"
+          }
+        ],
+        "traceId": "76b7eec9-35ae-4695-af3c-c583ee2d8724",
+        "functionalStatus": "COMPLETE"
+      }
+    }
+  ],
+  "calendar": {
+    "expired": {
+      "status": 409,
+      "body": {
+        "message": "La operación requiere revisar su estado vigente.",
+        "code": "WORKSPACE_UNAVAILABLE"
+      }
+    },
+    "availability": {
+      "status": 200,
+      "body": {
+        "timezone": "America/Bogota",
+        "start": "2026-11-19T14:00:00-05:00",
+        "available": true,
+        "calendarConfigured": true,
+        "end": "2026-11-19T14:30:00-05:00"
+      }
+    },
+    "proposal": {
+      "status": 200,
+      "body": {
+        "code": "DJNJHCVSGXUBOKRCONEO",
+        "status": "PROPOSED",
+        "start": "2026-11-19T14:00:00-05:00",
+        "end": "2026-11-19T14:30:00-05:00",
+        "expiresAt": "2026-11-14T19:18:26.958239696-05:00",
+        "meetUrl": null,
+        "instruction": "Confirmar asesoria DJNJHCVSGXUBOKRCONEO"
+      }
+    },
+    "confirmed": {
+      "status": 200,
+      "body": {
+        "code": "DJNJHCVSGXUBOKRCONEO",
+        "status": "PENDING_MEET",
+        "start": "2026-11-19T14:00:00-05:00",
+        "end": "2026-11-19T14:30:00-05:00",
+        "expiresAt": "2026-11-14T19:18:26.95824-05:00",
+        "meetUrl": null,
+        "instruction": ""
+      }
+    },
+    "duplicate": {
+      "status": 200,
+      "body": {
+        "code": "DJNJHCVSGXUBOKRCONEO",
+        "status": "PENDING_MEET",
+        "start": "2026-11-19T14:00:00-05:00",
+        "end": "2026-11-19T14:30:00-05:00",
+        "expiresAt": "2026-11-14T19:18:26.95824-05:00",
+        "meetUrl": null,
+        "instruction": ""
+      }
+    },
+    "missing": {
+      "status": 404,
+      "body": {
+        "message": "Recurso no encontrado.",
+        "code": "WORKSPACE_UNAVAILABLE"
+      }
+    },
+    "past": {
+      "status": 400,
+      "body": {
+        "message": "Revisa los datos de la solicitud.",
+        "code": "WORKSPACE_INVALID_INPUT"
+      }
+    },
+    "isolation": {
+      "status": 404,
+      "body": {
+        "message": "Recurso no encontrado.",
+        "code": "WORKSPACE_UNAVAILABLE"
+      }
+    }
+  },
+  "draft": {
+    "preview": "Preparar borrador para revisar\n\nBorrador simulado. No se envían correos.\n\nPara: demo@ceroa.local\n\nResumen financiero Ceroa - pendiente de revision\n\nDeuda registrada: 15420000.00. Obligaciones activas: 3. Revisa y confirma la propuesta en Ceroa.\n\nConfirmar propuesta",
+    "confirmation": "Asistente de Ceroa\n\nDemo: datos sintéticos; Calendar y Gmail simulados\n\nTamaño del chat\nSobre el asistente y tus datos\nSubir archivo\nConsultar archivos\nRevisar archivos\nTú\nEnvíame un resumen financiero a mi correo\nCeroa\nPara autorizar el envío a tu correo registrado escribe: Confirmar envio WXNVJEDTLOZVIYDCELUR\nTú\nConfirmar envio WXNVJEDTLOZVIYDCELUR\nCeroa\nAutorización registrada. El correo queda pendiente de envío; todavía no hay confirmación de Gmail.\nGrabar\nAdjuntar audio"
+  },
+  "search": {
+    "generatedText": "Resultados disponibles en las fuentes y datos adjuntos; verifica los originales.",
+    "verifiedData": null,
+    "appliedFilters": {
+      "ownerId": null,
+      "identificationType": null,
+      "documentType": null,
+      "financialEntity": null,
+      "periodFrom": null,
+      "periodToExclusive": null,
+      "documentId": null
+    },
+    "sources": [
+      {
+        "documentId": "d26f7f5e-1d94-4fdd-b301-8bd9ad5dea7a",
+        "chunkId": "90d4913c-a103-4461-845c-d8305df780fc",
+        "page": 1,
+        "location": "Página 1",
+        "content": "\nCEROA | EXTRACTO SINTETICO\nBanco Andino - Laboratorio de validacion\nDocumento de prueba. Sin informacion de una persona real.\nTipo de identificacion: OTHER\nEntidad financiera: Banco Andino\nTarjeta principal - cuenta sintetica DEMO-4821\nPeriodo: 2026-11-01 a 2026-12-01 (fin exclusivo)\nFecha de emision: 2026-11-14\nSaldo actual: COP 5.240.000,00\nTasa de interes efectiva anual: 28,70%\nPago minimo: COP 310.000,00\nEstos valores coinciden con la obligacion sintetica registrada.\nEl archivo no representa un pago realizado ni una reserva real.\nSolo demostracion local | Proveedor documental sintetico | Pagina 1 de 1\n",
+        "score": 0.48549988676608363,
+        "documentVersion": 2
+      }
+    ],
+    "documents": [
+      {
+        "id": "d26f7f5e-1d94-4fdd-b301-8bd9ad5dea7a",
+        "ownerId": "00000000-0000-0000-0000-000000000001",
+        "identificationType": "OTHER",
+        "documentType": "BANK_STATEMENT",
+        "financialEntity": "Banco Andino",
+        "periodStart": "2026-11-01",
+        "periodEnd": "2026-12-01",
+        "issuedAt": "2026-11-14",
+        "status": "INDEXED",
+        "version": 2,
+        "uploadedAt": "2026-11-14T15:06:11.799014-05:00"
+      }
+    ],
+    "evidenceStatus": "AVAILABLE",
+    "traceId": "b96e8d26-70fb-4e2f-977a-671dd715c613",
+    "elapsedMs": 563
+  },
+  "admissionObservation": {
+    "status": 429,
+    "reason": "Espera un minuto antes de enviar otra consulta.",
+    "note": "Observed after closely spaced financial/document requests. Waited for admission window; did not bypass limiter."
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "isolated": true,
+  "network": "none",
+  "productionCredentialsImported": false,
+  "credentialReferencesPreserved": true,
+  "checks": [
+    {
+      "id": "ceroaFinancialAgent30",
+      "nodes": 24,
+      "storedDefinitionMatches": true
+    },
+    {
+      "id": "ceroaHybridQuery20",
+      "nodes": 40,
+      "storedDefinitionMatches": true
+    },
+    {
+      "id": "ceroaKnowledgeAgent30",
+      "nodes": 20,
+      "storedDefinitionMatches": true
+    },
+    {
+      "id": "ceroaMcpClient40",
+      "nodes": 3,
+      "storedDefinitionMatches": true
+    },
+    {
+      "id": "ceroaMcpSupport40",
+      "nodes": 4,
+      "storedDefinitionMatches": true
+    },
+    {
+      "id": "ceroaSupportAgent30",
+      "nodes": 25,
+      "storedDefinitionMatches": true
+    },
+    {
+      "id": "ceroaWorkspaceCalendar40",
+      "nodes": 7,
+      "storedDefinitionMatches": true
+    }
+  ],
+  "publicationPerformed": false
+}

@@ -1,0 +1,26 @@
+{
+  "files": 86,
+  "findings": [
+    {
+      "file": "docker-compose.demo.yml",
+      "kind": "secret-assignment",
+      "line": 15
+    },
+    {
+      "file": "docker-compose.demo.yml",
+      "kind": "secret-assignment",
+      "line": 32
+    },
+    {
+      "file": "docker-compose.demo.yml",
+      "kind": "secret-assignment",
+      "line": 41
+    },
+    {
+      "file": "docker-compose.demo.yml",
+      "kind": "secret-assignment",
+      "line": 53
+    }
+  ],
+  "review": "Four secret-assignment matches are explicit synthetic database passwords in isolated demo Compose. No real provider key/token/private key found. Temporary files, environments, binary artifacts, backups, browser state and raw logs excluded."
+}

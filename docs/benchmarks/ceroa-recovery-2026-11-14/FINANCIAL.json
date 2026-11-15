@@ -1,0 +1,85 @@
+{
+  "scenario": "FINANCIAL",
+  "requestId": "00000000-0000-4000-8000-000000000002",
+  "toolsInvoked": [
+    "Delegar_a_ATLAS",
+    "Consultar_datos_financieros",
+    "format_final_json_response",
+    "format_final_json_response"
+  ],
+  "workflowId": "ceroaMultiagentFixture30FINANCIAL",
+  "executionId": null,
+  "executions": [
+    {
+      "id": 5,
+      "workflowId": "ceroaFinancialAgent30",
+      "status": "running",
+      "startedAt": "2026-11-14 19:12:17.486",
+      "stoppedAt": null
+    }
+  ],
+  "startedAt": "2026-11-14T19:12:16.785Z",
+  "stoppedAt": "2026-11-14T19:12:17.841Z",
+  "latencyMs": 1056,
+  "provider": "SIMULATED",
+  "backend": "SIMULATED",
+  "finished": true,
+  "sqliteStatusIsNotFinalProof": true,
+  "roles": [
+    "ceroaFinancialAgent30"
+  ],
+  "delegations": 1,
+  "providerRequests": 4,
+  "providerTrace": [
+    {
+      "model": "fixture-root",
+      "availableTools": [
+        "Delegar_a_LUMEN",
+        "Delegar_a_ORACLE",
+        "Delegar_a_ATLAS",
+        "format_final_json_response"
+      ],
+      "selectedTool": "Delegar_a_ATLAS",
+      "toolResults": 0
+    },
+    {
+      "model": "ceroaFinancialAgent30",
+      "availableTools": [
+        "Proponer_correo_autorizado",
+        "Consultar_sobrecapacidad",
+        "Simular_escenario_hipot_tico",
+        "Consultar_documentos_financieros",
+        "Calcular_con_evidencia",
+        "Consultar_datos_financieros",
+        "format_final_json_response"
+      ],
+      "selectedTool": "Consultar_datos_financieros",
+      "toolResults": 0
+    },
+    {
+      "model": "ceroaFinancialAgent30",
+      "availableTools": [
+        "Proponer_correo_autorizado",
+        "Consultar_sobrecapacidad",
+        "Simular_escenario_hipot_tico",
+        "Consultar_documentos_financieros",
+        "Calcular_con_evidencia",
+        "Consultar_datos_financieros",
+        "format_final_json_response"
+      ],
+      "selectedTool": "format_final_json_response",
+      "toolResults": 1
+    },
+    {
+      "model": "fixture-root",
+      "availableTools": [
+        "Delegar_a_LUMEN",
+        "Delegar_a_ORACLE",
+        "Delegar_a_ATLAS",
+        "format_final_json_response"
+      ],
+      "selectedTool": "format_final_json_response",
+      "toolResults": 1
+    }
+  ]
+}

@@ -1,0 +1,77 @@
+{
+  "scenario": "EXTRACTS",
+  "requestId": "00000000-0000-4000-8000-000000000006",
+  "toolsInvoked": [
+    "Delegar_a_ORACLE",
+    "Consultar_documentos_financieros",
+    "format_final_json_response",
+    "format_final_json_response"
+  ],
+  "workflowId": "ceroaMultiagentFixture30EXTRACTS",
+  "executionId": null,
+  "executions": [
+    {
+      "id": 12,
+      "workflowId": "ceroaKnowledgeAgent30",
+      "status": "running",
+      "startedAt": "2026-11-14 19:12:30.400",
+      "stoppedAt": null
+    }
+  ],
+  "startedAt": "2026-11-14T19:12:29.839Z",
+  "stoppedAt": "2026-11-14T19:12:30.750Z",
+  "latencyMs": 911,
+  "provider": "SIMULATED",
+  "backend": "SIMULATED",
+  "finished": true,
+  "sqliteStatusIsNotFinalProof": true,
+  "roles": [
+    "ceroaKnowledgeAgent30"
+  ],
+  "delegations": 1,
+  "providerRequests": 4,
+  "providerTrace": [
+    {
+      "model": "fixture-root",
+      "availableTools": [
+        "Delegar_a_LUMEN",
+        "Delegar_a_ORACLE",
+        "Delegar_a_ATLAS",
+        "format_final_json_response"
+      ],
+      "selectedTool": "Delegar_a_ORACLE",
+      "toolResults": 0
+    },
+    {
+      "model": "ceroaKnowledgeAgent30",
+      "availableTools": [
+        "Consultar_documentaci_n_aprobada",
+        "Consultar_documentos_financieros",
+        "format_final_json_response"
+      ],
+      "selectedTool": "Consultar_documentos_financieros",
+      "toolResults": 0
+    },
+    {
+      "model": "ceroaKnowledgeAgent30",
+      "availableTools": [
+        "Consultar_documentaci_n_aprobada",
+        "Consultar_documentos_financieros",
+        "format_final_json_response"
+      ],
+      "selectedTool": "format_final_json_response",
+      "toolResults": 1
+    },
+    {
+      "model": "fixture-root",
+      "availableTools": [
+        "Delegar_a_LUMEN",
+        "Delegar_a_ORACLE",
+        "Delegar_a_ATLAS",
+        "format_final_json_response"
+      ],
+      "selectedTool": "format_final_json_response",
+      "toolResults": 1
+    }
+  ]
+}

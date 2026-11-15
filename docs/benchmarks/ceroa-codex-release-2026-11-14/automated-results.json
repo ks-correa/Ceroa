@@ -1,0 +1,39 @@
+{
+  "node": {
+    "tests": 51,
+    "passed": 51
+  },
+  "frontend": {
+    "typecheck": "PASSED",
+    "files": 23,
+    "tests": 190,
+    "passed": 190
+  },
+  "java": {
+    "unique": 456,
+    "passed": 454,
+    "skipped": 2,
+    "failures": 0,
+    "initialUtcRun": {
+      "failures": 4,
+      "errors": 1,
+      "reason": "Date fixtures use default zone, services use America/Bogota after UTC midnight"
+    },
+    "timezoneRerun": {
+      "classes": [
+        "NotificationIntegrationTest",
+        "DebtServiceTest"
+      ],
+      "passed": 17
+    },
+    "optInExecuted": {
+      "HybridDocumentIntegrationTest": 27,
+      "PostgresMigrationIntegrationTest": 3,
+      "MultiagentEndToEndTest": 2
+    },
+    "remaining": [
+      "RealMultiagentEndToEndTest: replaced for release acceptance by exact RC1 runtime cases; not executed as legacy suite",
+      "Block6GoogleEndToEndTest: real Gmail/Sheets external effects not authorized"
+    ]
+  }
+}
