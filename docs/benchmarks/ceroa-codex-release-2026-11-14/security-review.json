@@ -1,5 +1,5 @@
 {
-  "files": 86,
+  "files": 99,
   "findings": [
     {
       "file": "docker-compose.demo.yml",
@@ -22,5 +22,5 @@
       "line": 53
     }
   ],
-  "review": "Four secret-assignment matches are explicit synthetic database passwords in isolated demo Compose. No real provider key/token/private key found. Temporary files, environments, binary artifacts, backups, browser state and raw logs excluded."
+  "review": "Committed 99-file diff reviewed. Four matches are synthetic demo database passwords only; no real provider tokens/private keys. Environments, browser state, binaries, backups and raw logs excluded."
 }

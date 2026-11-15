@@ -109,3 +109,20 @@ Publicación autorizada únicamente después de las validaciones. La inspección
 **GO para revisión/integración del candidato RC1 y demostración local. NO-GO para ejecutar producción ahora.** La autorización productiva sigue pendiente; antes deben verificarse respaldo/restauración actualizados, empaquetado final y configuración operativa. MCP Calendar y createDraft productivos requieren los adaptadores mínimos descritos si forman parte del alcance de lanzamiento. Se puede lanzar sin ellos solamente manteniéndolos deshabilitados y declarando esa limitación.
 
 Próximo paso: revisar el PR borrador y decidir el alcance productivo y la ventana de Bloque 13; no fusionar ni desplegar automáticamente.
+
+
+## Cierre de versionamiento y publicación
+
+Rama publicada mediante push normal; PR borrador [#1 — Validate RC1 runtime and consolidate Ceroa release readiness](https://github.com/ks-correa/Ceroa/pull/1), base main, sin merge. Commits funcionales y evidencia publicados:
+
+```text
+31c6593efb48a973c1a9d7bbf665d292860c7cc6 fix(assistant): consolidate grounded multiagent budgets and governed drafts
+e0148bcba255e6ad654932028c0ec8fa439e54e4 feat(n8n): preserve six agent identities and bounded workflow contracts
+694fda950ee6085fcb9755acba03345af25e7cce feat(frontend): expose reviewed mail drafts and demo provider labels
+71c5b4a4fcbbac2de6bffb37f1e549d76a69495c chore(demo): run verified RC1 with reversible startup and release provenance
+71cab5ea5314b2f9cf19836eaa14658adb343e2b docs(release): reconcile RC1 evidence and correct deployment gates
+```
+
+El commit documental de cierre contiene este registro y final-integrity.json; su hash se obtiene con git rev-parse HEAD y se entrega también en la respuesta final, evitando una autorreferencia de hash imposible. No cambia clases, recursos, frontend, workflows ni configuración del candidato. El manifiesto ampliado final conserva SHA-256 crudo `0b1f3e7ee597b3cbbce4909e4d2e4ab080a63f6aa4b2e4a5fb9d3a4ac5a26252` y normalizado LF `1a8f0babf7384c56af748be1ecdf9df598d01c26ba2812b839506eb95a88e181`.
+
+La lectura de cierre confirma contenedores operativos, workflows publicados, checksums Flyway y outbox sin cambios frente al preflight. Demo backend, frontend, adapter, DB y n8n permanecen activos; backend ejecuta el hash RC1 original. No hay cambios funcionales posteriores al build que requieran RC2. Logs completos de las invocaciones de prueba se conservan privadamente en tmp/codex-release; los resúmenes publicables preservan los resultados y sus limitaciones.
