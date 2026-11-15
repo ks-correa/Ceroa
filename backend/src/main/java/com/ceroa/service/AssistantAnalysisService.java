@@ -148,6 +148,8 @@ public class AssistantAnalysisService {
         }
         matcher.appendTail(rendered);
         String prose=REFERENCE.matcher(answer).replaceAll("");
+        if(Pattern.compile("(?i)\\bConfirmar\\s+(?:asesor[ií]a|env[ií]o|cancelaci[oó]n)\\b|\\b[A-Z]{20}\\b").matcher(prose).find())
+            throw new IllegalArgumentException("Código o instrucción de confirmación sin evidencia.");
         if(prose.codePoints().anyMatch(Character::isDigit) || prose.contains("{{") || prose.contains("}}")) {
             var unsupported=Pattern.compile("\\d+(?:[.,/\\-]\\d+)*").matcher(prose).results().map(java.util.regex.MatchResult::group).distinct().limit(20).toList();
             throw new IllegalArgumentException("Respuesta con cifras sin evidencia. Sustituye u omite estos literales: "+unsupported+". No uses números de lista ni años literales; usa los hechos actuales con {{fID}}.");
@@ -170,6 +172,7 @@ public class AssistantAnalysisService {
         while(references.find()) {
             String prose=grounded.substring(cursor,references.start());
             String cleaned=prose.replaceAll("\\{\\{[^{}]*\\}\\}","[dato sin evidencia]")
+                .replaceAll("(?i)\\bConfirmar\\s+(?:asesor[ií]a|env[ií]o|cancelaci[oó]n)(?:\\s+[A-Z0-9_-]+)*|\\b[A-Z]{20}\\b","[dato sin evidencia]")
                 .replaceAll("[$]?\\p{N}+(?:[.,/\\-]\\p{N}+)*%?","[dato sin evidencia]");
             omitted|=!cleaned.equals(prose);safe.append(cleaned);
             Fact fact=facts.get(references.group(1));
@@ -179,6 +182,7 @@ public class AssistantAnalysisService {
         }
         String tail=grounded.substring(cursor);
         String cleaned=tail.replaceAll("\\{\\{[^{}]*\\}\\}","[dato sin evidencia]")
+            .replaceAll("(?i)\\bConfirmar\\s+(?:asesor[ií]a|env[ií]o|cancelaci[oó]n)(?:\\s+[A-Z0-9_-]+)*|\\b[A-Z]{20}\\b","[dato sin evidencia]")
             .replaceAll("[$]?\\p{N}+(?:[.,/\\-]\\p{N}+)*%?","[dato sin evidencia]");
         omitted|=!cleaned.equals(tail);safe.append(cleaned);
         String resolved=resolve(facts,safe.toString());
@@ -206,9 +210,39 @@ public class AssistantAnalysisService {
             }
         }
         pctMatcher.appendTail(pctBuf);
-        String proseOnly=pctBuf.toString().replaceAll("\\{\\{f[1-9][0-9]*\\}\\}","").replaceAll("[^\\p{L}]","");
+        String currentText=pctBuf.toString();
+        var ctxMatcher=Pattern.compile("\\{\\{(f[1-9][0-9]*)\\}\\}").matcher(currentText);
+        StringBuffer ctxBuf=new StringBuffer();
+        while(ctxMatcher.find()) {
+            Fact fact=facts.get(ctxMatcher.group(1));
+            if(fact!=null && fact.source().startsWith("financialDocuments/") && fact.source().matches(".*/(?:context|quote)$")) {
+                String parent=fact.source().substring(0,fact.source().lastIndexOf('/'));
+                String docId=facts.values().stream().filter(f->f.source().equals(parent+"/documentId")).map(f->f.value().asText()).findFirst().orElse("");
+                String docVersion=facts.values().stream().filter(f->f.source().equals(parent+"/documentVersion")).map(f->f.value().asText()).findFirst().orElse("");
+                String ownerId=facts.values().stream().filter(f->f.source().equals(parent+"/ownerId")).map(f->f.value().asText()).findFirst().orElse("");
+                boolean unverified=facts.values().stream().anyMatch(f->f.source().equals(parent+"/validationStatus")&&!"VERIFIED".equals(f.value().asText()));
+                int start=ctxMatcher.start(),end=ctxMatcher.end();
+                String sibling=unverified?ctxMatcher.group(1):facts.entrySet().stream()
+                    .filter(e->e.getValue().source().equals(parent+"/numericValue")||e.getValue().source().equals(parent+"/literal")||e.getValue().source().equals(parent+"/textValue"))
+                    .filter(e->{
+                        String sp=e.getValue().source().substring(0,e.getValue().source().lastIndexOf('/'));
+                        String sDoc=facts.values().stream().filter(f->f.source().equals(sp+"/documentId")).map(f->f.value().asText()).findFirst().orElse("");
+                        String sVer=facts.values().stream().filter(f->f.source().equals(sp+"/documentVersion")).map(f->f.value().asText()).findFirst().orElse("");
+                        String sOwn=facts.values().stream().filter(f->f.source().equals(sp+"/ownerId")).map(f->f.value().asText()).findFirst().orElse("");
+                        return sp.equals(parent)&&sDoc.equals(docId)&&sVer.equals(docVersion)&&sOwn.equals(ownerId)
+                            &&FinancialClaimGrounding.permits(facts,e.getValue(),currentText,start,end);
+                    })
+                    .sorted(Comparator.comparingInt(e->e.getValue().source().endsWith("/numericValue")?0:e.getValue().source().endsWith("/literal")?1:2))
+                    .map(Map.Entry::getKey).findFirst().orElse(ctxMatcher.group(1));
+                ctxMatcher.appendReplacement(ctxBuf,Matcher.quoteReplacement("{{"+sibling+"}}"));
+            } else {
+                ctxMatcher.appendReplacement(ctxBuf,Matcher.quoteReplacement(ctxMatcher.group()));
+            }
+        }
+        ctxMatcher.appendTail(ctxBuf);
+        String proseOnly=ctxBuf.toString().replaceAll("\\{\\{f[1-9][0-9]*\\}\\}","").replaceAll("[^\\p{L}]","");
         if(proseOnly.length()>=25) {
-            var guideMatcher=Pattern.compile("\\s*\\(?\\{\\{(f[1-9][0-9]*)\\}\\}\\)?").matcher(pctBuf.toString());
+            var guideMatcher=Pattern.compile("\\s*\\(?\\{\\{(f[1-9][0-9]*)\\}\\}\\)?").matcher(ctxBuf.toString());
             StringBuffer guideBuf=new StringBuffer();
             while(guideMatcher.find()) {
                 Fact fact=facts.get(guideMatcher.group(1));
@@ -221,7 +255,7 @@ public class AssistantAnalysisService {
             guideMatcher.appendTail(guideBuf);
             return guideBuf.toString();
         }
-        return pctBuf.toString();
+        return ctxBuf.toString();
     }
     private String groundExactLiterals(Map<String,Fact> facts,String answer) {
         var literals=new ArrayList<Map.Entry<String,String>>();
@@ -240,9 +274,15 @@ public class AssistantAnalysisService {
                     candidates.add(compact.replace('.',','));
                     candidates.add(compact.replace("%"," %"));
                 }
+                if(fact.source().matches("(?i)(?:.*/)?supportBooking/(?:start|end|expiresAt)")&&value.length()>=16) {
+                    candidates.add(value.substring(0,10));
+                    candidates.add(value.substring(11,16));
+                    if(value.length()>=19)candidates.add(value.substring(11,19));
+                }
             }
+            boolean confirmationFact=fact.source().matches("(?i)(?:.*/)?(?:supportBooking/(?:code|instruction)|workspaceProposal/(?:confirmationCode|instruction))$");
             for(String candidate:candidates)
-                if(candidate.length()>=1&&candidate.length()<=120&&!candidate.matches("f[1-9][0-9]*")&&candidate.codePoints().anyMatch(Character::isDigit))
+                if(candidate.length()>=1&&candidate.length()<=120&&!candidate.matches("f[1-9][0-9]*")&&(candidate.codePoints().anyMatch(Character::isDigit)||confirmationFact))
                     literals.add(Map.entry(candidate,entry.getKey()));
         }
         literals.sort(Comparator.comparingInt((Map.Entry<String,String> literal)->literal.getKey().length()).reversed());

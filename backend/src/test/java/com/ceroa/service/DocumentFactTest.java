@@ -55,4 +55,22 @@ class DocumentFactTest {
         var bounded=DocumentQueryBudget.bound(result,5);assertEquals("PARTIAL",bounded.evidenceStatus());assertTrue(bounded.sources().isEmpty());
         var coverage=(Map<?,?>)bounded.verifiedData();assertEquals(false,coverage.get("complete"));assertEquals(true,coverage.get("hasMoreDocuments"));assertEquals(10,coverage.get("nextOffset"));
     }
+    @Test void decomposesStatementAnalysisAcrossVerifiedNumericFieldsWithoutForcingUnverifiedCompleteness(){
+        var d=document(9);
+        var facts=extract(d,"Entidad financiera: Banco Andino\nSaldo actual: COP 5.240.000,00\nTasa de interes efectiva anual: 28,70%\nPago minimo: COP 310.000,00");
+        assertEquals(4,facts.size());
+        var analysis=DocumentFactAnalysis.analyze(List.of(d),facts,Map.of(),DocumentFactAnalysis.requestedKinds("Analiza el extracto financiero que cargué."));
+        assertTrue(analysis.complete());assertTrue(analysis.limitations().isEmpty());
+        var unverified=extract(d,"Saldo actual: $5.240.000\nTasa de interes: 28,70%");
+        var partial=DocumentFactAnalysis.analyze(List.of(d),unverified,Map.of(),DocumentFactAnalysis.requestedKinds("Analiza el extracto financiero que cargué."));
+        assertFalse(partial.complete());assertTrue(partial.limitations().contains("UNVERIFIED_VALUES"));
+        var singleFieldOnly=extract(d,"Saldo actual: COP 5.240.000,00");
+        var incompleteGeneral=DocumentFactAnalysis.analyze(List.of(d),singleFieldOnly,Map.of(),DocumentFactAnalysis.requestedKinds("Analiza el extracto financiero que cargué."));
+        assertFalse(incompleteGeneral.complete());assertTrue(incompleteGeneral.limitations().contains("MISSING_OR_AMBIGUOUS_FIELD"));
+        var a=document(8);var b=document(9);var debt=UUID.randomUUID();
+        var incompatibleRates=new ArrayList<>(extract(a,"Tasa de interes efectiva anual: 28,70%"));
+        incompatibleRates.addAll(extract(b,"Tasa de interes efectiva mensual: 2,10%"));
+        var rateComparison=DocumentFactAnalysis.analyze(List.of(a,b),incompatibleRates,Map.of(a.id(),debt,b.id(),debt),com.ceroa.api.dto.DocumentFactContracts.Kind.RATE);
+        assertFalse(rateComparison.complete());assertTrue(rateComparison.comparisons().isEmpty());assertTrue(rateComparison.limitations().contains("NO_COMPARABLE_PERIOD_PAIR"));
+    }
 }

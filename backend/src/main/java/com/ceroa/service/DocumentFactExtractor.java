@@ -12,7 +12,7 @@ import java.util.regex.*;
 public final class DocumentFactExtractor {
     public static final int VERSION=1;
     private DocumentFactExtractor() {}
-    private static final Pattern HEADER=Pattern.compile("(?iu)^(saldo(?:\\s+(?:total|actual|informado))?|pago m[ií]nimo|cuota|tasa(?:\\s+(?:de inter[eé]s|efectiva|nominal))?|fecha de corte|fecha de vencimiento|inicio del per[ií]odo|fin del per[ií]odo|entidad)\\s*:\\s*(.+)$");
+    private static final Pattern HEADER=Pattern.compile("(?iu)^(saldo(?:\\s+(?:total|actual|informado))?|pago m[ií]nimo|cuota|tasa(?:\\s+de\\s+inter[eé]s)?(?:\\s+(?:efectiva(?:\\s+(?:anual|mensual))?|nominal(?:\\s+(?:anual|mensual))?))?|fecha de corte|fecha de vencimiento|inicio del per[ií]odo|fin del per[ií]odo|entidad(?:\\s+financiera)?)\\s*:\\s*(.+)$");
     private static final Pattern MONEY=Pattern.compile("(?iu)^(?:(COP|USD|EUR)\\s*)?\\$?\\s*([+-]?[0-9][0-9.,]*)(?:\\s*(COP|USD|EUR))?$");
     private static final Pattern RATE=Pattern.compile("(?iu)^([0-9]+(?:[.,][0-9]{1,6})?)\\s*%\\s*(EA|EM|MV|NMV|NAMV)?$");
     // A movement needs a stable reference and date to support deterministic deduplication.
@@ -36,7 +36,7 @@ public final class DocumentFactExtractor {
                 else if(kind==Kind.RATE){
                     var m=RATE.matcher(value);if(!m.matches())continue;
                     BigDecimal number=new BigDecimal(m.group(1).replace(',','.'));if(number.compareTo(new BigDecimal("100"))>0)continue;
-                    String mode=m.group(2)==null?null:m.group(2).toUpperCase(Locale.ROOT);
+                    String mode=m.group(2)!=null?m.group(2).toUpperCase(Locale.ROOT):label.contains("efectiva anual")?"EA":label.contains("efectiva mensual")?"EM":label.contains("nominal anual")?"NAMV":label.contains("nominal mensual")?"NMV":null;
                     result.add(fact(source,kind,"NUMBER",number,null,null,"PERCENT",null,mode,null,null,mode==null?"NEEDS_REVIEW":"VERIFIED",quote,offset));
                 }else if(kind==Kind.ENTITY){if(value.length()<=160)result.add(fact(source,kind,"TEXT",null,null,value,"TEXT",null,null,null,null,"VERIFIED",quote,offset));}
                 else {LocalDate parsed=date(value);if(parsed!=null)result.add(fact(source,kind,"DATE",null,parsed,null,"DATE",null,null,null,null,"VERIFIED",quote,offset));}

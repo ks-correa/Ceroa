@@ -27,6 +27,10 @@ class AgentContractsTest {
         assertFalse(AgentContracts.requiresContextualClarification("Explícame mejor la segunda opción","Compara mis estrategias de pago"));
         assertEquals(Set.of(AgentContracts.Role.FINANCIAL),AgentContracts.selectedRoles(AgentContracts.routingQuestion("Explícame mejor la segunda opción","Compara mis estrategias de pago",false),false));
     }
+    @Test void newDebtRegistrationDoesNotAcquireFinancialScope(){
+        assertEquals(Set.of(AgentContracts.Role.SUPPORT),AgentContracts.selectedRoles("¿Cómo puedo registrar una nueva deuda en Ceroa?",false));
+        assertEquals(Set.of(AgentContracts.Role.SUPPORT),AgentContracts.selectedRoles("Quiero registrar una nueva obligación",false));
+    }
     @Test void budgetsAreBoundedAndSelectedDocumentsCannotAcquireFinanceTools(){
         var context=AgentContracts.context(UUID.randomUUID(),"compara mis extractos",true);
         assertFalse(context.tools().containsKey(AgentContracts.Role.FINANCIAL));

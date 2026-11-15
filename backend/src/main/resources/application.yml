@@ -70,6 +70,7 @@ logging:
 
 ceroa:
   workspace:
+    draft-url: ${WORKSPACE_DRAFT_URL:}
     worker-key: ${WORKSPACE_WORKER_KEY:}
     gmail-enabled: ${WORKSPACE_GMAIL_ENABLED:false}
     sheets-enabled: ${WORKSPACE_SHEETS_ENABLED:false}

@@ -65,15 +65,15 @@ public final class AgentContracts {
             .replaceAll("\\b(?:no necesito|no quiero|no busco|sin necesidad de|sin consultar|no me expliques)\\b[^.;!?]*","");
         boolean document=q.matches("(?s).*\\b(extractos?|documentos?|archivos?|pdfs?)\\b.*");
         boolean operational=q.matches("(?s).*("
-            + "registr(?:ar|o|e|as|an|amos)\\s+(?:un |el |una |la |mis |las |los )?(?:pagos?|obligaciones?|deudas?|abonos?)"
-            + "|(?:como|donde|pasos para|manera de|forma de|quiero saber como|explicame como)\\s+(?:se\\s+|puedo\\s+)?(?:registr\\w*|agreg\\w*|cre\\w*|anad\\w*|carg\\w*|sub\\w*|edit\\w*|modific\\w*|actualiz\\w*|elimin\\w*|borr\\w*)\\s+(?:un |el |una |la |mis |las |los )?(?:pagos?|obligaciones?|deudas?|abonos?|extractos?|documentos?|archivos?)"
+            + "registr(?:ar|o|e|as|an|amos)\\s+(?:un |el |una |la |mis |las |los )?(?:nuev[oa]s? )?(?:pagos?|obligacion(?:es)?|deudas?|abonos?)"
+            + "|(?:como|donde|pasos para|manera de|forma de|quiero saber como|explicame como)\\s+(?:se\\s+|puedo\\s+)?(?:registr\\w*|agreg\\w*|cre\\w*|anad\\w*|carg\\w*|sub\\w*|edit\\w*|modific\\w*|actualiz\\w*|elimin\\w*|borr\\w*)\\s+(?:un |el |una |la |mis |las |los )?(?:nuev[oa]s? )?(?:pagos?|obligacion(?:es)?|deudas?|abonos?|extractos?|documentos?|archivos?)"
             + "|(?:como\\s+funciona|para\\s+que\\s+sirve|como\\s+se\\s+usa|como\\s+uso|como\\s+utiliz\\w*)\\s+(?:el\\s+|la\\s+)?(?:simulador|seccion\\s+simular|biblioteca|centinela)"
             + "|\\bplan(?:es)?\\s+cero\\b|\\bceroa\\s+plus\\b|(?:diferencias?|compar\\w*)\\s+entre\\s+(?:el\\s+|los\\s+)?plan(?:es)?"
             + "|soporte|ayuda con (?:la|mi) cuenta|asesori\\w*|\\bcitas?\\b|contrasen\\w*|iniciar sesion|cerrar sesion|navegacion|suscripcion\\w*|\\bmcp\\b"
             + ").*");
         boolean concept=q.matches("(?s).*(concepto|bola de nieve|avalancha|amortizacion|(?:que es |que significa|como se interpreta)(?![^.;!?]*(?:plan cero|ceroa plus|simulador|asesoria|soporte|cuenta))).*")
             ||(q.matches("(?s).*como funciona.*")&&!operational);
-        boolean personal=q.matches("(?s).*(\\bmis? (?:deudas?|obligaciones?|finanzas|pagos?|vencimientos?|saldos?|estrategias?|capacidad|progreso|ingresos?|gastos?)\\b|(?:obligaciones?|deudas?|pagos?|saldos?|vencimientos?)\\s+registrad[oa]s?|datos financieros actuales|(?:mas\\s+proxim[oa]|cual|que)\\s+(?:a\\s+)?venc(?:er|e|en)).*");
+        boolean personal=q.matches("(?s).*(\\bmis? (?:deudas?|obligacion(?:es)?|finanzas|pagos?|vencimientos?|saldos?|estrategias?|capacidad|progreso|ingresos?|gastos?)\\b|(?:obligacion(?:es)?|deudas?|pagos?|saldos?|vencimientos?)\\s+registrad[oa]s?|datos financieros actuales|(?:mas\\s+proxim[oa]|cual|que)\\s+(?:a\\s+)?venc(?:er|e|en)).*");
         boolean finance=q.matches("(?s).*(saldo|deuda|obligacion|tasa|pago|capacidad|estrategia|ingreso|gasto|vencimiento|vencer|vence|vencen|priorizar|financial|finance|analysis).*");
         var roles=EnumSet.noneOf(Role.class);
         if(document||concept)roles.add(Role.RAG);
@@ -81,7 +81,7 @@ public final class AgentContracts {
         if(!operational&&!document&&(personal||finance&&!concept))roles.add(Role.FINANCIAL);
         if(personal&&concept&&!document)roles.add(Role.FINANCIAL);
         if(personal&&document&&!operational)roles.add(Role.FINANCIAL);
-        if(personal&&operational&&q.matches("(?s).*(analiza|interpreta|contrasta|compara|saldo|vencimiento|vencer).*"))roles.add(Role.FINANCIAL);
+        if(personal&&operational&&q.matches("(?s).*(analiza|interpreta|contrasta|compara|prioriz\\w*|saldo|vencimiento|vencer).*"))roles.add(Role.FINANCIAL);
         if(operational&&!concept&&(!document||q.matches("(?s).*(?:como|donde)\\s+(?:se\\s+|puedo\\s+)?(?:carg\\w*|sub\\w*|elimin\\w*|borr\\w*).*")))roles.remove(Role.RAG);
         return Collections.unmodifiableSet(roles);
     }
