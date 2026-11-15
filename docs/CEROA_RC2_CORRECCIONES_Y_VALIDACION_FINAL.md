@@ -139,6 +139,12 @@ HEAD recibido f5a0866fcd9b192902effea05505bddf35745d96; base main observada 8c6a
 
 Commits funcionales: 4f5b2fe (modalidad), 8d110e0 (HTTP/contrato proveedor), 934f0f3 (compatibilidad sin inferir modalidad). Los siguientes commits consolidan configuración demo, aclaraciones e inventario de evidencia. Publicación y verificación remota se registran en el cierre de este apartado. No se publica ningún binario ni dato privado.
 
+### Cierre de publicación
+
+Push normal realizado correctamente hasta `f4d62274589d820ee1fd1209bc95ebf2f0917353`, incluyendo los tres commits funcionales, `d11988dcd0c73e01549750eb9dbc2fd9ce3a6fbd` de configuración reversible y `f4d6227` de informe/evidencias. Se actualizó título y descripción del PR #1 a RC2, con terminología correcta y resultados Gemini completos/parciales/abstenciones visibles. La lectura posterior de GitHub confirma abierto, **draft=true**, **merged=false**, **mergeable=true**; base main sin cambios en `8c6ac23939211228e58112e92b010bd675f7ba86`. El valor transitorio no fusionable durante el recálculo inicial de GitHub se resolvió en esa lectura posterior, sin cambios de código.
+
+Este cierre se publica en un commit documental posterior mediante push normal; no altera el backend, el JAR ni su manifiesto fuente. La comprobación de integridad posterior confirmó que el manifiesto de entrega sigue idéntico. [Registro de publicación](benchmarks/ceroa-rc2-2026-11-14/publication.json). La autorización de integración/merge permanece pendiente del usuario.
+
 ## J. Estado productivo
 
 No se consultó ni modificó Supabase en este bloque; no se aplicó V31 real ni se arrancaron los cinco contenedores operativos originales. Sus IDs, estado detenido, marcas de arranque y reinicios coinciden con el snapshot inicial. No hubo publicación de workflows operativos, modificación de credenciales, consumo de eventos Sheets, pagos, reservas ni correos reales; no hubo reprocesamiento documental real. El preflight anterior de V30/V31 ausente y siete eventos SHEETS/PENDING es evidencia histórica fechada, no una lectura nueva.

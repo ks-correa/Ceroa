@@ -1,5 +1,5 @@
 {
-  "files": 33,
+  "files": 35,
   "findings": [],
   "forbidden": [],
   "limitations": "Pattern scan plus manual review; synthetic fixture identifiers and public artifact hashes permitted."
