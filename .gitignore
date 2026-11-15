@@ -17,6 +17,10 @@ tmp/
 *.sqlite-wal
 # Private backup keys and decrypted restore output.
 *.key
+*.pem
+*.p12
+*.luks
 /backups/n8n/restored/
 /backups/migration/
+/backups/migration-keys/
 .DS_Store
