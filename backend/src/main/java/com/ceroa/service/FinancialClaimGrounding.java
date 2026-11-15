@@ -45,6 +45,8 @@ final class FinancialClaimGrounding {
         String parent=path.substring(0,Math.max(0,path.lastIndexOf('/')));
         boolean document=path.startsWith("financialDocuments/");
         if(document&&path.matches(".*/(?:context|quote|kindHint|transactionReference)$"))return false;
+        if(document&&"RATE".equals(sibling(facts,parent,"kind"))&&
+            !DocumentRateMode.consistent(sibling(facts,parent,"rateMode"),sibling(facts,parent,"quote"),sibling(facts,parent,"context")))return false;
         if(path.contains("/verifiedData/analysis/facts/")&&!sibling(facts,parent,"validationStatus").isEmpty()&&
             !sibling(facts,parent,"validationStatus").equals("VERIFIED"))return false;
         int boundary=Math.max(answer.lastIndexOf('\n',start),Math.max(answer.lastIndexOf(';',start),answer.lastIndexOf('.',start)));
@@ -100,10 +102,13 @@ final class FinancialClaimGrounding {
             if(normalized(context).matches("(?s).*(?:ignora|instrucciones|system prompt|ignore previous|prompt injection).*"))return false;
         }
         String quote=sibling(facts,parent,"quote");
-        String normalizedContext=normalized(context+" "+quote);
-        String inferredRateMode=normalizedContext.contains("efectiva anual")?" EA":normalizedContext.contains("efectiva mensual")?" EM":normalizedContext.contains("nominal anual")?" NAMV":normalizedContext.contains("nominal mensual")?" NMV":"";
-        String unit=context+" "+quote+" "+sibling(facts,parent,"currency")+" "+sibling(facts,parent,"rateMode")+inferredRateMode;
-        for(String token:List.of("COP","USD","EUR","EA","EM","MV","NMV","NAMV")) {
+        String rateMode=sibling(facts,parent,"rateMode");
+        if(sourceConcept.equals("rate")) {
+            if(rateMode.isEmpty())rateMode=DocumentRateMode.unique(context+" "+quote);
+            if(!DocumentRateMode.consistent(rateMode,context,quote,effectiveLine))return false;
+        }
+        String unit=context+" "+quote+" "+sibling(facts,parent,"currency");
+        for(String token:List.of("COP","USD","EUR")) {
             var p=Pattern.compile("(?i)(?<![a-z])"+token+"(?![a-z])");
             if(p.matcher(effectiveLine).find()&&!p.matcher(unit).find())return false;
         }

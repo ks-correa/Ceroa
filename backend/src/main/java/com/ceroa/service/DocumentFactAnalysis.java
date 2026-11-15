@@ -37,7 +37,7 @@ public final class DocumentFactAnalysis {
     public static Analysis analyze(List<Document> documents,List<Fact> input,Map<UUID,UUID> debts,Set<Kind> requestedKinds){
         var docs=new HashMap<UUID,Document>();for(var d:documents)docs.put(d.id(),d);
         boolean generalStatement=requestedKinds!=null&&requestedKinds.equals(STATEMENT_NUMERIC_KINDS);
-        var scopedInput=input.stream().filter(f->docs.containsKey(f.documentId())&&docs.get(f.documentId()).version()==f.documentVersion()).toList();
+        var scopedInput=input.stream().filter(f->docs.containsKey(f.documentId())&&docs.get(f.documentId()).version()==f.documentVersion()).map(DocumentRateMode::checked).toList();
         Set<Kind> targetKinds=requestedKinds==null?Set.of():generalStatement
             ?scopedInput.stream().map(Fact::kind).filter(STATEMENT_NUMERIC_KINDS::contains).collect(java.util.stream.Collectors.toCollection(LinkedHashSet::new))
             :requestedKinds;
@@ -54,6 +54,7 @@ public final class DocumentFactAnalysis {
             var matching=facts.stream().filter(f->f.documentId().equals(d.id())&&(targetKinds.isEmpty()||generalStatement||targetKinds.contains(f.kind()))).toList();
             if(matching.isEmpty())limitations.add("MISSING_FACTS");
             if(matching.stream().anyMatch(f->!f.validationStatus().equals("VERIFIED")))limitations.add("UNVERIFIED_VALUES");
+            if(matching.stream().anyMatch(f->f.kind()==Kind.RATE&&DocumentRateMode.modes(f.quote()).size()>1))limitations.add("CONTRADICTORY_RATE_MODALITY");
             if(d.periodStart()==null||d.periodEnd()==null)limitations.add("UNKNOWN_DOCUMENT_PERIOD");
             if(targetKinds.contains(Kind.MOVEMENT))limitations.add("MOVEMENT_COVERAGE_IS_A_SUBSET");
             for(var requested:targetKinds){

@@ -339,6 +339,25 @@ class HybridDocumentIntegrationTest {
         service.update(d.id(),metadata(Identification.CC,9));
         assertThat(db.queryForObject("SELECT count(*) FROM document_financial_facts WHERE document_id=?",Long.class,d.id())).isZero();
     }
+    @Test void rc1PersistedContradictoryRatesAreRebuiltFromCurrentChunksWithoutExternalReindexing()throws Exception {
+        var file=new MockMultipartFile("file","conflicting-rate.docx","application/vnd.openxmlformats-officedocument.wordprocessingml.document",DocumentTextExtractorTest.word("Cabecera\nSaldo: COP 1000\nTasa efectiva anual: 28,70% EM\nFin"));
+        var d=service.upload(file,metadata(Identification.CC,8),true);index();
+        db.update("UPDATE document_financial_facts SET extractor_version=1,rate_mode=CASE WHEN kind='RATE' THEN 'EM' ELSE rate_mode END,validation_status='VERIFIED' WHERE document_id=?",d.id());
+        db.update("UPDATE financial_documents SET metadata=jsonb_set(metadata,'{factsExtraction,extractorVersion}','1') WHERE id=?",d.id());
+        assertThat(documents.financialFacts(a,List.of(d.id()))).isEmpty();
+        clearInvocations(storage,embeddings);
+        var query=new Query(Intent.FACT_ANALYSIS,"Analiza mi extracto financiero",new Filters(null,null,null,null,null,null,d.id()),0,10);
+        assertThat(service.query(query).evidenceStatus()).isEqualTo("PARTIAL");
+        var facts=documents.financialFacts(a,List.of(d.id()));
+        assertThat(facts).filteredOn(f->f.kind()==com.ceroa.api.dto.DocumentFactContracts.Kind.RATE).hasSize(1).allMatch(f->f.validationStatus().equals("NEEDS_REVIEW")&&f.rateMode()==null&&f.extractorVersion()==2);
+        assertThat(facts).anyMatch(f->f.kind()==com.ceroa.api.dto.DocumentFactContracts.Kind.BALANCE&&f.validationStatus().equals("VERIFIED"));
+        assertThat(documents.financialFacts(b,List.of(d.id()))).isEmpty();
+        service.rebuildFacts(d.id());assertThat(service.query(query).evidenceStatus()).isEqualTo("PARTIAL");
+        verify(storage,never()).read(anyString());verify(embeddings,never()).embed(anyString());
+        service.reprocess(d.id());index();
+        assertThat(documents.financialFacts(a,List.of(d.id()))).allMatch(f->f.documentVersion()==service.get(d.id()).version());
+        assertThat(service.query(query).evidenceStatus()).isEqualTo("PARTIAL");
+    }
     @Test void recordComparableDocumentFactRetrievalMeasurements()throws Exception {
         var debt=new Debt();debt.setUser(users.findById(a).orElseThrow());debt.setName("Synthetic benchmark obligation");debt.setEntity("Banco sintético");debt.setType(DebtType.CREDIT_CARD);debt.setCategoryLabel("Tarjeta");debt.setCurrentBalance(new java.math.BigDecimal("1000"));debt.setRateType(RateType.EA);debt=debts.saveAndFlush(debt);
         var fixtures=new ArrayList<Document>();
