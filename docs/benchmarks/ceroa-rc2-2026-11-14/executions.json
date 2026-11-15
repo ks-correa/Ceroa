@@ -1,0 +1,2696 @@
+[
+  {
+    "executionId": "140",
+    "workflowId": "ceroaRagIngest20",
+    "workflowName": "Ceroa - RAG - Ingestión documental",
+    "executionStatus": "success",
+    "startedAt": "2026-11-15 01:07:01.237",
+    "stoppedAt": "2026-11-15 01:07:03.997",
+    "requestId": null,
+    "question": null,
+    "functionalStatus": null,
+    "error": null,
+    "nodes": [
+      {
+        "name": "Evento documental autorizado",
+        "runs": 1,
+        "startTime": 1794704821280,
+        "durationMs": 0
+      },
+      {
+        "name": "Ejecutar procesador compartido",
+        "runs": 1,
+        "startTime": 1794704821281,
+        "durationMs": 2716
+      }
+    ],
+    "url": "http://localhost:5679/workflow/ceroaRagIngest20/executions/140"
+  },
+  {
+    "executionId": "141",
+    "workflowId": "ceroaDocumentProcessor22",
+    "workflowName": "Ceroa - Biblioteca - Procesador compartido",
+    "executionStatus": "success",
+    "startedAt": "2026-11-15 01:07:01.291",
+    "stoppedAt": "2026-11-15 01:07:03.986",
+    "requestId": null,
+    "question": null,
+    "functionalStatus": null,
+    "error": null,
+    "nodes": [
+      {
+        "name": "Procesar cola autorizada",
+        "runs": 1,
+        "startTime": 1794704821307,
+        "durationMs": 1
+      },
+      {
+        "name": "Supabase · Configuración del índice",
+        "runs": 1,
+        "startTime": 1794704821308,
+        "durationMs": 9
+      },
+      {
+        "name": "Verificar contrato del índice",
+        "runs": 1,
+        "startTime": 1794704821317,
+        "durationMs": 36
+      },
+      {
+        "name": "Tomar trabajo",
+        "runs": 1,
+        "startTime": 1794704821353,
+        "durationMs": 68
+      },
+      {
+        "name": "Comprobar trabajo",
+        "runs": 1,
+        "startTime": 1794704821421,
+        "durationMs": 9
+      },
+      {
+        "name": "Proponer metadatos sin herramientas",
+        "runs": 1,
+        "startTime": 1794704821430,
+        "durationMs": 1703
+      },
+      {
+        "name": "Gemini metadatos",
+        "runs": 1,
+        "startTime": 1794704821474,
+        "durationMs": 1656
+      },
+      {
+        "name": "Contrato de propuestas",
+        "runs": 1,
+        "startTime": 1794704823132,
+        "durationMs": 1
+      },
+      {
+        "name": "Preparar fragmentos",
+        "runs": 1,
+        "startTime": 1794704823133,
+        "durationMs": 8
+      },
+      {
+        "name": "Embedding de fragmentos",
+        "runs": 1,
+        "startTime": 1794704823141,
+        "durationMs": 735
+      },
+      {
+        "name": "Validar vectores y propuesta",
+        "runs": 1,
+        "startTime": 1794704823876,
+        "durationMs": 10
+      },
+      {
+        "name": "Confirmar índice en Spring Boot",
+        "runs": 1,
+        "startTime": 1794704823887,
+        "durationMs": 99
+      }
+    ],
+    "url": "http://localhost:5679/workflow/ceroaDocumentProcessor22/executions/141"
+  },
+  {
+    "executionId": "142",
+    "workflowId": "ceroaHybridQuery20",
+    "workflowName": "CEROA AI | NEXUS — Supervisor & Router",
+    "executionStatus": "success",
+    "startedAt": "2026-11-15 01:07:48.757",
+    "stoppedAt": "2026-11-15 01:07:53.078",
+    "requestId": "31c92f7c-f95e-42e2-81c1-503fa27ab3c4",
+    "question": "Analiza el extracto financiero que cargué.",
+    "functionalStatus": "COMPLETE",
+    "error": null,
+    "nodes": [
+      {
+        "name": "Recibir consulta",
+        "runs": 1,
+        "startTime": 1794704868803,
+        "durationMs": 0
+      },
+      {
+        "name": "Es audio",
+        "runs": 1,
+        "startTime": 1794704868803,
+        "durationMs": 4
+      },
+      {
+        "name": "Preparar texto",
+        "runs": 1,
+        "startTime": 1794704868807,
+        "durationMs": 10
+      },
+      {
+        "name": "Preparar contexto en Spring Boot",
+        "runs": 1,
+        "startTime": 1794704868817,
+        "durationMs": 20
+      },
+      {
+        "name": "Iniciar orquestación autorizada",
+        "runs": 1,
+        "startTime": 1794704868838,
+        "durationMs": 19
+      },
+      {
+        "name": "Iniciar medición del agente",
+        "runs": 1,
+        "startTime": 1794704868857,
+        "durationMs": 2
+      },
+      {
+        "name": "Gemini Ceroa",
+        "runs": 2,
+        "startTime": 1794704868880,
+        "durationMs": 1612
+      },
+      {
+        "name": "Delegar a ORACLE",
+        "runs": 1,
+        "startTime": 1794704869758,
+        "durationMs": 2496
+      },
+      {
+        "name": "NEXUS",
+        "runs": 1,
+        "startTime": 1794704872254,
+        "durationMs": 752
+      },
+      {
+        "name": "Contrato de respuesta",
+        "runs": 1,
+        "startTime": 1794704873004,
+        "durationMs": 1
+      },
+      {
+        "name": "Registrar medición sin contenido",
+        "runs": 1,
+        "startTime": 1794704873006,
+        "durationMs": 15
+      },
+      {
+        "name": "Conservar respuesta del agente",
+        "runs": 1,
+        "startTime": 1794704873022,
+        "durationMs": 1
+      },
+      {
+        "name": "Validar respuesta",
+        "runs": 1,
+        "startTime": 1794704873023,
+        "durationMs": 6
+      },
+      {
+        "name": "Revisar borrador con evidencia",
+        "runs": 1,
+        "startTime": 1794704873029,
+        "durationMs": 22
+      },
+      {
+        "name": "Borrador respaldado",
+        "runs": 1,
+        "startTime": 1794704873051,
+        "durationMs": 1
+      },
+      {
+        "name": "Validar evidencia en Spring Boot",
+        "runs": 1,
+        "startTime": 1794704873052,
+        "durationMs": 23
+      },
+      {
+        "name": "Devolver respuesta",
+        "runs": 1,
+        "startTime": 1794704873076,
+        "durationMs": 2
+      }
+    ],
+    "url": "http://localhost:5679/workflow/ceroaHybridQuery20/executions/142"
+  },
+  {
+    "executionId": "143",
+    "workflowId": "ceroaKnowledgeAgent30",
+    "workflowName": "CEROA AI | ORACLE — Knowledge & RAG",
+    "executionStatus": "success",
+    "startedAt": "2026-11-15 01:07:49.772",
+    "stoppedAt": "2026-11-15 01:07:52.243",
+    "requestId": "31c92f7c-f95e-42e2-81c1-503fa27ab3c4",
+    "question": "Analiza el extracto financiero seleccionado d26f7f5e-1d94-4fdd-b301-8bd9ad5dea7a y extrae los hechos verificados.",
+    "functionalStatus": "OK",
+    "error": null,
+    "nodes": [
+      {
+        "name": "Recibir delegación",
+        "runs": 1,
+        "startTime": 1794704869784,
+        "durationMs": 0
+      },
+      {
+        "name": "Una solicitud por delegacion",
+        "runs": 1,
+        "startTime": 1794704869784,
+        "durationMs": 4
+      },
+      {
+        "name": "Autorizar alcance",
+        "runs": 1,
+        "startTime": 1794704869789,
+        "durationMs": 24
+      },
+      {
+        "name": "Resultado reutilizable",
+        "runs": 1,
+        "startTime": 1794704869814,
+        "durationMs": 1
+      },
+      {
+        "name": "Gemini Ceroa",
+        "runs": 2,
+        "startTime": 1794704869833,
+        "durationMs": 2275
+      },
+      {
+        "name": "Consultar documentos financieros",
+        "runs": 1,
+        "startTime": 1794704870751,
+        "durationMs": 58
+      },
+      {
+        "name": "ORACLE",
+        "runs": 1,
+        "startTime": 1794704870809,
+        "durationMs": 1384
+      },
+      {
+        "name": "Contrato del especialista",
+        "runs": 1,
+        "startTime": 1794704872192,
+        "durationMs": 0
+      },
+      {
+        "name": "Resultado estructurado presente",
+        "runs": 1,
+        "startTime": 1794704872193,
+        "durationMs": 2
+      },
+      {
+        "name": "Validar resultado en Spring Boot",
+        "runs": 1,
+        "startTime": 1794704872195,
+        "durationMs": 46
+      },
+      {
+        "name": "Resultado autorizado presente",
+        "runs": 1,
+        "startTime": 1794704872241,
+        "durationMs": 1
+      },
+      {
+        "name": "Devolver resultado validado",
+        "runs": 1,
+        "startTime": 1794704872242,
+        "durationMs": 1
+      }
+    ],
+    "url": "http://localhost:5679/workflow/ceroaKnowledgeAgent30/executions/143"
+  },
+  {
+    "executionId": "144",
+    "workflowId": "ceroaDemoDraft",
+    "workflowName": "CEROA AI | AEGIS — Gmail createDraft (SIMULATED)",
+    "executionStatus": "success",
+    "startedAt": "2026-11-15 01:08:12.957",
+    "stoppedAt": "2026-11-15 01:08:13.012",
+    "requestId": null,
+    "question": null,
+    "functionalStatus": null,
+    "error": null,
+    "nodes": [
+      {
+        "name": "AEGIS propuesta vigente y propietario",
+        "runs": 1,
+        "startTime": 1794704892993,
+        "durationMs": 0
+      },
+      {
+        "name": "Gmail createDraft adaptador simulado",
+        "runs": 1,
+        "startTime": 1794704892993,
+        "durationMs": 15
+      },
+      {
+        "name": "Borrador para revision humana",
+        "runs": 1,
+        "startTime": 1794704893009,
+        "durationMs": 3
+      }
+    ],
+    "url": "http://localhost:5679/workflow/ceroaDemoDraft/executions/144"
+  },
+  {
+    "executionId": "145",
+    "workflowId": "ceroaDemoDraft",
+    "workflowName": "CEROA AI | AEGIS — Gmail createDraft (SIMULATED)",
+    "executionStatus": "success",
+    "startedAt": "2026-11-15 01:08:13.297",
+    "stoppedAt": "2026-11-15 01:08:13.340",
+    "requestId": null,
+    "question": null,
+    "functionalStatus": null,
+    "error": null,
+    "nodes": [
+      {
+        "name": "AEGIS propuesta vigente y propietario",
+        "runs": 1,
+        "startTime": 1794704893329,
+        "durationMs": 0
+      },
+      {
+        "name": "Gmail createDraft adaptador simulado",
+        "runs": 1,
+        "startTime": 1794704893330,
+        "durationMs": 8
+      },
+      {
+        "name": "Borrador para revision humana",
+        "runs": 1,
+        "startTime": 1794704893338,
+        "durationMs": 2
+      }
+    ],
+    "url": "http://localhost:5679/workflow/ceroaDemoDraft/executions/145"
+  },
+  {
+    "executionId": "146",
+    "workflowId": "ceroaDemoDraft",
+    "workflowName": "CEROA AI | AEGIS — Gmail createDraft (SIMULATED)",
+    "executionStatus": "success",
+    "startedAt": "2026-11-15 01:08:29.673",
+    "stoppedAt": "2026-11-15 01:08:29.720",
+    "requestId": null,
+    "question": null,
+    "functionalStatus": null,
+    "error": null,
+    "nodes": [
+      {
+        "name": "AEGIS propuesta vigente y propietario",
+        "runs": 1,
+        "startTime": 1794704909708,
+        "durationMs": 0
+      },
+      {
+        "name": "Gmail createDraft adaptador simulado",
+        "runs": 1,
+        "startTime": 1794704909708,
+        "durationMs": 10
+      },
+      {
+        "name": "Borrador para revision humana",
+        "runs": 1,
+        "startTime": 1794704909718,
+        "durationMs": 2
+      }
+    ],
+    "url": "http://localhost:5679/workflow/ceroaDemoDraft/executions/146"
+  },
+  {
+    "executionId": "147",
+    "workflowId": "ceroaDemoDraft",
+    "workflowName": "CEROA AI | AEGIS — Gmail createDraft (SIMULATED)",
+    "executionStatus": "success",
+    "startedAt": "2026-11-15 01:08:29.963",
+    "stoppedAt": "2026-11-15 01:08:30.005",
+    "requestId": null,
+    "question": null,
+    "functionalStatus": null,
+    "error": null,
+    "nodes": [
+      {
+        "name": "AEGIS propuesta vigente y propietario",
+        "runs": 1,
+        "startTime": 1794704909995,
+        "durationMs": 0
+      },
+      {
+        "name": "Gmail createDraft adaptador simulado",
+        "runs": 1,
+        "startTime": 1794704909995,
+        "durationMs": 8
+      },
+      {
+        "name": "Borrador para revision humana",
+        "runs": 1,
+        "startTime": 1794704910004,
+        "durationMs": 1
+      }
+    ],
+    "url": "http://localhost:5679/workflow/ceroaDemoDraft/executions/147"
+  },
+  {
+    "executionId": "148",
+    "workflowId": "ceroaHybridQuery20",
+    "workflowName": "CEROA AI | NEXUS — Supervisor & Router",
+    "executionStatus": "success",
+    "startedAt": "2026-11-15 01:08:59.154",
+    "stoppedAt": "2026-11-15 01:09:06.015",
+    "requestId": "69f6714d-35de-4545-883f-00bcd83313f2",
+    "question": "Analiza mi extracto financiero e identifica las inconsistencias de su tasa. No conviertas ni selecciones una modalidad contradictoria.",
+    "functionalStatus": "FAILED",
+    "error": null,
+    "nodes": [
+      {
+        "name": "Recibir consulta",
+        "runs": 1,
+        "startTime": 1794704939191,
+        "durationMs": 0
+      },
+      {
+        "name": "Es audio",
+        "runs": 1,
+        "startTime": 1794704939192,
+        "durationMs": 3
+      },
+      {
+        "name": "Preparar texto",
+        "runs": 1,
+        "startTime": 1794704939195,
+        "durationMs": 8
+      },
+      {
+        "name": "Preparar contexto en Spring Boot",
+        "runs": 1,
+        "startTime": 1794704939203,
+        "durationMs": 13
+      },
+      {
+        "name": "Iniciar orquestación autorizada",
+        "runs": 1,
+        "startTime": 1794704939216,
+        "durationMs": 10
+      },
+      {
+        "name": "Iniciar medición del agente",
+        "runs": 1,
+        "startTime": 1794704939227,
+        "durationMs": 1
+      },
+      {
+        "name": "Gemini Ceroa",
+        "runs": 2,
+        "startTime": 1794704939245,
+        "durationMs": 1503
+      },
+      {
+        "name": "Delegar a ORACLE",
+        "runs": 1,
+        "startTime": 1794704940081,
+        "durationMs": 5201
+      },
+      {
+        "name": "NEXUS",
+        "runs": 1,
+        "startTime": 1794704945282,
+        "durationMs": 684
+      },
+      {
+        "name": "Contrato de respuesta",
+        "runs": 1,
+        "startTime": 1794704945964,
+        "durationMs": 0
+      },
+      {
+        "name": "Registrar medición sin contenido",
+        "runs": 1,
+        "startTime": 1794704945966,
+        "durationMs": 11
+      },
+      {
+        "name": "Conservar respuesta del agente",
+        "runs": 1,
+        "startTime": 1794704945977,
+        "durationMs": 2
+      },
+      {
+        "name": "Validar respuesta",
+        "runs": 1,
+        "startTime": 1794704945979,
+        "durationMs": 6
+      },
+      {
+        "name": "Revisar borrador con evidencia",
+        "runs": 1,
+        "startTime": 1794704945986,
+        "durationMs": 12
+      },
+      {
+        "name": "Borrador respaldado",
+        "runs": 1,
+        "startTime": 1794704945999,
+        "durationMs": 1
+      },
+      {
+        "name": "Validar evidencia en Spring Boot",
+        "runs": 1,
+        "startTime": 1794704946000,
+        "durationMs": 13
+      },
+      {
+        "name": "Devolver respuesta",
+        "runs": 1,
+        "startTime": 1794704946013,
+        "durationMs": 2
+      }
+    ],
+    "url": "http://localhost:5679/workflow/ceroaHybridQuery20/executions/148"
+  },
+  {
+    "executionId": "149",
+    "workflowId": "ceroaKnowledgeAgent30",
+    "workflowName": "CEROA AI | ORACLE — Knowledge & RAG",
+    "executionStatus": "success",
+    "startedAt": "2026-11-15 01:09:00.096",
+    "stoppedAt": "2026-11-15 01:09:05.271",
+    "requestId": "69f6714d-35de-4545-883f-00bcd83313f2",
+    "question": "Analiza el extracto financiero seleccionado e identifica las inconsistencias de su tasa sin convertir ni seleccionar una modalidad contradictoria.",
+    "functionalStatus": "FAILED",
+    "error": null,
+    "nodes": [
+      {
+        "name": "Recibir delegación",
+        "runs": 1,
+        "startTime": 1794704940106,
+        "durationMs": 1
+      },
+      {
+        "name": "Una solicitud por delegacion",
+        "runs": 1,
+        "startTime": 1794704940107,
+        "durationMs": 6
+      },
+      {
+        "name": "Autorizar alcance",
+        "runs": 1,
+        "startTime": 1794704940114,
+        "durationMs": 18
+      },
+      {
+        "name": "Resultado reutilizable",
+        "runs": 1,
+        "startTime": 1794704940132,
+        "durationMs": 2
+      },
+      {
+        "name": "Gemini Ceroa",
+        "runs": 4,
+        "startTime": 1794704940152,
+        "durationMs": 4849
+      },
+      {
+        "name": "Consultar documentos financieros",
+        "runs": 1,
+        "startTime": 1794704941323,
+        "durationMs": 31
+      },
+      {
+        "name": "Consultar documentación aprobada",
+        "runs": 3,
+        "startTime": 1794704942123,
+        "durationMs": 94
+      },
+      {
+        "name": "ORACLE",
+        "runs": 1,
+        "startTime": 1794704945231,
+        "durationMs": 6
+      },
+      {
+        "name": "Resultado estructurado presente",
+        "runs": 1,
+        "startTime": 1794704945237,
+        "durationMs": 1
+      },
+      {
+        "name": "Devolver fallo recuperable",
+        "runs": 1,
+        "startTime": 1794704945238,
+        "durationMs": 33
+      }
+    ],
+    "url": "http://localhost:5679/workflow/ceroaKnowledgeAgent30/executions/149"
+  },
+  {
+    "executionId": "150",
+    "workflowId": "ceroaHybridQuery20",
+    "workflowName": "CEROA AI | NEXUS — Supervisor & Router",
+    "executionStatus": "success",
+    "startedAt": "2026-11-15 01:10:12.078",
+    "stoppedAt": "2026-11-15 01:10:17.315",
+    "requestId": "b77319dd-b29c-41f0-b850-63f3f891b747",
+    "question": "¿Cuál de mis deudas debería pagar primero y por qué?",
+    "functionalStatus": "COMPLETE",
+    "error": null,
+    "nodes": [
+      {
+        "name": "Recibir consulta",
+        "runs": 1,
+        "startTime": 1794705012115,
+        "durationMs": 0
+      },
+      {
+        "name": "Es audio",
+        "runs": 1,
+        "startTime": 1794705012115,
+        "durationMs": 3
+      },
+      {
+        "name": "Preparar texto",
+        "runs": 1,
+        "startTime": 1794705012118,
+        "durationMs": 7
+      },
+      {
+        "name": "Preparar contexto en Spring Boot",
+        "runs": 1,
+        "startTime": 1794705012125,
+        "durationMs": 14
+      },
+      {
+        "name": "Iniciar orquestación autorizada",
+        "runs": 1,
+        "startTime": 1794705012139,
+        "durationMs": 10
+      },
+      {
+        "name": "Iniciar medición del agente",
+        "runs": 1,
+        "startTime": 1794705012149,
+        "durationMs": 3
+      },
+      {
+        "name": "Gemini Ceroa",
+        "runs": 2,
+        "startTime": 1794705012165,
+        "durationMs": 1715
+      },
+      {
+        "name": "Delegar a ATLAS",
+        "runs": 1,
+        "startTime": 1794705013064,
+        "durationMs": 3353
+      },
+      {
+        "name": "NEXUS",
+        "runs": 1,
+        "startTime": 1794705016417,
+        "durationMs": 832
+      },
+      {
+        "name": "Contrato de respuesta",
+        "runs": 1,
+        "startTime": 1794705017248,
+        "durationMs": 0
+      },
+      {
+        "name": "Registrar medición sin contenido",
+        "runs": 1,
+        "startTime": 1794705017249,
+        "durationMs": 13
+      },
+      {
+        "name": "Conservar respuesta del agente",
+        "runs": 1,
+        "startTime": 1794705017262,
+        "durationMs": 1
+      },
+      {
+        "name": "Validar respuesta",
+        "runs": 1,
+        "startTime": 1794705017263,
+        "durationMs": 5
+      },
+      {
+        "name": "Revisar borrador con evidencia",
+        "runs": 1,
+        "startTime": 1794705017269,
+        "durationMs": 21
+      },
+      {
+        "name": "Borrador respaldado",
+        "runs": 1,
+        "startTime": 1794705017290,
+        "durationMs": 2
+      },
+      {
+        "name": "Validar evidencia en Spring Boot",
+        "runs": 1,
+        "startTime": 1794705017292,
+        "durationMs": 21
+      },
+      {
+        "name": "Devolver respuesta",
+        "runs": 1,
+        "startTime": 1794705017314,
+        "durationMs": 1
+      }
+    ],
+    "url": "http://localhost:5679/workflow/ceroaHybridQuery20/executions/150"
+  },
+  {
+    "executionId": "151",
+    "workflowId": "ceroaFinancialAgent30",
+    "workflowName": "CEROA AI | ATLAS — Financial Intelligence",
+    "executionStatus": "success",
+    "startedAt": "2026-11-15 01:10:13.082",
+    "stoppedAt": "2026-11-15 01:10:16.408",
+    "requestId": "b77319dd-b29c-41f0-b850-63f3f891b747",
+    "question": "Indicar cuál de las deudas se debe pagar primero y por qué, priorizando según los datos financieros actuales.",
+    "functionalStatus": "OK",
+    "error": null,
+    "nodes": [
+      {
+        "name": "Recibir delegación",
+        "runs": 1,
+        "startTime": 1794705013098,
+        "durationMs": 0
+      },
+      {
+        "name": "Una solicitud por delegacion",
+        "runs": 1,
+        "startTime": 1794705013098,
+        "durationMs": 7
+      },
+      {
+        "name": "Autorizar alcance",
+        "runs": 1,
+        "startTime": 1794705013105,
+        "durationMs": 13
+      },
+      {
+        "name": "Resultado reutilizable",
+        "runs": 1,
+        "startTime": 1794705013119,
+        "durationMs": 1
+      },
+      {
+        "name": "Gemini Ceroa",
+        "runs": 3,
+        "startTime": 1794705013140,
+        "durationMs": 3132
+      },
+      {
+        "name": "Consultar datos financieros",
+        "runs": 2,
+        "startTime": 1794705014003,
+        "durationMs": 61
+      },
+      {
+        "name": "ATLAS",
+        "runs": 1,
+        "startTime": 1794705014786,
+        "durationMs": 1589
+      },
+      {
+        "name": "Contrato del especialista",
+        "runs": 1,
+        "startTime": 1794705016374,
+        "durationMs": 0
+      },
+      {
+        "name": "Resultado estructurado presente",
+        "runs": 1,
+        "startTime": 1794705016375,
+        "durationMs": 1
+      },
+      {
+        "name": "Validar resultado en Spring Boot",
+        "runs": 1,
+        "startTime": 1794705016376,
+        "durationMs": 29
+      },
+      {
+        "name": "Resultado autorizado presente",
+        "runs": 1,
+        "startTime": 1794705016405,
+        "durationMs": 1
+      },
+      {
+        "name": "Devolver resultado validado",
+        "runs": 1,
+        "startTime": 1794705016406,
+        "durationMs": 1
+      }
+    ],
+    "url": "http://localhost:5679/workflow/ceroaFinancialAgent30/executions/151"
+  },
+  {
+    "executionId": "152",
+    "workflowId": "ceroaHybridQuery20",
+    "workflowName": "CEROA AI | NEXUS — Supervisor & Router",
+    "executionStatus": "success",
+    "startedAt": "2026-11-15 01:11:23.379",
+    "stoppedAt": "2026-11-15 01:11:30.647",
+    "requestId": "c211a4c9-d9f0-4f31-b75d-5a1672640fd1",
+    "question": "Compara mi extracto financiero con mis obligaciones registradas y dime qué deuda debería priorizar.",
+    "functionalStatus": "PARTIAL",
+    "error": null,
+    "nodes": [
+      {
+        "name": "Recibir consulta",
+        "runs": 1,
+        "startTime": 1794705083412,
+        "durationMs": 1
+      },
+      {
+        "name": "Es audio",
+        "runs": 1,
+        "startTime": 1794705083413,
+        "durationMs": 3
+      },
+      {
+        "name": "Preparar texto",
+        "runs": 1,
+        "startTime": 1794705083416,
+        "durationMs": 6
+      },
+      {
+        "name": "Preparar contexto en Spring Boot",
+        "runs": 1,
+        "startTime": 1794705083422,
+        "durationMs": 10
+      },
+      {
+        "name": "Iniciar orquestación autorizada",
+        "runs": 1,
+        "startTime": 1794705083433,
+        "durationMs": 10
+      },
+      {
+        "name": "Iniciar medición del agente",
+        "runs": 1,
+        "startTime": 1794705083443,
+        "durationMs": 2
+      },
+      {
+        "name": "Gemini Ceroa",
+        "runs": 3,
+        "startTime": 1794705083460,
+        "durationMs": 2444
+      },
+      {
+        "name": "Delegar a ORACLE",
+        "runs": 1,
+        "startTime": 1794705084192,
+        "durationMs": 2026
+      },
+      {
+        "name": "Delegar a ATLAS",
+        "runs": 1,
+        "startTime": 1794705087015,
+        "durationMs": 2614
+      },
+      {
+        "name": "NEXUS",
+        "runs": 1,
+        "startTime": 1794705089630,
+        "durationMs": 956
+      },
+      {
+        "name": "Contrato de respuesta",
+        "runs": 1,
+        "startTime": 1794705090585,
+        "durationMs": 0
+      },
+      {
+        "name": "Registrar medición sin contenido",
+        "runs": 1,
+        "startTime": 1794705090587,
+        "durationMs": 11
+      },
+      {
+        "name": "Conservar respuesta del agente",
+        "runs": 1,
+        "startTime": 1794705090598,
+        "durationMs": 1
+      },
+      {
+        "name": "Validar respuesta",
+        "runs": 1,
+        "startTime": 1794705090600,
+        "durationMs": 5
+      },
+      {
+        "name": "Revisar borrador con evidencia",
+        "runs": 1,
+        "startTime": 1794705090605,
+        "durationMs": 18
+      },
+      {
+        "name": "Borrador respaldado",
+        "runs": 1,
+        "startTime": 1794705090623,
+        "durationMs": 2
+      },
+      {
+        "name": "Validar evidencia en Spring Boot",
+        "runs": 1,
+        "startTime": 1794705090625,
+        "durationMs": 20
+      },
+      {
+        "name": "Devolver respuesta",
+        "runs": 1,
+        "startTime": 1794705090645,
+        "durationMs": 2
+      }
+    ],
+    "url": "http://localhost:5679/workflow/ceroaHybridQuery20/executions/152"
+  },
+  {
+    "executionId": "153",
+    "workflowId": "ceroaKnowledgeAgent30",
+    "workflowName": "CEROA AI | ORACLE — Knowledge & RAG",
+    "executionStatus": "success",
+    "startedAt": "2026-11-15 01:11:24.206",
+    "stoppedAt": "2026-11-15 01:11:26.201",
+    "requestId": "c211a4c9-d9f0-4f31-b75d-5a1672640fd1",
+    "question": "Consulta y compara los documentos financieros y extractos disponibles para extraer los hechos relevantes sobre obligaciones y extractos.",
+    "functionalStatus": "OK",
+    "error": null,
+    "nodes": [
+      {
+        "name": "Recibir delegación",
+        "runs": 1,
+        "startTime": 1794705084213,
+        "durationMs": 0
+      },
+      {
+        "name": "Una solicitud por delegacion",
+        "runs": 1,
+        "startTime": 1794705084213,
+        "durationMs": 5
+      },
+      {
+        "name": "Autorizar alcance",
+        "runs": 1,
+        "startTime": 1794705084218,
+        "durationMs": 11
+      },
+      {
+        "name": "Resultado reutilizable",
+        "runs": 1,
+        "startTime": 1794705084229,
+        "durationMs": 1
+      },
+      {
+        "name": "Gemini Ceroa",
+        "runs": 2,
+        "startTime": 1794705084241,
+        "durationMs": 1857
+      },
+      {
+        "name": "Consultar documentos financieros",
+        "runs": 1,
+        "startTime": 1794705084995,
+        "durationMs": 23
+      },
+      {
+        "name": "ORACLE",
+        "runs": 1,
+        "startTime": 1794705085018,
+        "durationMs": 1129
+      },
+      {
+        "name": "Contrato del especialista",
+        "runs": 1,
+        "startTime": 1794705086145,
+        "durationMs": 1
+      },
+      {
+        "name": "Resultado estructurado presente",
+        "runs": 1,
+        "startTime": 1794705086147,
+        "durationMs": 2
+      },
+      {
+        "name": "Validar resultado en Spring Boot",
+        "runs": 1,
+        "startTime": 1794705086149,
+        "durationMs": 47
+      },
+      {
+        "name": "Resultado autorizado presente",
+        "runs": 1,
+        "startTime": 1794705086197,
+        "durationMs": 2
+      },
+      {
+        "name": "Devolver resultado validado",
+        "runs": 1,
+        "startTime": 1794705086199,
+        "durationMs": 2
+      }
+    ],
+    "url": "http://localhost:5679/workflow/ceroaKnowledgeAgent30/executions/153"
+  },
+  {
+    "executionId": "154",
+    "workflowId": "ceroaFinancialAgent30",
+    "workflowName": "CEROA AI | ATLAS — Financial Intelligence",
+    "executionStatus": "success",
+    "startedAt": "2026-11-15 01:11:27.026",
+    "stoppedAt": "2026-11-15 01:11:29.621",
+    "requestId": "c211a4c9-d9f0-4f31-b75d-5a1672640fd1",
+    "question": "Interpreta las obligaciones registradas, saldos, tasas y determina la estrategia y la deuda que se debe priorizar.",
+    "functionalStatus": "FAILED",
+    "error": null,
+    "nodes": [
+      {
+        "name": "Recibir delegación",
+        "runs": 1,
+        "startTime": 1794705087034,
+        "durationMs": 0
+      },
+      {
+        "name": "Una solicitud por delegacion",
+        "runs": 1,
+        "startTime": 1794705087034,
+        "durationMs": 5
+      },
+      {
+        "name": "Autorizar alcance",
+        "runs": 1,
+        "startTime": 1794705087039,
+        "durationMs": 12
+      },
+      {
+        "name": "Resultado reutilizable",
+        "runs": 1,
+        "startTime": 1794705087051,
+        "durationMs": 2
+      },
+      {
+        "name": "Gemini Ceroa",
+        "runs": 3,
+        "startTime": 1794705087070,
+        "durationMs": 2411
+      },
+      {
+        "name": "Consultar datos financieros",
+        "runs": 2,
+        "startTime": 1794705087609,
+        "durationMs": 46
+      },
+      {
+        "name": "ATLAS",
+        "runs": 1,
+        "startTime": 1794705088450,
+        "durationMs": 1127
+      },
+      {
+        "name": "Contrato del especialista",
+        "runs": 1,
+        "startTime": 1794705089576,
+        "durationMs": 0
+      },
+      {
+        "name": "Resultado estructurado presente",
+        "runs": 1,
+        "startTime": 1794705089577,
+        "durationMs": 1
+      },
+      {
+        "name": "Validar resultado en Spring Boot",
+        "runs": 1,
+        "startTime": 1794705089578,
+        "durationMs": 31
+      },
+      {
+        "name": "Resultado autorizado presente",
+        "runs": 1,
+        "startTime": 1794705089610,
+        "durationMs": 1
+      },
+      {
+        "name": "Devolver fallo recuperable",
+        "runs": 1,
+        "startTime": 1794705089611,
+        "durationMs": 9
+      }
+    ],
+    "url": "http://localhost:5679/workflow/ceroaFinancialAgent30/executions/154"
+  },
+  {
+    "executionId": "155",
+    "workflowId": "ceroaHybridQuery20",
+    "workflowName": "CEROA AI | NEXUS — Supervisor & Router",
+    "executionStatus": "success",
+    "startedAt": "2026-11-15 01:12:36.706",
+    "stoppedAt": "2026-11-15 01:12:47.665",
+    "requestId": "b195dca9-e0ac-4e5e-a2cf-63b618e9204f",
+    "question": "Compara mi extracto financiero con mis obligaciones registradas para decirme qué deuda priorizar y explícame cómo registrar un pago en Ceroa.",
+    "functionalStatus": "PARTIAL",
+    "error": null,
+    "nodes": [
+      {
+        "name": "Recibir consulta",
+        "runs": 1,
+        "startTime": 1794705156745,
+        "durationMs": 0
+      },
+      {
+        "name": "Es audio",
+        "runs": 1,
+        "startTime": 1794705156745,
+        "durationMs": 3
+      },
+      {
+        "name": "Preparar texto",
+        "runs": 1,
+        "startTime": 1794705156748,
+        "durationMs": 11
+      },
+      {
+        "name": "Preparar contexto en Spring Boot",
+        "runs": 1,
+        "startTime": 1794705156759,
+        "durationMs": 12
+      },
+      {
+        "name": "Iniciar orquestación autorizada",
+        "runs": 1,
+        "startTime": 1794705156772,
+        "durationMs": 9
+      },
+      {
+        "name": "Iniciar medición del agente",
+        "runs": 1,
+        "startTime": 1794705156781,
+        "durationMs": 2
+      },
+      {
+        "name": "Gemini Ceroa",
+        "runs": 4,
+        "startTime": 1794705156797,
+        "durationMs": 4481
+      },
+      {
+        "name": "Delegar a ORACLE",
+        "runs": 1,
+        "startTime": 1794705158682,
+        "durationMs": 2476
+      },
+      {
+        "name": "Delegar a ATLAS",
+        "runs": 1,
+        "startTime": 1794705161890,
+        "durationMs": 2785
+      },
+      {
+        "name": "Delegar a LUMEN",
+        "runs": 1,
+        "startTime": 1794705165585,
+        "durationMs": 1021
+      },
+      {
+        "name": "NEXUS",
+        "runs": 1,
+        "startTime": 1794705166606,
+        "durationMs": 1003
+      },
+      {
+        "name": "Contrato de respuesta",
+        "runs": 1,
+        "startTime": 1794705167607,
+        "durationMs": 0
+      },
+      {
+        "name": "Registrar medición sin contenido",
+        "runs": 1,
+        "startTime": 1794705167609,
+        "durationMs": 11
+      },
+      {
+        "name": "Conservar respuesta del agente",
+        "runs": 1,
+        "startTime": 1794705167620,
+        "durationMs": 1
+      },
+      {
+        "name": "Validar respuesta",
+        "runs": 1,
+        "startTime": 1794705167621,
+        "durationMs": 6
+      },
+      {
+        "name": "Revisar borrador con evidencia",
+        "runs": 1,
+        "startTime": 1794705167627,
+        "durationMs": 16
+      },
+      {
+        "name": "Borrador respaldado",
+        "runs": 1,
+        "startTime": 1794705167643,
+        "durationMs": 1
+      },
+      {
+        "name": "Validar evidencia en Spring Boot",
+        "runs": 1,
+        "startTime": 1794705167644,
+        "durationMs": 18
+      },
+      {
+        "name": "Devolver respuesta",
+        "runs": 1,
+        "startTime": 1794705167662,
+        "durationMs": 3
+      }
+    ],
+    "url": "http://localhost:5679/workflow/ceroaHybridQuery20/executions/155"
+  },
+  {
+    "executionId": "156",
+    "workflowId": "ceroaKnowledgeAgent30",
+    "workflowName": "CEROA AI | ORACLE — Knowledge & RAG",
+    "executionStatus": "success",
+    "startedAt": "2026-11-15 01:12:38.694",
+    "stoppedAt": "2026-11-15 01:12:41.150",
+    "requestId": "b195dca9-e0ac-4e5e-a2cf-63b618e9204f",
+    "question": "Consulta los documentos financieros y extractos disponibles para extraer la información comparativa solicitada.",
+    "functionalStatus": "FAILED",
+    "error": null,
+    "nodes": [
+      {
+        "name": "Recibir delegación",
+        "runs": 1,
+        "startTime": 1794705158701,
+        "durationMs": 0
+      },
+      {
+        "name": "Una solicitud por delegacion",
+        "runs": 1,
+        "startTime": 1794705158702,
+        "durationMs": 2
+      },
+      {
+        "name": "Autorizar alcance",
+        "runs": 1,
+        "startTime": 1794705158704,
+        "durationMs": 14
+      },
+      {
+        "name": "Resultado reutilizable",
+        "runs": 1,
+        "startTime": 1794705158718,
+        "durationMs": 2
+      },
+      {
+        "name": "Gemini Ceroa",
+        "runs": 2,
+        "startTime": 1794705158731,
+        "durationMs": 1535
+      },
+      {
+        "name": "Consultar documentos financieros",
+        "runs": 1,
+        "startTime": 1794705159430,
+        "durationMs": 833
+      },
+      {
+        "name": "ORACLE",
+        "runs": 1,
+        "startTime": 1794705160263,
+        "durationMs": 855
+      },
+      {
+        "name": "Contrato del especialista",
+        "runs": 1,
+        "startTime": 1794705161117,
+        "durationMs": 1
+      },
+      {
+        "name": "Resultado estructurado presente",
+        "runs": 1,
+        "startTime": 1794705161118,
+        "durationMs": 1
+      },
+      {
+        "name": "Validar resultado en Spring Boot",
+        "runs": 1,
+        "startTime": 1794705161119,
+        "durationMs": 20
+      },
+      {
+        "name": "Resultado autorizado presente",
+        "runs": 1,
+        "startTime": 1794705161139,
+        "durationMs": 2
+      },
+      {
+        "name": "Devolver fallo recuperable",
+        "runs": 1,
+        "startTime": 1794705161141,
+        "durationMs": 9
+      }
+    ],
+    "url": "http://localhost:5679/workflow/ceroaKnowledgeAgent30/executions/156"
+  },
+  {
+    "executionId": "157",
+    "workflowId": "ceroaRagEmbedding03",
+    "workflowName": "RA-N8N-003 - Embeddings privados",
+    "executionStatus": "success",
+    "startedAt": "2026-11-15 01:12:39.458",
+    "stoppedAt": "2026-11-15 01:12:40.246",
+    "requestId": null,
+    "question": null,
+    "functionalStatus": null,
+    "error": null,
+    "nodes": [
+      {
+        "name": "Recibir texto autorizado",
+        "runs": 1,
+        "startTime": 1794705159490,
+        "durationMs": 0
+      },
+      {
+        "name": "Validar texto de consulta",
+        "runs": 1,
+        "startTime": 1794705159490,
+        "durationMs": 4
+      },
+      {
+        "name": "Embedding Gemini",
+        "runs": 1,
+        "startTime": 1794705159494,
+        "durationMs": 742
+      },
+      {
+        "name": "Validar dimensiones",
+        "runs": 1,
+        "startTime": 1794705160236,
+        "durationMs": 5
+      },
+      {
+        "name": "Devolver vector",
+        "runs": 1,
+        "startTime": 1794705160241,
+        "durationMs": 5
+      }
+    ],
+    "url": "http://localhost:5679/workflow/ceroaRagEmbedding03/executions/157"
+  },
+  {
+    "executionId": "158",
+    "workflowId": "ceroaFinancialAgent30",
+    "workflowName": "CEROA AI | ATLAS — Financial Intelligence",
+    "executionStatus": "success",
+    "startedAt": "2026-11-15 01:12:41.900",
+    "stoppedAt": "2026-11-15 01:12:44.666",
+    "requestId": "b195dca9-e0ac-4e5e-a2cf-63b618e9204f",
+    "question": "Analiza las obligaciones financieras registradas y determina qué deuda priorizar según los datos actuales.",
+    "functionalStatus": "FAILED",
+    "error": null,
+    "nodes": [
+      {
+        "name": "Recibir delegación",
+        "runs": 1,
+        "startTime": 1794705161908,
+        "durationMs": 1
+      },
+      {
+        "name": "Una solicitud por delegacion",
+        "runs": 1,
+        "startTime": 1794705161909,
+        "durationMs": 4
+      },
+      {
+        "name": "Autorizar alcance",
+        "runs": 1,
+        "startTime": 1794705161913,
+        "durationMs": 13
+      },
+      {
+        "name": "Resultado reutilizable",
+        "runs": 1,
+        "startTime": 1794705161926,
+        "durationMs": 1
+      },
+      {
+        "name": "Gemini Ceroa",
+        "runs": 3,
+        "startTime": 1794705161943,
+        "durationMs": 2619
+      },
+      {
+        "name": "Consultar datos financieros",
+        "runs": 3,
+        "startTime": 1794705162865,
+        "durationMs": 57
+      },
+      {
+        "name": "ATLAS",
+        "runs": 1,
+        "startTime": 1794705164652,
+        "durationMs": 5
+      },
+      {
+        "name": "Resultado estructurado presente",
+        "runs": 1,
+        "startTime": 1794705164657,
+        "durationMs": 0
+      },
+      {
+        "name": "Devolver fallo recuperable",
+        "runs": 1,
+        "startTime": 1794705164658,
+        "durationMs": 8
+      }
+    ],
+    "url": "http://localhost:5679/workflow/ceroaFinancialAgent30/executions/158"
+  },
+  {
+    "executionId": "159",
+    "workflowId": "ceroaSupportAgent30",
+    "workflowName": "CEROA AI | LUMEN — Customer Experience & Support",
+    "executionStatus": "success",
+    "startedAt": "2026-11-15 01:12:45.596",
+    "stoppedAt": "2026-11-15 01:12:46.593",
+    "requestId": "b195dca9-e0ac-4e5e-a2cf-63b618e9204f",
+    "question": "Explica el procedimiento para registrar un pago en Ceroa utilizando la guía de soporte.",
+    "functionalStatus": "OK",
+    "error": null,
+    "nodes": [
+      {
+        "name": "Recibir delegación",
+        "runs": 1,
+        "startTime": 1794705165608,
+        "durationMs": 0
+      },
+      {
+        "name": "Una solicitud por delegacion",
+        "runs": 1,
+        "startTime": 1794705165608,
+        "durationMs": 5
+      },
+      {
+        "name": "Autorizar alcance",
+        "runs": 1,
+        "startTime": 1794705165613,
+        "durationMs": 13
+      },
+      {
+        "name": "Resultado reutilizable",
+        "runs": 1,
+        "startTime": 1794705165627,
+        "durationMs": 1
+      },
+      {
+        "name": "LUMEN",
+        "runs": 1,
+        "startTime": 1794705165628,
+        "durationMs": 933
+      },
+      {
+        "name": "Gemini Ceroa",
+        "runs": 1,
+        "startTime": 1794705165649,
+        "durationMs": 910
+      },
+      {
+        "name": "Contrato del especialista",
+        "runs": 1,
+        "startTime": 1794705166559,
+        "durationMs": 1
+      },
+      {
+        "name": "Resultado estructurado presente",
+        "runs": 1,
+        "startTime": 1794705166561,
+        "durationMs": 1
+      },
+      {
+        "name": "Validar resultado en Spring Boot",
+        "runs": 1,
+        "startTime": 1794705166562,
+        "durationMs": 23
+      },
+      {
+        "name": "Resultado autorizado presente",
+        "runs": 1,
+        "startTime": 1794705166586,
+        "durationMs": 4
+      },
+      {
+        "name": "Devolver resultado validado",
+        "runs": 1,
+        "startTime": 1794705166590,
+        "durationMs": 2
+      }
+    ],
+    "url": "http://localhost:5679/workflow/ceroaSupportAgent30/executions/159"
+  },
+  {
+    "executionId": "160",
+    "workflowId": "ceroaHybridQuery20",
+    "workflowName": "CEROA AI | NEXUS — Supervisor & Router",
+    "executionStatus": "success",
+    "startedAt": "2026-11-15 01:14:27.340",
+    "stoppedAt": "2026-11-15 01:14:31.713",
+    "requestId": "33363b55-4e74-4142-b50b-48ff77797517",
+    "question": "Analiza el extracto financiero que cargué.",
+    "functionalStatus": "FAILED",
+    "error": null,
+    "nodes": [
+      {
+        "name": "Recibir consulta",
+        "runs": 1,
+        "startTime": 1794705267376,
+        "durationMs": 0
+      },
+      {
+        "name": "Es audio",
+        "runs": 1,
+        "startTime": 1794705267376,
+        "durationMs": 3
+      },
+      {
+        "name": "Preparar texto",
+        "runs": 1,
+        "startTime": 1794705267379,
+        "durationMs": 5
+      },
+      {
+        "name": "Preparar contexto en Spring Boot",
+        "runs": 1,
+        "startTime": 1794705267384,
+        "durationMs": 11
+      },
+      {
+        "name": "Iniciar orquestación autorizada",
+        "runs": 1,
+        "startTime": 1794705267395,
+        "durationMs": 7
+      },
+      {
+        "name": "Iniciar medición del agente",
+        "runs": 1,
+        "startTime": 1794705267402,
+        "durationMs": 2
+      },
+      {
+        "name": "Gemini Ceroa",
+        "runs": 2,
+        "startTime": 1794705267418,
+        "durationMs": 1983
+      },
+      {
+        "name": "Delegar a ORACLE",
+        "runs": 1,
+        "startTime": 1794705268652,
+        "durationMs": 2255
+      },
+      {
+        "name": "NEXUS",
+        "runs": 1,
+        "startTime": 1794705270907,
+        "durationMs": 763
+      },
+      {
+        "name": "Contrato de respuesta",
+        "runs": 1,
+        "startTime": 1794705271669,
+        "durationMs": 0
+      },
+      {
+        "name": "Registrar medición sin contenido",
+        "runs": 1,
+        "startTime": 1794705271670,
+        "durationMs": 13
+      },
+      {
+        "name": "Conservar respuesta del agente",
+        "runs": 1,
+        "startTime": 1794705271683,
+        "durationMs": 1
+      },
+      {
+        "name": "Validar respuesta",
+        "runs": 1,
+        "startTime": 1794705271684,
+        "durationMs": 5
+      },
+      {
+        "name": "Revisar borrador con evidencia",
+        "runs": 1,
+        "startTime": 1794705271689,
+        "durationMs": 11
+      },
+      {
+        "name": "Borrador respaldado",
+        "runs": 1,
+        "startTime": 1794705271700,
+        "durationMs": 1
+      },
+      {
+        "name": "Validar evidencia en Spring Boot",
+        "runs": 1,
+        "startTime": 1794705271701,
+        "durationMs": 11
+      },
+      {
+        "name": "Devolver respuesta",
+        "runs": 1,
+        "startTime": 1794705271712,
+        "durationMs": 1
+      }
+    ],
+    "url": "http://localhost:5679/workflow/ceroaHybridQuery20/executions/160"
+  },
+  {
+    "executionId": "161",
+    "workflowId": "ceroaKnowledgeAgent30",
+    "workflowName": "CEROA AI | ORACLE — Knowledge & RAG",
+    "executionStatus": "success",
+    "startedAt": "2026-11-15 01:14:28.666",
+    "stoppedAt": "2026-11-15 01:14:30.897",
+    "requestId": "33363b55-4e74-4142-b50b-48ff77797517",
+    "question": "Analiza el extracto financiero seleccionado y extrae los datos y hechos relevantes.",
+    "functionalStatus": "FAILED",
+    "error": null,
+    "nodes": [
+      {
+        "name": "Recibir delegación",
+        "runs": 1,
+        "startTime": 1794705268675,
+        "durationMs": 1
+      },
+      {
+        "name": "Una solicitud por delegacion",
+        "runs": 1,
+        "startTime": 1794705268676,
+        "durationMs": 4
+      },
+      {
+        "name": "Autorizar alcance",
+        "runs": 1,
+        "startTime": 1794705268681,
+        "durationMs": 10
+      },
+      {
+        "name": "Resultado reutilizable",
+        "runs": 1,
+        "startTime": 1794705268692,
+        "durationMs": 0
+      },
+      {
+        "name": "Gemini Ceroa",
+        "runs": 2,
+        "startTime": 1794705268704,
+        "durationMs": 2115
+      },
+      {
+        "name": "Consultar documentos financieros",
+        "runs": 1,
+        "startTime": 1794705269796,
+        "durationMs": 20
+      },
+      {
+        "name": "ORACLE",
+        "runs": 1,
+        "startTime": 1794705269816,
+        "durationMs": 1044
+      },
+      {
+        "name": "Contrato del especialista",
+        "runs": 1,
+        "startTime": 1794705270859,
+        "durationMs": 0
+      },
+      {
+        "name": "Resultado estructurado presente",
+        "runs": 1,
+        "startTime": 1794705270860,
+        "durationMs": 1
+      },
+      {
+        "name": "Validar resultado en Spring Boot",
+        "runs": 1,
+        "startTime": 1794705270861,
+        "durationMs": 22
+      },
+      {
+        "name": "Resultado autorizado presente",
+        "runs": 1,
+        "startTime": 1794705270883,
+        "durationMs": 1
+      },
+      {
+        "name": "Devolver fallo recuperable",
+        "runs": 1,
+        "startTime": 1794705270884,
+        "durationMs": 13
+      }
+    ],
+    "url": "http://localhost:5679/workflow/ceroaKnowledgeAgent30/executions/161"
+  },
+  {
+    "executionId": "162",
+    "workflowId": "ceroaHybridQuery20",
+    "workflowName": "CEROA AI | NEXUS — Supervisor & Router",
+    "executionStatus": "success",
+    "startedAt": "2026-11-15 01:15:54.574",
+    "stoppedAt": "2026-11-15 01:15:59.494",
+    "requestId": "36d98b2e-48dd-4cd4-9304-c4692bee8272",
+    "question": "Compara mi extracto financiero con mis obligaciones registradas y dime qué deuda debería priorizar.",
+    "functionalStatus": "COMPLETE",
+    "error": null,
+    "nodes": [
+      {
+        "name": "Recibir consulta",
+        "runs": 1,
+        "startTime": 1794705354607,
+        "durationMs": 0
+      },
+      {
+        "name": "Es audio",
+        "runs": 1,
+        "startTime": 1794705354607,
+        "durationMs": 3
+      },
+      {
+        "name": "Preparar texto",
+        "runs": 1,
+        "startTime": 1794705354610,
+        "durationMs": 9
+      },
+      {
+        "name": "Preparar contexto en Spring Boot",
+        "runs": 1,
+        "startTime": 1794705354619,
+        "durationMs": 12
+      },
+      {
+        "name": "Iniciar orquestación autorizada",
+        "runs": 1,
+        "startTime": 1794705354631,
+        "durationMs": 10
+      },
+      {
+        "name": "Iniciar medición del agente",
+        "runs": 1,
+        "startTime": 1794705354641,
+        "durationMs": 1
+      },
+      {
+        "name": "Gemini Ceroa",
+        "runs": 2,
+        "startTime": 1794705354657,
+        "durationMs": 2013
+      },
+      {
+        "name": "Delegar a ORACLE",
+        "runs": 1,
+        "startTime": 1794705355871,
+        "durationMs": 2749
+      },
+      {
+        "name": "NEXUS",
+        "runs": 1,
+        "startTime": 1794705358621,
+        "durationMs": 814
+      },
+      {
+        "name": "Contrato de respuesta",
+        "runs": 1,
+        "startTime": 1794705359433,
+        "durationMs": 0
+      },
+      {
+        "name": "Registrar medición sin contenido",
+        "runs": 1,
+        "startTime": 1794705359435,
+        "durationMs": 12
+      },
+      {
+        "name": "Conservar respuesta del agente",
+        "runs": 1,
+        "startTime": 1794705359447,
+        "durationMs": 1
+      },
+      {
+        "name": "Validar respuesta",
+        "runs": 1,
+        "startTime": 1794705359448,
+        "durationMs": 6
+      },
+      {
+        "name": "Revisar borrador con evidencia",
+        "runs": 1,
+        "startTime": 1794705359454,
+        "durationMs": 16
+      },
+      {
+        "name": "Borrador respaldado",
+        "runs": 1,
+        "startTime": 1794705359470,
+        "durationMs": 1
+      },
+      {
+        "name": "Validar evidencia en Spring Boot",
+        "runs": 1,
+        "startTime": 1794705359471,
+        "durationMs": 21
+      },
+      {
+        "name": "Devolver respuesta",
+        "runs": 1,
+        "startTime": 1794705359492,
+        "durationMs": 1
+      }
+    ],
+    "url": "http://localhost:5679/workflow/ceroaHybridQuery20/executions/162"
+  },
+  {
+    "executionId": "163",
+    "workflowId": "ceroaKnowledgeAgent30",
+    "workflowName": "CEROA AI | ORACLE — Knowledge & RAG",
+    "executionStatus": "success",
+    "startedAt": "2026-11-15 01:15:55.883",
+    "stoppedAt": "2026-11-15 01:15:58.612",
+    "requestId": "36d98b2e-48dd-4cd4-9304-c4692bee8272",
+    "question": "Compara el extracto financiero con las obligaciones registradas y determina qué deuda se debe priorizar usando documentos y análisis financieros.",
+    "functionalStatus": "OK",
+    "error": null,
+    "nodes": [
+      {
+        "name": "Recibir delegación",
+        "runs": 1,
+        "startTime": 1794705355891,
+        "durationMs": 1
+      },
+      {
+        "name": "Una solicitud por delegacion",
+        "runs": 1,
+        "startTime": 1794705355892,
+        "durationMs": 4
+      },
+      {
+        "name": "Autorizar alcance",
+        "runs": 1,
+        "startTime": 1794705355896,
+        "durationMs": 13
+      },
+      {
+        "name": "Resultado reutilizable",
+        "runs": 1,
+        "startTime": 1794705355909,
+        "durationMs": 1
+      },
+      {
+        "name": "Gemini Ceroa",
+        "runs": 2,
+        "startTime": 1794705355923,
+        "durationMs": 2603
+      },
+      {
+        "name": "Consultar documentos financieros",
+        "runs": 1,
+        "startTime": 1794705356610,
+        "durationMs": 30
+      },
+      {
+        "name": "ORACLE",
+        "runs": 1,
+        "startTime": 1794705356640,
+        "durationMs": 1949
+      },
+      {
+        "name": "Contrato del especialista",
+        "runs": 1,
+        "startTime": 1794705358588,
+        "durationMs": 0
+      },
+      {
+        "name": "Resultado estructurado presente",
+        "runs": 1,
+        "startTime": 1794705358589,
+        "durationMs": 1
+      },
+      {
+        "name": "Validar resultado en Spring Boot",
+        "runs": 1,
+        "startTime": 1794705358590,
+        "durationMs": 19
+      },
+      {
+        "name": "Resultado autorizado presente",
+        "runs": 1,
+        "startTime": 1794705358609,
+        "durationMs": 2
+      },
+      {
+        "name": "Devolver resultado validado",
+        "runs": 1,
+        "startTime": 1794705358611,
+        "durationMs": 1
+      }
+    ],
+    "url": "http://localhost:5679/workflow/ceroaKnowledgeAgent30/executions/163"
+  },
+  {
+    "executionId": "164",
+    "workflowId": "ceroaHybridQuery20",
+    "workflowName": "CEROA AI | NEXUS — Supervisor & Router",
+    "executionStatus": "success",
+    "startedAt": "2026-11-15 01:17:47.992",
+    "stoppedAt": "2026-11-15 01:17:55.797",
+    "requestId": "e0253152-865a-4252-9cf7-199bce70eb63",
+    "question": "Compara mi extracto financiero con mis obligaciones registradas y dime qué deuda debería priorizar.",
+    "functionalStatus": "PARTIAL",
+    "error": null,
+    "nodes": [
+      {
+        "name": "Recibir consulta",
+        "runs": 1,
+        "startTime": 1794705468043,
+        "durationMs": 0
+      },
+      {
+        "name": "Es audio",
+        "runs": 1,
+        "startTime": 1794705468043,
+        "durationMs": 6
+      },
+      {
+        "name": "Preparar texto",
+        "runs": 1,
+        "startTime": 1794705468049,
+        "durationMs": 8
+      },
+      {
+        "name": "Preparar contexto en Spring Boot",
+        "runs": 1,
+        "startTime": 1794705468057,
+        "durationMs": 16
+      },
+      {
+        "name": "Iniciar orquestación autorizada",
+        "runs": 1,
+        "startTime": 1794705468074,
+        "durationMs": 13
+      },
+      {
+        "name": "Iniciar medición del agente",
+        "runs": 1,
+        "startTime": 1794705468087,
+        "durationMs": 2
+      },
+      {
+        "name": "Gemini Ceroa",
+        "runs": 3,
+        "startTime": 1794705468103,
+        "durationMs": 2704
+      },
+      {
+        "name": "Delegar a ORACLE",
+        "runs": 1,
+        "startTime": 1794705469188,
+        "durationMs": 2126
+      },
+      {
+        "name": "Delegar a ATLAS",
+        "runs": 1,
+        "startTime": 1794705472189,
+        "durationMs": 2788
+      },
+      {
+        "name": "NEXUS",
+        "runs": 1,
+        "startTime": 1794705474977,
+        "durationMs": 771
+      },
+      {
+        "name": "Contrato de respuesta",
+        "runs": 1,
+        "startTime": 1794705475746,
+        "durationMs": 1
+      },
+      {
+        "name": "Registrar medición sin contenido",
+        "runs": 1,
+        "startTime": 1794705475748,
+        "durationMs": 10
+      },
+      {
+        "name": "Conservar respuesta del agente",
+        "runs": 1,
+        "startTime": 1794705475758,
+        "durationMs": 1
+      },
+      {
+        "name": "Validar respuesta",
+        "runs": 1,
+        "startTime": 1794705475759,
+        "durationMs": 5
+      },
+      {
+        "name": "Revisar borrador con evidencia",
+        "runs": 1,
+        "startTime": 1794705475765,
+        "durationMs": 14
+      },
+      {
+        "name": "Borrador respaldado",
+        "runs": 1,
+        "startTime": 1794705475779,
+        "durationMs": 1
+      },
+      {
+        "name": "Validar evidencia en Spring Boot",
+        "runs": 1,
+        "startTime": 1794705475780,
+        "durationMs": 15
+      },
+      {
+        "name": "Devolver respuesta",
+        "runs": 1,
+        "startTime": 1794705475795,
+        "durationMs": 2
+      }
+    ],
+    "url": "http://localhost:5679/workflow/ceroaHybridQuery20/executions/164"
+  },
+  {
+    "executionId": "165",
+    "workflowId": "ceroaKnowledgeAgent30",
+    "workflowName": "CEROA AI | ORACLE — Knowledge & RAG",
+    "executionStatus": "success",
+    "startedAt": "2026-11-15 01:17:49.201",
+    "stoppedAt": "2026-11-15 01:17:51.307",
+    "requestId": "e0253152-865a-4252-9cf7-199bce70eb63",
+    "question": "Consulta el extracto financiero y recupera los hechos relevantes del documento seleccionado para compararlo con las obligaciones.",
+    "functionalStatus": "OK",
+    "error": null,
+    "nodes": [
+      {
+        "name": "Recibir delegación",
+        "runs": 1,
+        "startTime": 1794705469210,
+        "durationMs": 0
+      },
+      {
+        "name": "Una solicitud por delegacion",
+        "runs": 1,
+        "startTime": 1794705469210,
+        "durationMs": 5
+      },
+      {
+        "name": "Autorizar alcance",
+        "runs": 1,
+        "startTime": 1794705469215,
+        "durationMs": 12
+      },
+      {
+        "name": "Resultado reutilizable",
+        "runs": 1,
+        "startTime": 1794705469227,
+        "durationMs": 1
+      },
+      {
+        "name": "Gemini Ceroa",
+        "runs": 2,
+        "startTime": 1794705469242,
+        "durationMs": 1997
+      },
+      {
+        "name": "Consultar documentos financieros",
+        "runs": 1,
+        "startTime": 1794705470367,
+        "durationMs": 23
+      },
+      {
+        "name": "ORACLE",
+        "runs": 1,
+        "startTime": 1794705470390,
+        "durationMs": 898
+      },
+      {
+        "name": "Contrato del especialista",
+        "runs": 1,
+        "startTime": 1794705471287,
+        "durationMs": 1
+      },
+      {
+        "name": "Resultado estructurado presente",
+        "runs": 1,
+        "startTime": 1794705471289,
+        "durationMs": 1
+      },
+      {
+        "name": "Validar resultado en Spring Boot",
+        "runs": 1,
+        "startTime": 1794705471290,
+        "durationMs": 15
+      },
+      {
+        "name": "Resultado autorizado presente",
+        "runs": 1,
+        "startTime": 1794705471305,
+        "durationMs": 1
+      },
+      {
+        "name": "Devolver resultado validado",
+        "runs": 1,
+        "startTime": 1794705471306,
+        "durationMs": 1
+      }
+    ],
+    "url": "http://localhost:5679/workflow/ceroaKnowledgeAgent30/executions/165"
+  },
+  {
+    "executionId": "166",
+    "workflowId": "ceroaFinancialAgent30",
+    "workflowName": "CEROA AI | ATLAS — Financial Intelligence",
+    "executionStatus": "success",
+    "startedAt": "2026-11-15 01:17:52.199",
+    "stoppedAt": "2026-11-15 01:17:54.969",
+    "requestId": "e0253152-865a-4252-9cf7-199bce70eb63",
+    "question": "Interpreta las obligaciones, saldos, tasas normalizadas y priorización de deudas usando datos financieros actuales, cruzando con la evidencia documental f12, f33, f50, f69.",
+    "functionalStatus": "FAILED",
+    "error": null,
+    "nodes": [
+      {
+        "name": "Recibir delegación",
+        "runs": 1,
+        "startTime": 1794705472208,
+        "durationMs": 0
+      },
+      {
+        "name": "Una solicitud por delegacion",
+        "runs": 1,
+        "startTime": 1794705472209,
+        "durationMs": 5
+      },
+      {
+        "name": "Autorizar alcance",
+        "runs": 1,
+        "startTime": 1794705472214,
+        "durationMs": 14
+      },
+      {
+        "name": "Resultado reutilizable",
+        "runs": 1,
+        "startTime": 1794705472228,
+        "durationMs": 1
+      },
+      {
+        "name": "Gemini Ceroa",
+        "runs": 3,
+        "startTime": 1794705472248,
+        "durationMs": 2594
+      },
+      {
+        "name": "Consultar datos financieros",
+        "runs": 2,
+        "startTime": 1794705472855,
+        "durationMs": 41
+      },
+      {
+        "name": "ATLAS",
+        "runs": 1,
+        "startTime": 1794705473678,
+        "durationMs": 1250
+      },
+      {
+        "name": "Contrato del especialista",
+        "runs": 1,
+        "startTime": 1794705474927,
+        "durationMs": 0
+      },
+      {
+        "name": "Resultado estructurado presente",
+        "runs": 1,
+        "startTime": 1794705474928,
+        "durationMs": 1
+      },
+      {
+        "name": "Validar resultado en Spring Boot",
+        "runs": 1,
+        "startTime": 1794705474929,
+        "durationMs": 25
+      },
+      {
+        "name": "Resultado autorizado presente",
+        "runs": 1,
+        "startTime": 1794705474954,
+        "durationMs": 2
+      },
+      {
+        "name": "Devolver fallo recuperable",
+        "runs": 1,
+        "startTime": 1794705474956,
+        "durationMs": 12
+      }
+    ],
+    "url": "http://localhost:5679/workflow/ceroaFinancialAgent30/executions/166"
+  },
+  {
+    "executionId": "167",
+    "workflowId": "ceroaHybridQuery20",
+    "workflowName": "CEROA AI | NEXUS — Supervisor & Router",
+    "executionStatus": "success",
+    "startedAt": "2026-11-15 01:19:01.855",
+    "stoppedAt": "2026-11-15 01:19:11.372",
+    "requestId": "dddae6d4-2772-4151-a38a-e0d618ba726b",
+    "question": "Compara mi extracto financiero con mis obligaciones registradas para decirme qué deuda priorizar y explícame cómo registrar un pago en Ceroa.",
+    "functionalStatus": "COMPLETE",
+    "error": null,
+    "nodes": [
+      {
+        "name": "Recibir consulta",
+        "runs": 1,
+        "startTime": 1794705541890,
+        "durationMs": 1
+      },
+      {
+        "name": "Es audio",
+        "runs": 1,
+        "startTime": 1794705541891,
+        "durationMs": 2
+      },
+      {
+        "name": "Preparar texto",
+        "runs": 1,
+        "startTime": 1794705541894,
+        "durationMs": 7
+      },
+      {
+        "name": "Preparar contexto en Spring Boot",
+        "runs": 1,
+        "startTime": 1794705541901,
+        "durationMs": 11
+      },
+      {
+        "name": "Iniciar orquestación autorizada",
+        "runs": 1,
+        "startTime": 1794705541912,
+        "durationMs": 8
+      },
+      {
+        "name": "Iniciar medición del agente",
+        "runs": 1,
+        "startTime": 1794705541920,
+        "durationMs": 1
+      },
+      {
+        "name": "Gemini Ceroa",
+        "runs": 4,
+        "startTime": 1794705541935,
+        "durationMs": 3282
+      },
+      {
+        "name": "Delegar a ORACLE",
+        "runs": 1,
+        "startTime": 1794705542784,
+        "durationMs": 3433
+      },
+      {
+        "name": "Delegar a ATLAS",
+        "runs": 1,
+        "startTime": 1794705546893,
+        "durationMs": 1768
+      },
+      {
+        "name": "Delegar a LUMEN",
+        "runs": 1,
+        "startTime": 1794705549405,
+        "durationMs": 858
+      },
+      {
+        "name": "NEXUS",
+        "runs": 1,
+        "startTime": 1794705550263,
+        "durationMs": 1055
+      },
+      {
+        "name": "Contrato de respuesta",
+        "runs": 1,
+        "startTime": 1794705551316,
+        "durationMs": 1
+      },
+      {
+        "name": "Registrar medición sin contenido",
+        "runs": 1,
+        "startTime": 1794705551318,
+        "durationMs": 10
+      },
+      {
+        "name": "Conservar respuesta del agente",
+        "runs": 1,
+        "startTime": 1794705551329,
+        "durationMs": 1
+      },
+      {
+        "name": "Validar respuesta",
+        "runs": 1,
+        "startTime": 1794705551330,
+        "durationMs": 4
+      },
+      {
+        "name": "Revisar borrador con evidencia",
+        "runs": 1,
+        "startTime": 1794705551335,
+        "durationMs": 15
+      },
+      {
+        "name": "Borrador respaldado",
+        "runs": 1,
+        "startTime": 1794705551351,
+        "durationMs": 1
+      },
+      {
+        "name": "Validar evidencia en Spring Boot",
+        "runs": 1,
+        "startTime": 1794705551352,
+        "durationMs": 17
+      },
+      {
+        "name": "Devolver respuesta",
+        "runs": 1,
+        "startTime": 1794705551369,
+        "durationMs": 2
+      }
+    ],
+    "url": "http://localhost:5679/workflow/ceroaHybridQuery20/executions/167"
+  },
+  {
+    "executionId": "168",
+    "workflowId": "ceroaKnowledgeAgent30",
+    "workflowName": "CEROA AI | ORACLE — Knowledge & RAG",
+    "executionStatus": "success",
+    "startedAt": "2026-11-15 01:19:02.798",
+    "stoppedAt": "2026-11-15 01:19:06.210",
+    "requestId": "dddae6d4-2772-4151-a38a-e0d618ba726b",
+    "question": "Comparar el extracto financiero del usuario con sus obligaciones registradas para priorizar deudas.",
+    "functionalStatus": "OK",
+    "error": null,
+    "nodes": [
+      {
+        "name": "Recibir delegación",
+        "runs": 1,
+        "startTime": 1794705542805,
+        "durationMs": 0
+      },
+      {
+        "name": "Una solicitud por delegacion",
+        "runs": 1,
+        "startTime": 1794705542806,
+        "durationMs": 2
+      },
+      {
+        "name": "Autorizar alcance",
+        "runs": 1,
+        "startTime": 1794705542809,
+        "durationMs": 12
+      },
+      {
+        "name": "Resultado reutilizable",
+        "runs": 1,
+        "startTime": 1794705542822,
+        "durationMs": 1
+      },
+      {
+        "name": "Gemini Ceroa",
+        "runs": 3,
+        "startTime": 1794705542836,
+        "durationMs": 2814
+      },
+      {
+        "name": "Consultar documentos financieros",
+        "runs": 1,
+        "startTime": 1794705543557,
+        "durationMs": 22
+      },
+      {
+        "name": "Consultar documentación aprobada",
+        "runs": 1,
+        "startTime": 1794705544375,
+        "durationMs": 468
+      },
+      {
+        "name": "ORACLE",
+        "runs": 1,
+        "startTime": 1794705544843,
+        "durationMs": 1346
+      },
+      {
+        "name": "Contrato del especialista",
+        "runs": 1,
+        "startTime": 1794705546188,
+        "durationMs": 0
+      },
+      {
+        "name": "Resultado estructurado presente",
+        "runs": 1,
+        "startTime": 1794705546189,
+        "durationMs": 1
+      },
+      {
+        "name": "Validar resultado en Spring Boot",
+        "runs": 1,
+        "startTime": 1794705546191,
+        "durationMs": 16
+      },
+      {
+        "name": "Resultado autorizado presente",
+        "runs": 1,
+        "startTime": 1794705546207,
+        "durationMs": 1
+      },
+      {
+        "name": "Devolver resultado validado",
+        "runs": 1,
+        "startTime": 1794705546209,
+        "durationMs": 1
+      }
+    ],
+    "url": "http://localhost:5679/workflow/ceroaKnowledgeAgent30/executions/168"
+  },
+  {
+    "executionId": "169",
+    "workflowId": "ceroaRagEmbedding03",
+    "workflowName": "RA-N8N-003 - Embeddings privados",
+    "executionStatus": "success",
+    "startedAt": "2026-11-15 01:19:04.414",
+    "stoppedAt": "2026-11-15 01:19:04.832",
+    "requestId": null,
+    "question": null,
+    "functionalStatus": null,
+    "error": null,
+    "nodes": [
+      {
+        "name": "Recibir texto autorizado",
+        "runs": 1,
+        "startTime": 1794705544447,
+        "durationMs": 0
+      },
+      {
+        "name": "Validar texto de consulta",
+        "runs": 1,
+        "startTime": 1794705544448,
+        "durationMs": 4
+      },
+      {
+        "name": "Embedding Gemini",
+        "runs": 1,
+        "startTime": 1794705544452,
+        "durationMs": 371
+      },
+      {
+        "name": "Validar dimensiones",
+        "runs": 1,
+        "startTime": 1794705544823,
+        "durationMs": 4
+      },
+      {
+        "name": "Devolver vector",
+        "runs": 1,
+        "startTime": 1794705544827,
+        "durationMs": 5
+      }
+    ],
+    "url": "http://localhost:5679/workflow/ceroaRagEmbedding03/executions/169"
+  },
+  {
+    "executionId": "170",
+    "workflowId": "ceroaFinancialAgent30",
+    "workflowName": "CEROA AI | ATLAS — Financial Intelligence",
+    "executionStatus": "success",
+    "startedAt": "2026-11-15 01:19:06.902",
+    "stoppedAt": "2026-11-15 01:19:08.654",
+    "requestId": "dddae6d4-2772-4151-a38a-e0d618ba726b",
+    "question": "Interpretar los datos financieros y priorizar las obligaciones registradas del usuario.",
+    "functionalStatus": "OK",
+    "error": null,
+    "nodes": [
+      {
+        "name": "Recibir delegación",
+        "runs": 1,
+        "startTime": 1794705546909,
+        "durationMs": 0
+      },
+      {
+        "name": "Una solicitud por delegacion",
+        "runs": 1,
+        "startTime": 1794705546910,
+        "durationMs": 3
+      },
+      {
+        "name": "Autorizar alcance",
+        "runs": 1,
+        "startTime": 1794705546914,
+        "durationMs": 13
+      },
+      {
+        "name": "Resultado reutilizable",
+        "runs": 1,
+        "startTime": 1794705546927,
+        "durationMs": 1
+      },
+      {
+        "name": "Gemini Ceroa",
+        "runs": 2,
+        "startTime": 1794705546943,
+        "durationMs": 1648
+      },
+      {
+        "name": "Consultar datos financieros",
+        "runs": 1,
+        "startTime": 1794705547624,
+        "durationMs": 21
+      },
+      {
+        "name": "ATLAS",
+        "runs": 1,
+        "startTime": 1794705547645,
+        "durationMs": 988
+      },
+      {
+        "name": "Contrato del especialista",
+        "runs": 1,
+        "startTime": 1794705548632,
+        "durationMs": 0
+      },
+      {
+        "name": "Resultado estructurado presente",
+        "runs": 1,
+        "startTime": 1794705548633,
+        "durationMs": 2
+      },
+      {
+        "name": "Validar resultado en Spring Boot",
+        "runs": 1,
+        "startTime": 1794705548635,
+        "durationMs": 16
+      },
+      {
+        "name": "Resultado autorizado presente",
+        "runs": 1,
+        "startTime": 1794705548652,
+        "durationMs": 1
+      },
+      {
+        "name": "Devolver resultado validado",
+        "runs": 1,
+        "startTime": 1794705548653,
+        "durationMs": 1
+      }
+    ],
+    "url": "http://localhost:5679/workflow/ceroaFinancialAgent30/executions/170"
+  },
+  {
+    "executionId": "171",
+    "workflowId": "ceroaSupportAgent30",
+    "workflowName": "CEROA AI | LUMEN — Customer Experience & Support",
+    "executionStatus": "success",
+    "startedAt": "2026-11-15 01:19:09.414",
+    "stoppedAt": "2026-11-15 01:19:10.257",
+    "requestId": "dddae6d4-2772-4151-a38a-e0d618ba726b",
+    "question": "Explicar cómo registrar un pago en Ceroa usando la guía de soporte.",
+    "functionalStatus": "OK",
+    "error": null,
+    "nodes": [
+      {
+        "name": "Recibir delegación",
+        "runs": 1,
+        "startTime": 1794705549422,
+        "durationMs": 0
+      },
+      {
+        "name": "Una solicitud por delegacion",
+        "runs": 1,
+        "startTime": 1794705549422,
+        "durationMs": 4
+      },
+      {
+        "name": "Autorizar alcance",
+        "runs": 1,
+        "startTime": 1794705549426,
+        "durationMs": 13
+      },
+      {
+        "name": "Resultado reutilizable",
+        "runs": 1,
+        "startTime": 1794705549439,
+        "durationMs": 1
+      },
+      {
+        "name": "LUMEN",
+        "runs": 1,
+        "startTime": 1794705549440,
+        "durationMs": 799
+      },
+      {
+        "name": "Gemini Ceroa",
+        "runs": 1,
+        "startTime": 1794705549455,
+        "durationMs": 782
+      },
+      {
+        "name": "Contrato del especialista",
+        "runs": 1,
+        "startTime": 1794705550238,
+        "durationMs": 0
+      },
+      {
+        "name": "Resultado estructurado presente",
+        "runs": 1,
+        "startTime": 1794705550239,
+        "durationMs": 1
+      },
+      {
+        "name": "Validar resultado en Spring Boot",
+        "runs": 1,
+        "startTime": 1794705550241,
+        "durationMs": 13
+      },
+      {
+        "name": "Resultado autorizado presente",
+        "runs": 1,
+        "startTime": 1794705550254,
+        "durationMs": 2
+      },
+      {
+        "name": "Devolver resultado validado",
+        "runs": 1,
+        "startTime": 1794705550256,
+        "durationMs": 1
+      }
+    ],
+    "url": "http://localhost:5679/workflow/ceroaSupportAgent30/executions/171"
+  }
+]

@@ -1,5 +1,7 @@
 # CEROA AI — Multi-Agent Financial Intelligence Ecosystem
 
+> Nota de vigencia RC2 (14/11/2026): este informe conserva observaciones históricas. El candidato actual, las correcciones R1/R2 y el estado del PR se documentan en [validación final RC2](CEROA_RC2_CORRECCIONES_Y_VALIDACION_FINAL.md). El Grant es autorizado y ligado al servidor, sin firma HMAC/JWS; la ruta actual es `POST /api/v1/workspace-actions/{code}/draft`.
+
 Auditoría: 14 de noviembre de 2026, America/Bogota. Base: `8c6ac23939211228e58112e92b010bd675f7ba86`. Rama local: `docs/ceroa-ai-architecture`.
 
 ## Alcance y estado comprobado
@@ -138,3 +140,8 @@ El dry-run se realizó sobre el export publicado actual de 30 workflows: siete s
 IMPLEMENTADO: identidades y actualización selectiva locales. PROBADO: Node, Java y las integraciones/fixtures descritos; no 18 E2E completos ni Gemini nuevo. VERSIONADO: base 8c6ac23; cambios nuevos sin commit/push. DESPLEGADO/ACTIVADO: ninguna modificación de esta entrega. OPERATIVO: producto detenido; entorno de pruebas aislado disponible y verificado.
 
 El [informe de recuperación y preparación](CEROA_RECUPERACION_Y_VALIDACION_INTEGRADA.md) contiene procedencia, contraste académico, archivos, limitaciones y siguiente paso. La [matriz MAS actualizada](CEROA_MULTIAGENT_VALIDATION.md) conserva los 63 E2E históricos sin inflarlos.
+
+
+## Aclaración de contratos para RC2
+
+El Grant es un contrato autorizado ligado al estado del servidor (scopeToken aleatorio, requestId, rol, referencias y vigencia), con callbacks autenticados y validación de alcance en backend. No lleva firma HMAC/JWS. El endpoint versionado de preparación de borradores es `POST /api/v1/workspace-actions/{code}/draft`; las referencias históricas a workspace-proposals/.../gmail-draft no describen el controlador actual. Se conservan los resultados históricos tal como fueron registrados; el manejo HTTP del nuevo controlador se corrige y valida por separado en RC2. Véase [correcciones y validación RC2](CEROA_RC2_CORRECCIONES_Y_VALIDACION_FINAL.md).

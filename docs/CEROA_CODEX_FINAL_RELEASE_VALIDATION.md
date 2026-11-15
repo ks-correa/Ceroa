@@ -1,5 +1,7 @@
 # CEROA — Validación final de release por Codex
 
+> Nota de vigencia RC2 (14/11/2026): este informe conserva observaciones históricas. El candidato actual, las correcciones R1/R2 y el estado del PR se documentan en [validación final RC2](CEROA_RC2_CORRECCIONES_Y_VALIDACION_FINAL.md). El Grant es autorizado y ligado al servidor, sin firma HMAC/JWS; la ruta actual es `POST /api/v1/workspace-actions/{code}/draft`.
+
 Fecha: 14 de noviembre de 2026, America/Bogota. Rama: `docs/ceroa-ai-architecture`. Base recibida: `8c6ac23939211228e58112e92b010bd675f7ba86`.
 
 ## Estado recibido y alcance
@@ -126,3 +128,8 @@ e0148bcba255e6ad654932028c0ec8fa439e54e4 feat(n8n): preserve six agent identitie
 El commit documental de cierre contiene este registro y final-integrity.json; su hash se obtiene con git rev-parse HEAD y se entrega también en la respuesta final, evitando una autorreferencia de hash imposible. No cambia clases, recursos, frontend, workflows ni configuración del candidato. El manifiesto ampliado final conserva SHA-256 crudo `0b1f3e7ee597b3cbbce4909e4d2e4ab080a63f6aa4b2e4a5fb9d3a4ac5a26252` y normalizado LF `1a8f0babf7384c56af748be1ecdf9df598d01c26ba2812b839506eb95a88e181`.
 
 La lectura de cierre confirma contenedores operativos, workflows publicados, checksums Flyway y outbox sin cambios frente al preflight. Demo backend, frontend, adapter, DB y n8n permanecen activos; backend ejecuta el hash RC1 original. No hay cambios funcionales posteriores al build que requieran RC2. Logs completos de las invocaciones de prueba se conservan privadamente en tmp/codex-release; los resúmenes publicables preservan los resultados y sus limitaciones.
+
+
+## Aclaración de contratos para RC2
+
+El Grant es un contrato autorizado ligado al estado del servidor (scopeToken aleatorio, requestId, rol, referencias y vigencia), con callbacks autenticados y validación de alcance en backend. No lleva firma HMAC/JWS. El endpoint versionado de preparación de borradores es `POST /api/v1/workspace-actions/{code}/draft`; las referencias históricas a workspace-proposals/.../gmail-draft no describen el controlador actual. Se conservan los resultados históricos tal como fueron registrados; el manejo HTTP del nuevo controlador se corrige y valida por separado en RC2. Véase [correcciones y validación RC2](CEROA_RC2_CORRECCIONES_Y_VALIDACION_FINAL.md).

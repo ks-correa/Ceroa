@@ -1,0 +1,147 @@
+{
+  "port": 8082,
+  "database": "synthetic clone runtime_fixture",
+  "login": 200,
+  "debts": 200,
+  "validDocument": {
+    "status": 200,
+    "body": {
+      "generatedText": "Hechos documentales y operaciones verificadas; no representan pagos registrados.",
+      "verifiedData": {
+        "nextOffset": 1,
+        "hasMoreDocuments": false,
+        "canonicalPayments": false,
+        "factsTruncated": false,
+        "periodSource": "DOCUMENT_METADATA",
+        "complete": true,
+        "analysis": {
+          "facts": [
+            {
+              "id": "a2fb7d48-8d97-4541-a6a3-b132d7c4289d",
+              "documentId": "d26f7f5e-1d94-4fdd-b301-8bd9ad5dea7a",
+              "documentVersion": 2,
+              "chunkId": "90d4913c-a103-4461-845c-d8305df780fc",
+              "kind": "BALANCE",
+              "valueType": "NUMBER",
+              "numericValue": 5240000,
+              "dateValue": null,
+              "textValue": null,
+              "unit": "MONEY",
+              "currency": "COP",
+              "rateMode": null,
+              "transactionReference": null,
+              "effectiveDate": null,
+              "validationStatus": "VERIFIED",
+              "quote": "Saldo actual: COP 5.240.000,00",
+              "quoteStart": 315,
+              "quoteEnd": 345,
+              "extractorVersion": 2
+            },
+            {
+              "id": "6ff1e5e3-dc41-46c7-8bf1-fb9d6d2fdc82",
+              "documentId": "d26f7f5e-1d94-4fdd-b301-8bd9ad5dea7a",
+              "documentVersion": 2,
+              "chunkId": "90d4913c-a103-4461-845c-d8305df780fc",
+              "kind": "ENTITY",
+              "valueType": "TEXT",
+              "numericValue": null,
+              "dateValue": null,
+              "textValue": "Banco Andino",
+              "unit": "TEXT",
+              "currency": null,
+              "rateMode": null,
+              "transactionReference": null,
+              "effectiveDate": null,
+              "validationStatus": "VERIFIED",
+              "quote": "Entidad financiera: Banco Andino",
+              "quoteStart": 157,
+              "quoteEnd": 189,
+              "extractorVersion": 2
+            },
+            {
+              "id": "ddc0ca54-2992-4f9a-8137-dc4050fcce37",
+              "documentId": "d26f7f5e-1d94-4fdd-b301-8bd9ad5dea7a",
+              "documentVersion": 2,
+              "chunkId": "90d4913c-a103-4461-845c-d8305df780fc",
+              "kind": "MINIMUM_PAYMENT",
+              "valueType": "NUMBER",
+              "numericValue": 310000,
+              "dateValue": null,
+              "textValue": null,
+              "unit": "MONEY",
+              "currency": "COP",
+              "rateMode": null,
+              "transactionReference": null,
+              "effectiveDate": null,
+              "validationStatus": "VERIFIED",
+              "quote": "Pago minimo: COP 310.000,00",
+              "quoteStart": 385,
+              "quoteEnd": 412,
+              "extractorVersion": 2
+            },
+            {
+              "id": "310bcf12-5f73-4d4d-972c-ba9c44f62e41",
+              "documentId": "d26f7f5e-1d94-4fdd-b301-8bd9ad5dea7a",
+              "documentVersion": 2,
+              "chunkId": "90d4913c-a103-4461-845c-d8305df780fc",
+              "kind": "RATE",
+              "valueType": "NUMBER",
+              "numericValue": 28.7,
+              "dateValue": null,
+              "textValue": null,
+              "unit": "PERCENT",
+              "currency": null,
+              "rateMode": "EA",
+              "transactionReference": null,
+              "effectiveDate": null,
+              "validationStatus": "VERIFIED",
+              "quote": "Tasa de interes efectiva anual: 28,70%",
+              "quoteStart": 346,
+              "quoteEnd": 384,
+              "extractorVersion": 2
+            }
+          ],
+          "comparisons": [],
+          "movementTotals": [],
+          "complete": true,
+          "limitations": []
+        }
+      },
+      "appliedFilters": {
+        "ownerId": null,
+        "identificationType": null,
+        "documentType": null,
+        "financialEntity": null,
+        "periodFrom": null,
+        "periodToExclusive": null,
+        "documentId": "d26f7f5e-1d94-4fdd-b301-8bd9ad5dea7a"
+      },
+      "sources": [],
+      "documents": [
+        {
+          "id": "d26f7f5e-1d94-4fdd-b301-8bd9ad5dea7a",
+          "ownerId": "00000000-0000-0000-0000-000000000001",
+          "identificationType": "OTHER",
+          "documentType": "BANK_STATEMENT",
+          "financialEntity": "Banco Andino",
+          "periodStart": "2026-11-01",
+          "periodEnd": "2026-12-01",
+          "issuedAt": "2026-11-14",
+          "status": "INDEXED",
+          "version": 2,
+          "uploadedAt": "2026-11-14T15:06:11.799014-05:00"
+        }
+      ],
+      "evidenceStatus": "AVAILABLE",
+      "traceId": "262a23f0-11d9-475f-8b20-a98a43282823",
+      "elapsedMs": 33
+    }
+  },
+  "missing": {
+    "status": 404,
+    "body": {
+      "code": "WORKSPACE_UNAVAILABLE",
+      "message": "Recurso no encontrado."
+    }
+  }
+}

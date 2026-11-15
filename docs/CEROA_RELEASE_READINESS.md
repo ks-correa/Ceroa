@@ -1,3 +1,17 @@
+# CEROA — Release readiness RC2
+
+14 de noviembre de 2026, America/Bogota. **GO PARA INTEGRACIÓN DE RC2**, pendiente revisión humana y autorización de merge. PR #1 abierto y en borrador. **Producción: NO-GO**.
+
+R1 (modalidades contradictorias) y R2 (estados HTTP del endpoint de borradores) corregidos con pruebas permanentes. Backend: 490 casos Java únicos aprobados, siete opt-in omitidos; Node 51/51 y frontend tsc + 190/190. Los resultados Gemini completos, parciales y la abstención se distinguen en el [informe final RC2](CEROA_RC2_CORRECCIONES_Y_VALIDACION_FINAL.md).
+
+La demo http://localhost:3001 ejecuta RC2, SHA-256 `19A7DCB8496CB7EC41C6DAF99C3A34585CA69E1F109229110A49B4DA2CE12418`, comprobado dentro del backend. RC1/B12/JAR anterior y volúmenes preservados. No hubo merge, despliegue productivo ni modificación del entorno operativo. Calendar/Gmail siguen simulados; WORKSPACE_DRAFT_URL productivo debe seguir vacío.
+
+El informe RC2 y su evidencia sustituyen el veredicto inicial de RC1. Los prerrequisitos productivos independientes continúan pendientes.
+
+---
+
+## Registro histórico de RC1, conservado sin reescribir sus observaciones
+
 # CEROA — Release readiness verificado
 
 Actualización: 14 de noviembre de 2026, America/Bogota. Rama `docs/ceroa-ai-architecture`; base recibida `8c6ac23`.

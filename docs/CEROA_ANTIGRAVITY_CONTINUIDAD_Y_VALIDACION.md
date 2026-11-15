@@ -1,5 +1,7 @@
 # CEROA AI — Informe de Continuidad (Codex → Antigravity) y Validación Integral
 
+> Nota de vigencia RC2 (14/11/2026): este informe conserva observaciones históricas. El candidato actual, las correcciones R1/R2 y el estado del PR se documentan en [validación final RC2](CEROA_RC2_CORRECCIONES_Y_VALIDACION_FINAL.md). El Grant es autorizado y ligado al servidor, sin firma HMAC/JWS; la ruta actual es `POST /api/v1/workspace-actions/{code}/draft`.
+
 **Fecha:** 14 de noviembre de 2026 (`America/Bogota`)
 **Rama Git:** `docs/ceroa-ai-architecture`
 **Commit base (`HEAD` / `origin/main`):** `8c6ac23939211228e58112e92b010bd675f7ba86`
@@ -323,3 +325,8 @@ docker ps
 # Volver a iniciar el entorno de demostración
 .\integrations\demo\demo.ps1
 ```
+
+
+## Aclaración de contratos para RC2
+
+El Grant es un contrato autorizado ligado al estado del servidor (scopeToken aleatorio, requestId, rol, referencias y vigencia), con callbacks autenticados y validación de alcance en backend. No lleva firma HMAC/JWS. El endpoint versionado de preparación de borradores es `POST /api/v1/workspace-actions/{code}/draft`; las referencias históricas a workspace-proposals/.../gmail-draft no describen el controlador actual. Se conservan los resultados históricos tal como fueron registrados; el manejo HTTP del nuevo controlador se corrige y valida por separado en RC2. Véase [correcciones y validación RC2](CEROA_RC2_CORRECCIONES_Y_VALIDACION_FINAL.md).

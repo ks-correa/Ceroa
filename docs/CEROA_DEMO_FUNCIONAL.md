@@ -1,5 +1,7 @@
 # Ceroa AI: entorno funcional de demostración
 
+> Nota de vigencia RC2 (14/11/2026): este informe conserva observaciones históricas. El candidato actual, las correcciones R1/R2 y el estado del PR se documentan en [validación final RC2](CEROA_RC2_CORRECCIONES_Y_VALIDACION_FINAL.md). El Grant es autorizado y ligado al servidor, sin firma HMAC/JWS; la ruta actual es `POST /api/v1/workspace-actions/{code}/draft`.
+
 14 de noviembre de 2026, America/Bogota. Rama `docs/ceroa-ai-architecture`. Cambios locales para revisión, sin commit ni push.
 
 ## Acceso local
@@ -101,3 +103,8 @@ Se verificó inicio de sesión y navegación real por dashboard, deudas, estrate
 ## Actualización posterior Codex: RC1 validado
 
 La demo ahora ejecuta exactamente RC1 (SHA-256 4C2F954C53399AE5B8F1E050F5EC10AA0C0CE0A2B39187A744105422010C7004). Compose/demo.ps1 lo seleccionan por defecto; CEROA_DEMO_BACKEND_JAR permite volver al candidato anterior sin sobrescribirlo. Los resultados históricos anteriores no son pruebas de RC1. Véanse [regresiones nuevas, configuración efectiva y límites](CEROA_CODEX_FINAL_RELEASE_VALIDATION.md). Calendar/Gmail/Storage siguen simulados; Gemini, PostgreSQL/pgvector y n8n son reales.
+
+
+## Aclaración de contratos para RC2
+
+El Grant es un contrato autorizado ligado al estado del servidor (scopeToken aleatorio, requestId, rol, referencias y vigencia), con callbacks autenticados y validación de alcance en backend. No lleva firma HMAC/JWS. El endpoint versionado de preparación de borradores es `POST /api/v1/workspace-actions/{code}/draft`; las referencias históricas a workspace-proposals/.../gmail-draft no describen el controlador actual. Se conservan los resultados históricos tal como fueron registrados; el manejo HTTP del nuevo controlador se corrige y valida por separado en RC2. Véase [correcciones y validación RC2](CEROA_RC2_CORRECCIONES_Y_VALIDACION_FINAL.md).

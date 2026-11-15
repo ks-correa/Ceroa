@@ -1,5 +1,7 @@
 # CEROA AI — Validación multiagente complementaria
 
+> Nota de vigencia RC2 (14/11/2026): este informe conserva observaciones históricas. El candidato actual, las correcciones R1/R2 y el estado del PR se documentan en [validación final RC2](CEROA_RC2_CORRECCIONES_Y_VALIDACION_FINAL.md). El Grant es autorizado y ligado al servidor, sin firma HMAC/JWS; la ruta actual es `POST /api/v1/workspace-actions/{code}/draft`.
+
 Actualización: 14 de noviembre de 2026, America/Bogota. Base 8c6ac23; rama local `docs/ceroa-ai-architecture`. Esta matriz complementa la [matriz E2E histórica](CEROA_MATRIZ_E2E_CONSOLIDADA_63.tsv), que conserva **54 aprobados históricos, dos bloqueados y siete no ejecutados**. No se suman comprobaciones por capas como nuevas aprobaciones de esos 63 casos.
 
 ## Evidencia y alcance
@@ -98,3 +100,8 @@ La batería Java completa (`452` registradas, `418` ejecutadas, `34` opt-in omit
 Evidencia nueva: MAS-02/ATLAS NEXUS 122 y ATLAS 123 COMPLETE; MAS-04/ORACLE 129–130 COMPLETE; MAS-05/comparación 131–133 COMPLETE; tres especialistas 118–121 COMPLETE con Grants de 3 iteraciones y reserva 15. Calendar simulado: disponibilidad, propuesta, confirmación idempotente, aislamiento y expiración; Gmail createDraft simulado: ejecución 128, vista previa y confirmación sin envío real. No sustituir IDs históricos por estos nuevos.
 
 Java reconciliado: 456 únicos, 454 aprobados y 2 opt-in omitidos, cero fallos pendientes después de repetir las clases dependientes de fecha con America/Bogota. Incluye 30 opt-in PostgreSQL y 2 n8n nativo. Node 51/51 y frontend 190/190. El detalle de cobertura por componentes frente a conversaciones reales, y las limitaciones productivas, están en [validación final](CEROA_CODEX_FINAL_RELEASE_VALIDATION.md).
+
+
+## Aclaración de contratos para RC2
+
+El Grant es un contrato autorizado ligado al estado del servidor (scopeToken aleatorio, requestId, rol, referencias y vigencia), con callbacks autenticados y validación de alcance en backend. No lleva firma HMAC/JWS. El endpoint versionado de preparación de borradores es `POST /api/v1/workspace-actions/{code}/draft`; las referencias históricas a workspace-proposals/.../gmail-draft no describen el controlador actual. Se conservan los resultados históricos tal como fueron registrados; el manejo HTTP del nuevo controlador se corrige y valida por separado en RC2. Véase [correcciones y validación RC2](CEROA_RC2_CORRECCIONES_Y_VALIDACION_FINAL.md).
