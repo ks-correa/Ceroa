@@ -69,4 +69,12 @@ class DocumentRateRegressionTest {
         renderer.evidence(map,mapper.valueToTree(Map.of("literal","2,5%","context","Tasa: 2,5% EM EA")),"financialDocuments/trace/documentValues/0");
         assertThrows(IllegalArgumentException.class,()->renderer.resolve(map,"Tasa: {{f1}} EA."));
     }
+    @Test void legacyUnqualifiedPercentageCanBeQuotedWithoutInventingAModality(){
+        var renderer=new AssistantAnalysisService(new ObjectMapper(),null,null,null,null,null,null,null,null);
+        var map=new LinkedHashMap<String,AssistantAnalysisService.Fact>();
+        renderer.evidence(map,new ObjectMapper().valueToTree(Map.of("literal","2,5%","context","Tasa indicada: 2,5%")),"financialDocuments/trace/documentValues/0");
+        String ref=map.entrySet().stream().filter(e->e.getValue().source().endsWith("/literal")).findFirst().orElseThrow().getKey();
+        assertEquals("La tasa indicada es 2,5%.",renderer.resolve(map,"La tasa indicada es {{"+ref+"}}."));
+        assertThrows(IllegalArgumentException.class,()->renderer.resolve(map,"Tasa: {{"+ref+"}} EA."));
+    }
 }

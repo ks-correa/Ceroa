@@ -105,7 +105,11 @@ final class FinancialClaimGrounding {
         String rateMode=sibling(facts,parent,"rateMode");
         if(sourceConcept.equals("rate")) {
             if(rateMode.isEmpty())rateMode=DocumentRateMode.unique(context+" "+quote);
-            if(!DocumentRateMode.consistent(rateMode,context,quote,effectiveLine))return false;
+            // Legacy retrieval may quote a percentage without naming its modality.
+            // It cannot assert one, and typed RATE facts still require it above.
+            if(rateMode==null) {
+                if(!DocumentRateMode.modes(context+" "+quote).isEmpty()||!DocumentRateMode.modes(effectiveLine).isEmpty())return false;
+            }else if(!DocumentRateMode.consistent(rateMode,context,quote,effectiveLine))return false;
         }
         String unit=context+" "+quote+" "+sibling(facts,parent,"currency");
         for(String token:List.of("COP","USD","EUR")) {
