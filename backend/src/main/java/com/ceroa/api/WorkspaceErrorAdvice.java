@@ -8,7 +8,7 @@ import java.util.Map;
 
 /** Preserve connector authorization/conflict semantics instead of the recovery-specific global fallback. */
 @Order(-10)
-@RestControllerAdvice(assignableTypes={WorkspaceController.class,DriveSyncController.class,SupportBookingController.class,McpController.class})
+@RestControllerAdvice(assignableTypes={WorkspaceController.class,WorkspaceDraftController.class,DriveSyncController.class,SupportBookingController.class,McpController.class})
 public class WorkspaceErrorAdvice {
  @ExceptionHandler(ResponseStatusException.class)
  public ResponseEntity<?> status(ResponseStatusException error){

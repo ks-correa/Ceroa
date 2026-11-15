@@ -32,14 +32,24 @@ public class WorkspaceDraftService {
         if(!"FINANCIAL_SUMMARY".equals(proposal.kind))throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
         if(key.length()<32||!url.matches("http://n8n:5678/webhook/[A-Za-z0-9/_-]+"))throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE);
         var summary=dashboard.getSummary();
-        var factory=new org.springframework.http.client.SimpleClientHttpRequestFactory();factory.setConnectTimeout(3000);factory.setReadTimeout(15000);
-        var result=RestClient.builder().requestFactory(factory).build().post().uri(url)
+        JsonNode result;
+        try { result=client().post().uri(url)
             .header("X-Ceroa-Workspace",key).body(Map.of("proposalId",proposal.id.toString(),"recipient",user.getEmail(),
                 "subject","Resumen financiero Ceroa - pendiente de revision",
                 "message","Deuda registrada: "+summary.totalRegisteredDebt()+". Obligaciones activas: "+summary.activeDebtCount()+". Revisa y confirma la propuesta en Ceroa."))
             .retrieve().body(JsonNode.class);
+        } catch(org.springframework.web.client.ResourceAccessException error) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Estado del proveedor no confirmado");
+        } catch(org.springframework.web.client.RestClientException error) {
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY,"Respuesta del proveedor no valida");
+        }
         if(result==null||result.toString().length()>12000||!proposal.id.toString().equals(result.path("proposalId").asText())
-            ||result.path("id").asText().isBlank()||result.path("sent").asBoolean(true))throw new ResponseStatusException(HttpStatus.BAD_GATEWAY);
+            ||!result.path("id").isTextual()||result.path("id").asText().isBlank()
+            ||!result.path("sent").isBoolean()||result.path("sent").booleanValue())throw new ResponseStatusException(HttpStatus.BAD_GATEWAY);
         return result;
+    }
+    RestClient client(){
+        var factory=new org.springframework.http.client.SimpleClientHttpRequestFactory();factory.setConnectTimeout(3000);factory.setReadTimeout(15000);
+        return RestClient.builder().requestFactory(factory).build();
     }
 }
