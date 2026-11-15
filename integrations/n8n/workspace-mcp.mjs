@@ -20,10 +20,10 @@ export function mcpClientWorkflow(){
  const client=native('client','MCP consultar capacidades publicas','@n8n/n8n-nodes-langchain.mcpClient',1.1,{serverTransport:'httpStreamable',endpointUrl:'http://127.0.0.1:3100/mcp',authentication:'headerAuth',tool:{__rl:true,mode:'id',value:'ceroa_capabilities'},inputMode:'json',jsonInput:'{}',options:{timeout:5000,convertToBinary:false}},250);
  // Fixed endpoint/tool/empty arguments: no identity or financial data can leave this workflow.
  const bounded=native('bounded','Limitar respuesta externa','n8n-nodes-base.set',3.4,{mode:'raw',jsonOutput:'={{ JSON.stringify({status:"UNTRUSTED_EXTERNAL_METADATA",content:JSON.stringify($json).slice(0,4000)}) }}',options:{}},500);
- return{id:'ceroaMcpClient40',name:'Ceroa - MCP cliente controlado',active:false,nodes:[entry,client,bounded],connections:{[entry.name]:{main:[[edge(client.name)]]},[client.name]:{main:[[edge(bounded.name)]]}},settings:{...workspaceSettings,executionTimeout:15}};
+ return{id:'ceroaMcpClient40',name:'CEROA AI | CHRONOS — MCP Client',active:false,nodes:[entry,client,bounded],connections:{[entry.name]:{main:[[edge(client.name)]]},[client.name]:{main:[[edge(bounded.name)]]}},settings:{...workspaceSettings,executionTimeout:15}};
 }
 export function scopedMcpClientWorkflow(){
- const w=mcpClientWorkflow();w.id='ceroaMcpSupport40';w.name='Ceroa - MCP soporte con alcance';
+ const w=mcpClientWorkflow();w.id='ceroaMcpSupport40';w.name='CEROA AI | CHRONOS — Scoped MCP Support';
  const http=(id,name,suffix,body,x)=>native(id,name,'n8n-nodes-base.httpRequest',4.2,{method:'POST',url:'={{ "http://backend:8080/api/v1/assistant-tools/requests/" + $("Entrada controlada").first().json.requestId + "/external/'+suffix+'" }}',authentication:'genericCredentialType',genericAuthType:'httpHeaderAuth',sendQuery:true,queryParameters:{parameters:[{name:'scope',value:'={{ $("Entrada controlada").first().json.scope }}'}]},sendBody:true,specifyBody:'json',jsonBody:body,options:{timeout:10000}},x);
  const authorize=http('authorize','Autorizar MCP publico','authorize','{}',200),result=http('result','Validar datos externos','result','={{ JSON.stringify($json) }}',650);
  const [entry,client]=w.nodes;w.nodes=[entry,authorize,client,result];w.connections={[entry.name]:{main:[[edge(authorize.name)]]},[authorize.name]:{main:[[edge(client.name)]]},[client.name]:{main:[[edge(result.name)]]}};return w;
