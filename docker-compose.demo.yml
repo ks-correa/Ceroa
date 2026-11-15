@@ -24,7 +24,7 @@ services:
     command: [java, -jar, /app/backend.jar]
     volumes:
       - ./tmp/functional-demo/truststore.p12:/demo/truststore.p12:ro
-      - ${CEROA_DEMO_BACKEND_JAR:-./tmp/release-candidate/ceroa-backend-0.1.0-SNAPSHOT-rc1.jar}:/app/backend.jar:ro
+      - ${CEROA_DEMO_BACKEND_JAR:-./tmp/release-candidate/ceroa-backend-0.1.0-SNAPSHOT-rc2.jar}:/app/backend.jar:ro
     environment:
       CEROA_ENV_FILE: optional:file:/nonexistent
       DB_URL: jdbc:postgresql://db:5432/ceroa_demo
