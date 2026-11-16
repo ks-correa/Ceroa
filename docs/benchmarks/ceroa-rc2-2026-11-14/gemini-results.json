@@ -1,0 +1,343 @@
+[
+  {
+    "id": "valid-document",
+    "message": "Analiza el extracto financiero que cargué.",
+    "documentId": "d26f7f5e-1d94-4fdd-b301-8bd9ad5dea7a",
+    "startedAt": "2026-11-15T01:07:48.691Z",
+    "finishedAt": "2026-11-15T01:07:53.090Z",
+    "status": 200,
+    "body": {
+      "answer": "Entidad financiera: Banco Andino. Saldo actual: 5.240.000 COP. Pago mínimo: 310.000 COP. Tasa de interés efectiva anual: 28,7% EA.\n\nFuentes documentales:\n• BANK_STATEMENT · Banco Andino · d26f7f5e-1d94-4fdd-b301-8bd9ad5dea7a",
+      "intent": "analysis",
+      "documents": [
+        {
+          "id": "d26f7f5e-1d94-4fdd-b301-8bd9ad5dea7a",
+          "ownerId": "00000000-0000-0000-0000-000000000001",
+          "identificationType": "OTHER",
+          "documentType": "BANK_STATEMENT",
+          "financialEntity": "Banco Andino",
+          "periodStart": "2026-11-01",
+          "periodEnd": "2026-12-01",
+          "issuedAt": "2026-11-14",
+          "status": "INDEXED",
+          "version": 2,
+          "uploadedAt": "2026-11-14T15:06:11.799014-05:00"
+        }
+      ],
+      "traceId": "5c1e6016-8283-4151-b7e3-8f03eafd8f13",
+      "functionalStatus": "COMPLETE"
+    },
+    "attempts": [
+      {
+        "status": 200,
+        "body": {
+          "answer": "Entidad financiera: Banco Andino. Saldo actual: 5.240.000 COP. Pago mínimo: 310.000 COP. Tasa de interés efectiva anual: 28,7% EA.\n\nFuentes documentales:\n• BANK_STATEMENT · Banco Andino · d26f7f5e-1d94-4fdd-b301-8bd9ad5dea7a",
+          "intent": "analysis",
+          "documents": [
+            {
+              "id": "d26f7f5e-1d94-4fdd-b301-8bd9ad5dea7a",
+              "ownerId": "00000000-0000-0000-0000-000000000001",
+              "identificationType": "OTHER",
+              "documentType": "BANK_STATEMENT",
+              "financialEntity": "Banco Andino",
+              "periodStart": "2026-11-01",
+              "periodEnd": "2026-12-01",
+              "issuedAt": "2026-11-14",
+              "status": "INDEXED",
+              "version": 2,
+              "uploadedAt": "2026-11-14T15:06:11.799014-05:00"
+            }
+          ],
+          "traceId": "5c1e6016-8283-4151-b7e3-8f03eafd8f13",
+          "functionalStatus": "COMPLETE"
+        }
+      }
+    ]
+  },
+  {
+    "id": "contradictory-document",
+    "message": "Analiza mi extracto financiero e identifica las inconsistencias de su tasa. No conviertas ni selecciones una modalidad contradictoria.",
+    "documentId": "2a865a11-5bb6-4547-8d16-dd3fccbe1054",
+    "startedAt": "2026-11-15T01:08:59.112Z",
+    "finishedAt": "2026-11-15T01:09:06.017Z",
+    "status": 200,
+    "body": {
+      "answer": "No tengo información aprobada suficiente para responder esa pregunta.\nEl análisis se limita a la evidencia disponible; alguna parte de la consulta quedó incompleta o requiere aclaración.\n\nFuentes documentales:\n• BANK_STATEMENT · Banco Contradictorio Sintetico · 2a865a11-5bb6-4547-8d16-dd3fccbe1054",
+      "intent": "analysis",
+      "documents": [
+        {
+          "id": "2a865a11-5bb6-4547-8d16-dd3fccbe1054",
+          "ownerId": "9f1fd598-cb14-4345-b238-ce171a0e65ff",
+          "identificationType": "OTHER",
+          "documentType": "BANK_STATEMENT",
+          "financialEntity": "Banco Contradictorio Sintetico",
+          "periodStart": "2026-11-01",
+          "periodEnd": "2026-12-01",
+          "issuedAt": "2026-11-14",
+          "status": "INDEXED",
+          "version": 1,
+          "uploadedAt": "2026-11-14T20:04:44.960014-05:00"
+        }
+      ],
+      "traceId": "94acca83-b22d-40f9-a009-44d21dccd07e",
+      "functionalStatus": "FAILED"
+    },
+    "attempts": [
+      {
+        "status": 200,
+        "body": {
+          "answer": "No tengo información aprobada suficiente para responder esa pregunta.\nEl análisis se limita a la evidencia disponible; alguna parte de la consulta quedó incompleta o requiere aclaración.\n\nFuentes documentales:\n• BANK_STATEMENT · Banco Contradictorio Sintetico · 2a865a11-5bb6-4547-8d16-dd3fccbe1054",
+          "intent": "analysis",
+          "documents": [
+            {
+              "id": "2a865a11-5bb6-4547-8d16-dd3fccbe1054",
+              "ownerId": "9f1fd598-cb14-4345-b238-ce171a0e65ff",
+              "identificationType": "OTHER",
+              "documentType": "BANK_STATEMENT",
+              "financialEntity": "Banco Contradictorio Sintetico",
+              "periodStart": "2026-11-01",
+              "periodEnd": "2026-12-01",
+              "issuedAt": "2026-11-14",
+              "status": "INDEXED",
+              "version": 1,
+              "uploadedAt": "2026-11-14T20:04:44.960014-05:00"
+            }
+          ],
+          "traceId": "94acca83-b22d-40f9-a009-44d21dccd07e",
+          "functionalStatus": "FAILED"
+        }
+      }
+    ]
+  },
+  {
+    "id": "financial-interpretation",
+    "message": "¿Cuál de mis deudas debería pagar primero y por qué?",
+    "documentId": null,
+    "startedAt": "2026-11-15T01:10:12.045Z",
+    "finishedAt": "2026-11-15T01:10:17.320Z",
+    "status": 200,
+    "body": {
+      "answer": "La estrategia activa actual es el método de bola de nieve, según el cual la deuda prioritaria a pagar primero es Compra de computador, con un saldo de 1.280.000 y una tasa de 0%. Por su parte, la Tarjeta principal cuenta con un saldo de 5.240.000 y una tasa de 28,7%, y el Crédito de libre inversión presenta un saldo de 8.900.000 y una tasa de 19,5%.",
+      "intent": "analysis",
+      "documents": [],
+      "traceId": null,
+      "functionalStatus": "COMPLETE"
+    },
+    "attempts": [
+      {
+        "status": 200,
+        "body": {
+          "answer": "La estrategia activa actual es el método de bola de nieve, según el cual la deuda prioritaria a pagar primero es Compra de computador, con un saldo de 1.280.000 y una tasa de 0%. Por su parte, la Tarjeta principal cuenta con un saldo de 5.240.000 y una tasa de 28,7%, y el Crédito de libre inversión presenta un saldo de 8.900.000 y una tasa de 19,5%.",
+          "intent": "analysis",
+          "documents": [],
+          "traceId": null,
+          "functionalStatus": "COMPLETE"
+        }
+      }
+    ]
+  },
+  {
+    "id": "oracle-atlas",
+    "message": "Compara mi extracto financiero con mis obligaciones registradas y dime qué deuda debería priorizar.",
+    "documentId": null,
+    "startedAt": "2026-11-15T01:11:23.345Z",
+    "finishedAt": "2026-11-15T01:11:30.650Z",
+    "status": 200,
+    "body": {
+      "answer": "Los documentos financieros y extractos disponibles registran la información para la entidad financiera Banco Andino. Se establece un saldo actual de 5.240.000 COP, con un pago mínimo de 310.000 COP y una tasa de interés efectiva anual de 28,7% EA. No fue posible completar la interpretación de las obligaciones registradas y la priorización de deudas debido a una limitación en el sistema financiero.\nEl análisis se limita a la evidencia disponible; alguna parte de la consulta quedó incompleta o requiere aclaración.\n\nFuentes documentales:\n• BANK_STATEMENT · Banco Andino · d26f7f5e-1d94-4fdd-b301-8bd9ad5dea7a",
+      "intent": "analysis",
+      "documents": [
+        {
+          "id": "d26f7f5e-1d94-4fdd-b301-8bd9ad5dea7a",
+          "ownerId": "00000000-0000-0000-0000-000000000001",
+          "identificationType": "OTHER",
+          "documentType": "BANK_STATEMENT",
+          "financialEntity": "Banco Andino",
+          "periodStart": "2026-11-01",
+          "periodEnd": "2026-12-01",
+          "issuedAt": "2026-11-14",
+          "status": "INDEXED",
+          "version": 2,
+          "uploadedAt": "2026-11-14T15:06:11.799014-05:00"
+        }
+      ],
+      "traceId": "9ad5ad73-ecb2-4f9b-b46c-c3ba512cd195",
+      "functionalStatus": "PARTIAL"
+    },
+    "attempts": [
+      {
+        "status": 200,
+        "body": {
+          "answer": "Los documentos financieros y extractos disponibles registran la información para la entidad financiera Banco Andino. Se establece un saldo actual de 5.240.000 COP, con un pago mínimo de 310.000 COP y una tasa de interés efectiva anual de 28,7% EA. No fue posible completar la interpretación de las obligaciones registradas y la priorización de deudas debido a una limitación en el sistema financiero.\nEl análisis se limita a la evidencia disponible; alguna parte de la consulta quedó incompleta o requiere aclaración.\n\nFuentes documentales:\n• BANK_STATEMENT · Banco Andino · d26f7f5e-1d94-4fdd-b301-8bd9ad5dea7a",
+          "intent": "analysis",
+          "documents": [
+            {
+              "id": "d26f7f5e-1d94-4fdd-b301-8bd9ad5dea7a",
+              "ownerId": "00000000-0000-0000-0000-000000000001",
+              "identificationType": "OTHER",
+              "documentType": "BANK_STATEMENT",
+              "financialEntity": "Banco Andino",
+              "periodStart": "2026-11-01",
+              "periodEnd": "2026-12-01",
+              "issuedAt": "2026-11-14",
+              "status": "INDEXED",
+              "version": 2,
+              "uploadedAt": "2026-11-14T15:06:11.799014-05:00"
+            }
+          ],
+          "traceId": "9ad5ad73-ecb2-4f9b-b46c-c3ba512cd195",
+          "functionalStatus": "PARTIAL"
+        }
+      }
+    ]
+  },
+  {
+    "id": "oracle-atlas-lumen",
+    "message": "Compara mi extracto financiero con mis obligaciones registradas para decirme qué deuda priorizar y explícame cómo registrar un pago en Ceroa.",
+    "documentId": null,
+    "startedAt": "2026-11-15T01:12:36.668Z",
+    "finishedAt": "2026-11-15T01:12:47.668Z",
+    "status": 200,
+    "body": {
+      "answer": "No fue posible completar la comparación del extracto financiero con las obligaciones registradas debido a un error técnico en el acceso a los documentos y datos financieros. Sin embargo, para registrar un pago o abono en la plataforma, accede a la sección de deudas desde el menú lateral, escoge la obligación correspondiente, haz clic en registrar pago y proporciona los datos solicitados de monto, fecha y tipo de abono.\nEl análisis se limita a la evidencia disponible; alguna parte de la consulta quedó incompleta o requiere aclaración.",
+      "intent": "analysis",
+      "documents": [],
+      "traceId": null,
+      "functionalStatus": "PARTIAL"
+    },
+    "attempts": [
+      {
+        "status": 200,
+        "body": {
+          "answer": "No fue posible completar la comparación del extracto financiero con las obligaciones registradas debido a un error técnico en el acceso a los documentos y datos financieros. Sin embargo, para registrar un pago o abono en la plataforma, accede a la sección de deudas desde el menú lateral, escoge la obligación correspondiente, haz clic en registrar pago y proporciona los datos solicitados de monto, fecha y tipo de abono.\nEl análisis se limita a la evidencia disponible; alguna parte de la consulta quedó incompleta o requiere aclaración.",
+          "intent": "analysis",
+          "documents": [],
+          "traceId": null,
+          "functionalStatus": "PARTIAL"
+        }
+      }
+    ]
+  },
+  {
+    "id": "contradictory-document-bounded-retry",
+    "reason": "First attempt exhausted existing 4-iteration specialist cap; use the same general document question as the valid control, unchanged budgets.",
+    "message": "Analiza el extracto financiero que cargué.",
+    "startedAt": "2026-11-15T01:14:27.300Z",
+    "finishedAt": "2026-11-15T01:14:31.717Z",
+    "status": 200,
+    "body": {
+      "answer": "No tengo información aprobada suficiente para responder esa pregunta.\nEl análisis se limita a la evidencia disponible; alguna parte de la consulta quedó incompleta o requiere aclaración.\n\nFuentes documentales:\n• BANK_STATEMENT · Banco Contradictorio Sintetico · 2a865a11-5bb6-4547-8d16-dd3fccbe1054",
+      "intent": "analysis",
+      "documents": [
+        {
+          "id": "2a865a11-5bb6-4547-8d16-dd3fccbe1054",
+          "ownerId": "9f1fd598-cb14-4345-b238-ce171a0e65ff",
+          "identificationType": "OTHER",
+          "documentType": "BANK_STATEMENT",
+          "financialEntity": "Banco Contradictorio Sintetico",
+          "periodStart": "2026-11-01",
+          "periodEnd": "2026-12-01",
+          "issuedAt": "2026-11-14",
+          "status": "INDEXED",
+          "version": 1,
+          "uploadedAt": "2026-11-14T20:04:44.960014-05:00"
+        }
+      ],
+      "traceId": "1b558028-6be7-4ce2-a3f1-1a0ca6f40db5",
+      "functionalStatus": "FAILED"
+    }
+  },
+  {
+    "id": "oracle-atlas-bounded-retry",
+    "reason": "One bounded repetition after partial specialist result, explicit same valid synthetic document selected; unchanged budgets.",
+    "message": "Compara mi extracto financiero con mis obligaciones registradas y dime qué deuda debería priorizar.",
+    "documentId": "d26f7f5e-1d94-4fdd-b301-8bd9ad5dea7a",
+    "startedAt": "2026-11-15T01:15:54.536Z",
+    "finishedAt": "2026-11-15T01:15:59.497Z",
+    "status": 200,
+    "body": {
+      "answer": "El extracto financiero de Banco Andino registra una entidad financiera Banco Andino, un saldo actual de 5.240.000 COP, un pago mínimo de 310.000 COP y una tasa de interés efectiva anual de 28,7% EA. Al comparar esta obligación con los datos del análisis, se debe priorizar este tipo de deudas considerando el análisis financiero general para optimizar los pagos.\n\nFuentes documentales:\n• BANK_STATEMENT · Banco Andino · d26f7f5e-1d94-4fdd-b301-8bd9ad5dea7a",
+      "intent": "analysis",
+      "documents": [
+        {
+          "id": "d26f7f5e-1d94-4fdd-b301-8bd9ad5dea7a",
+          "ownerId": "00000000-0000-0000-0000-000000000001",
+          "identificationType": "OTHER",
+          "documentType": "BANK_STATEMENT",
+          "financialEntity": "Banco Andino",
+          "periodStart": "2026-11-01",
+          "periodEnd": "2026-12-01",
+          "issuedAt": "2026-11-14",
+          "status": "INDEXED",
+          "version": 2,
+          "uploadedAt": "2026-11-14T15:06:11.799014-05:00"
+        }
+      ],
+      "traceId": "daaba4cc-8be2-44d8-a9dc-8d482d87bbcb",
+      "functionalStatus": "COMPLETE"
+    },
+    "observedDelegations": [
+      "ORACLE"
+    ],
+    "qualifiesAsComposite": false,
+    "validationNote": "Explicit document selection routes to document analysis; COMPLETE is not proof of ORACLE+ATLAS collaboration."
+  },
+  {
+    "id": "oracle-atlas-native-retry",
+    "reason": "One repetition of native multiagent route without document selection override; unchanged questions and budgets.",
+    "message": "Compara mi extracto financiero con mis obligaciones registradas y dime qué deuda debería priorizar.",
+    "startedAt": "2026-11-15T01:17:47.952Z",
+    "finishedAt": "2026-11-15T01:17:55.799Z",
+    "status": 200,
+    "body": {
+      "answer": "Entidad financiera: Banco Andino. Saldo actual: 5.240.000 COP. Pago mínimo: 310.000 COP. Tasa de interés efectiva anual: 28,7% EA. No fue posible completar esta parte de la consulta debido a un error en el procesamiento financiero.\nEl análisis se limita a la evidencia disponible; alguna parte de la consulta quedó incompleta o requiere aclaración.\n\nFuentes documentales:\n• BANK_STATEMENT · Banco Andino · d26f7f5e-1d94-4fdd-b301-8bd9ad5dea7a",
+      "intent": "analysis",
+      "documents": [
+        {
+          "id": "d26f7f5e-1d94-4fdd-b301-8bd9ad5dea7a",
+          "ownerId": "00000000-0000-0000-0000-000000000001",
+          "identificationType": "OTHER",
+          "documentType": "BANK_STATEMENT",
+          "financialEntity": "Banco Andino",
+          "periodStart": "2026-11-01",
+          "periodEnd": "2026-12-01",
+          "issuedAt": "2026-11-14",
+          "status": "INDEXED",
+          "version": 2,
+          "uploadedAt": "2026-11-14T15:06:11.799014-05:00"
+        }
+      ],
+      "traceId": "83eb5a24-3cdb-4b26-b8e1-94b046af0304",
+      "functionalStatus": "PARTIAL"
+    }
+  },
+  {
+    "id": "oracle-atlas-lumen-native-retry",
+    "reason": "One repetition of native multiagent route without document selection override; unchanged questions and budgets.",
+    "message": "Compara mi extracto financiero con mis obligaciones registradas para decirme qué deuda priorizar y explícame cómo registrar un pago en Ceroa.",
+    "startedAt": "2026-11-15T01:19:01.815Z",
+    "finishedAt": "2026-11-15T01:19:11.374Z",
+    "status": 200,
+    "body": {
+      "answer": "Para comparar y priorizar las deudas utilizando el extracto financiero de la entidad 157, el saldo actual es de 5.240.000 COP, con una tasa de interés efectiva anual de 28,7% EA y un pago mínimo de 310.000 COP. Las obligaciones registradas del usuario son las siguientes: Tarjeta principal con un saldo de 5.240.000 y tasa 28,7% EA. Crédito de libre inversión con un saldo de 8.900.000 y tasa 19,5% EA. Compra de computador con un saldo de 1.280.000 y tasa 0% EA. Para registrar un pago o abono en Ceroa, ingresa a la sección Deudas en el menú lateral, selecciona la obligación correspondiente, pulsa Registrar pago e ingresa el monto pagado, la fecha de pago y el tipo de abono.\n\nFuentes documentales:\n• BANK_STATEMENT · Banco Andino · d26f7f5e-1d94-4fdd-b301-8bd9ad5dea7a",
+      "intent": "analysis",
+      "documents": [
+        {
+          "id": "d26f7f5e-1d94-4fdd-b301-8bd9ad5dea7a",
+          "ownerId": "00000000-0000-0000-0000-000000000001",
+          "identificationType": "OTHER",
+          "documentType": "BANK_STATEMENT",
+          "financialEntity": "Banco Andino",
+          "periodStart": "2026-11-01",
+          "periodEnd": "2026-12-01",
+          "issuedAt": "2026-11-14",
+          "status": "INDEXED",
+          "version": 2,
+          "uploadedAt": "2026-11-14T15:06:11.799014-05:00"
+        }
+      ],
+      "traceId": "91f010af-3986-4a75-af8a-9021cb822232",
+      "functionalStatus": "COMPLETE"
+    }
+  }
+]

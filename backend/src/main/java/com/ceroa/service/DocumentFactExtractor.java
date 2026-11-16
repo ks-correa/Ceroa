@@ -10,11 +10,11 @@ import java.util.regex.*;
 
 /** Conservative, versioned extraction. Only explicit labels; no LLM or financial writes. */
 public final class DocumentFactExtractor {
-    public static final int VERSION=1;
+    public static final int VERSION=2;
     private DocumentFactExtractor() {}
-    private static final Pattern HEADER=Pattern.compile("(?iu)^(saldo(?:\\s+(?:total|actual|informado))?|pago m[ií]nimo|cuota|tasa(?:\\s+(?:de inter[eé]s|efectiva|nominal))?|fecha de corte|fecha de vencimiento|inicio del per[ií]odo|fin del per[ií]odo|entidad)\\s*:\\s*(.+)$");
+    private static final Pattern HEADER=Pattern.compile("(?iu)^(saldo(?:\\s+(?:total|actual|informado))?|pago m[ií]nimo|cuota|tasa(?:\\s+de\\s+inter[eé]s)?(?:\\s+(?:efectiva(?:\\s+(?:anual|mensual))?|nominal(?:\\s+(?:anual|mensual))?))?|fecha de corte|fecha de vencimiento|inicio del per[ií]odo|fin del per[ií]odo|entidad(?:\\s+financiera)?)\\s*:\\s*(.+)$");
     private static final Pattern MONEY=Pattern.compile("(?iu)^(?:(COP|USD|EUR)\\s*)?\\$?\\s*([+-]?[0-9][0-9.,]*)(?:\\s*(COP|USD|EUR))?$");
-    private static final Pattern RATE=Pattern.compile("(?iu)^([0-9]+(?:[.,][0-9]{1,6})?)\\s*%\\s*(EA|EM|MV|NMV|NAMV)?$");
+    private static final Pattern RATE=Pattern.compile("(?iu)^([0-9]+(?:[.,][0-9]{1,6})?)\\s*%\\s*([a-z.\\s]+)?$");
     // A movement needs a stable reference and date to support deterministic deduplication.
     private static final Pattern MOVEMENT=Pattern.compile("(?iu)^movimiento\\s+ref(?:erencia)?\\s*:?\\s*([A-Z0-9_-]{3,80})\\s+(\\d{4}-\\d{2}-\\d{2})\\s+(.+)$");
     public static List<Fact> extract(Source source){
@@ -36,7 +36,11 @@ public final class DocumentFactExtractor {
                 else if(kind==Kind.RATE){
                     var m=RATE.matcher(value);if(!m.matches())continue;
                     BigDecimal number=new BigDecimal(m.group(1).replace(',','.'));if(number.compareTo(new BigDecimal("100"))>0)continue;
-                    String mode=m.group(2)==null?null:m.group(2).toUpperCase(Locale.ROOT);
+                    String explicit=DocumentRateMode.mode(m.group(2));
+                    if(m.group(2)!=null&&explicit==null)continue;
+                    String inferred=DocumentRateMode.unique(label);
+                    String mode=explicit!=null?explicit:inferred;
+                    if(!DocumentRateMode.consistent(mode,label))mode=null;
                     result.add(fact(source,kind,"NUMBER",number,null,null,"PERCENT",null,mode,null,null,mode==null?"NEEDS_REVIEW":"VERIFIED",quote,offset));
                 }else if(kind==Kind.ENTITY){if(value.length()<=160)result.add(fact(source,kind,"TEXT",null,null,value,"TEXT",null,null,null,null,"VERIFIED",quote,offset));}
                 else {LocalDate parsed=date(value);if(parsed!=null)result.add(fact(source,kind,"DATE",null,parsed,null,"DATE",null,null,null,null,"VERIFIED",quote,offset));}

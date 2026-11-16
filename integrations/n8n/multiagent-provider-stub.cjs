@@ -23,7 +23,7 @@ const server=http.createServer(async(req,res)=>{try{
   }else if(root){
    const count=scenario==='UNKNOWN'?0:scenario==='COMPOSITE'?2:1;
    if(results.length<count){const target=scenario==='COMPOSITE'?(results.length===0?'RAG':'FINANCIAL'):scenario==='EXTRACTS'?'RAG':scenario;
-    tool=names.find(n=>target==='RAG'?/Conocimiento|RAG/i.test(n):target==='SUPPORT'?/Soporte/i.test(n):/Financiero/i.test(n));args={task:'SCENARIO_'+scenario+' '+(results.length===0?'Resolver parte especializada':'Interpretar evidencia compartida'),evidenceRefs:results.length===0?'':'f1'};}
+    tool=names.find(n=>target==='RAG'?/ORACLE|Conocimiento|RAG/i.test(n):target==='SUPPORT'?/LUMEN|Soporte/i.test(n):/ATLAS|Financiero/i.test(n));args={task:'SCENARIO_'+scenario+' '+(results.length===0?'Resolver parte especializada':'Interpretar evidencia compartida'),evidenceRefs:results.length===0?'':'f1'};}
    else output={answer:scenario==='UNKNOWN'?'No tengo información aprobada suficiente para responder esa pregunta.':scenario==='SUPPORT'||scenario==='RAG'?'Consulta la documentación aprobada.':specialistResult?.answer??'Resultado parcial {{f1}}.',mode:scenario==='RAG'||scenario==='SUPPORT'||scenario==='UNKNOWN'?'documentary':'personal',sources:scenario==='RAG'||scenario==='SUPPORT'?['d1']:[]};
   }else{
    if(!results.length){tool=scenario==='SUPPORT'||scenario==='RAG'?names.find(n=>/documentaci/i.test(n)):body.model.includes('Financial')?names.find(n=>/datos_financieros/i.test(n)):names.find(n=>/documentos_financieros/i.test(n));
@@ -38,6 +38,7 @@ const server=http.createServer(async(req,res)=>{try{
   if(output){const final=names.find(n=>n==='format_final_json_response');if(final){tool=final;args={output};}}
   if(!tool&&!output)throw Error('No matching tool '+JSON.stringify(names));
   const message=tool?{role:'assistant',content:null,tool_calls:[{id:'call_'+(++counter),type:'function',function:{name:tool,arguments:JSON.stringify(args)}}]}:{role:'assistant',content:JSON.stringify(output)};
+  traces[traces.length-1].selectedTool=tool??null;fs.writeFileSync('/tmp/provider-traces.json',JSON.stringify(traces));
   response(res,{id:'fixture-'+counter,object:'chat.completion',created:1,model:body.model,choices:[{index:0,message,finish_reason:tool?'tool_calls':'stop'}],usage:{prompt_tokens:1,completion_tokens:1,total_tokens:2}});return;
  }
  if(url.pathname.endsWith('/begin')){const role=url.pathname.split('/').at(-2);const token='00000000-0000-4000-8000-'+String(++counter).padStart(12,'0');const requestId=url.pathname.split('/').at(-4);grants.set(token,{role,requestId,task:body.task});backendTrace({event:'begin',role,requestId});response(res,{requestId,correlationId:requestId,role,scopeToken:token,task:body.task,maxIterations:4,remainingMs:60000,maxContextCharacters:16000,cached:null,evidence:body.evidenceRefs?.length?{f1:{source:'syntheticDocument/balance',value:42}}:{}});return;}

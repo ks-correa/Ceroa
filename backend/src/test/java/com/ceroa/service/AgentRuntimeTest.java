@@ -42,4 +42,19 @@ class AgentRuntimeTest {
     @Test void partialReferencesRetainCoverageAcrossDelegations(){var r=runtime();var g=r.begin(AgentContracts.Role.RAG,new AgentRuntime.Task("Recuperar",List.of()),false);r.complete(r.scope(g.scopeToken()),result(AgentContracts.Role.RAG,"PARTIAL",List.of("f1")));var next=r.begin(AgentContracts.Role.FINANCIAL,new AgentRuntime.Task("Interpretar",List.of("f1")),false);assertThrows(IllegalArgumentException.class,()->r.complete(r.scope(next.scopeToken()),result(AgentContracts.Role.FINANCIAL,"COMPLETE",List.of("f1"))));}
     @Test void contextBudgetIsSharedAcrossSpecialists(){var r=runtime();var g=r.begin(AgentContracts.Role.RAG,new AgentRuntime.Task("Recuperar",List.of()),false);r.delivered(r.scope(g.scopeToken()),80000);var next=r.begin(AgentContracts.Role.FINANCIAL,new AgentRuntime.Task("Interpretar",List.of()),false);assertThrows(ResponseStatusException.class,()->r.delivered(r.scope(next.scopeToken()),10001));}
     @Test void metricsDoNotInventProviderCallsOrIterations(){var r=runtime();var g=r.begin(AgentContracts.Role.FINANCIAL,new AgentRuntime.Task("Leer",List.of()),false);r.authorize(r.scope(g.scopeToken()),"finance.read");var agents=(List<?>)r.metrics().get("agents");var values=(Map<?,?>)agents.getFirst();assertNull(values.get("llmCalls"));assertNull(values.get("iterations"));assertNull(values.get("providerRetries"));}
+    @Test void threeSpecialistCompositeRuntimeStaysWithinReservedFifteenCallBudget(){
+        var roles=Set.of(AgentContracts.Role.FINANCIAL,AgentContracts.Role.RAG,AgentContracts.Role.SUPPORT);
+        var budget=AgentContracts.budget(AgentContracts.Intent.COMPOSITE);
+        int reservation=AssistantProviderGate.reservation(budget,roles);
+        assertEquals(15,reservation);
+        var r=new AgentRuntime(UUID.randomUUID(),budget,List.of("f1"),reservation,roles.size());
+        var gRag=r.begin(AgentContracts.Role.RAG,new AgentRuntime.Task("Extracto",List.of("f1")),false);
+        var gFin=r.begin(AgentContracts.Role.FINANCIAL,new AgentRuntime.Task("Obligaciones",List.of("f1")),false);
+        var gSup=r.begin(AgentContracts.Role.SUPPORT,new AgentRuntime.Task("Pagos",List.of()),false);
+        assertEquals(3,gRag.maxIterations());
+        assertEquals(3,gFin.maxIterations());
+        assertEquals(3,gSup.maxIterations());
+        assertEquals(15,r.metrics().get("reservedIterations"));
+        assertThrows(ResponseStatusException.class,()->r.begin(AgentContracts.Role.RAG,new AgentRuntime.Task("Extra",List.of("f1")),false));
+    }
 }

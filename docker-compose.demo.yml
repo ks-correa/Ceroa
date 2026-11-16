@@ -1,0 +1,92 @@
+services:
+  adapter:
+    image: docker.n8n.io/n8nio/n8n@sha256:ffeb52485f78b1b06c9a832205853cf75da72a07a514c9a27724df85979d6c34
+    user: "0:0"
+    entrypoint: [node, /scripts/adapter.cjs]
+    volumes:
+      - ./integrations/demo:/scripts:ro
+      - ./tmp/functional-demo:/fixtures:ro
+      - demo-adapter:/data
+  db:
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_DB: ceroa_demo
+      POSTGRES_USER: ceroa_demo
+      POSTGRES_PASSWORD: SyntheticDemoDb2026
+    volumes:
+      - demo-db:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U ceroa_demo -d ceroa_demo']
+      interval: 3s
+      retries: 20
+  backend:
+    image: eclipse-temurin:25-jre
+    command: [java, -jar, /app/backend.jar]
+    volumes:
+      - ./tmp/functional-demo/truststore.p12:/demo/truststore.p12:ro
+      - ${CEROA_DEMO_BACKEND_JAR:-./tmp/release-candidate/ceroa-backend-0.1.0-SNAPSHOT-rc2.jar}:/app/backend.jar:ro
+    environment:
+      CEROA_ENV_FILE: optional:file:/nonexistent
+      DB_URL: jdbc:postgresql://db:5432/ceroa_demo
+      DB_USERNAME: ceroa_demo
+      DB_PASSWORD: SyntheticDemoDb2026
+      FRONTEND_URL: http://localhost:3001
+      ASSISTANT_ENABLED: 'true'
+      ASSISTANT_WEBHOOK_URL: http://n8n:5678/webhook/ceroa-assistant-hybrid-v1
+      ASSISTANT_WORKER_KEY: synthetic-worker-only-at-least-32-characters
+      DOCUMENTS_ENABLED: 'false'
+      RAG_ENABLED: 'true'
+      RAG_DB_URL: jdbc:postgresql://db:5432/ceroa_demo
+      RAG_DB_USERNAME: ceroa_demo
+      RAG_DB_PASSWORD: SyntheticDemoDb2026
+      RAG_EMBEDDING_WEBHOOK_URL: http://n8n:5678/webhook/ceroa-rag-embedding-v1
+      RAG_WORKER_KEY: synthetic-rag-only-at-least-32-characters
+      DOCUMENT_LIBRARY_ENABLED: 'true'
+      DOCUMENT_LIBRARY_WORKER_KEY: synthetic-library-only-at-least-32-characters
+      DOCUMENT_LIBRARY_STORAGE_URL: https://adapter:3443
+      DOCUMENT_LIBRARY_STORAGE_KEY: synthetic-storage-key
+      DOCUMENT_LIBRARY_INGESTION_WEBHOOK_URL: http://n8n:5678/webhook/ceroa-library-ingest-v1
+      WORKSPACE_DRAFT_URL: http://n8n:5678/webhook/ceroa-demo-draft
+      WORKSPACE_CALENDAR_ENABLED: 'true'
+      WORKSPACE_WORKER_KEY: synthetic-workspace-only-at-least-32-characters
+      WORKSPACE_CALENDAR_URL: http://n8n:5678/webhook/ceroa-demo-chronos
+      JAVA_TOOL_OPTIONS: -Djavax.net.ssl.trustStore=/demo/truststore.p12 -Djavax.net.ssl.trustStorePassword=SyntheticTrust2026
+    ports:
+      - 127.0.0.1:8081:8080
+    depends_on:
+      db:
+        condition: service_healthy
+  frontend:
+    image: ceroa-frontend:latest
+    volumes:
+      - ./frontend/src:/app/src:ro
+    environment:
+      VITE_API_URL: http://localhost:8081/api/v1
+      VITE_MAIL_DRAFTS_ENABLED: 'true'
+      VITE_DEMO_MODE: 'true'
+    ports:
+      - 127.0.0.1:3001:3000
+  n8n:
+    image: docker.n8n.io/n8nio/n8n@sha256:ffeb52485f78b1b06c9a832205853cf75da72a07a514c9a27724df85979d6c34
+    environment:
+      N8N_HOST: localhost
+      N8N_SECURE_COOKIE: 'false'
+      N8N_DIAGNOSTICS_ENABLED: 'false'
+      N8N_VERSION_NOTIFICATIONS_ENABLED: 'false'
+      N8N_PERSONALIZATION_ENABLED: 'false'
+      N8N_EDITOR_BASE_URL: http://localhost:5679/
+      WEBHOOK_URL: http://localhost:5679/
+      GENERIC_TIMEZONE: America/Bogota
+      EXECUTIONS_DATA_SAVE_ON_SUCCESS: all
+      EXECUTIONS_DATA_SAVE_ON_ERROR: all
+      EXECUTIONS_DATA_SAVE_MANUAL_EXECUTIONS: 'true'
+      EXECUTIONS_DATA_PRUNE: 'false'
+    ports:
+      - 127.0.0.1:5679:5678
+    volumes:
+      - demo-n8n:/home/node/.n8n
+      - ./tmp/functional-demo:/fixtures:ro
+volumes:
+  demo-adapter:
+  demo-db:
+  demo-n8n:

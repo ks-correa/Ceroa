@@ -1,0 +1,9 @@
+{
+  "onlyTaskCreatedStoppedContainersRemoved": true,
+  "count": 14,
+  "productionContainersTouched": false,
+  "networksRemoved": [
+    "ceroa-recovery-e2e"
+  ],
+  "privateEvidenceRetainedInIgnoredTmp": true
+}

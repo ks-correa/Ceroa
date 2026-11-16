@@ -1,0 +1,87 @@
+{
+  "scenario": "SUPPORT",
+  "requestId": "00000000-0000-4000-8000-000000000004",
+  "toolsInvoked": [
+    "Delegar_a_LUMEN",
+    "Consultar_documentaci_n_aprobada",
+    "format_final_json_response",
+    "format_final_json_response"
+  ],
+  "workflowId": "ceroaMultiagentFixture30SUPPORT",
+  "executionId": null,
+  "executions": [
+    {
+      "id": 9,
+      "workflowId": "ceroaSupportAgent30",
+      "status": "running",
+      "startedAt": "2026-11-14 19:12:24.453",
+      "stoppedAt": null
+    }
+  ],
+  "startedAt": "2026-11-14T19:12:23.777Z",
+  "stoppedAt": "2026-11-14T19:12:24.821Z",
+  "latencyMs": 1044,
+  "provider": "SIMULATED",
+  "backend": "SIMULATED",
+  "finished": true,
+  "sqliteStatusIsNotFinalProof": true,
+  "roles": [
+    "ceroaSupportAgent30"
+  ],
+  "delegations": 1,
+  "providerRequests": 4,
+  "providerTrace": [
+    {
+      "model": "fixture-root",
+      "availableTools": [
+        "Delegar_a_LUMEN",
+        "Delegar_a_ORACLE",
+        "Delegar_a_ATLAS",
+        "format_final_json_response"
+      ],
+      "selectedTool": "Delegar_a_LUMEN",
+      "toolResults": 0
+    },
+    {
+      "model": "ceroaSupportAgent30",
+      "availableTools": [
+        "Consultar_capacidad_externa_MCP",
+        "cancelar_asesoria",
+        "consultar_asesoria",
+        "proponer_asesoria",
+        "consultar_disponibilidad_soporte",
+        "Proponer_correo_autorizado",
+        "Consultar_documentaci_n_aprobada",
+        "format_final_json_response"
+      ],
+      "selectedTool": "Consultar_documentaci_n_aprobada",
+      "toolResults": 0
+    },
+    {
+      "model": "ceroaSupportAgent30",
+      "availableTools": [
+        "Consultar_capacidad_externa_MCP",
+        "cancelar_asesoria",
+        "consultar_asesoria",
+        "proponer_asesoria",
+        "consultar_disponibilidad_soporte",
+        "Proponer_correo_autorizado",
+        "Consultar_documentaci_n_aprobada",
+        "format_final_json_response"
+      ],
+      "selectedTool": "format_final_json_response",
+      "toolResults": 1
+    },
+    {
+      "model": "fixture-root",
+      "availableTools": [
+        "Delegar_a_LUMEN",
+        "Delegar_a_ORACLE",
+        "Delegar_a_ATLAS",
+        "format_final_json_response"
+      ],
+      "selectedTool": "format_final_json_response",
+      "toolResults": 1
+    }
+  ]
+}

@@ -12,17 +12,24 @@ final class FinancialClaimGrounding {
     }
     private static String concept(String s) {
         String n=normalized(s);
-        var m=Pattern.compile("pago minimo|minimumPayment|saldo|balance|tasa|rate|cuota|installment|monthlyPayment|pagos?|pagaste|pagados?|abonos?|amount|importe|pagina|page|cuenta|referencia|obligacion|prioridad|fecha|documento|periodo",Pattern.CASE_INSENSITIVE).matcher(n);
+        var m=Pattern.compile("fecha(?: estimada)? de pago|estimatedPayoffDate|payoffDate|date|presupuesto(?: mensual)?|monthlyBudget|plazo(?: estimado)?|tasa(?:s)? de interes|interestRate|interestSavings|interestDifference|ahorro(?: en intereses)?|diferencia (?:de|en) intereses(?: totales)?|monthsDifference|monthsReduced|meses|months|intereses|interes|interest|basePayment|normalPayment|extraPayment|pago minimo|minimumPayment|saldo|balance|tasa|rate|cuota|installment|monthlyPayment|pagos?|pagaste|pagados?|abonos?|amount|importe|pagina|page|numero de obligacion|cuenta|referencia|priority|prioridad|horario|hora|disponibilidad|asesoria|cita|programad[oa]|agendad[oa]|reserva|propuesta|expira|hasta|fecha|documento|periodo",Pattern.CASE_INSENSITIVE).matcher(n);
         String last="";
         while(m.find())last=switch(m.group().toLowerCase(Locale.ROOT)) {
             case "saldo","balance" -> "balance";
-            case "tasa","rate" -> "rate";
+            case "tasa","rate","tasa de interes","tasas de interes","interestrate" -> "rate";
+            case "interes","intereses","interest" -> "interest";
+            case "interestsavings","interestdifference","ahorro","ahorro en intereses","diferencia de intereses" -> "savings";
+            case "monthsdifference","monthsreduced","meses","months","plazo","plazo estimado" -> "months";
+            case "presupuesto","presupuesto mensual","monthlybudget" -> "budget";
+            case "diferencia en intereses","diferencia en intereses totales","diferencia de intereses totales" -> "savings";
+            case "fecha de pago","fecha estimada de pago","date","estimatedpayoffdate","payoffdate" -> "date";
             case "pago minimo","minimumpayment" -> "minimum";
             case "cuota","installment","monthlypayment" -> "installment";
-            case "pago","pagos","pagaste","pagado","pagados","abono","abonos","amount","importe" -> "payment";
-            case "fecha","documento","periodo" -> "date";
+            case "basepayment","normalpayment","extrapayment","pago","pagos","pagaste","pagado","pagados","abono","abonos","amount","importe" -> "payment";
+            case "fecha","documento","periodo","horario","hora","disponibilidad","asesoria","cita","programada","programado","agendada","agendado","reserva","propuesta","expira" -> "date";
             case "pagina","page" -> "page";
-            case "cuenta","referencia","obligacion" -> "reference";
+            case "cuenta","referencia","numero de obligacion" -> "reference";
+            case "hasta" -> "date";
             default -> "priority";
         };
         return last;
@@ -34,17 +41,23 @@ final class FinancialClaimGrounding {
     private static boolean permits(Map<String,AssistantAnalysisService.Fact> facts, AssistantAnalysisService.Fact fact,
                            String answer,int start,int end,boolean aggregate) {
         if(fact==null||fact.value().isNull())return false;
-        if(!fact.value().isNumber()&&!fact.value().asText().codePoints().anyMatch(Character::isDigit))return true;
         String path=fact.source();
-        if(path.matches("(?i).*/(?:id|documentId|chunkId|ownerId)$"))return true; // renderer omits internal IDs
+        String parent=path.substring(0,Math.max(0,path.lastIndexOf('/')));
+        boolean document=path.startsWith("financialDocuments/");
+        if(document&&path.matches(".*/(?:context|quote|kindHint|transactionReference)$"))return false;
+        if(document&&"RATE".equals(sibling(facts,parent,"kind"))&&
+            !DocumentRateMode.consistent(sibling(facts,parent,"rateMode"),sibling(facts,parent,"quote"),sibling(facts,parent,"context")))return false;
+        if(path.contains("/verifiedData/analysis/facts/")&&!sibling(facts,parent,"validationStatus").isEmpty()&&
+            !sibling(facts,parent,"validationStatus").equals("VERIFIED"))return false;
         int boundary=Math.max(answer.lastIndexOf('\n',start),Math.max(answer.lastIndexOf(';',start),answer.lastIndexOf('.',start)));
         String before=answer.substring(Math.max(boundary+1,start-180),start);
         String claim=concept(before);
-        boolean document=path.startsWith("financialDocuments/");
-        if(document&&path.matches(".*/(?:context|quote|kindHint|transactionReference)$"))return false;
+        if(path.startsWith("supportBooking/")||path.startsWith("workspaceProposal/"))
+            return claim.isEmpty()||claim.equals("date");
+        if(!fact.value().isNumber()&&!fact.value().asText().codePoints().anyMatch(Character::isDigit))return true;
+        if(path.matches("(?i).*/(?:id|documentId|chunkId|ownerId)$"))return true; // renderer omits internal IDs
         String sourceConcept=concept(path);
-        if(path.matches("(?i).*/(?:periodStart|periodEnd|periodEndInclusive|issuedAt|dateValue|periodYear|periodMonth)$"))sourceConcept="date";
-        String parent=path.substring(0,Math.max(0,path.lastIndexOf('/')));
+        if(path.matches("(?i).*/(?:periodStart|periodEnd|periodEndInclusive|issuedAt|dateValue|periodYear|periodMonth|start|end|expiresAt|dueDate|nextDueDate)$"))sourceConcept="date";
         String context=sibling(facts,parent,"context");
         String kind=sibling(facts,parent,"kind");
         if(path.startsWith("calculation/")) {
@@ -65,7 +78,21 @@ final class FinancialClaimGrounding {
             // Masked account identifiers are display evidence, never balances or arithmetic.
             if(!(claim.equals("reference")&&fact.value().asText().matches("\\*{2,4}\\d+")))return false;
         }
-        if(!document)return true;
+        int stop=answer.indexOf(';',end);if(stop<0)stop=answer.indexOf('\n',end);if(stop<0)stop=answer.length();
+        String line=answer.substring(Math.max(boundary+1,start-16),Math.min(stop,end+12));
+        String normalizedLine=normalized(before+" "+line);
+        String lineModes=(normalizedLine.contains("efectiva anual")?" EA":"")+(normalizedLine.contains("efectiva mensual")?" EM":"")+(normalizedLine.contains("nominal anual")?" NAMV":"")+(normalizedLine.contains("nominal mensual")?" NMV":"");
+        String effectiveLine=line+lineModes;
+        if(!document) {
+            String rateType=sibling(facts,parent,"rateType");
+            if(!rateType.isEmpty()&&sourceConcept.equals("rate")) {
+                for(String token:List.of("EA","EM","MV","NMV","NAMV")) {
+                    var p=Pattern.compile("(?i)(?<![a-z])"+token+"(?![a-z])");
+                    if(p.matcher(effectiveLine).find()&&!p.matcher(rateType).find())return false;
+                }
+            }
+            return true;
+        }
         if(path.endsWith("/numericValue")&&path.contains("/verifiedData/analysis/")&&
             !sibling(facts,parent,"validationStatus").equals("VERIFIED"))return false;
         if(path.contains("/documentValues/")&&(path.endsWith("/literal")||path.endsWith("/numericValue"))) {
@@ -74,12 +101,20 @@ final class FinancialClaimGrounding {
             if(!context.isEmpty()&&!normalized(context).matches("(?s)^(?:saldo|tasa|pago|abono|interes|cuota|pagina|cuenta|referencia).*"))return false;
             if(normalized(context).matches("(?s).*(?:ignora|instrucciones|system prompt|ignore previous|prompt injection).*"))return false;
         }
-        int stop=answer.indexOf(';',end);if(stop<0)stop=answer.indexOf('\n',end);if(stop<0)stop=answer.length();
-        String line=answer.substring(Math.max(boundary+1,start-16),Math.min(stop,end+12));
-        String unit=context+" "+sibling(facts,parent,"currency")+" "+sibling(facts,parent,"rateMode");
-        for(String token:List.of("COP","USD","EUR","EA","EM","MV","NMV","NAMV")) {
+        String quote=sibling(facts,parent,"quote");
+        String rateMode=sibling(facts,parent,"rateMode");
+        if(sourceConcept.equals("rate")) {
+            if(rateMode.isEmpty())rateMode=DocumentRateMode.unique(context+" "+quote);
+            // Legacy retrieval may quote a percentage without naming its modality.
+            // It cannot assert one, and typed RATE facts still require it above.
+            if(rateMode==null) {
+                if(!DocumentRateMode.modes(context+" "+quote).isEmpty()||!DocumentRateMode.modes(effectiveLine).isEmpty())return false;
+            }else if(!DocumentRateMode.consistent(rateMode,context,quote,effectiveLine))return false;
+        }
+        String unit=context+" "+quote+" "+sibling(facts,parent,"currency");
+        for(String token:List.of("COP","USD","EUR")) {
             var p=Pattern.compile("(?i)(?<![a-z])"+token+"(?![a-z])");
-            if(p.matcher(line).find()&&!p.matcher(unit).find())return false;
+            if(p.matcher(effectiveLine).find()&&!p.matcher(unit).find())return false;
         }
         String documentId=sibling(facts,parent,"documentId");
         boolean periodMatches=false;

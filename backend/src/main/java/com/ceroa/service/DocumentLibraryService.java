@@ -131,7 +131,7 @@ public class DocumentLibraryService {
             documents=page.stream().limit(q.limit()).toList();var ids=documents.stream().map(Document::id).toList();
             tx.executeWithoutResult(s->repo.ensureFinancialFacts(actor,ids));
             var stored=repo.financialFacts(actor,ids);
-            var facts=DocumentFactAnalysis.analyze(documents,stored.stream().limit(1000).toList(),repo.factDebtLinks(actor,ids),DocumentFactAnalysis.requestedKind(q.question()));
+            var facts=DocumentFactAnalysis.analyze(documents,stored.stream().limit(1000).toList(),repo.factDebtLinks(actor,ids),DocumentFactAnalysis.requestedKinds(q.question()));
             boolean complete=q.offset()==0&&!more&&stored.size()<=1000&&facts.complete();
             var data=Map.of("analysis",facts,"hasMoreDocuments",more,"nextOffset",q.offset()+documents.size(),"complete",complete,
                 "factsTruncated",stored.size()>1000,"periodSource","DOCUMENT_METADATA","canonicalPayments",false);

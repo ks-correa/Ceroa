@@ -1,0 +1,29 @@
+{
+  "guards": [
+    "Rc1RateReviewTest#conflictingAnnualLabelAndMonthlySuffixMustNotHaveCompleteCoverage",
+    "Rc1DraftHttpReviewTest#missingDraftProposalMustPreserveNotFoundSemantics"
+  ],
+  "sameAcceptanceGuards": true,
+  "rc1": {
+    "sha256": "4c2f954c53399ae5b8f1e050f5ec10aa0c0ce0a2b39187a744105422010c7004",
+    "tests": 2,
+    "failures": 2,
+    "logSha256": "7da3306f0111533433cea3f8b9d17693fea76edf3d02ea9b7e73884adfdb6347",
+    "messages": [
+      "java.lang.AssertionError: Status expected:<404> but was:<503>",
+      "org.opentest4j.AssertionFailedError: A contradictory rate must remain unverified/partial instead of authorizing COMPLETE ==> expected: <false> but was: <true>",
+      "[ERROR]   Rc1DraftHttpReviewTest.missingDraftProposalMustPreserveNotFoundSemantics:17 Status expected:<404> but was:<503>",
+      "[ERROR]   Rc1RateReviewTest.conflictingAnnualLabelAndMonthlySuffixMustNotHaveCompleteCoverage:24 A contradictory rate must remain unverified/partial instead of authorizing COMPLETE ==> expected: <false> but was: <true>",
+      "[ERROR] Tests run: 2, Failures: 2, Errors: 0, Skipped: 0"
+    ]
+  },
+  "rc2": {
+    "sha256": "19a7dcb8496cb7ec41c6daf99c3a34585ca69e1f109229110a49b4da2ce12418",
+    "tests": 2,
+    "failures": 0,
+    "logSha256": "bad65fe6548d242266a03cd33c410c436a07ee483e8accd4924eaefbaad577f7",
+    "classesExtractedFromFinalJar": true,
+    "timezone": "America/Bogota"
+  },
+  "notes": "Original RC1 reproduction logs preserved locally. Permanent tests require corrected behavior; characterization assertions expecting defects are not acceptance criteria."
+}

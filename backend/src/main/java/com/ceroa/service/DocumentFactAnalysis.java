@@ -7,40 +7,65 @@ import java.util.*;
 
 /** Documentary arithmetic only. No canonical balance, interest or registered payment updates. */
 public final class DocumentFactAnalysis {
+    private static final Set<Kind> STATEMENT_NUMERIC_KINDS=Set.of(Kind.BALANCE,Kind.MINIMUM_PAYMENT,Kind.INSTALLMENT,Kind.RATE);
     private DocumentFactAnalysis() {}
     public static Kind requestedKind(String question){
-        String q=java.text.Normalizer.normalize(question==null?"":question.toLowerCase(Locale.ROOT),java.text.Normalizer.Form.NFD).replaceAll("\\p{M}","");
-        var kinds=new LinkedHashSet<Kind>();
-        if(q.matches(".*\\bsaldos?\\b.*"))kinds.add(Kind.BALANCE);
-        if(q.contains("pago minimo")||q.contains("pagos minimos"))kinds.add(Kind.MINIMUM_PAYMENT);
-        if(q.matches(".*\\bcuotas?\\b.*"))kinds.add(Kind.INSTALLMENT);
-        if(q.matches(".*\\btasas?\\b.*"))kinds.add(Kind.RATE);
-        if(q.matches(".*\\bmovimientos?\\b.*"))kinds.add(Kind.MOVEMENT);
+        var kinds=explicitKinds(question);
         return kinds.size()==1?kinds.iterator().next():null;
     }
+    public static Set<Kind> requestedKinds(String question){
+        var kinds=explicitKinds(question);
+        if(!kinds.isEmpty())return Collections.unmodifiableSet(kinds);
+        String q=java.text.Normalizer.normalize(question==null?"":question.toLowerCase(Locale.ROOT),java.text.Normalizer.Form.NFD).replaceAll("\\p{M}","");
+        if(q.matches("(?s).*\\b(analiz\\w*|compar\\w*|contrast\\w*|resum\\w*|revis\\w*|evalua\\w*|extractos?|documentos?|archivos?|obligacion\\w*|deudas?|prioriz\\w*)\\b.*"))
+            return STATEMENT_NUMERIC_KINDS;
+        return Set.of();
+    }
+    private static Set<Kind> explicitKinds(String question){
+        String q=java.text.Normalizer.normalize(question==null?"":question.toLowerCase(Locale.ROOT),java.text.Normalizer.Form.NFD).replaceAll("\\p{M}","");
+        var kinds=new LinkedHashSet<Kind>();
+        if(q.matches("(?s).*\\bsaldos?\\b.*"))kinds.add(Kind.BALANCE);
+        if(q.contains("pago minimo")||q.contains("pagos minimos"))kinds.add(Kind.MINIMUM_PAYMENT);
+        if(q.matches("(?s).*\\bcuotas?\\b.*"))kinds.add(Kind.INSTALLMENT);
+        if(q.matches("(?s).*\\btasas?\\b.*"))kinds.add(Kind.RATE);
+        if(q.matches("(?s).*\\bmovimientos?\\b.*"))kinds.add(Kind.MOVEMENT);
+        return kinds;
+    }
     public static Analysis analyze(List<Document> documents,List<Fact> input,Map<UUID,UUID> debts,Kind requested){
+        return analyze(documents,input,debts,requested==null?Set.of():Set.of(requested));
+    }
+    public static Analysis analyze(List<Document> documents,List<Fact> input,Map<UUID,UUID> debts,Set<Kind> requestedKinds){
         var docs=new HashMap<UUID,Document>();for(var d:documents)docs.put(d.id(),d);
+        boolean generalStatement=requestedKinds!=null&&requestedKinds.equals(STATEMENT_NUMERIC_KINDS);
+        var scopedInput=input.stream().filter(f->docs.containsKey(f.documentId())&&docs.get(f.documentId()).version()==f.documentVersion()).map(DocumentRateMode::checked).toList();
+        Set<Kind> targetKinds=requestedKinds==null?Set.of():generalStatement
+            ?scopedInput.stream().map(Fact::kind).filter(STATEMENT_NUMERIC_KINDS::contains).collect(java.util.stream.Collectors.toCollection(LinkedHashSet::new))
+            :requestedKinds;
         // Defensive against stale caches and out-of-scope repository adapters.
-        var facts=input.stream().filter(f->docs.containsKey(f.documentId())&&docs.get(f.documentId()).version()==f.documentVersion()&&(requested==null||f.kind()==requested)).toList();
+        var facts=scopedInput.stream().filter(f->targetKinds.isEmpty()||generalStatement||targetKinds.contains(f.kind())).toList();
         var limitations=new LinkedHashSet<String>();var differences=new ArrayList<Difference>();
-        if(requested==null)limitations.add("EXPLICIT_SINGLE_FIELD_REQUIRED_FOR_COMPLETE_ANALYSIS");
+        if(requestedKinds==null||requestedKinds.isEmpty())limitations.add("EXPLICIT_SINGLE_FIELD_REQUIRED_FOR_COMPLETE_ANALYSIS");
+        else if(generalStatement&&(!targetKinds.contains(Kind.BALANCE)||targetKinds.size()<2))limitations.add("MISSING_OR_AMBIGUOUS_FIELD");
         if(documents.isEmpty())limitations.add("NO_DOCUMENTS");
         record Group(UUID owner,UUID debt,Kind kind,String unit,String currency,String mode){}
         var groups=new LinkedHashMap<Group,List<Fact>>();
         for(var d:documents){
             if(!"INDEXED".equals(d.status()))limitations.add("DOCUMENT_NOT_INDEXED");
-            var matching=facts.stream().filter(f->f.documentId().equals(d.id())&&(requested==null||f.kind()==requested)).toList();
+            var matching=facts.stream().filter(f->f.documentId().equals(d.id())&&(targetKinds.isEmpty()||generalStatement||targetKinds.contains(f.kind()))).toList();
             if(matching.isEmpty())limitations.add("MISSING_FACTS");
             if(matching.stream().anyMatch(f->!f.validationStatus().equals("VERIFIED")))limitations.add("UNVERIFIED_VALUES");
+            if(matching.stream().anyMatch(f->f.kind()==Kind.RATE&&DocumentRateMode.modes(f.quote()).size()>1))limitations.add("CONTRADICTORY_RATE_MODALITY");
             if(d.periodStart()==null||d.periodEnd()==null)limitations.add("UNKNOWN_DOCUMENT_PERIOD");
-            if(requested==Kind.MOVEMENT)limitations.add("MOVEMENT_COVERAGE_IS_A_SUBSET");
-            if(requested==null||requested==Kind.MOVEMENT)continue;
-            var numeric=matching.stream().filter(f->f.validationStatus().equals("VERIFIED")&&f.numericValue()!=null).toList();
-            if(numeric.size()!=1){limitations.add("MISSING_OR_AMBIGUOUS_FIELD");continue;}
-            var f=numeric.getFirst();var debt=debts.get(d.id());
-            if(debt==null){if(documents.size()>1)limitations.add("OBLIGATION_LINK_REQUIRED_FOR_COMPARISON");continue;}
-            if(f.unit().equals("MONEY")&&f.currency()==null||f.kind()==Kind.RATE&&f.rateMode()==null){limitations.add("UNKNOWN_UNIT");continue;}
-            groups.computeIfAbsent(new Group(d.ownerId(),debt,f.kind(),f.unit(),f.currency(),f.rateMode()),k->new ArrayList<>()).add(f);
+            if(targetKinds.contains(Kind.MOVEMENT))limitations.add("MOVEMENT_COVERAGE_IS_A_SUBSET");
+            for(var requested:targetKinds){
+                if(requested==Kind.MOVEMENT)continue;
+                var numeric=matching.stream().filter(f->f.kind()==requested&&f.validationStatus().equals("VERIFIED")&&f.numericValue()!=null).toList();
+                if(numeric.size()!=1){limitations.add("MISSING_OR_AMBIGUOUS_FIELD");continue;}
+                var f=numeric.getFirst();var debt=debts.get(d.id());
+                if(debt==null){if(documents.size()>1)limitations.add("OBLIGATION_LINK_REQUIRED_FOR_COMPARISON");continue;}
+                if(f.unit().equals("MONEY")&&f.currency()==null||f.kind()==Kind.RATE&&f.rateMode()==null){limitations.add("UNKNOWN_UNIT");continue;}
+                groups.computeIfAbsent(new Group(d.ownerId(),debt,f.kind(),f.unit(),f.currency(),f.rateMode()),k->new ArrayList<>()).add(f);
+            }
         }
         for(var entry:groups.entrySet()){
             var values=entry.getValue();values.removeIf(f->docs.get(f.documentId()).periodStart()==null||docs.get(f.documentId()).periodEnd()==null);
@@ -53,8 +78,8 @@ public final class DocumentFactAnalysis {
                 differences.add(new Difference(previous.documentId(),current.documentId(),g.debt(),g.kind(),g.unit(),g.currency(),g.mode(),docs.get(previous.documentId()).periodStart(),docs.get(current.documentId()).periodStart(),previous.numericValue(),current.numericValue(),current.numericValue().subtract(previous.numericValue()),List.of(previous.id(),current.id())));
             }
         }
-        if(documents.size()>1&&requested!=null&&requested!=Kind.MOVEMENT&&differences.isEmpty())limitations.add("NO_COMPARABLE_PERIOD_PAIR");
-        var totals=requested==null||requested==Kind.MOVEMENT?movements(documents,facts,debts,limitations):List.<MovementTotal>of();
+        if(documents.size()>1&&targetKinds.stream().anyMatch(k->k!=Kind.MOVEMENT)&&differences.isEmpty())limitations.add("NO_COMPARABLE_PERIOD_PAIR");
+        var totals=targetKinds.isEmpty()||targetKinds.contains(Kind.MOVEMENT)?movements(documents,facts,debts,limitations):List.<MovementTotal>of();
         return new Analysis(facts,List.copyOf(differences),totals,limitations.isEmpty(),List.copyOf(limitations));
     }
     private static List<MovementTotal> movements(List<Document> documents,List<Fact> facts,Map<UUID,UUID> debts,Set<String> limitations){

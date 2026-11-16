@@ -1,0 +1,1 @@
+{"image":"sha256:ed6d9ae228bbaf5371f546c9afd6278e303e467caf5e6b4c88197965657ce71b","database":"disposable migration_test","schema":"migration_verification","flyway":"31","login":200,"debts":200,"limitations":"Startup and authenticated read smoke only; no full old subscription writer certification."}

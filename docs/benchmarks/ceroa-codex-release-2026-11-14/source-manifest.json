@@ -1,0 +1,2578 @@
+{
+  "procedure": "SHA256 raw bytes per sorted relative path; aggregate SHA256 of path + space + sha256 + LF. Historical aggregate procedure not found in readiness document.",
+  "sha256": "05fdd6429c585973b95ee4cfe887a5b51180bbaccc9893bdcfd9a9c9bb723044",
+  "files": [
+    {
+      "path": "backend/pom.xml",
+      "sha256": "aad652df0912f6bb6b2bd43b5ffa3fb8117d01a2c5c163ac8ff0ed99d6acd724"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\CeroaApplication.java",
+      "sha256": "7e7d82427be404d43839beb8f0ba7dec8fa533f15981652629552acda8d6ceee"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\ApiError.java",
+      "sha256": "7b7b7f0f8bde5fa641d2397f4e73249182acc53fa6b6e908f48726e3dfb41670"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\AssistantController.java",
+      "sha256": "59e7f3d0e57d8b6104f67939d845d861d361ac0bae529bc018b6d5f22cee1dc3"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\AssistantErrorAdvice.java",
+      "sha256": "98bb182fb06e7f42f85875651a077a51531435d3fdda0c8b0973c6c4504ff1c3"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\AuthController.java",
+      "sha256": "dd6ff0bb49c5e9d387b8a21f04b2da0187f4b6de92a2348291b5f982b830fef6"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\AutomationController.java",
+      "sha256": "f405f7cabdf5d90f346d52874c89112be5584c64ceb16563371ef310b295f908"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\AutomationCredentialController.java",
+      "sha256": "864e89ba7a91448aebbeeb1723102091954ba49d67303071123b1f03336cb9d0"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\AutomationInputAdvice.java",
+      "sha256": "c30c212410def0a2fa7a492215debdc9392a3ac0e948f4aa5698c17266a585d8"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\DashboardController.java",
+      "sha256": "4244d74e8245dbdccc1d5894902773d8c76164e3376f4e314076c7edac023a22"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\DebtController.java",
+      "sha256": "0a55ac3a347ff8bdd01e69db66fe33ee24e646651aaf25dc2534e32b9200883c"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\DocumentErrorAdvice.java",
+      "sha256": "839ec1dc73e8592cff957350a32a43104e98994b1ff858bb0477f6905c8fd9b0"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\DocumentIngestionController.java",
+      "sha256": "6087a8bdaf0e4fde339939bf81258aeef113f1392c42a522b0f3257b99536b44"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\DocumentLibraryController.java",
+      "sha256": "780d2075ba6a4408cc9566c6b5b64765a5b3444c63b8d1392f8080d588c07133"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\DocumentLibraryErrorAdvice.java",
+      "sha256": "7d65d6b46acafdafbcb853b06159dd34fe0c1872ab8a1f23a5aa496f7944c7c0"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\DriveSyncController.java",
+      "sha256": "759a1315cc9b94b535f475cf51bf21862afe959e9999144e96ca3101bfe52e68"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\DueDateController.java",
+      "sha256": "a1ddd4c65741188feef63c6705e0306b8debefa66236afa2ff2cf540485b44eb"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\ExternalAuthController.java",
+      "sha256": "9bb54d20dcfb36108894d0a91cbc594862efe17d303657fc0eb1743e129554bc"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\FinancialProfileController.java",
+      "sha256": "8782f875820daa1f4ee21e609a4c908735fcb475c2aa91386262b2fb608e759b"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\GlobalExceptionHandler.java",
+      "sha256": "aa75b70a5520d86e7a7c34d815ba04208a9396be467bc5feaeff68cd991df206"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\McpController.java",
+      "sha256": "36eb85ffdd56a9e7c9a19ba58ffe6755afa7124e89c6273167f5a913f72e7f5e"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\MonthlyProgressController.java",
+      "sha256": "2e18eb2111684f8c21c2540fe059fdb7f512050fd1c500a3899404eb14601993"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\NotificationController.java",
+      "sha256": "2c16986f8a99ce1b7e75d936443b77960889310cdd2da37ee62a3bd73634c02e"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\PaymentController.java",
+      "sha256": "6e215a0fbdaf2ca3f7ad385388f53527afc525cccf0db21e75d4c5f462d4a740"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\PlanController.java",
+      "sha256": "08d31b153e11a0ae18a21950e55426a6fafd712429d62517a10826ee7e7913fb"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\PlusSubscriptionController.java",
+      "sha256": "f4dadbb015af977087424c1c51fa35905ebea77570b7d32450aa1cee28ff0f6f"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\RecoveryController.java",
+      "sha256": "790cb970dc609790dbe8af306f8e0d1615bc5e59e188bc9172c1e88582bbc2ba"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\ReminderErrorAdvice.java",
+      "sha256": "060b9e082e57c749010b1a2369344abe1afd07d8b3c8e9f9a91bc9ccf21cd74f"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\ScheduledReminderController.java",
+      "sha256": "3bb3bdee9837df83c3bc025700542e13ce51849cff55919c9c9c2ae80caa3910"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\SentinelController.java",
+      "sha256": "c463bdfe8055d8720f7ed5d4b6bb1f9f85ebd6c0e0fab04fc4329287a7a5f9eb"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\SimulationController.java",
+      "sha256": "23b65ebc50ae24b2e8c1166fc826c41734a5ee478618e044f2da1cd1a0282be8"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\StrategyController.java",
+      "sha256": "a7c9ea826d06fc0f048094821a29063590a66b11bd350cf2a8820599a4766215"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\SupportBookingController.java",
+      "sha256": "a2a3d6553ff5a12583efc0e9bcdf34f8b199152d60608ae799f8d83e750a1803"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\TelegramController.java",
+      "sha256": "4e12ee48b2fec7122510cec5bd17089f341b54f119779ecbe4671786dc92b450"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\UserController.java",
+      "sha256": "96c23b36f10816f2fa7785838898e1755f04c7193355d337cca03e31f9562470"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\WorkspaceController.java",
+      "sha256": "b9d45be239f32afad99ec3d403e9d7c5cce7aea7f2ec99968035e6ad89d9c343"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\WorkspaceDraftController.java",
+      "sha256": "3ab8bc13c2733d6fb784d389802af1b1645da8c4574fad64e377f8e0c4524f42"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\WorkspaceErrorAdvice.java",
+      "sha256": "559796ba2e533fd8e87506cf9c789adc5696b459eb05a2b82f921e90cfaf3e17"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\dto\\DashboardNextDueResponse.java",
+      "sha256": "943ce7c483161d7510d8c6cf867ec678b5ff1568c5cf1ed0f4e052a8e82295c6"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\dto\\DashboardProgressResponse.java",
+      "sha256": "210933996444bb80e2e00f73a805c2601532dbddb4268c7b03181e58543c0266"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\dto\\DashboardSummaryResponse.java",
+      "sha256": "c7bf237777375dcfbaaf8a56f88316215bf3240f74f1a7bd20e3aefcb9ef3684"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\dto\\DebtRequest.java",
+      "sha256": "119173f3b2e337aaeb7178a812ec93dcd1a796aa2726447129d28f21eb281693"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\dto\\DebtResponse.java",
+      "sha256": "88f81b4aea4fb2284f156a5c7d386664ddd971dc5be0c777116e365be3aff0b4"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\dto\\DocumentContracts.java",
+      "sha256": "cffb2ffb2e643b290a4e1f91bc46cc72905671a46520811339bf2ba738d943d4"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\dto\\DocumentFactContracts.java",
+      "sha256": "c8d0929e3964a2736a47a2e149dff143757ca1189e2a5c02f3a9c2944b2a5f3a"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\dto\\EmailChangeRequest.java",
+      "sha256": "f34568a4ccfcaf5f9cb809fc3675a8dbc635e75aa50b2177a5e34463cb922b0e"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\dto\\EmailVerifyRequest.java",
+      "sha256": "94670ff7a3ba41ded96d3cdd52766d7ee1b422e1c8b242679b6bfbe8184ff858"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\dto\\ExternalRegistrationRequest.java",
+      "sha256": "77b280db9fdb725106854a25c77b88545ab10f0b9f283f6a7e15dcc8b8f63143"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\dto\\ExternalReminderRequest.java",
+      "sha256": "bd77de9cb8b786f86e4c93ed0d069ddf427c5cb59112b1afc457b2fc1db00ec6"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\dto\\FinancialProfileRequest.java",
+      "sha256": "c33350587843344f1a01adf773e4fd306a1d2fc80f436487ada6a7f852c1f728"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\dto\\FinancialProfileResponse.java",
+      "sha256": "a89e476c6de98ea6bf3fa4a265705994c72c45348274a65eac3e11d5b89199a9"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\dto\\LoginRequest.java",
+      "sha256": "f438589c0678b81e2ae4f64524646cfa4b76a3bd051916cacae06292b4920c87"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\dto\\MonthlyProgressResponse.java",
+      "sha256": "377c2506f2dc050089612141bbddfa13085a223b181f176d215470023432e5f9"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\dto\\NotificationListResponse.java",
+      "sha256": "8540a4ab1f8fbb6830443dc3ac8e5025932db1f88f5bd323e3c9a034f3f21dd7"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\dto\\NotificationReadResponse.java",
+      "sha256": "59485f013bac7cb6b6fa27935c46286e648f61000d9a411663c1fb310426b7af"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\dto\\NotificationResponse.java",
+      "sha256": "1f3f9b12b37ffdd46624ef9afee9226222cfa03c3717a1436c08a70a482aa55f"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\dto\\PaymentMutationResponse.java",
+      "sha256": "1032c1a223488632c6070155d7ba122074bb46580e6808192c348c70a7541eee"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\dto\\PaymentRequest.java",
+      "sha256": "7b31f7ea29415707cb040123fe876126a35088acf344e34a119fe753a3525103"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\dto\\PaymentResponse.java",
+      "sha256": "5d85ece4d6330e0db1019524a6ea71a33d0a7f5b3a952c108ca08d85984784a0"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\dto\\RegisterRequest.java",
+      "sha256": "a4dfc8633b1d1d0ed3b941016cc3de9cdbdd34cb5e5c016f1b0016acf64512b3"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\dto\\SimulationEventRequest.java",
+      "sha256": "d5f8aa0b9bcee1fe596234da1220d999fbe5ddbaa207884c9bee56f5459c5d2f"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\dto\\SimulationRequest.java",
+      "sha256": "9c1dafe450ff2eab642bd4134edfcb7de117acd7f38976bf1f0af27c53aa9aba"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\dto\\SimulationResponse.java",
+      "sha256": "65ce1433e4f8b023dc56fffa33c1f685f9e2a8bf7dc8d67eb74306847d94342d"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\dto\\StrategyComparisonResponse.java",
+      "sha256": "2a7554cd25e7bc264ee26b7c483428ba6e0e69640abfbd4e0724ed87343e3eed"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\dto\\StrategyResponse.java",
+      "sha256": "14b5540ff346db58dbd0600ba58f8e83e1d09dfbe3599b4325a52dc5d61200c1"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\dto\\StrategyStatsResponse.java",
+      "sha256": "d1a7e34c3ace62de9a8bc28da7ff2e7655690349eca2990e8586e04b29e937d6"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\dto\\UnreadCountResponse.java",
+      "sha256": "914ef1dd2218b1c066d52a665477e299c582397097fb6defc7c54d9ef3688d0f"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\dto\\UpcomingDueResponse.java",
+      "sha256": "6ac2154f1df708f4ac3af0ac8909e38a24b12b2250d610042c8ee73ed6b7012c"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\dto\\UserResponse.java",
+      "sha256": "2de4537d5f4c36290eb98c69aae5080f0fc38c84a3f9ac7e182893ba6a0e1fe9"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\api\\dto\\UserUpdateRequest.java",
+      "sha256": "1ab5cb8dc8a7219ab64762ad8cccf27ea1f7d00d9e5c6f323924beb9e22c739f"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\config\\AssistantSecurityConfig.java",
+      "sha256": "4897f7736369695cd783fa82a2e1ad207e1cab07b9c79a98eac1ca855d763508"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\config\\AutomationAuthenticationFilter.java",
+      "sha256": "35b5cec1433582acdf19b5e16e92c792b4a9fbe0d351e86d44161aa57dc89033"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\config\\AutomationSecurityConfig.java",
+      "sha256": "6cd286806c65661e3ed103726bf0e281966de3299324736696f898e97096b444"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\config\\DocumentConnectorSecurityConfig.java",
+      "sha256": "ffff4b4d0c972325821708fbcfa83dd0073c42d156a3855cde0afed74367be93"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\config\\DocumentLibrarySecurityConfig.java",
+      "sha256": "e208464967556586c26c5a2b50802df4d66652773be8652b052dfabb54bc320b"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\config\\DocumentSecurityConfig.java",
+      "sha256": "81a5950e645030caa973d97a15498e4e7de594a2176aac759cba7ea1a35daa10"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\config\\McpSecurityConfig.java",
+      "sha256": "7597b4e136b774bad1ea1fdc6aaf3e43905cec401c67a2adffac99cb30e9347d"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\config\\OAuthHandlers.java",
+      "sha256": "ccd80cde612d22869ccfac398d139663ef674b8c43339ca1daaf47a82cec779f"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\config\\OAuthProviders.java",
+      "sha256": "faf65d56e427213a916d4fbc076a402dd4e704de2caafbf16b91e846369c96da"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\config\\OpenApiConfig.java",
+      "sha256": "8d5f36abdc48a7ce5605d1a9a861ff5458ebdf553d15fcbeebe841eac042ff07"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\config\\ReminderSecurityConfig.java",
+      "sha256": "a5d9ae40e1ed8f966df5e8fbab1e6c2eca4cdd365bce3960d7831569bd7be784"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\config\\SecurityConfig.java",
+      "sha256": "8efa7f52997a4a9ec957f825ac0d858e84a5105c7f92a04dc43a9faf9b2afedc"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\config\\SentinelSecurityConfig.java",
+      "sha256": "9a14cc4aa8b191f01a182cb03e0db00a261727399fb5be0850edd1afa233dd9e"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\config\\SessionAuthenticationFilter.java",
+      "sha256": "b98b7156ac8179d35ca7fdbc177233ce5685d685c26597de8820defc296eda6a"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\config\\WorkspaceSecurityConfig.java",
+      "sha256": "063eb9a14ed76b80ed1695105d82895a99780e2a29f2bb3482cdb3c3d6cdf123"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\domain\\ApprovedDriveSource.java",
+      "sha256": "dd7ac3ee19d0fdbf06b2b662135b2e83403faaaaaf1f1f1a17a2c7e06631c7ea"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\domain\\AuthSession.java",
+      "sha256": "bfd6d9aa7186c1949f7714166efc87321350f8ae141a0a091faa3dd43b23a65d"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\domain\\AutomationRequest.java",
+      "sha256": "a0cd649a75d35400875f3c5ad7c88d22eec9183c9eb8a9088a52bd06a4d60f70"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\domain\\AutomationToken.java",
+      "sha256": "b2aaa610ed020f3e870435e4dd5702a93343c8837d6322abccac16e36c3af23e"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\domain\\Debt.java",
+      "sha256": "fe080c4d49655f7f75cb58ab5ea58879c5935be4393e8145a494ffaa60b1df39"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\domain\\DebtStatus.java",
+      "sha256": "927eef40d7c94ac0258abf0eb4658388bb87bcdc289a3bde121abb20e3ca4b47"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\domain\\DebtType.java",
+      "sha256": "377db3777bf57eca73a19e47f44d114667abdd6f5e6dd0f4d3749ffbe750ece6"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\domain\\DriveSyncFile.java",
+      "sha256": "4ae89e3e44a1395e7da87a238b5142821b47f76bddba729b7127100bba6a0cfd"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\domain\\ExternalIdentity.java",
+      "sha256": "72a727d93eeffa09ff9f0d48fdd47318f5f9e7cd0452cdc027095825a54e7e41"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\domain\\FinancialProfile.java",
+      "sha256": "2a3f38d0a8482f5705857af3b693988ff958d1b81c99c36f1c4f01336e56004d"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\domain\\IntegrationEvent.java",
+      "sha256": "84430afa14233c4cd0ea07a1140c8d5eb4c0e3bcaccc2d7b6e8184cc1cba98d7"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\domain\\McpAccessToken.java",
+      "sha256": "f2b4a21f96b081616c1917f591b56a2c19e0572dfc7b7179f28aa272a17a7b20"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\domain\\MonthlyBalanceHistory.java",
+      "sha256": "4462a755c2282643ba211d57e0c45ae030a1007c5f27986cf840fc6cd7c7503b"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\domain\\Notification.java",
+      "sha256": "37b9443184451142f08cf31b53a2de5e93a748571d288b8a9b3c324c2a38c4b2"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\domain\\NotificationChannel.java",
+      "sha256": "20bda84e14f19753a93bf80c0bc1ae52a5b55a953c33626196cb1a4ac4a98104"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\domain\\PasswordRecovery.java",
+      "sha256": "dc93a2e4da728817c8e5ebc6a24abd615e49448ab5018396fd697728f0f31ca9"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\domain\\Payment.java",
+      "sha256": "2a04a8891ae3a421939b1971523a602bcc40a0d577344337ed6f8e56f5193b97"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\domain\\PaymentType.java",
+      "sha256": "01f8f53f1c00e638840ce31d6da1ce035f8700c1c04ab15fdc95ce760f513c7c"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\domain\\PlusSubscription.java",
+      "sha256": "3d88497cad7b3cccaba5b6677a269ab0d7af42aa1f85a130da2f62126689ab61"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\domain\\RateType.java",
+      "sha256": "aedaf860dc58308c4d10ba6596912779fa04d65fb95068cece3c73b44a7f1f67"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\domain\\ReminderMilestone.java",
+      "sha256": "dfa63257562abb3d263948bb097aba2912b4a0fe3981bbd94b689c38062fa220"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\domain\\ReminderPreference.java",
+      "sha256": "409a7963cc79176b3ab845a583fe606747871ddfd4c42d7846dd83fe8ed0a0d3"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\domain\\ScheduledDelivery.java",
+      "sha256": "44679123ce5868efae0600ceb62554978997c29b6b19b742c0d3b173920d3a00"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\domain\\SentinelAlert.java",
+      "sha256": "88e9986ca285cb3c1d2716f4d3eac156938a624bda3c56e30758175da2c10b55"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\domain\\SentinelApproval.java",
+      "sha256": "8849c2a72e4278635e09a74f1e73344db5f8644386096ff75c34bb9217a7d584"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\domain\\SentinelPreference.java",
+      "sha256": "f9fc04d6335a8376a072fdeaf9296a4775e98b793aebed5a31d0ebf1d3bc71c0"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\domain\\SentinelState.java",
+      "sha256": "c57fba028b74cb871682dc43a270fb9c49c2e3190dbfc9405cd596f328d83d5d"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\domain\\StrategyType.java",
+      "sha256": "eaf2d529742c1cdf586cdbfe037c97d9baedf6ba36eb6a85ed10c59a0cb4312e"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\domain\\SubscriptionCharge.java",
+      "sha256": "83c05978b519f6f0b6c7097b45cc1b7a8f8df09a08cc4a072a67ad2e68ac0040"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\domain\\SupportBooking.java",
+      "sha256": "62429d68ac19cb3e458423e850d48864e747a41c34e296a778644535aadbb1a7"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\domain\\TelegramLink.java",
+      "sha256": "d8e7eff07f1653c466f76490a290b4cc7a95fabcb4e784576abf635fc8684062"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\domain\\TelegramReceipt.java",
+      "sha256": "146dedfd2e29e5ad33db2f4827a4cacdd9f4c6571de78b8e478a44c0f77d6d04"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\domain\\User.java",
+      "sha256": "a537c903f632fb49a8df94cc1252972e657faab3b49e4250e12ebb43c96b48c0"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\domain\\UserPlan.java",
+      "sha256": "58d83748e20e11dfb721f40e266fcdae2d83e15aa1288d9e7cf4ca356c24231c"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\domain\\WorkspaceAction.java",
+      "sha256": "d66c49a09319fbc649646e82c2211a8c027dc18c23e260d9b14b07fe39149904"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\exception\\BusinessRuleException.java",
+      "sha256": "4310abeae9670dfc6a05dc7b1b6fbf0ea67d81b80f43ae50d69be4a21b652dfd"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\exception\\InvalidCredentialsException.java",
+      "sha256": "4252a3fabe968130ce4c55b00907117a412c33a395edf34abffdef119cbc0516"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\exception\\ResourceNotFoundException.java",
+      "sha256": "3fc75956b4084b9860f34ca1478015e0d5cdf5825d76462dd11e72106554dd51"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\repository\\ApprovedDriveSourceRepository.java",
+      "sha256": "3c62f11975ff8e2974d763949c608d00cebbdec2e563230e11d6d0ee070ae987"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\repository\\AuthSessionRepository.java",
+      "sha256": "af9db25d8a68fb6b544491f0076afb7248287d5331bfb634538e740a2cb04bae"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\repository\\AutomationRequestRepository.java",
+      "sha256": "a1739c034161bb11425497a1d9cb88de10a8ca2c57ee1b35dbb33c9a83282869"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\repository\\AutomationTokenRepository.java",
+      "sha256": "9d089c63ddb72effb1b0fda1a74ce627c24f42ccb55b69956a23afa1555c7883"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\repository\\DebtRepository.java",
+      "sha256": "fd3c2032c4e0c592e161abbfe3368003d1ed75074ba19c672b4ed84af0abbd26"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\repository\\DocumentFactRepository.java",
+      "sha256": "2fb4d403d34d6f5abb9790e8595c5620c3a91320899351f572372d4076f9abee"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\repository\\DriveSyncFileRepository.java",
+      "sha256": "5a033a8f780bdde4168d4fd42df10c5c001d153be57294a64a39dece358e64e6"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\repository\\ExternalIdentityRepository.java",
+      "sha256": "c8ff88feb277364a228d5abb5bdb8f8489152a734feb7dfb19eb8090fcf19c94"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\repository\\FinancialDocumentRepository.java",
+      "sha256": "0cdc0939d83ee79be8e4b1016d5632beb843794ad40c05b7599947985933f72f"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\repository\\FinancialProfileRepository.java",
+      "sha256": "d9bfbf71e4ad4f306aa658cc5b63c7623f116dc2cd45ee2664b91fef8cdf3ac1"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\repository\\IntegrationEventRepository.java",
+      "sha256": "08716e6eb725a0cffbd29db74fe8807865d47881c45381b00410880ea41c551e"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\repository\\McpAccessTokenRepository.java",
+      "sha256": "f5683e87e6342cdf85917d9f52a912c8db62bd0d8bf3de6ac6677e95efb99ad7"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\repository\\NotificationRepository.java",
+      "sha256": "fd1e8b4a0dcb0303f45d7015ab6d1d4ce0df13535320e9654ec27bff39bb09f0"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\repository\\PasswordRecoveryRepository.java",
+      "sha256": "48a720e40c6a2fc54cb5207696463f900415b3c2d4619927fb5684bfa6e5c109"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\repository\\PaymentRepository.java",
+      "sha256": "64cd69970e06cfc4ea71f1af4a5a65272145200f67745573ad79ab0753be486b"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\repository\\PlusSubscriptionRepository.java",
+      "sha256": "4d81c13d8c8b0aee99ded100e2cd965b814833b6b9f5637f5048347da713885b"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\repository\\ReminderPreferenceRepository.java",
+      "sha256": "1652a774aea1f41b7d44f29440d62edfd6b1c05aa93d4974e8d8b28ff4b40ee8"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\repository\\ScheduledDeliveryRepository.java",
+      "sha256": "a4a110ee11cadfeb369f7fadcb660115d561719d0be73a70168da91f2a94c05f"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\repository\\SentinelAlertRepository.java",
+      "sha256": "974b21a6c92e153d28c9ae60e7376a3cb72bd3317d541ce6b6215bfe7370a3a2"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\repository\\SentinelApprovalRepository.java",
+      "sha256": "d479f5682164e8708557c89d355484bf1364e17b3359b59972f250685d5a220e"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\repository\\SentinelPreferenceRepository.java",
+      "sha256": "8ff0c1f3653fd8a83c40c058e5fabf3cefb1d1dafb3346d861b6dc6dc5113622"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\repository\\SentinelStateRepository.java",
+      "sha256": "4fc59a2c85c9dd4531655fbb99b15350d01280b65dd79332f74b251f8918c66c"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\repository\\SubscriptionChargeRepository.java",
+      "sha256": "56e472c149be1f7c4e016a2e6331352edd6c1a6cd1e5e60e728a0b09c4d42409"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\repository\\SupportBookingRepository.java",
+      "sha256": "5723c069f8f2cec0b4a7d423bc0706ec50454fed57f2d6d74a4a4cac6e692071"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\repository\\TelegramLinkRepository.java",
+      "sha256": "4fca52ab23208ee753a0025555fa0081542362774238515d560b0fdcc6ad7d04"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\repository\\TelegramReceiptRepository.java",
+      "sha256": "66eb727d778bff72874a7eae1a38b88b1cc23345d6804131163a8b4709a1409e"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\repository\\UserRepository.java",
+      "sha256": "88aa9568173fbe4d178f9b0c8a7d0afb6fd2e5608b9cf5ceb038d3eccf9c03c4"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\repository\\WorkspaceActionRepository.java",
+      "sha256": "f08d6242b2bc53dab8f6564757ada3cc0f49bb885d49673018e9f2aa24c531cc"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\AgentContracts.java",
+      "sha256": "3185803b8bf615ead0dd65d536227152f4e0c380185e77dda8007228a73c6f76"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\AgentRuntime.java",
+      "sha256": "2ab2338788a1823e84eaf23ffef342e2e925ae132bba4ef5f8785a74cd499f43"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\AssistantAnalysisService.java",
+      "sha256": "ce5b3b6cd094a38f3dac6ddf25e74d81b6677431d701207950ed441586feea61"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\AssistantProviderGate.java",
+      "sha256": "c9b49c62ec1054338323f766cc0aa3082ca7ad892b81b4c078336beb2ac0a665"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\AssistantService.java",
+      "sha256": "4f99b3158c65a2e8ce6faf21fe7e19da999af994a2547b185fa991f1f296d150"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\AssistantTrace.java",
+      "sha256": "cf43bee38ce3f57797b322273275d9b1f125be688a29c9660684843f359ada34"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\AuthCookieService.java",
+      "sha256": "d6cccf3c4f319dc3beb5c5f3bd92febea667b5cf0a4a5e4e9c449e1163747ec8"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\AuthResult.java",
+      "sha256": "3158a89d20a85811f0ee9186bc8a3de77627ef7511c40d7076bb9e2c246f3bdf"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\AuthService.java",
+      "sha256": "625e57d247f4c6c5407c3058522265e10bbce96cecda626742a98a0400aded72"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\AutomationCredentialService.java",
+      "sha256": "d71f624a4a413f92e15582d0b6786af5e2cc7b4a07b76942bf7c341bb01e9e9e"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\AutomationMutationService.java",
+      "sha256": "8bad64b93331e1a7f664e9d9c9c74c0806a077fa7d7157a4c070b4b068642fa5"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\CurrentUserService.java",
+      "sha256": "a36945d224e8fb302a4770176bab2a461f1505d565b43c9be945d92789fad354"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\DashboardService.java",
+      "sha256": "8e490d13f046b007b70a7744d8fc5ccfb51dadd1625c2e0192a3aa0a69f4009a"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\DebtPaymentResolver.java",
+      "sha256": "5ea1298dfe24dd9767a680e5fdb4740dfb35b3b3265ebb6f4179c06729298341"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\DebtService.java",
+      "sha256": "1bd3b0f3ec2dffee1dd8a58709f5445c095936bdd9fa009db4db7245e8615bcf"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\DocumentDraftValidator.java",
+      "sha256": "9aaaeb9babfb372f72e663988a1707444e3fed3b4a63ba182edb9f62c4d9b98b"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\DocumentFactAnalysis.java",
+      "sha256": "8963782b2edb9c092b58113630c85f440b9f12a65be346817c61e735bef247f6"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\DocumentFactExtractor.java",
+      "sha256": "4c634ef6e448baa54bf9aad33a01d35cd5dabc307faef7064899c5cccb7e7115"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\DocumentIngestionService.java",
+      "sha256": "b89700db2580ae8c73cbc926da74e53bd1c0b08755295087160903bd3d6eac59"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\DocumentLibraryDispatcher.java",
+      "sha256": "4b5907cbfb669d99496c58630bd682d394f24b2292f865e14169abf1ef652dd5"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\DocumentLibraryService.java",
+      "sha256": "5a5f0b8bf02a523365d7de72791f21f4576b0b4730f6b226b3876ded4e3a0e90"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\DocumentMetadataInference.java",
+      "sha256": "712eb819fe0cca1fba37b9b24ba91c3114f2ac7c3be662d63ad995418d883702"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\DocumentOcrClient.java",
+      "sha256": "00bee037772433f72c767312f9681d510467254b76272b1f4d801e86f8bbeb04"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\DocumentPrivacy.java",
+      "sha256": "7c2e419e27ba3d70131be82df88e8cf01efb615c332de164178a16d77ade3e14"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\DocumentQueryBudget.java",
+      "sha256": "b5441a6ebf3a6f249e1ca2e615bf2e2e2cc88025e90c0ffad00be8f7c6538189"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\DocumentTextExtractor.java",
+      "sha256": "dc3e9202c188439789719c8d0caeda2cd1ce1da514a3cfa2c1c8786f5556f8cb"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\DriveSyncService.java",
+      "sha256": "e099d2327872bd751a5dc19a0248ad84d7dd8590baf1585459d2aa9a37fd61d0"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\EmailChangeDeliveryJob.java",
+      "sha256": "eef4d08cf51de2167c2c827b14fa65be4364c2cbfc6a7a873df833fb8e6d3166"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\EmailChangeMailService.java",
+      "sha256": "a4fc96bd54c883f6851cf8a4597cf107f5589823d86e03ab80bcc0d07330e077"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\EmailChangeService.java",
+      "sha256": "31044869c3c109c883f04479b52230e2ceb846265e292af078b415034c13d39c"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\ExternalAuthService.java",
+      "sha256": "a116fdc1acd0477725e6c2562c67b2c7708b1795d4392cbca1e17df584942dcc"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\FinancialClaimGrounding.java",
+      "sha256": "dfc012198d7a60c1fddc43c631179e396e336ada8afeae4a4d813f97a1abc178"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\FinancialProfileService.java",
+      "sha256": "d607d9bffcb0a80b0929e7954dac1fa5be293a341ba223c33c0d93d33b01b73e"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\IntegrationEventService.java",
+      "sha256": "a94f21b091b7981e7695cfbbefc85045879ea9fd2d028a5c955fde9f63b0ef83"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\McpAccessService.java",
+      "sha256": "0b4671dbd5576644ee0ee60603f40aa6df13fe3bc56d3044c102c0d6e71c6c3f"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\MonthlyHistoryService.java",
+      "sha256": "f183d586e0dbf00871e7994b5e8169f38161963ed681b88517a8c06d8c193c34"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\MonthlyProgressService.java",
+      "sha256": "35ba500ab203215fdef39abd8d48a8c58a49e25187813a7b1248271bb267e63d"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\NotificationService.java",
+      "sha256": "ef087bdb23f060df93f42083b1b069a0ffb990d161e4be6dcaccff7d56389aa2"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\PasswordRecoveryService.java",
+      "sha256": "4e29d55463e50a7e23ee9109e4c26493e478913ba9f9611e0ff4ccb4918dba9e"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\PaymentSchedule.java",
+      "sha256": "f6fd5f8f2b8c7e8eb0de0fdf93de1e6a1be4d315004a278a401a69f1025a3197"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\PaymentService.java",
+      "sha256": "bfe7dc9e6877b6641f557e47ec07588bb4419aee98ab51f73b14d6bac2b6346d"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\PendingIdentity.java",
+      "sha256": "7f7db6ce307d61e0f43a9160f5294facc889024a2cb057be7507efe42e9999ab"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\PlanAccessService.java",
+      "sha256": "8de002a10e96f719f8f75e8aeea04aa1cc3ec70595d529952565dc56cdac6db0"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\PlusSubscriptionService.java",
+      "sha256": "0680c162ce0b18ba7b151aff1a6f42c875a9d4b17b2327677d3e241cf829567e"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\PrivateDocumentStorage.java",
+      "sha256": "0d84fe108554ade5467f9bfd77375e569690c1384d27ff73382e592991216bdc"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\RagEmbeddingClient.java",
+      "sha256": "159b78cde8ffcdb5db98225857ab48ee1682831568ea26679de07a39ee0b80be"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\RagRetrievalService.java",
+      "sha256": "07ef836162df74f8128eb5ad34423c9ff03e5a3205f8c92fe4e7ffc773bfafd5"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\RagVectorStore.java",
+      "sha256": "7c8d4abfd1863c3291770dabe1c2497857c73cbf20dc15de9ce5f293e4c4cbde"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\RateNormalizationService.java",
+      "sha256": "f504156e607e2b56f3efb9b20fc744367337080c1cf0b3becfa8cd79749641f2"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\RecoveryDeliveryJob.java",
+      "sha256": "419d1c0fb1a3fa86485ad5ce0ff07382c5f7c95c8e7fb7a4448f12ada22fda7d"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\RecoveryMailService.java",
+      "sha256": "97400b3e414b44acc34d5165e154db7590b58d73a956ce224e0459b127661202"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\ScheduledReminderService.java",
+      "sha256": "c5401ac44a9281a017e07613f0886feb24d4b33b3538dc9e3ea07998c3234814"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\SentinelService.java",
+      "sha256": "8e023c3982a5be2d092dd6e46143d11a730823b05f715d6d9aecdf56576d7003"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\SentinelVersionService.java",
+      "sha256": "28b63bfaf5ef56129f7ec8041cef3411ab2edb442c786f0cddcb9cad6c7fb035"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\SessionTokenService.java",
+      "sha256": "06946b9ad4e0a740a50d9f8eae63636f6f31440dbcece6240db0e361715b134d"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\SimulationEngine.java",
+      "sha256": "81d3e32ee72688138fbfd5d4d3925415402cdb2a2f940408750670485019a6ac"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\SimulationService.java",
+      "sha256": "1a112aedf9729c196252d154937a6c3ca040fb861650ce7b3974e05a16292e7f"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\StrategyEngine.java",
+      "sha256": "019309535e3ba6c9d4c5f8fd23c359943a32eec99e0ea419209e0e83b08e6764"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\StrategyService.java",
+      "sha256": "c42479cd24cbc71f8e9c4f4b892bb3b898a3e1f4a7edde2914a48f0a0a362da8"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\SupabaseRagConfiguration.java",
+      "sha256": "781e8a3dc62c35cb1d27a1d7d00e8661794fa71f986b90092cb1faabc7353ccd"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\SupportBookingService.java",
+      "sha256": "e82d97de4fe7dc7d95fea9cf1a145cb51c751a0ea2d3c3bafaefe366ee442e29"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\TelegramDocumentService.java",
+      "sha256": "cefe5c795a514eb98e6bf5fd05fcebd0aad464f0dabe0659cfd779d36f2aedcb"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\TelegramService.java",
+      "sha256": "086bdb5c1274945b2d1eff8a04b6474c4927af54926e68e504d6f79717c75810"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\UpcomingDueService.java",
+      "sha256": "b0c410c7432e85128f7586cb4ad390d5cc278c1d697bdfeac7f4920c8a7924da"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\UserService.java",
+      "sha256": "3e6ee8f635294b6f8f024a8d1adbabe217ac0b503d3a8bc907a1af40bd169fb9"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\WorkspaceActionService.java",
+      "sha256": "da05b3178f983010214b77f995fb1bdebb80437f1e44f1bb156e237cbca053bb"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\WorkspaceCalendarGateway.java",
+      "sha256": "562b495202c6b5488dbedb98e7d800d02aa188e2a83087b5390c975bf5ab1ffc"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\WorkspaceDraftService.java",
+      "sha256": "138081c72fe32c15cc84423153d4c05bdbd844d4e0e2f3975dbee3eaefb59831"
+    },
+    {
+      "path": "backend/src\\main\\java\\com\\ceroa\\service\\validation\\DebtValidator.java",
+      "sha256": "dd7b2beb9b6b816ff9cbed4caa1a3cee583023b227abc98d7b4659936156606a"
+    },
+    {
+      "path": "backend/src\\main\\resources\\application-supabase.yml",
+      "sha256": "ffeee6273bcdbd4ac2964a5cd3e07797540a2d97f2c7c06ea997a124e1f1ce13"
+    },
+    {
+      "path": "backend/src\\main\\resources\\application.yml",
+      "sha256": "419fd51c0269efe9b6138cca5926aadce0925cf0fa0c9dab7547f432c6cc7eab"
+    },
+    {
+      "path": "backend/src\\main\\resources\\db\\migration\\V10__notifications_schema.sql",
+      "sha256": "0484d8b99a0a9c9244d671386da9a8e8bc6749394757747353995c482f1014df"
+    },
+    {
+      "path": "backend/src\\main\\resources\\db\\migration\\V11__plus_subscriptions.sql",
+      "sha256": "47dfa77f252ee362083f5c8e42495954ab8151aaf239ceee7fdb19c8be3429bc"
+    },
+    {
+      "path": "backend/src\\main\\resources\\db\\migration\\V12__plus_subscription_cancellation.sql",
+      "sha256": "6ec4fe75995eee29eccfa522361b40a4d451c7db9c37dce2de06cef4ed9bed88"
+    },
+    {
+      "path": "backend/src\\main\\resources\\db\\migration\\V13__monthly_progress_history.sql",
+      "sha256": "f87dd398c27579f7ea038b5d0e553ab08cc64ec2038f5cddb58dd1d891b2a45e"
+    },
+    {
+      "path": "backend/src\\main\\resources\\db\\migration\\V14__manual_debt_priority.sql",
+      "sha256": "444b2c8f74feeea5f722db7399b61613513b547aeb160c5b9643cc7be0183d0a"
+    },
+    {
+      "path": "backend/src\\main\\resources\\db\\migration\\V15__automation_credentials.sql",
+      "sha256": "5a482c70d6fe05262e7f95849ed59d4aeb0d4212c0dc4b971a378a7f281ff076"
+    },
+    {
+      "path": "backend/src\\main\\resources\\db\\migration\\V16__telegram_link.sql",
+      "sha256": "5230cdd63fc2fd29aba083564c78e7b079046b886219aaf0a3a38241542bee35"
+    },
+    {
+      "path": "backend/src\\main\\resources\\db\\migration\\V17__scheduled_deliveries.sql",
+      "sha256": "97633f99c3e0f31a2026301cf849ef60788ae936bcf25e2e84acd7715b0c04c3"
+    },
+    {
+      "path": "backend/src\\main\\resources\\db\\migration\\V18__sentinel.sql",
+      "sha256": "971f9bf2880ab22d8ea932e77507fbbf1dce4f2ec798c30e0894b704247fc1e1"
+    },
+    {
+      "path": "backend/src\\main\\resources\\db\\migration\\V19__payment_schedule_anchor.sql",
+      "sha256": "de3697d49797bfc3edac72d6e0ef4066999c9bbbba43da751c539a91d7085cfc"
+    },
+    {
+      "path": "backend/src\\main\\resources\\db\\migration\\V1__create_core_schema.sql",
+      "sha256": "2e6f9baa4f2b31977da24ab0a86c4793a54c530c6834ad8a8bbcab24bd226bc9"
+    },
+    {
+      "path": "backend/src\\main\\resources\\db\\migration\\V20__financial_document_library.sql",
+      "sha256": "64cb6bdb2e6c50ec5d2d6d702f3ea0859b6d42f740ecc8e5b36a7ed3b7c2ee8d"
+    },
+    {
+      "path": "backend/src\\main\\resources\\db\\migration\\V21__document_replacement_and_rag_configuration.sql",
+      "sha256": "2cefc4a40bc0c858a8d94b2d7f737972c95292c55aa78f9ffbd5f2af3eb92eac"
+    },
+    {
+      "path": "backend/src\\main\\resources\\db\\migration\\V22__telegram_document_consent.sql",
+      "sha256": "d31bac1a3beb50b316e0de7b41c279064a65337313fe5f2c25c11260bb4ba732"
+    },
+    {
+      "path": "backend/src\\main\\resources\\db\\migration\\V23__reminder_weekly_day.sql",
+      "sha256": "2415620e17d8f0bc82edb11a608196d6c0de3027c1424e6eac9d732867060b7e"
+    },
+    {
+      "path": "backend/src\\main\\resources\\db\\migration\\V24__reindex_masked_document_amounts.sql",
+      "sha256": "b5f783d5afe029bb4b3134a9e10673b83189de84e071730246db81ba3c43b678"
+    },
+    {
+      "path": "backend/src\\main\\resources\\db\\migration\\V25__document_financial_facts.sql",
+      "sha256": "78bea7231959ec7ffb499979c5dfde0802179f32a7aa329e0c7b9c19ae589e24"
+    },
+    {
+      "path": "backend/src\\main\\resources\\db\\migration\\V26__workspace_outbox.sql",
+      "sha256": "28cb5aeb91b70fa6705c8751a00fd28c33635ad4caa8e897cb8395a75ecc53ae"
+    },
+    {
+      "path": "backend/src\\main\\resources\\db\\migration\\V27__workspace_confirmations.sql",
+      "sha256": "078b4c0338315aee1ad470a7a59be9b8d85b93209f767625e3cf54ca1b151e6d"
+    },
+    {
+      "path": "backend/src\\main\\resources\\db\\migration\\V28__approved_drive_sync.sql",
+      "sha256": "3718aaa5f9a2d3fd1aaa126bc8f1aead275e42b195bc857053617cfa4af8df3e"
+    },
+    {
+      "path": "backend/src\\main\\resources\\db\\migration\\V29__support_bookings.sql",
+      "sha256": "6ed04fb05a6eed8f1a92ce00b950ee6fe01815bc74213cd0a7dca7cd59f940e5"
+    },
+    {
+      "path": "backend/src\\main\\resources\\db\\migration\\V2__authentication_and_demo_data.sql",
+      "sha256": "b2ec569fab897cdc6cfb139444d8c9d973f0a94a1c926160ce43cd73887b147f"
+    },
+    {
+      "path": "backend/src\\main\\resources\\db\\migration\\V30__mcp_scoped_tokens.sql",
+      "sha256": "b6f03153dbaf61c26b7e211534377d2bcc5a1e4e7f5951a28dceebc3dc8c36ae"
+    },
+    {
+      "path": "backend/src\\main\\resources\\db\\migration\\V31__durable_subscription_charges.sql",
+      "sha256": "90b923c0c31bfdfa64c70e04282c015d05e86b0f940b1b9e607ff793c41aed6a"
+    },
+    {
+      "path": "backend/src\\main\\resources\\db\\migration\\V3__concurrency_and_query_indexes.sql",
+      "sha256": "5502fe9fcb8bded95f77e5fe577b61e87fae3010193b2c983ae915456635c6f0"
+    },
+    {
+      "path": "backend/src\\main\\resources\\db\\migration\\V4__persist_user_document.sql",
+      "sha256": "4b4edc487ce49849bd879d7a3b174daecd681b41701b5850a5292d466cbe2655"
+    },
+    {
+      "path": "backend/src\\main\\resources\\db\\migration\\V5__registration_and_external_identities.sql",
+      "sha256": "9a041e0fee41c68dd1dfbaae44f79c7582bfdd255f615e4ef1668fe301437c92"
+    },
+    {
+      "path": "backend/src\\main\\resources\\db\\migration\\V6__case_insensitive_identity_email.sql",
+      "sha256": "0fc7073610a85b1c069ab686fd6498d9d61fbcf84ad455d4f1a004abf8f2e42f"
+    },
+    {
+      "path": "backend/src\\main\\resources\\db\\migration\\V7__password_recovery.sql",
+      "sha256": "860ab3e02b9891f7c46acc8ac4932f7c766c28eb21f7df6047e26a28cc60d68f"
+    },
+    {
+      "path": "backend/src\\main\\resources\\db\\migration\\V8__email_change_requests.sql",
+      "sha256": "e2db4fc9e94754e99ae31c72270763928d84d46fdb222bfcd6e68004aedcf61e"
+    },
+    {
+      "path": "backend/src\\main\\resources\\db\\migration\\V9__debt_type_flexibility.sql",
+      "sha256": "7dabd4aa374821fdadada14b7e506b620af392de3b476d82e90eda6e5824e64a"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\api\\PlusSubscriptionControllerTest.java",
+      "sha256": "6c818b9571a361b68eccba9267842dbf863a956abb481d6e7762dc06018045e8"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\config\\AssistantIntegrationTest.java",
+      "sha256": "4a7027fd338569081e2a142f07f33b151216ee992875e2040baebeb8f8e14e91"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\config\\AssistantLibraryIntegrationTest.java",
+      "sha256": "beb2891e6ab4266cd1fe103f8b69096107f36bac951743e0c228fb8c5bfd35bb"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\config\\AuthIntegrationTest.java",
+      "sha256": "629a65af63b931e16dd3dbcca0514851cdfd9990b5178dca258b4ee5177bf88c"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\config\\AutomationIntegrationTest.java",
+      "sha256": "c5de5dfaeb62932acb7cf9cf65ea4428800bed716d7016b7f77de06b4981e6dd"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\config\\Block6GoogleEndToEndTest.java",
+      "sha256": "b6df99e75dd2e085d2ee2bd9fc39c35b736c1288ccfd7027ec0128595e4de7ec"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\config\\DashboardIntegrationTest.java",
+      "sha256": "a173e11a305198a17a9353a061242a54e78c760eb1eb8ba8b2ac823fe090d787"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\config\\DebtIntegrationTest.java",
+      "sha256": "6ce9ea0ffa42a5ebc12234fbe1820a547fbe8304db9ee216024c0d50a953c2bf"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\config\\DocumentIngestionIntegrationTest.java",
+      "sha256": "2053945db4bbfb5e1490eda67f5b2880f36daaf985784e7e9c9bdd4540b2bf69"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\config\\DrivePipelineIntegrationTest.java",
+      "sha256": "862ce67b2a337946ce27df519dae5e783f56f8489b915f5fe13c96d21f60c6c9"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\config\\DriveSyncIntegrationTest.java",
+      "sha256": "103bbcded5eb2498be6911d78a3cb262396cbce64601d00b6e4aa4cace19d9aa"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\config\\HybridDocumentIntegrationTest.java",
+      "sha256": "8b7005a8ea3439f3ffc42db81c5a86d9d5cd9e7a5414841c7b137ccb712e9e02"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\config\\McpIntegrationTest.java",
+      "sha256": "0103c29ac1411de825e1fcc5e38c2a666fd35c1ada0f7492835da4d7fd7ede4e"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\config\\MonthlyProgressIntegrationTest.java",
+      "sha256": "ff22c49d7d0c568436d3ebb56dfcc3458e373b92a426a328ac9a22e341282374"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\config\\MultiagentEndToEndTest.java",
+      "sha256": "b7ab7b1d07504434cc88f1a3ce7174828deb94d2d67b9a5ed594ea5ce335004f"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\config\\NotificationIntegrationTest.java",
+      "sha256": "d0464c7b65a71786c03391d3d0b7986e354864b1d16ac35e94bf3df9dee07069"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\config\\OAuthFlowTest.java",
+      "sha256": "f41b45b2028eb76df13393ebc11b8482381d6a6a36e5a99519dcdb8230a98e0d"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\config\\PaymentIntegrationTest.java",
+      "sha256": "c58ceac54de774f86e27ad11bf5ad1c19cbc4ce62e83ce4ecf7160113641b81a"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\config\\PostgresMigrationIntegrationTest.java",
+      "sha256": "6bc6bf728e8a9514920252db62425fed0d4c57ae7288afe2451902836be3ab2a"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\config\\ProfileIntegrationTest.java",
+      "sha256": "1d722d5a6b00cdce3af792b4631527d640ac663d3cfdc52561793de7f3fa1e46"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\config\\RagAssistantIntegrationTest.java",
+      "sha256": "48c361affe85fa53d2b8c92ce164f39adb34d8497cb33edaaf63f8bf8042ecc8"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\config\\RealMultiagentEndToEndTest.java",
+      "sha256": "4020ab8387bbeb8e4c59c19cad6e8f552d7e265434020a3489dbd7cf9941bc62"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\config\\RecoveryIntegrationTest.java",
+      "sha256": "6a6cf7f4d2278d2b08e6b015f77a978df1d709df650a2355c4015576a277947c"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\config\\RecoveryUnavailableTest.java",
+      "sha256": "44fefdffc106f8b5bd3c8b4704a7ad0879ada0032fb5d30a0d16fa8fd3cb3d08"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\config\\SecurityConfigTest.java",
+      "sha256": "7562d60397e7050a2e8e43ec168e7d6a55dceccba64baa995437ecbc593e9ef8"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\config\\SimulationIntegrationTest.java",
+      "sha256": "afb67a7cbc770a80eb98b019e526a03e1d5c7d7525272457fbbb76a123db5830"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\config\\StrategyIntegrationTest.java",
+      "sha256": "e8de00946a6614addc4cfc26d2128e9b675b73715414b78067452f7780b68f40"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\config\\SubscriptionPersistenceIntegrationTest.java",
+      "sha256": "7e22ed567ef95397be9b516cb49b9e3ec34f437993290a14914e07aee2785b8a"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\config\\SupportBookingIntegrationTest.java",
+      "sha256": "71e34c80e6f46526c6c32ae9efeb2efe54a988f7acd758a674fcbecb17104c9f"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\config\\TelegramIntegrationTest.java",
+      "sha256": "7f74d5fb4d0b618578b37e0d1601593c0aa8b09bdf04343076b44d66d7d7720c"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\config\\WorkspaceEventIntegrationTest.java",
+      "sha256": "b1fcf2792abc75422eba5592c43d286746c4fec3dbe4b042478ead4de7ecde91"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\service\\AgentContractsTest.java",
+      "sha256": "b84e0fddd95bb1160066cda7586983bbd343ea611da7fe02b35cc10fe6a1de29"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\service\\AgentRuntimeTest.java",
+      "sha256": "109b325cc67ce2214bbebf70fead69022f30a1d9152b644eb15f9c2e938bee3b"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\service\\AssistantAnalysisServiceTest.java",
+      "sha256": "5152220f9b758bfaba3746a7701671dfafba4621554008284c520a593bbbf3f4"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\service\\AssistantProviderGateTest.java",
+      "sha256": "a6d9282be10278d21859b4cd78ddf783f61d73290be16abe320a11a2b1e1dd52"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\service\\DashboardServiceTest.java",
+      "sha256": "ec9a38ec9a2787f1950071d828dcd79ac22dad8385cd1fbd6bf7d57cf5fd3734"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\service\\DebtServiceTest.java",
+      "sha256": "df0b8834e22fb25eee1a30e3db9a2e2d98b917e78a1cf0f2e903f33a9e2e2f17"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\service\\DocumentBatchAuthorizationTest.java",
+      "sha256": "4284367cf20843b0359b81bccbaacbec6baf9eadc81ab0525f07acae40d814d4"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\service\\DocumentDraftValidatorTest.java",
+      "sha256": "c0be124d58b2af2ac11b7ce86ce797b21045e6e9164a904b1d4a6f6578230881"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\service\\DocumentFactTest.java",
+      "sha256": "c274ebd1b62048a6c6ce132a3efa6a34ef0d674a3d845adba6a562bf7a85b442"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\service\\DocumentFixtureWriter.java",
+      "sha256": "668fc57b5806d7e435714fedcb04defe839f7e16a9b3054c8ebf5a38a31877c8"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\service\\DocumentMetadataInferenceTest.java",
+      "sha256": "da09d8cd077f306f64e1d263ecd4aa08462d5f5ea5f97b87fddb453ab32c2d5d"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\service\\DocumentOcrClientTest.java",
+      "sha256": "19165d3a9a109626a923909414fde4a312b03d83216ee94bce255f4bbef434aa"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\service\\DocumentPeriodAnalysisTest.java",
+      "sha256": "facc5e2c338aeba2f8c19150653ee87f092a1d016533a82503eece1ec4729748"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\service\\DocumentPrivacyTest.java",
+      "sha256": "981d39d363feda075f94160b87b0d9974f8ea64fd976f14e7486641a6f5c9cbf"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\service\\DocumentTextExtractorTest.java",
+      "sha256": "6c695c3d6cc319010271a2c19fdcf813252ae05237d02f84ef19015d10ed29ed"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\service\\FinancialClaimGroundingTest.java",
+      "sha256": "08e0691043535b96572f459b20156afe0d51328674b76f7175bddae2d6afb514"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\service\\FinancialProfileServiceTest.java",
+      "sha256": "4b9f74069cf3c86057f0018e6785b0f3a8dc7d68a1e10ec5cc189647576df4ca"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\service\\FinancialProjectionGroundingTest.java",
+      "sha256": "6732617e3b9ac4bd0f18bb9694ffa0b3270b3bb0aa16f10f51a8d035fa910a47"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\service\\MonthlyProgressServiceTest.java",
+      "sha256": "98d3f5f734cf02277532452563e4224121a16dce291d8d701c5e04ce47f86a06"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\service\\PaymentScheduleTest.java",
+      "sha256": "9cce11dc20558d46d19c05078edb6b53efa11cae66522b3fcf22184c368bc167"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\service\\PaymentServiceTest.java",
+      "sha256": "99b995c063576231f97e61391cdde31d37266138ad1050bb78ef1afbbe6c4333"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\service\\PaymentStatusLifecycleTest.java",
+      "sha256": "9700b01c251bca1ef0c5f91a4314cb8274ce54d52f9d2f9664822351161ca4fb"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\service\\PlanAccessServiceTest.java",
+      "sha256": "e63d35e180fcb8e05562d883c2075851715412ee8e4010023999c33e96542e57"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\service\\PlusSubscriptionServiceTest.java",
+      "sha256": "512461d1205fb7a92d997c1054bb742511a8cb3ad8cb21b46808c644198fec05"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\service\\RagRetrievalServiceTest.java",
+      "sha256": "25593f3e09b8b576c5b3c5a3b4252c666a480866455638cf0d9b0273d6fb493b"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\service\\RateNormalizationServiceTest.java",
+      "sha256": "0b07e4b115b40fc8e06e3156ab296553f7b235dc9678f9a641bd30dc2afddc28"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\service\\ScheduledReminderIntegrationTest.java",
+      "sha256": "ddb4aa9f1ceaf8235e7529f4023dbe85057532c363700430b4b58b2de7bec258"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\service\\SentinelIntegrationTest.java",
+      "sha256": "1b927b80d1179c8db9ca123e81c3f3bb7e042309e2c1defa317a2cb24ff0eb08"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\service\\SimulationServiceTest.java",
+      "sha256": "ca52091050f1fd2a65f77e94822aa76b298c0a959e168182132d5904fdf556fd"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\service\\StrategyEngineTest.java",
+      "sha256": "68d0ac56b03fbe57fbffc2f70deb967369ba063ad4f2639d74f598ca9a209728"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\service\\UpcomingDueServiceTest.java",
+      "sha256": "37aefb76ac213659d281cc4808ee157742e3f50ccf65e50c546e424de67db1c7"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\service\\WorkspaceCalendarGatewayTest.java",
+      "sha256": "9c75e338f76f34ecf4b63f0899f8821909f36c0687cdbbcd521230f203b7751a"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\service\\WorkspaceDraftServiceTest.java",
+      "sha256": "97d633ccdb7fbcb7d0d1cdb4ba1daf2968ca83c8422eadd4c688170f55fc0f36"
+    },
+    {
+      "path": "backend/src\\test\\java\\com\\ceroa\\service\\validation\\DebtValidatorTest.java",
+      "sha256": "54c4c1f92fb930c25d7bbbf275a29cd69b591a64da2892e3dbf47fb465f0933a"
+    },
+    {
+      "path": "backend/src\\test\\resources\\application.yml",
+      "sha256": "3025c7515e87d61756d019e0e4fd4e0c6cc34b730df8d4e99e6e0dde3050b89c"
+    },
+    {
+      "path": "frontend/src\\App.tsx",
+      "sha256": "7319f1d84b037907ac8070929a211b97f711d2f8501a20182dcea5e8b2d192b8"
+    },
+    {
+      "path": "frontend/src\\components\\assistant\\AssistantFab.test.tsx",
+      "sha256": "b6700a4b4e3af22bffd0d7c42c7ded647fa298c7f5a17dba3963371787f3928f"
+    },
+    {
+      "path": "frontend/src\\components\\assistant\\AssistantFab.tsx",
+      "sha256": "8f675b20c5551e1c8d4bae706f7ac67b9520fc8494ab5a8d66912dcb3c00f844"
+    },
+    {
+      "path": "frontend/src\\components\\assistant\\DocumentLibraryPanel.test.tsx",
+      "sha256": "5d1f3435f45873fa3a79b13d308bf11005d137ddc53173e8d48d7142c47a6bd3"
+    },
+    {
+      "path": "frontend/src\\components\\assistant\\DocumentLibraryPanel.tsx",
+      "sha256": "8429fb81470a19adccc86722fe65d60fbfefcaf92630cc7b0285f7a165b3be2a"
+    },
+    {
+      "path": "frontend/src\\components\\assistant\\DocumentReferences.tsx",
+      "sha256": "f48d069ef4005250bffa28c5d838e99f1d6ee0072bd35120f529aee0df8a9b49"
+    },
+    {
+      "path": "frontend/src\\components\\assistant\\DocumentVersionManager.test.tsx",
+      "sha256": "64fa4d26a9b1cb1583c039e6a6cb5aa1fa5a08ce4829e10f8b012f17c148912e"
+    },
+    {
+      "path": "frontend/src\\components\\assistant\\DocumentVersionManager.tsx",
+      "sha256": "a551d9058cc6103a365e24a8a2588b635fa41bce73185688aeb83105c621dfea"
+    },
+    {
+      "path": "frontend/src\\components\\auth\\AuthFields.tsx",
+      "sha256": "ed1cc42d38e7cff6cbefead0a33185a1ed7700267f3af4fbebd092718c62c96c"
+    },
+    {
+      "path": "frontend/src\\components\\auth\\AuthLayout.tsx",
+      "sha256": "22b3e9b6d6a2e6af15e466778e053a643e9e42b45a751fa3e194be9b841f4615"
+    },
+    {
+      "path": "frontend/src\\components\\auth\\ExternalRegistrationView.tsx",
+      "sha256": "6eb78150c51d4c9eec703e8a2af01031b158384b61df3a053446c750ed363747"
+    },
+    {
+      "path": "frontend/src\\components\\auth\\LoginView.tsx",
+      "sha256": "7ce9f990777ce70e5e266191b32b8305a1de1a72636d0de1a4aad4c1ccb58dac"
+    },
+    {
+      "path": "frontend/src\\components\\auth\\ProviderButtons.tsx",
+      "sha256": "62dabaaa8f3b5705d0c18690be08fb319ae4c58665b6547e4987557aa2f27e84"
+    },
+    {
+      "path": "frontend/src\\components\\auth\\RecoveryView.tsx",
+      "sha256": "b4fe1236da2fb592454098b097e8f44720ed116c8e232ce84e363671aeef7ef5"
+    },
+    {
+      "path": "frontend/src\\components\\auth\\RegisterView.tsx",
+      "sha256": "9c13bcc7ed417050684804030f4a1ca5faa1269a8269b0b3f62317d5a0a311db"
+    },
+    {
+      "path": "frontend/src\\components\\auth\\auth.test.tsx",
+      "sha256": "b86ba7fb886caed7abf1d56cdc3879e4b494f9e0812ba9e7832c2da3ad536432"
+    },
+    {
+      "path": "frontend/src\\components\\auth\\auth.validation.ts",
+      "sha256": "f72f35c5751566c1e13c5c19598d1afdc0d4c3749e394e32b0b35a579e7b41e0"
+    },
+    {
+      "path": "frontend/src\\components\\auth\\recovery.test.tsx",
+      "sha256": "589188acc5794646fe8c787e38af878793043c0a790e3777abc9f8edbbfc58c1"
+    },
+    {
+      "path": "frontend/src\\components\\auth\\useLoginForm.ts",
+      "sha256": "d97b41aa098a555a103bc9eab50898a9ab7e7854a3a48fc7f2457ab296e9a251"
+    },
+    {
+      "path": "frontend/src\\components\\auth\\useRecoveryForm.ts",
+      "sha256": "0cd1fec1ba92d41ad08403799aca094ce2bccd5ecb4c81b518984e46d2c65e1a"
+    },
+    {
+      "path": "frontend/src\\components\\auth\\useRegisterForm.ts",
+      "sha256": "8eacb4921b1d98c8e9b0e9cd1beb0992e85daff3d1eb73907f7fbc80a03684e9"
+    },
+    {
+      "path": "frontend/src\\components\\calendar\\CalendarGrid.tsx",
+      "sha256": "91c4f67f46ce84e07a62381a873264aa580235bcf042e94a9a579a4897b56511"
+    },
+    {
+      "path": "frontend/src\\components\\calendar\\CalendarView.tsx",
+      "sha256": "347d20d824f4086c60178509cfe2327b0a15580b4ea1753d05140fc4d62da72e"
+    },
+    {
+      "path": "frontend/src\\components\\calendar\\CommitmentPanel.tsx",
+      "sha256": "196ece92d3ed60b47691f87b53adfdbefed83ff0bb8080fc936680d23bb2e585"
+    },
+    {
+      "path": "frontend/src\\components\\calendar\\calendar.utils.ts",
+      "sha256": "0886384d93b5f81d0f04a039735e5bd36b0dae6212051bedd2e9c56019634f40"
+    },
+    {
+      "path": "frontend/src\\components\\calendar\\useCalendar.ts",
+      "sha256": "e009c98522743419ef5829cdba5d93ec268963874001bef19dd8401cda1a5129"
+    },
+    {
+      "path": "frontend/src\\components\\common\\AsyncState.tsx",
+      "sha256": "d11e4c9061a3ce86d8a124e8d675e129b93ebfe0712e2c83f92b35edc5b31db0"
+    },
+    {
+      "path": "frontend/src\\components\\common\\CeroaLogo.tsx",
+      "sha256": "53e019d0d9918e7bb890d6a1b07429efa0e1ee1517ae3ddf76df3c073ac24c5b"
+    },
+    {
+      "path": "frontend/src\\components\\common\\UpcomingDuesWidget.tsx",
+      "sha256": "da3419e268d23b93ca7d834247950520586bccbe95561865f1cb70d13b365e6a"
+    },
+    {
+      "path": "frontend/src\\components\\dashboard\\DashboardView.test.tsx",
+      "sha256": "a89b1b7f01b51acc8eba8319cc2cd66402b42419ce051c5df8ef508df9c476ce"
+    },
+    {
+      "path": "frontend/src\\components\\dashboard\\DashboardView.tsx",
+      "sha256": "f2853d9c7b40f70b652e93931fa258babf38bf33f1c62ed245b75477eef9930b"
+    },
+    {
+      "path": "frontend/src\\components\\dashboard\\useDashboardOverview.ts",
+      "sha256": "eedc944cbca9f5674d889691d26d226e530278a7979a5968cb78eebf796f5758"
+    },
+    {
+      "path": "frontend/src\\components\\debts\\AddDebtModal.test.tsx",
+      "sha256": "5ce133ec3cd097c2f8a6fb45b61802716527fb576c058f052f7223ba233ae1d5"
+    },
+    {
+      "path": "frontend/src\\components\\debts\\DebtDetailAndManagement.test.tsx",
+      "sha256": "0f474e7c8788b07afde951ec5e38444cf604c70330565b8ee678eaeeaafc935a"
+    },
+    {
+      "path": "frontend/src\\components\\debts\\DebtDetailView.tsx",
+      "sha256": "1aef1d71c02c1baa375520ead311c4d84e7df97d2e5ffea4f82c60952ff78655"
+    },
+    {
+      "path": "frontend/src\\components\\debts\\DebtsListView.tsx",
+      "sha256": "a50fcc93e52fe225c676ff8b0981976dfd1af316f34537c3a1ef371a50e8a180"
+    },
+    {
+      "path": "frontend/src\\components\\debts\\DocumentDebtReview.test.tsx",
+      "sha256": "4322ecb0dffde61c499f86f35efc45d8c4b8719cfec6129e3bcf11041f5b9176"
+    },
+    {
+      "path": "frontend/src\\components\\debts\\DocumentDebtReview.tsx",
+      "sha256": "0b02aa86e57c99832329d803db7666411d0390c064a2b0e08c142a89d17b3b1b"
+    },
+    {
+      "path": "frontend/src\\components\\debts\\PaymentManagement.test.tsx",
+      "sha256": "d4033c51d026ac77b9917c04e850c890c5707689c14be5b87f719f2fe086ff2f"
+    },
+    {
+      "path": "frontend/src\\components\\debts\\form\\CategorySelect.tsx",
+      "sha256": "459e226138ad43b7d8aa0043b6e270f92e0fd4fc4bdc1120638c9e85808c4514"
+    },
+    {
+      "path": "frontend/src\\components\\debts\\form\\CommonFieldsSection.tsx",
+      "sha256": "cb6e8afbdcf95ae7ca2ddef8c29b1aa17515651d3adeb6a9d2429699ff4a8d9a"
+    },
+    {
+      "path": "frontend/src\\components\\debts\\form\\PaymentAndDatesSection.tsx",
+      "sha256": "749240cc0dffb6598780cb12a6bb64ffb1ce8fa13ac4c1f59e6d2a02f0b505f3"
+    },
+    {
+      "path": "frontend/src\\components\\debts\\form\\RateSection.tsx",
+      "sha256": "bfe28b52f5f808606809213d06986f62356c06ce8ec5c7e36bd581d9c2c4be91"
+    },
+    {
+      "path": "frontend/src\\components\\debts\\form\\TypeSpecificSection.tsx",
+      "sha256": "32dfe6e56046fe052da2413ef473f9616b36e845ee9e929ed8b61465aa43ab63"
+    },
+    {
+      "path": "frontend/src\\components\\debts\\form\\debtTypeSchemas.ts",
+      "sha256": "dec9ed412abf85c053a5a56eb43c715621b8b4b75307006ee0e1fba70dc19a56"
+    },
+    {
+      "path": "frontend/src\\components\\debts\\useDebtFilters.ts",
+      "sha256": "25a827537380b2b85f3ba20bffde50d6b378db3640a1eb18f4df1dae51efe197"
+    },
+    {
+      "path": "frontend/src\\components\\layout\\AppScreenRouter.tsx",
+      "sha256": "f03c3dad9c31f5a08468939972e757d0a605d0579406ac3d2ef0bda924147650"
+    },
+    {
+      "path": "frontend/src\\components\\layout\\BottomNav.tsx",
+      "sha256": "63b4e69534919f9fc996c4e7aeec4a92c0273c084ca74b5cdc3eb4c07647a95b"
+    },
+    {
+      "path": "frontend/src\\components\\layout\\Sidebar.tsx",
+      "sha256": "24bdb7d9dae343bd51f9b52e7905ae23a2c6902c56cb7087b6929ce805678133"
+    },
+    {
+      "path": "frontend/src\\components\\layout\\TopHeader.tsx",
+      "sha256": "58e9d26d588bc94782e95bee3927e6fa090971510b42022409fce91266cca269"
+    },
+    {
+      "path": "frontend/src\\components\\layout\\navigation.ts",
+      "sha256": "0f84bc7a20e19ab72fc9a9134d6741f24cdb5ced12a77f921a4c3ae433bc2deb"
+    },
+    {
+      "path": "frontend/src\\components\\modals\\AddDebtModal.tsx",
+      "sha256": "589f63a7b8da4aa2f22b6f12ed899968d88601c6463129b54309391d63be7557"
+    },
+    {
+      "path": "frontend/src\\components\\modals\\AsyncModals.tsx",
+      "sha256": "09e8e645a9100e961e98a4dbae0c82914eb3982ff1bc13875647b4b9544b95be"
+    },
+    {
+      "path": "frontend/src\\components\\modals\\EditFinancialProfileModal.tsx",
+      "sha256": "d790b3e769680b7f302056b2cfb1ebb8a46531e70fc642c6df5202d8e9411fd3"
+    },
+    {
+      "path": "frontend/src\\components\\modals\\EditProfileModal.tsx",
+      "sha256": "afa7617638118662bcf0483734edfc136b3738b2acab9f70357a2a2280ea969c"
+    },
+    {
+      "path": "frontend/src\\components\\modals\\ExportReportModal.tsx",
+      "sha256": "a79ef14ed55311cda7d0a251412e03df7e7999fb1ce8d4f16bcfd1576fc647ed"
+    },
+    {
+      "path": "frontend/src\\components\\modals\\RecordPaymentModal.tsx",
+      "sha256": "f988d540e15131b20685f3fac14b55cba78e113cc2b4cb9aa627b1bed3898457"
+    },
+    {
+      "path": "frontend/src\\components\\modals\\SubscriptionCheckoutModal.tsx",
+      "sha256": "75bd1e3d7e18da05ae59ea6b60131793d812ba7fe592bed5f712b010916e9ee0"
+    },
+    {
+      "path": "frontend/src\\components\\monthly\\MonthlyProgressView.tsx",
+      "sha256": "51aef94c64e4189f0d8599033342ae79317974d7a6b327ba59012e41790e47f2"
+    },
+    {
+      "path": "frontend/src\\components\\notifications\\NotificationsDrawer.tsx",
+      "sha256": "cd0c901bda6ee9814a6b87d5cef70dd4c824efef85264fb141105ab29851f705"
+    },
+    {
+      "path": "frontend/src\\components\\notifications\\UpcomingDuesAndNotifications.test.tsx",
+      "sha256": "b20ef7a4bf1a7d0e5f23cc4f46baec43ba90d5c6ad3006f95779588e296b723c"
+    },
+    {
+      "path": "frontend/src\\components\\onboarding\\DesktopOnboardingPanel.tsx",
+      "sha256": "b551da41a61eb86c3e5dd7d6b6db509ad289ffc9c54fc9063587d64e8ff51d0f"
+    },
+    {
+      "path": "frontend/src\\components\\onboarding\\InitialSetupWizard.test.tsx",
+      "sha256": "dd7d81862458b84f1e1a37c58289ae8d5ea27aa7a0210399b2c042a5e10b28e1"
+    },
+    {
+      "path": "frontend/src\\components\\onboarding\\InitialSetupWizard.tsx",
+      "sha256": "0a9559af638ae3b10100308bf971b2e8f2d81fdfbbe1cafa5d4ec5f6895b9d9f"
+    },
+    {
+      "path": "frontend/src\\components\\onboarding\\MobileOnboarding.test.tsx",
+      "sha256": "4c482b6b13261956188ad959e24395d7a6cc771c39f114d1840ae7a67dfa2abd"
+    },
+    {
+      "path": "frontend/src\\components\\onboarding\\MobileOnboarding.tsx",
+      "sha256": "bb7c866389576f00662c5aa3ba567527abe6fd3d08ca1304e9baa1fac5cc395a"
+    },
+    {
+      "path": "frontend/src\\components\\onboarding\\OnboardingContent.tsx",
+      "sha256": "6f094e055c96139cfce122166f0578dbab7d2f0a66005a8ad0714c5463f74088"
+    },
+    {
+      "path": "frontend/src\\components\\onboarding\\onboarding.constants.ts",
+      "sha256": "de2ce1d4d6bd31ec06402409757923216de40f4abbdc6061ad61a235eb5928f8"
+    },
+    {
+      "path": "frontend/src\\components\\onboarding\\steps\\FinancialSituationStep.tsx",
+      "sha256": "e6e8d9b154456b83ed2e123f5f8c9019dcf24ff578f1d0a2bdf1228dc41e8df6"
+    },
+    {
+      "path": "frontend/src\\components\\onboarding\\steps\\RegisterDebtsStep.tsx",
+      "sha256": "d48741ab540d3189089b1f49f5ed21949ff4de1ca5dd9113178ed4cf89d9ed3b"
+    },
+    {
+      "path": "frontend/src\\components\\onboarding\\steps\\ReviewStep.tsx",
+      "sha256": "18b0b185bcf31c777c2148a6bf3816a9f667d40581b94046fd022de36700fb81"
+    },
+    {
+      "path": "frontend/src\\components\\onboarding\\steps\\SelectStrategyStep.tsx",
+      "sha256": "eee0bef6a0d0141747db77d2e19cdf68ec156557296b9f9df69527d415bd265b"
+    },
+    {
+      "path": "frontend/src\\components\\onboarding\\steps\\TotalDeclaredDebtsStep.tsx",
+      "sha256": "67bc5c00b78d068fa97cdc648097813c71533cacc2fa463767ce9f0889c12ba4"
+    },
+    {
+      "path": "frontend/src\\components\\onboarding\\useMobileOnboarding.ts",
+      "sha256": "b56b8325cc0415b33e5f4ef192ee4ea8d3650db1eb4f47db461471429ef2362c"
+    },
+    {
+      "path": "frontend/src\\components\\plan\\StrategicPlanView.test.tsx",
+      "sha256": "c0a5f5a225483a202653c6b9617d9365614161dcf8c4437cf91a071e7c8ad087"
+    },
+    {
+      "path": "frontend/src\\components\\plan\\StrategicPlanView.tsx",
+      "sha256": "16ebfaf3b6662122e36b80bca507b7a988281c860d8628dfb46bb4ad3a3cec2b"
+    },
+    {
+      "path": "frontend/src\\components\\plan\\useStrategyComparison.ts",
+      "sha256": "6bee8815815883b6df49765dec6138364e396681070b4e3ced3650816472172b"
+    },
+    {
+      "path": "frontend/src\\components\\plan\\useStrategyData.ts",
+      "sha256": "ee4ea3c4f53874c10ee2d907bafb8ebd836d812b1fcdd74c0cae347b35615266"
+    },
+    {
+      "path": "frontend/src\\components\\profile\\AutomationSettings.test.tsx",
+      "sha256": "25d3400fe8e113d1db14695b7ba9edb9907066f73d05d6010d2b2ca6f406feaf"
+    },
+    {
+      "path": "frontend/src\\components\\profile\\AutomationSettings.tsx",
+      "sha256": "aa2f3498f26795fc9e6e1aa98bc06bf48bf8dd5ea46e39caf9dec51b3ca55eb3"
+    },
+    {
+      "path": "frontend/src\\components\\profile\\EmailChangeFlow.tsx",
+      "sha256": "b62ff51dd62e6eb6b49a584907a82e13f9d1aecbb48d26e17ce3ea2e2eb942d1"
+    },
+    {
+      "path": "frontend/src\\components\\profile\\PersonalInfoSection.tsx",
+      "sha256": "61d5fab7c39d08eaa7c951c98de55364cfe9802ae73629c50aa666773b7403db"
+    },
+    {
+      "path": "frontend/src\\components\\profile\\ProfileView.tsx",
+      "sha256": "d05199f5d12b7b607e7ef0e9aaa5a1d8de17acccec5aae2e21edf14a8e5cf9c6"
+    },
+    {
+      "path": "frontend/src\\components\\profile\\ReminderSettings.test.tsx",
+      "sha256": "c44aa86f6d1ad6f903aa7c8161e59ba79a399dcefe55cde75d06f47b5735d5f6"
+    },
+    {
+      "path": "frontend/src\\components\\profile\\ReminderSettings.tsx",
+      "sha256": "55b6f1cf59ed83ef30fb6fca88c7b36bdfd970f873e0b01b93a66f4803af879a"
+    },
+    {
+      "path": "frontend/src\\components\\profile\\SubscriptionStatusCard.test.tsx",
+      "sha256": "575e705564c461071e8228568612fde43457a7383c2e9716938600ff5f42a4ec"
+    },
+    {
+      "path": "frontend/src\\components\\profile\\SubscriptionStatusCard.tsx",
+      "sha256": "fed2325bf9e283a5d9874dc363fa7dc8aea8876aaa84d350f1bff7aaa9440e28"
+    },
+    {
+      "path": "frontend/src\\components\\profile\\TelegramSettings.test.tsx",
+      "sha256": "4c0d842f096143049d774eb745f964ad18b1f626ba43e26ad54525f4b123d630"
+    },
+    {
+      "path": "frontend/src\\components\\profile\\TelegramSettings.tsx",
+      "sha256": "647a34a51f1e7a0ce66a6a75aedd19053940290996c4b33f89ab6fe316fc19c9"
+    },
+    {
+      "path": "frontend/src\\components\\profile\\profile.test.tsx",
+      "sha256": "40adc319d34a44198b59dfd9db2bb9e2711d521808bbe94531189ffcbda761a4"
+    },
+    {
+      "path": "frontend/src\\components\\profile\\profile.validation.ts",
+      "sha256": "84f8598ee211f9b5728e1f0054f8923e4f5d749c9ca26e3c59f8e7c5fcec1c57"
+    },
+    {
+      "path": "frontend/src\\components\\profile\\useEditProfileForm.ts",
+      "sha256": "ba7804075e7144b0005803f01505d2edfe28004f805df076b8c41df22db70413"
+    },
+    {
+      "path": "frontend/src\\components\\profile\\useEmailChangeForm.ts",
+      "sha256": "838bb3f217d7407e9b389682588940578bdc3a92d2429bc3538cc5cc315c2dd1"
+    },
+    {
+      "path": "frontend/src\\components\\sentinel\\SentinelFab.tsx",
+      "sha256": "9eb5d8ccd4edcc2512d8cbcfb675df7b6b4996630dc2f2b960f5844067e477ed"
+    },
+    {
+      "path": "frontend/src\\components\\simulation\\SimulationChart.tsx",
+      "sha256": "0b6edbeab6e7593ff673636bea38d295b22765057c957e10e50dc1c1323dc932"
+    },
+    {
+      "path": "frontend/src\\components\\simulation\\SimulationView.test.tsx",
+      "sha256": "5f24e920a4d97b16ab7efe9f29a35361d8b65e0e3f6f579e9a100c3732007c2a"
+    },
+    {
+      "path": "frontend/src\\components\\simulation\\SimulationView.tsx",
+      "sha256": "1875b18104b75a7a7801d70dc26413d700f318c270163ebe80aa9696cd3a8aa7"
+    },
+    {
+      "path": "frontend/src\\components\\simulation\\useSimulation.ts",
+      "sha256": "5462c6377beacad20ae529d8be4265785a617d5dea7af4c6d79a80104e176b5b"
+    },
+    {
+      "path": "frontend/src\\components\\subscription\\SubscriptionView.test.tsx",
+      "sha256": "48b7acfc8d5ff5e4eb7cf4f255d44b0f2864fab5688bb67406111946a05a0f75"
+    },
+    {
+      "path": "frontend/src\\components\\subscription\\SubscriptionView.tsx",
+      "sha256": "6a436e8a0b37e5b3bd0bf8641dc255eb5122e01dfb9c2fc45c9379cd57e83f45"
+    },
+    {
+      "path": "frontend/src\\constants\\defaults.ts",
+      "sha256": "7696b480c804f527d5855e8d6ad897f181bc4f2a094d6088e199a89bdd876ead"
+    },
+    {
+      "path": "frontend/src\\constants\\subscription.ts",
+      "sha256": "1410b72a472821b5dd76bc0278c76971f45bd7ebea823033f2f5beb620e6da1c"
+    },
+    {
+      "path": "frontend/src\\context\\AppContext.tsx",
+      "sha256": "2c806f360a109975d0639b3f9a084c6ac4b70e22bc04a49868f48a566e921651"
+    },
+    {
+      "path": "frontend/src\\context\\logout.test.tsx",
+      "sha256": "477e06596fe61e7dc9188ba30ff797628cdb8aa710e92e15ecae520e61c606df"
+    },
+    {
+      "path": "frontend/src\\context\\useLayoutState.ts",
+      "sha256": "6b8fdb39c2c3707bb90b63596108fcfa2a73cf57a2a7b8a65ac2f2189d27787e"
+    },
+    {
+      "path": "frontend/src\\context\\useOverlayState.ts",
+      "sha256": "07f3062bc770de58e27f636a8989cd7d1064450d3acea2e8d33ab2fe4ffd8c48"
+    },
+    {
+      "path": "frontend/src\\hooks\\useDocumentLibrary.ts",
+      "sha256": "7bf10e79055f197b41a2f98c5f6078d2cb028a95aa9a4f1ab0d5c36bbcf157fa"
+    },
+    {
+      "path": "frontend/src\\hooks\\useToast.ts",
+      "sha256": "005299b976ae7b54d0aee1fefd77570c17b24a7b684eb3e4e747d5289edd255a"
+    },
+    {
+      "path": "frontend/src\\index.css",
+      "sha256": "eae48d0ccd9a321938df4df5da8f610e912685838530c8a8c95c8b83d81f8381"
+    },
+    {
+      "path": "frontend/src\\main.tsx",
+      "sha256": "821258b5acf6a35b7b83ea57c5fcc03c866af4aa1eded0543f8943d50e1b8c35"
+    },
+    {
+      "path": "frontend/src\\services\\api.ts",
+      "sha256": "9a4340b28f9590584d69591651a82d4122f60268739cb9a04bf7563f556a789e"
+    },
+    {
+      "path": "frontend/src\\services\\authService.ts",
+      "sha256": "c503e210c06155d2b95d5e4f2f0cbe3d7c44074bb8cddb3e13df1fa48010f9c6"
+    },
+    {
+      "path": "frontend/src\\services\\automationService.ts",
+      "sha256": "66fb6d93dc31c3350ca4d9d1d80e95e8c26a577b6216cf4dba58837c3ed87102"
+    },
+    {
+      "path": "frontend/src\\services\\dashboardService.ts",
+      "sha256": "ecf0ba814e0bfc55f5b12f23d386c1438907350f4bfd8a62c367565f3e836bac"
+    },
+    {
+      "path": "frontend/src\\services\\debtService.ts",
+      "sha256": "0019d42ac86c8ca29fac47298c63a2cf5a2842cbe180c7c0dfaa6dcc55ecaf93"
+    },
+    {
+      "path": "frontend/src\\services\\documentLibraryService.ts",
+      "sha256": "497a24de4cadc3216082af9a98724b59c65ae7377384061401d4829eef75f5f1"
+    },
+    {
+      "path": "frontend/src\\services\\dueService.ts",
+      "sha256": "a73d0fd42cc0a7b895fc046f08a4beef7fc544ec2dc32f0065e9b5f5e491d853"
+    },
+    {
+      "path": "frontend/src\\services\\monthlyProgressService.ts",
+      "sha256": "46dc79127df9719c3ff0bf0dcbe672dd76f913c1b75afe886c1e40a970daf4c8"
+    },
+    {
+      "path": "frontend/src\\services\\notificationService.ts",
+      "sha256": "014fd10bdcce833c769250fedfd5e07cfb30616baf22d98edb52455ded20f855"
+    },
+    {
+      "path": "frontend/src\\services\\planService.ts",
+      "sha256": "ce51c2748b279b1d470db90cc4c7255081c1412936fdc30362fb138dda960155"
+    },
+    {
+      "path": "frontend/src\\services\\recoveryService.ts",
+      "sha256": "bc1ddf49cc91904974738267afc7236036b0dc8b03df7ac5e80471f5419432e6"
+    },
+    {
+      "path": "frontend/src\\services\\simulationService.ts",
+      "sha256": "86093d8ab6e1b295a1c57b9b2dc4ce97e1c4a662372ffe64fec3d080aadc19dd"
+    },
+    {
+      "path": "frontend/src\\services\\storage.ts",
+      "sha256": "aee04225ad6e3764c9cf88fb3f0caa21202688b71f072f141cfc96f0d1fedf5e"
+    },
+    {
+      "path": "frontend/src\\services\\strategyService.test.ts",
+      "sha256": "d1c0de90d759199f06ebdee6c776d0c3c87acf7e3fde8eef1a92b57d213d7035"
+    },
+    {
+      "path": "frontend/src\\services\\strategyService.ts",
+      "sha256": "0520a4e28bfce8c9a5ba94806352c6d2e7c7d0bd1b71033e22d2efff8b7df450"
+    },
+    {
+      "path": "frontend/src\\services\\subscriptionService.ts",
+      "sha256": "8131f1174eecf0a5b06d00a7fbbd1f48018e17ad272ee466b465c8c2cd1a1e86"
+    },
+    {
+      "path": "frontend/src\\services\\userService.ts",
+      "sha256": "641dfa51ff55cbd0d0ac23e6d3651e39796dd0a02c93d35c832698c2c2cf48ee"
+    },
+    {
+      "path": "frontend/src\\types\\index.ts",
+      "sha256": "3919b02214d8108c1311f112d339bc67eaa6f59dc110f457a9dc22f59b25ad2b"
+    },
+    {
+      "path": "frontend/src\\utils\\date.ts",
+      "sha256": "46a45319735bfa032df777dd05f0148d2ffae8f580fff7d48b780d215d83a39d"
+    },
+    {
+      "path": "frontend/src\\utils\\financial.ts",
+      "sha256": "13e295201783ee1def7f0278663c6cba755f8b2bd924e5c055468959c61b8dab"
+    },
+    {
+      "path": "frontend/src\\utils\\formatters.ts",
+      "sha256": "5a94cccba9bcd206fc5304dc6973369e107260473bf0369eba7fb7e1f189e8bb"
+    },
+    {
+      "path": "frontend/src\\utils\\strategyAllocation.ts",
+      "sha256": "68744be2f05ba8b70a0ad61380c3f0c97a25fc996e2358f0b18f8f4639c32f4a"
+    },
+    {
+      "path": "frontend/src\\utils\\theme.ts",
+      "sha256": "f071d9e8124c6c4ccbc3fae0df58e4d22f6cbffaf0720fe8bf672f090cacef38"
+    },
+    {
+      "path": "frontend/src\\vite-env.d.ts",
+      "sha256": "424faf9241dd699dda995b367ed36665732da1e6ec1f33b2fd40394488ecac92"
+    },
+    {
+      "path": "integrations/n8n\\Block5DriveRepositoryCheck.java",
+      "sha256": "5f165f4206564509d88b611d11f26ba342f4c37aab8ac0390c619c1d8d3582c3"
+    },
+    {
+      "path": "integrations/n8n\\Block6DriveRepositoryCheck.java",
+      "sha256": "9510d05a12ab345113cd5bd084aa52d87130d74f0d698b09cd6a7b188856d1dd"
+    },
+    {
+      "path": "integrations/n8n\\activate-rag.ps1",
+      "sha256": "b525342041bc32c6cf38c799515034caeb2e9b8a86fe5096fdf041209c2c903d"
+    },
+    {
+      "path": "integrations/n8n\\activate-reminders.ps1",
+      "sha256": "024942a20f86192cdf744cd8ce5c1a84c3985da58dd113c2d6f72ceac88c6a5c"
+    },
+    {
+      "path": "integrations/n8n\\activate-sentinel.ps1",
+      "sha256": "f7f0b40f499dbe4384ee51962f50718657b8a5e80370ba31299f20c7078216c3"
+    },
+    {
+      "path": "integrations/n8n\\assistant-rag.json",
+      "sha256": "8032cb71aa53ba3ecbd01103b15cf242e4aea088bea674b31cbde26c9e74fde0"
+    },
+    {
+      "path": "integrations/n8n\\assistant-telegram.json",
+      "sha256": "0a25a86be9ae522a6f2d3e10916aba219c312df386b961cce40c182970d15aaa"
+    },
+    {
+      "path": "integrations/n8n\\assistant-web.json",
+      "sha256": "45eec5d1569c19a9d0860855c36ca5775eff1eed0c63b1fc8395573ab9e61b71"
+    },
+    {
+      "path": "integrations/n8n\\audit-runtime-readonly.cjs",
+      "sha256": "142f97b1515761abcc27d0ddd26caa555483dced2c9cf4ff34beb103281645c5"
+    },
+    {
+      "path": "integrations/n8n\\backup-crypto.mjs",
+      "sha256": "091ee18b7a9258533c8df01b7b95d9490ac245a9afda6a215e0e92a784903eda"
+    },
+    {
+      "path": "integrations/n8n\\backup-crypto.test.mjs",
+      "sha256": "2e8e405e53773f41795bb51b35d6808e480c9a937fd585b0a4c92bbd966a40ec"
+    },
+    {
+      "path": "integrations/n8n\\bind-google-workspace-drafts.mjs",
+      "sha256": "73fd1a4f9ae19088c37e12554568121a9df4dc73f4ba94893eb1bba486ab4116"
+    },
+    {
+      "path": "integrations/n8n\\block5-drive-fixture.cjs",
+      "sha256": "522e862b7a0e3b861de82a6d7175366c0fe325fd596fa935c226c27ed91f6667"
+    },
+    {
+      "path": "integrations/n8n\\block5-runtime.test.mjs",
+      "sha256": "ef37a5fdaa769a2dc0b7f0ebd6bf7ae39b3c1c99feedbe3034b8e1364c256286"
+    },
+    {
+      "path": "integrations/n8n\\block6-contracts.test.mjs",
+      "sha256": "53c63ecb8fbbc0ca3ef8db5cc55401c1339b9206bc5f6dfa330b208d0ab2cdfc"
+    },
+    {
+      "path": "integrations/n8n\\block6-error-runtime-fixture.mjs",
+      "sha256": "20e2c57cb4bab4fb9d0c6be46cb1e274c8ff91af60ab0525a14a28fb133de939"
+    },
+    {
+      "path": "integrations/n8n\\block6-google-readback.cjs",
+      "sha256": "b289e4bf81cf02a94cc2a0eb2f5a9b27479d54e2be98bfd9adee59537b9b76c5"
+    },
+    {
+      "path": "integrations/n8n\\block8-runtime-profile.json",
+      "sha256": "7b8d91d56f60fb3fe6f10edd292e61d4751dbf28a2165cc73f4376c03b99a916"
+    },
+    {
+      "path": "integrations/n8n\\block8-runtime-profile.mjs",
+      "sha256": "e40247241fb581a6b7979b8974b844c75c378ab816bc6229c3fa2182af43e786"
+    },
+    {
+      "path": "integrations/n8n\\block8-runtime-profile.test.mjs",
+      "sha256": "322e54bcd93fc2086b63c50c2479c3394fbc592f47e0928490d40c6820d0b988"
+    },
+    {
+      "path": "integrations/n8n\\build-assistant-workflow.mjs",
+      "sha256": "70119c7a3a0be65172b378696d4a40a8407bffc2aa399a6369c7ffab16347713"
+    },
+    {
+      "path": "integrations/n8n\\build-document-workflow.mjs",
+      "sha256": "e319c0163529eb2e1b503fb52a3d08fb42d977f1ca23fb01b5a0fefec3a4edd5"
+    },
+    {
+      "path": "integrations/n8n\\build-hybrid-rag-workflows.mjs",
+      "sha256": "f822b051c587c7c8bdf5e45582497aa540fd6ff7a52de92604cb8b783cf97033"
+    },
+    {
+      "path": "integrations/n8n\\build-rag-workflows.mjs",
+      "sha256": "4db4d6633ff8be37fabd0ebebcf70362a6dcebdd2a780bd1bf1cc77cb8f647e6"
+    },
+    {
+      "path": "integrations/n8n\\build-reminder-workflows.mjs",
+      "sha256": "7805fa6eb068bb9e2e841d1f46493e69ae5cb118b6d56fffa5ebd97cfbf8588a"
+    },
+    {
+      "path": "integrations/n8n\\build-sentinel-workflows.mjs",
+      "sha256": "e4d9a717fcff7971d47fd9c5e246b1fae159ee365b73c9c6d4830418aa34a489"
+    },
+    {
+      "path": "integrations/n8n\\build-telegram-workflow.mjs",
+      "sha256": "63a5d220e50fd2284d1b19d5238bcf0f6c61de1a839ea84d8880152d47732525"
+    },
+    {
+      "path": "integrations/n8n\\ceroa-identity.mjs",
+      "sha256": "630f6f94d312022af368537a41368d8fefec22ca5b95523adfd2ab56457379f6"
+    },
+    {
+      "path": "integrations/n8n\\ceroa-identity.test.mjs",
+      "sha256": "6b2343f1d7532ce55de058314b7c920e951fea9bf6d122e73b16c22aa0b7b0de"
+    },
+    {
+      "path": "integrations/n8n\\check-block5-drive.mjs",
+      "sha256": "0e39f816e4bcf9ddd970b9dfcbe012d554f8662d277f2ecdb5a61759f533b8b0"
+    },
+    {
+      "path": "integrations/n8n\\check-block6-errors.cjs",
+      "sha256": "8bea5e401164ff54564a770cb41008c35af356d4b8892ecf8d314435b694171e"
+    },
+    {
+      "path": "integrations/n8n\\check-document-runtime.cjs",
+      "sha256": "0fb8cc3355b1256431d1052b1eed65fc2ea6231a272834e354843fc7f7a66565"
+    },
+    {
+      "path": "integrations/n8n\\check-google-live-resources.cjs",
+      "sha256": "7334bc67fc16ba531e2dbc7ffea1f1f88ce097982ef9d08ffb72225fd49ef9af"
+    },
+    {
+      "path": "integrations/n8n\\check-mcp-runtime.cjs",
+      "sha256": "92d1684c19936579a4028012df5904df282fcbd356815718e542b6c4197696e0"
+    },
+    {
+      "path": "integrations/n8n\\check-multiagent-runtime.cjs",
+      "sha256": "33eae90c1535ab3e7ec057ed3e4838586f5de1cc8c57019bb50e50ed33a5afe1"
+    },
+    {
+      "path": "integrations/n8n\\check-query-runtime.cjs",
+      "sha256": "97217f46f9d26bf29f56a5a2857543ecbb2429685f9c9b6244318d75ad202bb9"
+    },
+    {
+      "path": "integrations/n8n\\check-real-agent-runtime.cjs",
+      "sha256": "2d0b9801ae15ae1b99e4ed2751ec235d7ccadfcad55b14c68352c28e0cf31d81"
+    },
+    {
+      "path": "integrations/n8n\\check-workspace-runtime.cjs",
+      "sha256": "7ddd573e593ee0d4299e19570b61495d912b8ae54bd541c7e9cb8dc9d4f30336"
+    },
+    {
+      "path": "integrations/n8n\\cleanup-obsolete-workflows.cjs",
+      "sha256": "dae5dbfe3819288a12e35545054da07384d450c8e84c55e6f72387832f3add5e"
+    },
+    {
+      "path": "integrations/n8n\\contracts\\agent-result.schema.json",
+      "sha256": "fa7d16fe9210617bed84403f4e58162569d3d5133a178c8c1641b30f82e26ded"
+    },
+    {
+      "path": "integrations/n8n\\contracts\\agent-task.schema.json",
+      "sha256": "1d60c6276d2858b19ec38965ed615cd7a5fda2ed9771231835046d7454f71114"
+    },
+    {
+      "path": "integrations/n8n\\contracts\\tools.json",
+      "sha256": "6ac705ec7285f231c3d1001c0098f1c0a16d832a2d675a0e6bbc1e16677c89f0"
+    },
+    {
+      "path": "integrations/n8n\\create-payment.json",
+      "sha256": "3349dc5b59464f371da05e06083e1de6dc00ceec480b03c7183627470858fc3a"
+    },
+    {
+      "path": "integrations/n8n\\deploy-document-refactor.ps1",
+      "sha256": "8947eb160f3436c4aa4e8869b2a0f16b3e86e601cf8a981382989f5916ef7f67"
+    },
+    {
+      "path": "integrations/n8n\\deploy-multiagent.ps1",
+      "sha256": "6fa70f5ee6459fc1ba9bd6cdc86880e81c6e06cad8609a934c87ba054d5516f8"
+    },
+    {
+      "path": "integrations/n8n\\document-ingestion.json",
+      "sha256": "9d1c60c3c659cd606426794c3836a07e8ffea0cc2ef0eb32e514c207010d87b3"
+    },
+    {
+      "path": "integrations/n8n\\document-ingestion\\draft.schema.json",
+      "sha256": "332f634afefda226a78fca4b822bc8eaf8654793915ab730c1a35821de7e7f87"
+    },
+    {
+      "path": "integrations/n8n\\document-ingestion\\extraction-prompt.md",
+      "sha256": "320276913ab16498832d4812b44772c94fb6c6ad1f73d9f601d27767132e9433"
+    },
+    {
+      "path": "integrations/n8n\\document-processor.json",
+      "sha256": "e97a13f4769baf890188bf16724bb0ad569c30fffae9fd8574305fec1e913f52"
+    },
+    {
+      "path": "integrations/n8n\\document-processor.mjs",
+      "sha256": "ef4b2293b01cf037cf264bc7d1dd0e383b16ffb60f756e36e1582708e2140550"
+    },
+    {
+      "path": "integrations/n8n\\document-processor.test.mjs",
+      "sha256": "1db855b3c8a75b98c5c23bf85edfbf2edba2abe441a32db7eb3739c06b309638"
+    },
+    {
+      "path": "integrations/n8n\\document-query.test.mjs",
+      "sha256": "876f2c88ff42906ae2f2f537472ea6052da303091f42e2de3717a615d9a34de3"
+    },
+    {
+      "path": "integrations/n8n\\document-runtime-fixture.mjs",
+      "sha256": "83edaeb2dae5b2d32396f39fe9c7a8eefc75cf3abec934bbc701bed92794119c"
+    },
+    {
+      "path": "integrations/n8n\\execute-calendar-event-verification.mjs",
+      "sha256": "de3b5b17255c8936d1f6e353177a3e2ac0bb7f3705f6f52866c00d077d67e9e6"
+    },
+    {
+      "path": "integrations/n8n\\execute-google-verification.mjs",
+      "sha256": "0df1a729100702af7a2c76f802084dae53dad5ab5fa926c03bcab5b7ab8b53f3"
+    },
+    {
+      "path": "integrations/n8n\\extend-document-query.mjs",
+      "sha256": "55938b9307d9441ebdade7d2eb373bd7b4846b31c86dfabd91291348dc231677"
+    },
+    {
+      "path": "integrations/n8n\\extend-workspace-agents.mjs",
+      "sha256": "b08876ade10b0791b5ed494fd4c0df9ef76acdbf61769a7d173112baf2e00a93"
+    },
+    {
+      "path": "integrations/n8n\\financial-agent.json",
+      "sha256": "012abd720992f1ebb46d0840b786d5d9318ef5ffaf1dc1f4433cb5cd95e13e3f"
+    },
+    {
+      "path": "integrations/n8n\\generate-multiagent-templates.mjs",
+      "sha256": "5a8f1da25d887280e7d6de9ab7f1c93cd792f24aa3909d12fcd0ccf52edc8320"
+    },
+    {
+      "path": "integrations/n8n\\google-live-verification.mjs",
+      "sha256": "1192ded4f7d0864e23113e603d0f73c47e116d8ab6420551ab3b0662140808dd"
+    },
+    {
+      "path": "integrations/n8n\\google-live-verification.test.mjs",
+      "sha256": "76bf79b6436fc2bde23a08a47c835560cfb6cd5d4a3cd1e9928c09b56a393e43"
+    },
+    {
+      "path": "integrations/n8n\\hybrid-clean-test.java",
+      "sha256": "308e454f4a1b49786982b41920212dfd90a69ae882a41a66ee7162f7807044f3"
+    },
+    {
+      "path": "integrations/n8n\\hybrid-deployment-smoke.mjs",
+      "sha256": "f03674bda2eb775f3a8f4d76c89a74fcf3dcf283c086023f6b975cb731123a0b"
+    },
+    {
+      "path": "integrations/n8n\\hybrid-live-finish.mjs",
+      "sha256": "cc777d72c61919df714d7a92ab0abc2927e1d60ecc0c02c574f1361622cc491f"
+    },
+    {
+      "path": "integrations/n8n\\hybrid-live-smoke.mjs",
+      "sha256": "7c233d5572db4870720ba8a4695b372f2b13f36ff88999f9db5539e47b5fde00"
+    },
+    {
+      "path": "integrations/n8n\\hybrid-preflight.java",
+      "sha256": "021e99b8bb33e1a73132b18365b3670b043d722cff51a135a91a63e79ccfec3c"
+    },
+    {
+      "path": "integrations/n8n\\hybrid-rag-ingestion.json",
+      "sha256": "87f1a51529093c24be75634c0027e0823766ae6eb3b37ff58bf8f1ccc1f6dbdf"
+    },
+    {
+      "path": "integrations/n8n\\hybrid-rag-ocr.json",
+      "sha256": "8276594cebae94f2381148136ed4523e68fa07e1e327e27a79dbbf468fc8997a"
+    },
+    {
+      "path": "integrations/n8n\\hybrid-rag-query.json",
+      "sha256": "9b70dcb1cfba756ef15f8e1ac3b282e51984c84fd5961d4730acca24b218a272"
+    },
+    {
+      "path": "integrations/n8n\\hybrid-rag-sync.json",
+      "sha256": "d2f15c481f4bd488330965bdec5daae18ad2126315d394c6ac20b2396b347f03"
+    },
+    {
+      "path": "integrations/n8n\\hybrid-rag-workflows.test.mjs",
+      "sha256": "451da1021e1ee6c591e458a7ada0100ae126a493fa107c6c11419a92a00b207c"
+    },
+    {
+      "path": "integrations/n8n\\hybrid-storage-setup.mjs",
+      "sha256": "6f4e17fcfe65ea2cf33686fc2a6887062a7872a64ac5f9beec212ba49025e3d9"
+    },
+    {
+      "path": "integrations/n8n\\install-documents.ps1",
+      "sha256": "4c887aa4715c858881a5d4dda21a6af8c3869a69e93f1d52a3c83975892eb239"
+    },
+    {
+      "path": "integrations/n8n\\install-hybrid-runtime.cjs",
+      "sha256": "791cc12dda707cf017d442428cf474d339b6471be0c769ddbce52673d654a14e"
+    },
+    {
+      "path": "integrations/n8n\\install-hybrid.ps1",
+      "sha256": "f145cac2c4bac981e82c7a607f5496e18d9d908b46d47287bf34cf0945d8839b"
+    },
+    {
+      "path": "integrations/n8n\\install-rag.ps1",
+      "sha256": "46c60c2bb6b4cb9a9e1aed650dbe53da0856b548d1ea069814965afe56f80f91"
+    },
+    {
+      "path": "integrations/n8n\\install-reminders.ps1",
+      "sha256": "a2b22a2baf0e67cc637312d5b1cc401e819a47816028ee9c583bfa2cb20e1aa0"
+    },
+    {
+      "path": "integrations/n8n\\install-sentinel.ps1",
+      "sha256": "63860496c3433bd7fbb92532b584543db735c962dca7ab3e51aaffd05cdb3b90"
+    },
+    {
+      "path": "integrations/n8n\\install-telegram-local.ps1",
+      "sha256": "2a339073958e52760e9c4b308fbd97325bdbf5e73cee3b4d09f6342677463764"
+    },
+    {
+      "path": "integrations/n8n\\knowledge-agent.json",
+      "sha256": "477bbbf11cd5ac597048237a4496934769a76f6f5953b26b6ed8bd52780efa89"
+    },
+    {
+      "path": "integrations/n8n\\mcp-provider-stub.cjs",
+      "sha256": "8db00185a76e7edc7a794a0c5a341a5042734c3ebd6e41184162f305c0b9b3a1"
+    },
+    {
+      "path": "integrations/n8n\\mcp-runtime-fixture.mjs",
+      "sha256": "866f561e9ba2da6cc7093198d095d94b16d59b895999eb3317a627d35ffde5c9"
+    },
+    {
+      "path": "integrations/n8n\\multiagent-e2e-fixture.mjs",
+      "sha256": "f540270ac422d8a02d3e74655d766936d17f4a0b58f0dea21fe8061a112d315e"
+    },
+    {
+      "path": "integrations/n8n\\multiagent-provider-stub.cjs",
+      "sha256": "70ba3a885440bf3e2e7c590b192e64d3e22a0dbdd74fa676adaa092370c8a902"
+    },
+    {
+      "path": "integrations/n8n\\multiagent-query.json",
+      "sha256": "8643dbb0281b44bc4c1be48da3fd074629989bacc7accc82ff33603c1cd9c27a"
+    },
+    {
+      "path": "integrations/n8n\\multiagent-runtime-fixture.mjs",
+      "sha256": "c283bb34a6d17c3c5605d64853c7632c4b20b5cb2fbffb503f4bba9c697b3527"
+    },
+    {
+      "path": "integrations/n8n\\multiagent-workflows.mjs",
+      "sha256": "d907a7907a17c7adf0328cd9e414d0e32a8a861a618ee5f812393e62247eabb1"
+    },
+    {
+      "path": "integrations/n8n\\multiagent-workflows.test.mjs",
+      "sha256": "8a601d95f3beaab2d1527faa7795d9cea7bc450f202dab553d7c9efd391f3416"
+    },
+    {
+      "path": "integrations/n8n\\prepare-block5-e2e.mjs",
+      "sha256": "35174826eda418b8a241e2aa0ef6b5ed08f91e69847806ed1937dd87693bc75d"
+    },
+    {
+      "path": "integrations/n8n\\prepare-block5-runtime.mjs",
+      "sha256": "19840ede6c8bed54dd5bc5bf0092843bb9557cccc2b02bc3c3282c390c6ae840"
+    },
+    {
+      "path": "integrations/n8n\\prepare-block6-drive-poll.mjs",
+      "sha256": "e160b1049282e73abcb1db88daf2bef458d6f35087b149c73eef1ed1fbd0b9d2"
+    },
+    {
+      "path": "integrations/n8n\\prepare-block6-google.cjs",
+      "sha256": "f0cf274760a505514feac34a038a185bb296563c80ff7e0bd6e9ed10d9a260a6"
+    },
+    {
+      "path": "integrations/n8n\\prepare-block6-runtime.mjs",
+      "sha256": "f1f81fbf78f74db9911c81661ff63a08bfd2633b7a101d2bbdd4bbcbaf8c3f6b"
+    },
+    {
+      "path": "integrations/n8n\\prepare-calendar-verification.mjs",
+      "sha256": "11f1e796e461ead3f10409193ae8268a4c4b67dbdae3b6c2d118c8d9aad76708"
+    },
+    {
+      "path": "integrations/n8n\\prepare-document-refactor.mjs",
+      "sha256": "42c096d398f04503a482ad9d213132e75701281dda0cab0c0c311f1a64a956e7"
+    },
+    {
+      "path": "integrations/n8n\\prepare-gemini-native-verification.mjs",
+      "sha256": "b9a50754b56d2a93a4921d823a6ffb49833e9c285b1e5a98b8dcde0a67bfe22e"
+    },
+    {
+      "path": "integrations/n8n\\prepare-google-runtime-credentials.cjs",
+      "sha256": "c861692825aa27fef892a2f0257fca7967f76f40495b62284e43551d41bff829"
+    },
+    {
+      "path": "integrations/n8n\\prepare-identity-update.mjs",
+      "sha256": "9f3f94402b65200c3cf1c7715b3031b059b5386326d0af98aef92882093b86c3"
+    },
+    {
+      "path": "integrations/n8n\\prepare-identity-update.test.mjs",
+      "sha256": "51bdb1421c49dfda3ec001269c405c9a4a91f9250fa3dd35e41edc13a68f1b5f"
+    },
+    {
+      "path": "integrations/n8n\\prepare-query-refactor.mjs",
+      "sha256": "8d35e73c7f0fcbcdb3978bdff5e1b98133061fc48cc6b1513763f9709abe28a4"
+    },
+    {
+      "path": "integrations/n8n\\prepare-real-agent-verification.mjs",
+      "sha256": "2e675319a0223ba862397042f6d972ed414a5d33c8e581eeeab1b62d114a067a"
+    },
+    {
+      "path": "integrations/n8n\\prepare-telegram-documents.cjs",
+      "sha256": "55bfe0b694583123d2f215c74b99fb7d4f78e10090357598fc7f75ba76c154dc"
+    },
+    {
+      "path": "integrations/n8n\\prepare-workspace-deployment.mjs",
+      "sha256": "bf4a09127ec45869304a710c80533af2348251634de8c423769360f112635ed9"
+    },
+    {
+      "path": "integrations/n8n\\probe-gemini-key.cjs",
+      "sha256": "17e23660b54d496db903116f28234f76f9e431e491d5983456a02c5c31d09a22"
+    },
+    {
+      "path": "integrations/n8n\\probe-gemini-runtime.cjs",
+      "sha256": "31f043a7f89c76824f23902efdedbae55ed68b6a67a2208d5f0afc450d755cb0"
+    },
+    {
+      "path": "integrations/n8n\\probe-google-connections.cjs",
+      "sha256": "7d638dcb563428b229a561b039401e9fad81c154901ab68b10fa20789c41fac9"
+    },
+    {
+      "path": "integrations/n8n\\probe-runtime.mjs",
+      "sha256": "1aacbdff6966244a0bbd3c0352b4b67371c2b0496725d51593ccf6a5b9921371"
+    },
+    {
+      "path": "integrations/n8n\\query-runtime-fixture.mjs",
+      "sha256": "fee73fb60baef753fbf49589cf6ccbcc707be3bc59093d82a5f8e29b46ea50c5"
+    },
+    {
+      "path": "integrations/n8n\\rag-embedding.json",
+      "sha256": "754d04079470c476e088beb3986390b01f488ffecfd93dd98efea75422925cd1"
+    },
+    {
+      "path": "integrations/n8n\\rag-index.json",
+      "sha256": "bee92bf4cd35971e59947bd47e8c8541191a2ca3fae6615bfd14ed5c2917160b"
+    },
+    {
+      "path": "integrations/n8n\\rag\\CalibrateRag.java",
+      "sha256": "23f3ba814ba3fb81a620a55813cc8f57933ef1407144d73cce9ec1902fe72fdc"
+    },
+    {
+      "path": "integrations/n8n\\rag\\PublishRag.java",
+      "sha256": "59a647f2f2c011f8ed35b6ca0109a454ec9043c6105a20eb4f38ab5357833d99"
+    },
+    {
+      "path": "integrations/n8n\\rag\\RagPermissionsProbe.java",
+      "sha256": "0cedae1d790c85807a2e047964de77740451730fadcd81c4bd1f2815c1be907f"
+    },
+    {
+      "path": "integrations/n8n\\rag\\ReconcileDocumentStorage.java",
+      "sha256": "3ce678abbf7ecc624519c42f5c3cb32cc5d5f9f1330e2cf5a6d6bcb0c37fda3a"
+    },
+    {
+      "path": "integrations/n8n\\rag\\RevokeRagSource.java",
+      "sha256": "0db3813c4d375cb0240d07bef042b0beba26875a2286a5a0273eaa578bf4e2a2"
+    },
+    {
+      "path": "integrations/n8n\\rag\\SupabaseRagAdmin.java",
+      "sha256": "7025cde3f00e90a4d1ac34bc681291d9836a6f3a2a2d545be28e39068f747fd5"
+    },
+    {
+      "path": "integrations/n8n\\rag\\TelegramDocumentEvaluationIdentity.java",
+      "sha256": "f3ce185508ecd10969e3db57cba9ff080ad8349ad434e003b367bd1aeb299b60"
+    },
+    {
+      "path": "integrations/n8n\\rag\\WriteRagEvaluationFixtures.java",
+      "sha256": "c759cca1c8ca2c97c4f894921f97c383183bbed70190f7ee177bebc9b773b229"
+    },
+    {
+      "path": "integrations/n8n\\rag\\calibrate-embeddings.cjs",
+      "sha256": "a0f1f696965d27e15679f991b403e98a72c4744f319b4f4508d2cbf274a62f58"
+    },
+    {
+      "path": "integrations/n8n\\rag\\calibration.json",
+      "sha256": "9829941634f3499bc0a90bda9b73935f506ac28fc8b674bd1631d52141671ac6"
+    },
+    {
+      "path": "integrations/n8n\\rag\\evaluate-automatic-upload.mjs",
+      "sha256": "7d683f527c9cdcdc9c650eb0de40fd5c61fc6788c7f89f49249e77f850791c63"
+    },
+    {
+      "path": "integrations/n8n\\rag\\evaluate-library.mjs",
+      "sha256": "cb6e86ffe1e4ce073e5dc0145846d3d636d20efe347438962d7e547215a8e288"
+    },
+    {
+      "path": "integrations/n8n\\rag\\evaluate-telegram-documents.mjs",
+      "sha256": "2a4a6f2121cac64253a13327b7251fb0007d019a53ad42bb45cd4e83c31d9999"
+    },
+    {
+      "path": "integrations/n8n\\rag\\install-runtime.cjs",
+      "sha256": "e52f53d83f7f835a43d953af72dd912b12f07d75bce6a5e0ff785692ce8cb27d"
+    },
+    {
+      "path": "integrations/n8n\\rag\\prepare-corpus.mjs",
+      "sha256": "b3e5a47d84a4bf8d2e1435eb5212da49e2d1dbd44081d02cdeb9ba0f49668ad1"
+    },
+    {
+      "path": "integrations/n8n\\rag\\prepare-corpus.test.mjs",
+      "sha256": "b72d5a11b6daa6a4bdf15969a2d6cdf9d2e88f26efe93faae9ddbfaddcd79318"
+    },
+    {
+      "path": "integrations/n8n\\rag\\sources.json",
+      "sha256": "5aa5d091eef6ababe2a0f3aaabe4d0455016a1cf316b73d8ea19651ef346b22c"
+    },
+    {
+      "path": "integrations/n8n\\read-debts.json",
+      "sha256": "aa0f1ff1bd6bce24faa56620d082404f233976544498c5eeb225ae7f28d27723"
+    },
+    {
+      "path": "integrations/n8n\\reconcile-workflows.mjs",
+      "sha256": "ec72ccc7475379519f989056b5b3d6a1098db4874f29c87f18e2f37e6bbfb10f"
+    },
+    {
+      "path": "integrations/n8n\\reminder-error.json",
+      "sha256": "30be8665f3b25aecbe49ed9d7d59141a6ce7d4bfd345c82979943ee19b27e633"
+    },
+    {
+      "path": "integrations/n8n\\reminders\\ReminderPreflight.java",
+      "sha256": "dfad55917845553784eb1657afef8bc4d4bf41d36bb4349464099b567488fdeb"
+    },
+    {
+      "path": "integrations/n8n\\reminders\\install-runtime.cjs",
+      "sha256": "d79961f8224e6f6bae37f3a43fa83d97691b93fa17c40ab036383e2b1e4de6c4"
+    },
+    {
+      "path": "integrations/n8n\\reminders\\mock-runtime.cjs",
+      "sha256": "434f52cc17794ac83045d4d8119a8387125937d4917f977149e236205932cbad"
+    },
+    {
+      "path": "integrations/n8n\\report-block5-benchmark.mjs",
+      "sha256": "78248e0b5829cc9bc169c93f89efef9aff3cf5996cc4a0fe241dd1281198c91c"
+    },
+    {
+      "path": "integrations/n8n\\report-block5-native.cjs",
+      "sha256": "ba02b571cc50050e71a462aad234901754076d9c5081efdfcfcc4ff3809450df"
+    },
+    {
+      "path": "integrations/n8n\\rollback-document-refactor.ps1",
+      "sha256": "37f893352a5050c706dc7f2a63c6ed8fa3d7910c2cfd10cddeef598508f99683"
+    },
+    {
+      "path": "integrations/n8n\\rollback-query-refactor.ps1",
+      "sha256": "88f8784af616ea0bcf36f9ec476586f4300e5d0751b59d25a1a75fa167283e4e"
+    },
+    {
+      "path": "integrations/n8n\\rollback-workspace.ps1",
+      "sha256": "aba1c1a119441e69c653abb4649c3c4ca8095f1f62086a3f0c21dc03fb00118b"
+    },
+    {
+      "path": "integrations/n8n\\scheduled-reminders.json",
+      "sha256": "8ab532f20d2542ff201230749864779165c4c30cdeee652fcd0fcdda571c2f6a"
+    },
+    {
+      "path": "integrations/n8n\\scheduled-sentinel.json",
+      "sha256": "57647a5b388b055d18cd17f6ac69fca3387bd71a7d386351d19709efb2f867a3"
+    },
+    {
+      "path": "integrations/n8n\\sentinel-error.json",
+      "sha256": "f6d9fd6b779ae6e3d78647826b5d3cc9f867e7baa534076c4244b27dacaff41c"
+    },
+    {
+      "path": "integrations/n8n\\sentinel\\install-runtime.cjs",
+      "sha256": "b295e49f199e71839d1fb41ef994f11d85ebc748fccd04bd69e346b6b0ffa72c"
+    },
+    {
+      "path": "integrations/n8n\\start-n8n.sh",
+      "sha256": "87eca82aa3ba847191ac33749735818e44047f2c12c82451ddc1c36d5053f450"
+    },
+    {
+      "path": "integrations/n8n\\support-agent.json",
+      "sha256": "165691ec5d9733baaee7e8814009a6504fa72bd5ddbc2386cfa8b060c4164b7c"
+    },
+    {
+      "path": "integrations/n8n\\sync-telegram-tunnel.ps1",
+      "sha256": "f72ce66353f81660a105111371baed47edef0ff02f526cfa6d8cf8f56c87756b"
+    },
+    {
+      "path": "integrations/n8n\\sync-telegram-webhook.cjs",
+      "sha256": "ac537a80e20f3fdcb711737a029b8be51ae7408d1c93f3216e05ea9eaf219009"
+    },
+    {
+      "path": "integrations/n8n\\telegram-documents.test.mjs",
+      "sha256": "e512dfa1d9391668b4f6016961aed9b4557136c4308037deaab6fd1d14ace583"
+    },
+    {
+      "path": "integrations/n8n\\telegram-proxy.mjs",
+      "sha256": "084bf90d2ed9aadfbbb2eb4e7a09b89eed5de7ed77a2e9de2d5176669bebe4b2"
+    },
+    {
+      "path": "integrations/n8n\\test-block5-real-e2e.sh",
+      "sha256": "c355bf6190a5c24b93b35b22df6279dadd71d7a1a2071d073126169c2c15e41c"
+    },
+    {
+      "path": "integrations/n8n\\test-block6-errors.sh",
+      "sha256": "0e391ada7067a4988657c6eb673d64ea1fab1934877b2de175416fae1faeeb9f"
+    },
+    {
+      "path": "integrations/n8n\\test-block8-recovery.cjs",
+      "sha256": "d18de8cdc9aa68b4e57acf8f2036fc5e8fcbdb5ae9c9544e25d91703647b4940"
+    },
+    {
+      "path": "integrations/n8n\\test-block8-recovery.sh",
+      "sha256": "79577d51dcebd8e00536eee2ea37680983a452c50bf913bfbd12ae9f4d9f400e"
+    },
+    {
+      "path": "integrations/n8n\\test-document-runtime.ps1",
+      "sha256": "50d1c943cacb652bf50f6e519e360849cd4db12621c2b40faed773db41e1b979"
+    },
+    {
+      "path": "integrations/n8n\\test-document-runtime.sh",
+      "sha256": "2db657a75f12fcf1f8c231204f10fbf91ac6a4df0e7aaabde2ee9e6115d987c8"
+    },
+    {
+      "path": "integrations/n8n\\test-mcp-runtime.ps1",
+      "sha256": "b926d240188a1f477ee07a36733d428bf008fe0ebe7642aeedba017668cc0a42"
+    },
+    {
+      "path": "integrations/n8n\\test-mcp-runtime.sh",
+      "sha256": "76648d25d0de0a5b423efee7791b36f1496a333aedc8dc825f291f717f262d40"
+    },
+    {
+      "path": "integrations/n8n\\test-multiagent-e2e.ps1",
+      "sha256": "5e813c9d703cfbf72114413ad6bb71b265f158b10e7b66152d67690acd18689d"
+    },
+    {
+      "path": "integrations/n8n\\test-multiagent-e2e.sh",
+      "sha256": "5c82dda737a2cb4a3b48105229948e23baaeea65f57c0d3fed33bb52c2d37f28"
+    },
+    {
+      "path": "integrations/n8n\\test-multiagent-runtime.ps1",
+      "sha256": "adf845c59c3c19d087ebffca9e20ce91fcb4b004fb050b010e260873f15d1df5"
+    },
+    {
+      "path": "integrations/n8n\\test-multiagent-runtime.sh",
+      "sha256": "d9dc93778dcd6dbd67539a93e2cc348b28d93434299e577f2170672e540d614c"
+    },
+    {
+      "path": "integrations/n8n\\test-query-runtime.ps1",
+      "sha256": "395e552893dd8650b699ff97b82dd6768ad55dd33c961099e18b533bfb158099"
+    },
+    {
+      "path": "integrations/n8n\\test-query-runtime.sh",
+      "sha256": "081c8c38bfabf6ba64292aea94330b0c3d2506e20df279e6c1a1efeaea56b4c2"
+    },
+    {
+      "path": "integrations/n8n\\test-real-agent-runtime.sh",
+      "sha256": "2e7561888129b0a36cc88627d38f6a002784261e7a351527e8a781f9b5cb0561"
+    },
+    {
+      "path": "integrations/n8n\\test-reminders.ps1",
+      "sha256": "97a3ea473e95b78446a0a8cdc38114d7a5a476dfa5b3660b0c0fdaf9a158faa7"
+    },
+    {
+      "path": "integrations/n8n\\test-workspace-runtime.ps1",
+      "sha256": "673eb9d157eaf2e32d17a664cb9ef08e37c119a1e8518c1b8729711eb5c31034"
+    },
+    {
+      "path": "integrations/n8n\\test-workspace-runtime.sh",
+      "sha256": "274c419f092fb763a3e073668ba6cc89aaf4f674feaf319cbb83152f60119379"
+    },
+    {
+      "path": "integrations/n8n\\update-assistant-runtime.cjs",
+      "sha256": "17ba1c769d200a16c6be32143c12a9d7a79af88a753cb663a46a9c3040f4ee46"
+    },
+    {
+      "path": "integrations/n8n\\update-gemini-runtime-key.cjs",
+      "sha256": "2920be324a8ae431c10de231c696acd20e335c0a718f4159473bb69353f84d57"
+    },
+    {
+      "path": "integrations/n8n\\validate-agent-contracts.cjs",
+      "sha256": "88ffe98c54bdb64a38e19c166e5da175daa4ac492029f91d04e322c12074418a"
+    },
+    {
+      "path": "integrations/n8n\\verify-multiagent-deployment.mjs",
+      "sha256": "f4f4f408f4933dee93027d26af4339dd3ccc0ae360b1c1426999b9e069cae713"
+    },
+    {
+      "path": "integrations/n8n\\verify-query-deployment.mjs",
+      "sha256": "9c8f9fd4b56900d439cb97ba7d49f2da23bf87a7c1f7fa1751d694a9984e9a85"
+    },
+    {
+      "path": "integrations/n8n\\verify-workspace-deployment.mjs",
+      "sha256": "454f339e29f8b6eea04a027ac686ffaab65da5107b773a149a47256f29d6b07f"
+    },
+    {
+      "path": "integrations/n8n\\wait-document-runtime.cjs",
+      "sha256": "8a72c4b0e8c18edfcdbe62968caa4b6c2882b3666739352dc1e48d3c93efded2"
+    },
+    {
+      "path": "integrations/n8n\\workspace-calendar.json",
+      "sha256": "1b98b0e442ea05c0559f2e337a4b8c34c0ec358950b14373ebe83843f49dd446"
+    },
+    {
+      "path": "integrations/n8n\\workspace-calendar.mjs",
+      "sha256": "cae570ce154961fdc62ce7d28adbc15ca26b6738ec0c9bdfb5055662986c1bb5"
+    },
+    {
+      "path": "integrations/n8n\\workspace-drive.json",
+      "sha256": "62a4347a8435c73838028a373e547f029669a58e03b5eb4addfae89b36882173"
+    },
+    {
+      "path": "integrations/n8n\\workspace-drive.mjs",
+      "sha256": "dc65708901a688d6eba773500f498abbafc84ad7330dbc4b060258ff81e4f09c"
+    },
+    {
+      "path": "integrations/n8n\\workspace-extensions.test.mjs",
+      "sha256": "35a585a1d5f06ad267d7289d117d2bba1a22c6ffe2125bcf9f5e764b866df03d"
+    },
+    {
+      "path": "integrations/n8n\\workspace-mail.json",
+      "sha256": "e3d1488436ae4f6ce42ee6a67af75d68cd0e11a1ea3186771b2ad9b2d8554176"
+    },
+    {
+      "path": "integrations/n8n\\workspace-mcp-backend.json",
+      "sha256": "6c71519baa87642323f9ed01846afa9a4944215ff12cde4a5f07d3ba4bcc1595"
+    },
+    {
+      "path": "integrations/n8n\\workspace-mcp-client.json",
+      "sha256": "272b0cdf30afa65d655cc6586463d9a7c987e88ddebd038040f1899dd4e5450b"
+    },
+    {
+      "path": "integrations/n8n\\workspace-mcp-server.json",
+      "sha256": "f76d28e172efa592884fc33921011443fbbf2702244a8cc8914784265a43d3b2"
+    },
+    {
+      "path": "integrations/n8n\\workspace-mcp-support.json",
+      "sha256": "33489a43354a9d7fb6801a4da7b569ebb41733a1fccfaf1e0687aa8979c5929b"
+    },
+    {
+      "path": "integrations/n8n\\workspace-mcp.mjs",
+      "sha256": "a15f77945023df97a515f9945218be2eb2c52a38151fc622a71457211d48c099"
+    },
+    {
+      "path": "integrations/n8n\\workspace-provider-stub.cjs",
+      "sha256": "b07bbf378d6291dc5d0373d216f4d33411dbdba6b4d3e4914d4d2b3cca6c6d47"
+    },
+    {
+      "path": "integrations/n8n\\workspace-runtime-fixture.mjs",
+      "sha256": "5790d97108162aef1168aec09a74aa9f4f30ec590adfdeb5d01b0dc27173bf0e"
+    },
+    {
+      "path": "integrations/n8n\\workspace-sheets.json",
+      "sha256": "e4e4ae72a740b9e711f7dbea674367703377bac259f8b83f37bcf94a1917be84"
+    },
+    {
+      "path": "integrations/n8n\\workspace-workflows.mjs",
+      "sha256": "8d463d320bbacae9acc8d5e38f1fa8d55b5d259e02361298e3b4f07ab17d6597"
+    },
+    {
+      "path": "integrations/n8n\\workspace-workflows.test.mjs",
+      "sha256": "93193232fb20cc68755e3d943a02b136eed73e80373495cbab021b147416b97f"
+    },
+    {
+      "path": "integrations/n8n\\write-verification-report.mjs",
+      "sha256": "94ce62f2351833e0bfb71af3a460047a054a7c53ba75a1241a5508b7bc59b2f7"
+    }
+  ]
+}

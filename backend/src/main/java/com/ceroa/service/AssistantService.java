@@ -177,6 +177,7 @@ public class AssistantService {
                     var diagnostic=json.readTree(response.body());
                     String stage=diagnostic.path("stage").asText("unknown");
                     String category=diagnostic.path("category").asText("unknown");
+                    if(Set.of("PROVIDER_LIMIT","PROVIDER_QUOTA").contains(category))providerGate.quotaFailure();
                     if(stage.matches("[a-z0-9-]{1,80}")&&category.matches("[A-Z_]{1,30}"))log.warn("Assistant workflow failure: stage={}, category={}",stage,category);
                 }catch(Exception ignored){/* Do not log provider payloads or user data. */}
                 throw unavailable();
@@ -226,6 +227,8 @@ public class AssistantService {
     private Reply bookingReply(SupportBookingService.View result){return new Reply("Estado de asesoria: "+result.status()+". Horario: "+result.start()+". "+(result.meetUrl()==null?"":result.meetUrl()+" ")+result.instruction(),"support");}
     public AssistantAnalysisService.Evidence bookingTool(UUID id,String operation,String value){return withJob(id,"supportBooking",job->{
         guard(job,"support.booking");if(activeScope.get()==null||activeScope.get().role!=AgentContracts.Role.SUPPORT||job.selectedDocument!=null)throw AgentRuntime.denied();
+        String requested=java.text.Normalizer.normalize(job.question.toLowerCase(Locale.ROOT),java.text.Normalizer.Form.NFD).replaceAll("\\p{M}","");
+        if(operation.equals("propose")&&requested.contains("disponibilidad")&&!requested.matches("(?s).*(?:propon|propuest|reserv|agend|program).*"))throw AgentRuntime.denied();
         Object result=switch(operation){case "availability"->supportBookings.availability(OffsetDateTime.parse(value));case "propose"->supportBookings.propose(OffsetDateTime.parse(value));case "get"->supportBookings.get(value);case "cancel"->supportBookings.proposeCancellation(value);default->throw AgentRuntime.denied();};
         return analysis.evidence(job.facts,json.valueToTree(result),"supportBooking");
     });}
@@ -347,6 +350,10 @@ public class AssistantService {
                 if(intent==com.ceroa.api.dto.DocumentContracts.Intent.STRUCTURED_QUERY||intent==com.ceroa.api.dto.DocumentContracts.Intent.COMBINED_QUERY||intent==com.ceroa.api.dto.DocumentContracts.Intent.PERIOD_ANALYSIS)
                     intent=com.ceroa.api.dto.DocumentContracts.Intent.HYBRID_SEARCH;
                 effective=new com.ceroa.api.dto.DocumentContracts.Query(intent,job.question,filters,0,10);
+            }else if(effective.filters()!=null&&effective.filters().identificationType()!=null
+                &&!java.text.Normalizer.normalize(routingQuestion(job).toLowerCase(Locale.ROOT),java.text.Normalizer.Form.NFD).replaceAll("\\p{M}","").matches("(?s).*\\b(cc|ce|ti|nit|pasaporte|passport|cedula|identificacion)\\b.*")){
+                var f=effective.filters();
+                effective=new com.ceroa.api.dto.DocumentContracts.Query(effective.intent(),effective.question(),new com.ceroa.api.dto.DocumentContracts.Filters(f.ownerId(),null,f.documentType(),f.financialEntity(),f.periodFrom(),f.periodToExclusive(),f.documentId()),effective.offset(),effective.limit());
             }
             library.assertCurrent(job.libraryDocuments.values());
             if(job.libraryCache.containsKey(effective)){
@@ -566,6 +573,14 @@ public class AssistantService {
                 }
             }else resolved=finalizeAnswer(job,answer);
             if(job.runtime!=null&&job.runtime.limited())resolved+="\nEl análisis se limita a la evidencia disponible; alguna parte de la consulta quedó incompleta o requiere aclaración.";
+            if(job.runtime!=null){
+                boolean bookingEvidence=job.runtime.operationalReferences().stream().map(job.facts::get).filter(Objects::nonNull).anyMatch(f->f.source().startsWith("supportBooking/"));
+                if(bookingEvidence){
+                    var instructions=job.facts.values().stream().filter(f->f.source().startsWith("supportBooking/")&&f.source().endsWith("/instruction")&&f.value().isTextual())
+                        .map(f->f.value().asText()).filter(v->v.matches("Confirmar asesoria [A-Z]{20}")).distinct().toList();
+                    for(String instruction:instructions)if(!resolved.contains(instruction))resolved+="\n"+instruction;
+                }
+            }
             job.question=transcript;
             if(libraryActive) {
                 var result=job.libraryResult;
@@ -622,7 +637,9 @@ public class AssistantService {
     }
     public AgentContracts.Context startOrchestration(UUID id){return withJob(id,job->{
         if(!job.cache.containsKey("inputs"))throw new IllegalArgumentException("Preparar contexto primero");
-        if(job.runtime==null)job.runtime=new AgentRuntime(id,job.budget,job.cache.get("inputs").facts().keySet(),Math.min(job.providerReservation,AssistantProviderGate.reservation(job.budget,AgentContracts.selectedRoles(routingQuestion(job),job.selectedDocument!=null))));
+        var roles=AgentContracts.selectedRoles(routingQuestion(job),job.selectedDocument!=null);
+        int runtimeBudget=Math.min(job.providerReservation,AssistantProviderGate.reservation(job.budget,roles));
+        if(job.runtime==null)job.runtime=new AgentRuntime(id,job.budget,job.cache.get("inputs").facts().keySet(),runtimeBudget,roles.size());
         return AgentContracts.context(id,routingQuestion(job),job.selectedDocument!=null);
     });}
     public AgentRuntime.Grant beginDelegation(UUID id,AgentContracts.Role role,AgentRuntime.Task task){return withJob(id,job->{
@@ -634,6 +651,7 @@ public class AssistantService {
             var supportGuide=job.cache.computeIfAbsent("supportGuide",k->{
                 var guide=json.createObjectNode();
                 guide.put("debtRegistration","Para registrar una deuda en Ceroa, ingresa a la sección Deudas en el menú lateral, pulsa Nueva deuda o Registrar obligación y completa entidad o acreedor, tipo de deuda, monto original, saldo actual, tasa de interés (EA, MV o sin intereses), cuota mensual y fecha de próximo vencimiento.");
+                guide.put("paymentRegistration","Para registrar un pago o abono en Ceroa, ingresa a la sección Deudas en el menú lateral, selecciona la obligación correspondiente, pulsa Registrar pago e ingresa el monto pagado, la fecha de pago y el tipo de abono.");
                 guide.put("simulatorUsage","El simulador de Ceroa (sección Simular) permite seleccionar una obligación registrada o el portafolio, elegir una estrategia (Avalancha o Bola de Nieve) y agregar abonos extraordinarios hipotéticos por período para proyectar el ahorro en intereses y la reducción de meses sin modificar tus saldos reales.");
                 guide.put("plansComparison","El plan Cero incluye el registro y seguimiento de deudas, control de pagos, próximos vencimientos, progreso mensual y simulaciones básicas. Ceroa Plus desbloquea la Estrategia de Pago personalizada completa (comparativa detallada Avalancha vs. Bola de Nieve, orden de priorización y hoja de ruta), Biblioteca Documental con análisis RAG de extractos y monitoreo avanzado.");
                 guide.put("advisoryProcedure","Para solicitar una asesoría en Ceroa, indica en el chat del asistente la fecha y hora deseada en horario hábil de Bogotá (lunes a viernes, en bloques de treinta minutos) junto con el tema a revisar. El Agente de Soporte verificará disponibilidad y generará una propuesta con código de confirmación; la sesión de Google Calendar y Google Meet solo se crea cuando confirmas explícitamente ese código.");
@@ -669,6 +687,13 @@ public class AssistantService {
         while(matcher.find())if(scope.issued.contains(matcher.group(1))&&updatedRefs.size()<100)updatedRefs.add(matcher.group(1));
         if(scope.role==AgentContracts.Role.SUPPORT&&updatedRefs.isEmpty()&&(result.sources()==null||result.sources().isEmpty())){
             scope.issued.stream().filter(r->job.facts.containsKey(r)&&job.facts.get(r).source().startsWith("supportGuide/")).findFirst().ifPresent(updatedRefs::add);
+        }
+        if(scope.role==AgentContracts.Role.SUPPORT){
+            for(String ref:scope.issued){
+                if(updatedRefs.size()<100&&job.facts.containsKey(ref)&&(job.facts.get(ref).source().startsWith("supportBooking/")||job.facts.get(ref).source().startsWith("workspaceProposal/"))){
+                    updatedRefs.add(ref);
+                }
+            }
         }
         if(updatedRefs.stream().anyMatch(job.partialLibraryFacts::contains))scope.partial=true;
         String coverage=scope.partial&&"COMPLETE".equals(result.coverage())?"PARTIAL":result.coverage();

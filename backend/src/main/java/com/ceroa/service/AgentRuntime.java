@@ -28,10 +28,11 @@ public final class AgentRuntime {
     private final UUID requestId; private final Instant deadline; private final AgentContracts.Budget budget;
     private final Map<UUID,Scope> scopes=new LinkedHashMap<>(); private final Map<String,Scope> tasks=new HashMap<>();
     private final Set<String> partialRefs=new HashSet<>();
-    private final Set<String> shared=new HashSet<>(),initial=new HashSet<>(); private int reserved,cacheHits,characters,deniedDelegations;private final int modelBudget;
+    private final Set<String> shared=new HashSet<>(),initial=new HashSet<>(); private int reserved,cacheHits,characters,deniedDelegations;private final int modelBudget,expectedSpecialists;
     public void deniedDelegation(){deniedDelegations++;}
-    public AgentRuntime(UUID id,AgentContracts.Budget budget,Collection<String> initial){this(id,budget,initial,22);}
-    public AgentRuntime(UUID id,AgentContracts.Budget budget,Collection<String> initial,int modelBudget){requestId=id;this.budget=budget;this.modelBudget=modelBudget;reserved=Math.min(6,budget.maxIterations());deadline=Instant.now().plusMillis(budget.deadlineMs());shared.addAll(initial);this.initial.addAll(initial);}
+    public AgentRuntime(UUID id,AgentContracts.Budget budget,Collection<String> initial){this(id,budget,initial,22,0);}
+    public AgentRuntime(UUID id,AgentContracts.Budget budget,Collection<String> initial,int modelBudget){this(id,budget,initial,modelBudget,0);}
+    public AgentRuntime(UUID id,AgentContracts.Budget budget,Collection<String> initial,int modelBudget,int expectedSpecialists){requestId=id;this.budget=budget;this.modelBudget=modelBudget;this.expectedSpecialists=expectedSpecialists;reserved=Math.min(6,budget.maxIterations());deadline=Instant.now().plusMillis(budget.deadlineMs());shared.addAll(initial);this.initial.addAll(initial);}
     public Grant begin(AgentContracts.Role role,Task input,boolean selected){
         checkTime();
         if(role==AgentContracts.Role.ORCHESTRATOR||selected&&role!=AgentContracts.Role.RAG)throw denied();
@@ -42,7 +43,7 @@ public final class AgentRuntime {
         String key=role+":"+input.task().strip().replaceAll("\\s+"," ")+":"+new TreeSet<>(refs);
         var existing=tasks.get(key);
         if(existing!=null){if(existing.result==null)throw new ResponseStatusException(HttpStatus.CONFLICT,"Delegación en curso");cacheHits++;return grant(existing);}
-        int iterations=role==AgentContracts.Role.SUPPORT?3:4;
+        int iterations=AssistantProviderGate.specialistIterations(role,expectedSpecialists);
         if(scopes.size()>=4||reserved+iterations>modelBudget)throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS,"Presupuesto de delegación agotado");
         reserved+=iterations;var scope=new Scope(role,input.task(),iterations,refs);scope.partial=refs.stream().anyMatch(partialRefs::contains);if(role!=AgentContracts.Role.SUPPORT)scope.issued.addAll(initial);scopes.put(scope.token,scope);tasks.put(key,scope);return grant(scope);
     }

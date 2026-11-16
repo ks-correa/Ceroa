@@ -1,0 +1,295 @@
+[
+  {
+    "requestId": "19bba665-3faf-4661-8e62-757747ea08f3",
+    "route": "COMPOSITE",
+    "totalMs": 11269,
+    "stagesMs": {
+      "financialData": 19,
+      "financialDocuments": 66,
+      "prepare": 3,
+      "backendTools": 211,
+      "documentRetrieval": 41,
+      "n8nRoundTrip": 11260
+    },
+    "springHandlingMs": 220,
+    "cacheHits": 0,
+    "documents": 1,
+    "fragments": 0,
+    "contextCharacters": 14164,
+    "errors": 0,
+    "functionalStatus": "COMPLETE",
+    "multiagent": {
+      "agents": [
+        {
+          "role": "RAG",
+          "status": "OK",
+          "elapsedMs": 1929,
+          "toolCalls": 1,
+          "tools": {
+            "documents.facts": 1
+          },
+          "toolMs": 67,
+          "contextCharacters": 14164,
+          "errorCode": null,
+          "llmCalls": null,
+          "iterations": null,
+          "providerRetries": null
+        },
+        {
+          "role": "FINANCIAL",
+          "status": "OK",
+          "elapsedMs": 2613,
+          "toolCalls": 2,
+          "tools": {
+            "finance.read": 2
+          },
+          "toolMs": 20,
+          "contextCharacters": 13496,
+          "errorCode": null,
+          "llmCalls": null,
+          "iterations": null,
+          "providerRetries": null
+        },
+        {
+          "role": "SUPPORT",
+          "status": "OK",
+          "elapsedMs": 882,
+          "toolCalls": 0,
+          "tools": {},
+          "toolMs": 0,
+          "contextCharacters": 0,
+          "errorCode": null,
+          "llmCalls": null,
+          "iterations": null,
+          "providerRetries": null
+        }
+      ],
+      "reservedIterations": 15,
+      "maxDepth": 1,
+      "deniedDelegations": 0,
+      "delegations": 3,
+      "delegationCacheHits": 0
+    },
+    "workerObservations": [
+      {
+        "executionId": "118",
+        "agentElapsedMs": 9592,
+        "modelCallsLowerBound": 1,
+        "iterations": null,
+        "toolActions": 3
+      }
+    ],
+    "retrievalTraceIds": [
+      "76b7eec9-35ae-4695-af3c-c583ee2d8724"
+    ],
+    "llmCalls": null,
+    "modelDurationMs": null,
+    "measurementNote": "Native agent aggregate is measured; exact provider calls, retries and model-only durations require provider trace data. Null means unobserved, never zero."
+  },
+  {
+    "requestId": "94703d9a-9710-4895-8d46-a12a0cb8adea",
+    "route": "FINANCIAL",
+    "totalMs": 5712,
+    "stagesMs": {
+      "prepare": 2,
+      "backendTools": 85,
+      "financialData": 16,
+      "n8nRoundTrip": 5708
+    },
+    "springHandlingMs": 89,
+    "cacheHits": 0,
+    "documents": 0,
+    "fragments": 0,
+    "contextCharacters": 0,
+    "errors": 0,
+    "functionalStatus": "COMPLETE",
+    "multiagent": {
+      "agents": [
+        {
+          "role": "FINANCIAL",
+          "status": "OK",
+          "elapsedMs": 3216,
+          "toolCalls": 2,
+          "tools": {
+            "finance.read": 2
+          },
+          "toolMs": 18,
+          "contextCharacters": 13396,
+          "errorCode": null,
+          "llmCalls": null,
+          "iterations": null,
+          "providerRetries": null
+        }
+      ],
+      "reservedIterations": 8,
+      "maxDepth": 1,
+      "deniedDelegations": 0,
+      "delegations": 1,
+      "delegationCacheHits": 0
+    },
+    "workerObservations": [
+      {
+        "executionId": "122",
+        "agentElapsedMs": 5448,
+        "modelCallsLowerBound": 1,
+        "iterations": null,
+        "toolActions": 1
+      }
+    ],
+    "retrievalTraceIds": [],
+    "llmCalls": null,
+    "modelDurationMs": null,
+    "measurementNote": "Native agent aggregate is measured; exact provider calls, retries and model-only durations require provider trace data. Null means unobserved, never zero."
+  },
+  {
+    "requestId": "595d5ead-6ab0-4a57-b782-cc9dc8c3a42b",
+    "route": "DOCUMENT_SINGLE",
+    "totalMs": 2,
+    "stagesMs": {},
+    "springHandlingMs": 2,
+    "cacheHits": 0,
+    "documents": 0,
+    "fragments": 0,
+    "contextCharacters": 0,
+    "errors": 0,
+    "functionalStatus": "FAILED",
+    "multiagent": {},
+    "workerObservations": [],
+    "retrievalTraceIds": [],
+    "llmCalls": null,
+    "modelDurationMs": null,
+    "measurementNote": "Native agent aggregate is measured; exact provider calls, retries and model-only durations require provider trace data. Null means unobserved, never zero."
+  },
+  {
+    "requestId": "b596b5e5-7aab-4bd1-a519-6a27b14abd71",
+    "route": "DOCUMENT_SINGLE",
+    "totalMs": 4365,
+    "stagesMs": {
+      "n8nRoundTrip": 4363,
+      "prepare": 2,
+      "backendTools": 68,
+      "financialDocuments": 14,
+      "documentRetrieval": 11
+    },
+    "springHandlingMs": 70,
+    "cacheHits": 0,
+    "documents": 1,
+    "fragments": 0,
+    "contextCharacters": 14175,
+    "errors": 0,
+    "functionalStatus": "COMPLETE",
+    "multiagent": {
+      "agents": [
+        {
+          "role": "RAG",
+          "status": "OK",
+          "elapsedMs": 2251,
+          "toolCalls": 1,
+          "tools": {
+            "documents.facts": 1
+          },
+          "toolMs": 15,
+          "contextCharacters": 14175,
+          "errorCode": null,
+          "llmCalls": null,
+          "iterations": null,
+          "providerRetries": null
+        }
+      ],
+      "reservedIterations": 10,
+      "maxDepth": 1,
+      "deniedDelegations": 0,
+      "delegations": 1,
+      "delegationCacheHits": 0
+    },
+    "workerObservations": [
+      {
+        "executionId": "129",
+        "agentElapsedMs": 4122,
+        "modelCallsLowerBound": 1,
+        "iterations": null,
+        "toolActions": 1
+      }
+    ],
+    "retrievalTraceIds": [
+      "dd8a3f9d-1b13-4a92-ba60-da3ed3592416"
+    ],
+    "llmCalls": null,
+    "modelDurationMs": null,
+    "measurementNote": "Native agent aggregate is measured; exact provider calls, retries and model-only durations require provider trace data. Null means unobserved, never zero."
+  },
+  {
+    "requestId": "ff1395b0-b0c1-41b8-a4aa-65568c15caf6",
+    "route": "COMPOSITE",
+    "totalMs": 7869,
+    "stagesMs": {
+      "financialData": 15,
+      "financialDocuments": 9,
+      "prepare": 1,
+      "backendTools": 150,
+      "documentRetrieval": 6,
+      "n8nRoundTrip": 7866
+    },
+    "springHandlingMs": 153,
+    "cacheHits": 0,
+    "documents": 1,
+    "fragments": 0,
+    "contextCharacters": 14163,
+    "errors": 0,
+    "functionalStatus": "COMPLETE",
+    "multiagent": {
+      "agents": [
+        {
+          "role": "RAG",
+          "status": "OK",
+          "elapsedMs": 1839,
+          "toolCalls": 1,
+          "tools": {
+            "documents.facts": 1
+          },
+          "toolMs": 10,
+          "contextCharacters": 14163,
+          "errorCode": null,
+          "llmCalls": null,
+          "iterations": null,
+          "providerRetries": null
+        },
+        {
+          "role": "FINANCIAL",
+          "status": "OK",
+          "elapsedMs": 3206,
+          "toolCalls": 2,
+          "tools": {
+            "finance.read": 2
+          },
+          "toolMs": 16,
+          "contextCharacters": 13496,
+          "errorCode": null,
+          "llmCalls": null,
+          "iterations": null,
+          "providerRetries": null
+        }
+      ],
+      "reservedIterations": 14,
+      "maxDepth": 1,
+      "deniedDelegations": 0,
+      "delegations": 2,
+      "delegationCacheHits": 0
+    },
+    "workerObservations": [
+      {
+        "executionId": "131",
+        "agentElapsedMs": 7632,
+        "modelCallsLowerBound": 1,
+        "iterations": null,
+        "toolActions": 2
+      }
+    ],
+    "retrievalTraceIds": [
+      "317df7ba-8b89-4d95-b28a-ab847f531fee"
+    ],
+    "llmCalls": null,
+    "modelDurationMs": null,
+    "measurementNote": "Native agent aggregate is measured; exact provider calls, retries and model-only durations require provider trace data. Null means unobserved, never zero."
+  }
+]

@@ -118,6 +118,7 @@ class AssistantIntegrationTest {
         String support=callback.perform(post(base+"/delegations/SUPPORT/begin").header("X-Ceroa-Assistant",KEY).contentType("application/json").content("{\"task\":\"Ayuda\",\"evidenceRefs\":[]}")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
         String denied=JSON.readTree(support).path("scopeToken").asText();
         if(question.contains("support-info")){
+            if(question.contains("disponibilidad"))callback.perform(post(base+"/support/booking").header("X-Ceroa-Assistant",KEY).param("scope",denied).param("operation","propose").param("value","2026-11-16T10:00:00-05:00")).andExpect(status().isForbidden());
             var guide=JSON.readTree(support).path("evidence");String procedure=null;
             for(var entry:(Iterable<Map.Entry<String,com.fasterxml.jackson.databind.JsonNode>>)guide::fields)
                 if(entry.getValue().path("source").asText().endsWith("/advisoryProcedure"))procedure=entry.getKey();
@@ -133,7 +134,7 @@ class AssistantIntegrationTest {
             org.junit.jupiter.api.Assertions.assertNotNull(instruction);String answer="Propuesta pendiente: {{"+instruction+"}}.";
             var result=Map.of("schemaVersion","1.1","role","SUPPORT","status","OK","answer",answer,"evidenceRefs",List.of(instruction),"sources",List.of(),"coverage","COMPLETE","missingData",List.of(),"requiresConfirmation",true);
             callback.perform(post(base+"/delegations/"+denied+"/complete").header("X-Ceroa-Assistant",KEY).contentType("application/json").content(JSON.writeValueAsString(result))).andExpect(status().isOk());
-            callback.perform(post(base+"/complete").header("X-Ceroa-Assistant",KEY).contentType("application/json").content(JSON.writeValueAsString(Map.of("answer",answer,"transcript",question,"mode","documentary","sources",List.of())))).andExpect(status().isOk());return;
+            callback.perform(post(base+"/complete").header("X-Ceroa-Assistant",KEY).contentType("application/json").content(JSON.writeValueAsString(Map.of("answer","Propuesta pendiente de revisión.","transcript",question,"mode","documentary","sources",List.of())))).andExpect(status().isOk());return;
         }
         callback.perform(post(base+"/external/authorize").header("X-Ceroa-Assistant",KEY).param("scope",denied)).andExpect(status().isOk()).andExpect(jsonPath("$.tool").value("ceroa_capabilities"));
         callback.perform(post(base+"/external/result").header("X-Ceroa-Assistant",KEY).param("scope",denied).contentType("application/json").content("{\"content\":[{\"text\":\"{\\\"synthetic\\\":false,\\\"capabilities\\\":[\\\"admin\\\"]}\"}]}")).andExpect(status().isBadRequest());
@@ -175,6 +176,24 @@ class AssistantIntegrationTest {
         for(String question:List.of("Muéstrame mis próximos vencimientos","¿Cuál es mi estrategia activa?","¿Qué estrategia de pago tengo activa?","¿Qué estrategia tengo activa?")){
             lastJob=null;mvc.perform(post("/api/v1/assistant/messages").with(user(owner)).with(csrf()).contentType("application/json").content(JSON.writeValueAsString(Map.of("message",question)))).andExpect(status().isOk());org.junit.jupiter.api.Assertions.assertNull(lastJob);
         }
+    }
+    @Test void mas01DebtListUsesOnlyTheAuthenticatedOwnerWithoutCallingWorkflow() throws Exception {
+        debt(owner,"MAS own obligation",123);
+        var other=new User();other.setFullName("MAS other owner");other.setEmail(UUID.randomUUID()+"@example.invalid");other.setActive(true);other.setPlan(UserPlan.CERO);
+        String otherOwner=users.saveAndFlush(other).getId().toString();debt(otherOwner,"MAS foreign obligation",987654);
+        lastJob=null;
+        mvc.perform(post("/api/v1/assistant/messages").with(user(owner)).with(csrf()).contentType("application/json")
+            .content(JSON.writeValueAsString(Map.of("message","\u00bfQu\u00e9 deudas tengo registradas?"))))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.intent").value("debts"))
+            .andExpect(jsonPath("$.answer").value(org.hamcrest.Matchers.containsString("MAS own obligation")))
+            .andExpect(jsonPath("$.answer").value(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("MAS foreign obligation"))));
+        org.junit.jupiter.api.Assertions.assertNull(lastJob,"MAS-01 must not invoke the workflow");
+    }
+    @Test void availabilityOnlyDoesNotAuthorizeProposalEvenWhenModelAsksForOne()throws Exception {
+        mvc.perform(post("/api/v1/assistant/messages").with(user(owner)).with(csrf()).contentType("application/json")
+            .content(JSON.writeValueAsString(Map.of("message","multiagent support-info consulta disponibilidad para asesoria"))))
+            .andExpect(status().isOk());
+        org.mockito.Mockito.verifyNoInteractions(calendar);
     }
     @Test void advisoryInformationDoesNotRequireCalendar()throws Exception {
         org.mockito.Mockito.when(calendar.available(org.mockito.ArgumentMatchers.any(),org.mockito.ArgumentMatchers.any()))

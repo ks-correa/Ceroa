@@ -1,0 +1,24 @@
+{
+  "checkedAt": "2026-11-15T00:14:17.574Z",
+  "operationalContainersUnchanged": true,
+  "operationalWorkflowsUnchanged": true,
+  "operationalFlywayUnchanged": true,
+  "operationalOutboxUnchanged": true,
+  "demoDatabaseIsLocal": true,
+  "demoRagDatabaseIsLocal": true,
+  "demoStorageIsAdapter": true,
+  "artifacts": [
+    {
+      "path": "tmp/block10-build-results/ceroa-backend-0.1.0-SNAPSHOT.jar",
+      "sha256": "dbc8b235ecc7cb94934c88037729cc903e7dbd66eaf0608f33f7290e3f248b8b"
+    },
+    {
+      "path": "tmp/functional-demo/backend-delivery.jar",
+      "sha256": "8400257b3e5c714361e67560b12f34e83dcb06a081cea750aac599a3d9d9de15"
+    },
+    {
+      "path": "tmp/release-candidate/ceroa-backend-0.1.0-SNAPSHOT-rc1.jar",
+      "sha256": "4c2f954c53399ae5b8f1e050f5ec10aa0c0ce0a2b39187a744105422010c7004"
+    }
+  ]
+}

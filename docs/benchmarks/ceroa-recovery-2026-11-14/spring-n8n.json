@@ -1,0 +1,93 @@
+{
+  "tests": 2,
+  "passed": 2,
+  "environment": "Spring/H2 + n8n native 2.40.7 + simulated LLM, internal Docker network",
+  "browser": false,
+  "executions": [
+    {
+      "id": 1,
+      "workflowId": "ceroaHybridQuery20",
+      "status": "running",
+      "startedAt": "2026-11-14 19:07:53.640",
+      "stoppedAt": null
+    },
+    {
+      "id": 2,
+      "workflowId": "ceroaFinancialAgent30",
+      "status": "running",
+      "startedAt": "2026-11-14 19:07:54.841",
+      "stoppedAt": null
+    },
+    {
+      "id": 3,
+      "workflowId": "ceroaHybridQuery20",
+      "status": "running",
+      "startedAt": "2026-11-14 19:07:55.649",
+      "stoppedAt": null
+    }
+  ],
+  "providerTrace": [
+    {
+      "model": "fixture-root",
+      "scenario": "FINANCIAL",
+      "tools": [
+        "Delegar_a_LUMEN",
+        "Delegar_a_ORACLE",
+        "Delegar_a_ATLAS",
+        "format_final_json_response"
+      ],
+      "results": 0
+    },
+    {
+      "model": "ceroaFinancialAgent30",
+      "scenario": "FINANCIAL",
+      "tools": [
+        "Proponer_correo_autorizado",
+        "Consultar_sobrecapacidad",
+        "Simular_escenario_hipot_tico",
+        "Consultar_documentos_financieros",
+        "Calcular_con_evidencia",
+        "Consultar_datos_financieros",
+        "format_final_json_response"
+      ],
+      "results": 0
+    },
+    {
+      "model": "ceroaFinancialAgent30",
+      "scenario": "FINANCIAL",
+      "tools": [
+        "Proponer_correo_autorizado",
+        "Consultar_sobrecapacidad",
+        "Simular_escenario_hipot_tico",
+        "Consultar_documentos_financieros",
+        "Calcular_con_evidencia",
+        "Consultar_datos_financieros",
+        "format_final_json_response"
+      ],
+      "results": 1
+    },
+    {
+      "model": "fixture-root",
+      "scenario": "FINANCIAL",
+      "tools": [
+        "Delegar_a_LUMEN",
+        "Delegar_a_ORACLE",
+        "Delegar_a_ATLAS",
+        "format_final_json_response"
+      ],
+      "results": 1
+    },
+    {
+      "model": "fixture-root",
+      "scenario": "UNKNOWN",
+      "tools": [
+        "Delegar_a_LUMEN",
+        "Delegar_a_ORACLE",
+        "Delegar_a_ATLAS",
+        "format_final_json_response"
+      ],
+      "results": 0
+    }
+  ],
+  "productionMutations": false
+}

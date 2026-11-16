@@ -1,0 +1,121 @@
+{
+  "suite": "com.ceroa.config.AssistantIntegrationTest",
+  "total": 22,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "cases": [
+    {
+      "name": "highestInterestComparesEquivalentRatesInsteadOfBalances",
+      "seconds": 2.212,
+      "status": "PASS"
+    },
+    {
+      "name": "mas01DebtListUsesOnlyTheAuthenticatedOwnerWithoutCallingWorkflow",
+      "seconds": 0.161,
+      "status": "PASS"
+    },
+    {
+      "name": "unverifiedModelReplyIsNeverReturnedAsFinancialTruth",
+      "seconds": 0.021,
+      "status": "PASS"
+    },
+    {
+      "name": "completionCredentialIsNotAWebSessionAndCannotWriteFinances",
+      "seconds": 0.022,
+      "status": "PASS"
+    },
+    {
+      "name": "toolCredentialCannotBypassWebSessionOrCsrf",
+      "seconds": 0.029,
+      "status": "PASS"
+    },
+    {
+      "name": "simpleUpcomingAndStrategyAvoidTheWebhook",
+      "seconds": 0.032,
+      "status": "PASS"
+    },
+    {
+      "name": "analysisUsesOnlySessionEvidenceAndBackendArithmetic",
+      "seconds": 0.18,
+      "status": "PASS"
+    },
+    {
+      "name": "preparedAudioUsesTheSameEvidenceAndCorrectionContractAsText",
+      "seconds": 0.068,
+      "status": "PASS"
+    },
+    {
+      "name": "advisoryInformationDoesNotRequireCalendar",
+      "seconds": 0.186,
+      "status": "PASS"
+    },
+    {
+      "name": "writesAndUnknownIntentsNeverExecuteMutations",
+      "seconds": 0.024,
+      "status": "PASS"
+    },
+    {
+      "name": "telegramAnalysisUsesLinkedAccountAndDeliveryIsRevokedAfterUnlink",
+      "seconds": 0.221,
+      "status": "PASS"
+    },
+    {
+      "name": "invalidDraftCanBeCorrectedWithoutReissuingFinancialReads",
+      "seconds": 0.079,
+      "status": "PASS"
+    },
+    {
+      "name": "followupKeepsTheRequestedYearWithoutTreatingOldAnswersAsFreshEvidence",
+      "seconds": 0.064,
+      "status": "PASS"
+    },
+    {
+      "name": "invalidAudioIsRejectedBeforeCallingWorkflow",
+      "seconds": 0.01,
+      "status": "PASS"
+    },
+    {
+      "name": "assistantProposalRequiresUserConfirmationBeforeSyntheticCalendarCreation",
+      "seconds": 0.156,
+      "status": "PASS"
+    },
+    {
+      "name": "financeCannotActivateSupportFallbackAndFailedParserCannotProduceAnAcceptedBalance",
+      "seconds": 0.037,
+      "status": "PASS"
+    },
+    {
+      "name": "hypotheticalAmountsRemainClearlyMarkedUserInputs",
+      "seconds": 0.019,
+      "status": "PASS"
+    },
+    {
+      "name": "analysisRejectsInventedAmountsAndFabricatedEvidence",
+      "seconds": 0.049,
+      "status": "PASS"
+    },
+    {
+      "name": "multiagentScopesPreserveAccountEvidenceAndRejectEscalation",
+      "seconds": 0.082,
+      "status": "PASS"
+    },
+    {
+      "name": "requestIsBoundToItsSessionOwnerAndExpiresAfterCompletion",
+      "seconds": 0.037,
+      "status": "PASS"
+    },
+    {
+      "name": "disabledAccountAndArbitraryToolsAreRejected",
+      "seconds": 0.013,
+      "status": "PASS"
+    },
+    {
+      "name": "requestsAreLimitedPerAccount",
+      "seconds": 0.03,
+      "status": "PASS"
+    }
+  ],
+  "newScenario": "MAS-01",
+  "initialAttempt": "Invalid fixture encoding; corrected without product code changes"
+}
