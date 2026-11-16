@@ -34,12 +34,14 @@ export async function prepareCorpus(root, manifest) {
     const text = bytes.toString('utf8').replace(/\r\n/g, '\n').trim();
     if (!text) throw new Error('Approved document is empty.');
     // Size and overlap are preparation defaults, to calibrate with the chosen tokenizer/model.
+    // Preserve approved document identity and published chunk IDs across a file move.
+    const sourceId=source.sourceId??source.path;
     for (let start = 0, index = 0; start < text.length; start += 1000, index++) {
       const content = text.slice(start, start + 1200);
       output.push({ pageContent: content, metadata: {
-        approved: true, source: source.path, title: source.title, version: source.version,
+        approved: true, source: sourceId, title: source.title, version: source.version,
         sourceHash: source.sha256, chunkIndex: index,
-        chunkId: hash(`${source.path}\n${source.sha256}\n${index}`),
+        chunkId: hash(`${sourceId}\n${source.sha256}\n${index}`),
       } });
       if (start + 1200 >= text.length) break;
     }

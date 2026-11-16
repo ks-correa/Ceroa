@@ -92,7 +92,7 @@ export function buildMultiagent(original){
  return identifyCeroa(extendWorkspaceAgents([w,...children]));
 }
 if(process.argv[1]===fileURLToPath(import.meta.url)){
- const input=JSON.parse(fs.readFileSync(process.argv[2]??new URL('./hybrid-rag-query.json',import.meta.url),'utf8'));
+ const input=JSON.parse(fs.readFileSync(process.argv[2]??new URL('./testing/fixtures/hybrid-rag-query.json',import.meta.url),'utf8'));
  const original=Array.isArray(input)?input.find(w=>w.id==='ceroaHybridQuery20'):input;
  const output=process.argv[3]??'tmp/multiagent';fs.mkdirSync(output,{recursive:true});
  for(const w of buildMultiagent(original))fs.writeFileSync(path.join(output,w.id+'.json'),JSON.stringify({id:w.id,name:w.name,active:false,nodes:w.nodes,connections:w.connections,settings:w.settings},null,2)+'\n');

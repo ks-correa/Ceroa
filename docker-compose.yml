@@ -1,85 +1,140 @@
 services:
   backend:
-    build:
-      context: ./backend
-      dockerfile: Dockerfile
-    container_name: ceroa-backend
+    build: ./backend
     restart: unless-stopped
-    env_file:
-      - .env
+    env_file: ${CEROA_ENV_FILE_PATH:-.env}
     environment:
-      SPRING_PROFILES_ACTIVE: supabase
-      DB_URL: ${DB_URL:?Completa DB_URL de Supabase en .env}
-      DB_USERNAME: ${DB_USERNAME:?Completa DB_USERNAME de Supabase en .env}
-      DB_PASSWORD: ${DB_PASSWORD:?Completa DB_PASSWORD de Supabase en .env}
+      SPRING_PROFILES_ACTIVE: ${SPRING_PROFILES_ACTIVE:-supabase}
+      DB_URL: ${DB_URL:?Completa DB_URL en .env}
+      DB_USERNAME: ${DB_USERNAME:?Completa DB_USERNAME en .env}
+      DB_PASSWORD: ${DB_PASSWORD:?Completa DB_PASSWORD en .env}
       DB_SCHEMA: ${DB_SCHEMA:-ceroa}
       SERVER_PORT: 8080
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:3000}
-      SESSION_DAYS: ${SESSION_DAYS:-30}
-      SESSION_SECURE_COOKIE: ${SESSION_SECURE_COOKIE:-false}
-      MAIL_HOST: ${MAIL_HOST:-}
-      MAIL_PORT: ${MAIL_PORT:-587}
-      MAIL_USERNAME: ${MAIL_USERNAME:-}
-      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
-      MAIL_FROM: ${MAIL_FROM:-}
       CEROA_TELEGRAM_BOT_USERNAME: ${TELEGRAM_BOT_USERNAME:-}
-      WORKSPACE_WORKER_KEY: ${WORKSPACE_WORKER_KEY:-}
-      WORKSPACE_GMAIL_ENABLED: ${WORKSPACE_GMAIL_ENABLED:-false}
-      WORKSPACE_SHEETS_ENABLED: ${WORKSPACE_SHEETS_ENABLED:-false}
-      WORKSPACE_CALENDAR_ENABLED: ${WORKSPACE_CALENDAR_ENABLED:-false}
-      WORKSPACE_CALENDAR_URL: ${WORKSPACE_CALENDAR_URL:-}
-      WORKSPACE_DRAFT_URL: ${WORKSPACE_DRAFT_URL:-}
-    ports:
-      - "${SERVER_PORT:-8080}:8080"
-
+      WORKSPACE_DRAFT_URL: ${WORKSPACE_DRAFT_URL:-http://n8n:5678/webhook/ceroa-google-draft}
+      WORKSPACE_CALENDAR_URL: ${WORKSPACE_CALENDAR_URL:-http://n8n:5678/webhook/ceroa-google-calendar}
+      WORKSPACE_SHEETS_ENABLED: 'false'
+    ports: ["127.0.0.1:${SERVER_PORT:-8080}:8080"]
+    healthcheck:
+      test: [CMD, java, -cp, /health, Healthcheck, "http://127.0.0.1:8080/api/v1/auth/csrf"]
+      interval: 15s
+      timeout: 8s
+      retries: 12
+      start_period: 90s
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    container_name: ceroa-frontend
+    build: ./frontend
     restart: unless-stopped
     depends_on:
-      - backend
+      backend: {condition: service_healthy}
     environment:
       VITE_API_URL: ${VITE_API_URL:-http://localhost:8080/api/v1}
-    ports:
-      - "3000:3000"
-
+      VITE_MAIL_DRAFTS_ENABLED: ${VITE_MAIL_DRAFTS_ENABLED:-true}
+    ports: ["127.0.0.1:${FRONTEND_PORT:-3000}:3000"]
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://127.0.0.1:3000').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 10
   n8n:
-    image: docker.n8n.io/n8nio/n8n@sha256:ffeb52485f78b1b06c9a832205853cf75da72a07a514c9a27724df85979d6c34
-    container_name: ceroa-n8n
+    image: &n8n-image docker.n8n.io/n8nio/n8n@sha256:ffeb52485f78b1b06c9a832205853cf75da72a07a514c9a27724df85979d6c34
     restart: unless-stopped
-    entrypoint: ["tini", "--", "/bin/sh", "/opt/ceroa-workflows/start-n8n.sh"]
-    depends_on:
-      backend:
-        condition: service_started
-    ports:
-      - "127.0.0.1:5678:5678"
+    entrypoint: [tini, --, /bin/sh, /opt/ceroa-workflows/start-n8n.sh]
+    ports: ["127.0.0.1:${N8N_PORT:-5678}:5678"]
     environment:
-      N8N_HOST: localhost
+      N8N_HOST: ${N8N_HOST:-localhost}
       N8N_PORT: 5678
-      N8N_PROTOCOL: http
-      N8N_EDITOR_BASE_URL: http://localhost:5678/
-      N8N_WEBHOOK_URL: http://localhost:5678/
-      N8N_SECURE_COOKIE: "false"
+      N8N_PROTOCOL: ${N8N_PROTOCOL:-http}
+      N8N_EDITOR_BASE_URL: ${N8N_EDITOR_BASE_URL:-http://localhost:5678/}
+      N8N_WEBHOOK_URL: ${N8N_WEBHOOK_URL:-http://localhost:5678/}
+      N8N_SECURE_COOKIE: ${N8N_SECURE_COOKIE:-false}
       GENERIC_TIMEZONE: America/Bogota
       TZ: America/Bogota
-      N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: "true"
-      N8N_DIAGNOSTICS_ENABLED: "false"
-      N8N_PERSONALIZATION_ENABLED: "false"
+      N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: 'true'
+      N8N_DIAGNOSTICS_ENABLED: 'false'
+      N8N_PERSONALIZATION_ENABLED: 'false'
       EXECUTIONS_DATA_SAVE_ON_SUCCESS: none
       EXECUTIONS_DATA_SAVE_ON_ERROR: none
-      EXECUTIONS_DATA_SAVE_MANUAL_EXECUTIONS: "false"
-      EXECUTIONS_DATA_PRUNE: "true"
+      EXECUTIONS_DATA_SAVE_MANUAL_EXECUTIONS: 'false'
+      EXECUTIONS_DATA_PRUNE: 'true'
+      ASSISTANT_WORKER_KEY: ${ASSISTANT_WORKER_KEY:-}
+      DOCUMENTS_WORKER_KEY: ${DOCUMENTS_WORKER_KEY:-}
+      RAG_WORKER_KEY: ${RAG_WORKER_KEY:-}
+      DOCUMENT_LIBRARY_WORKER_KEY: ${DOCUMENT_LIBRARY_WORKER_KEY:-}
+      DOCUMENT_LIBRARY_OCR_KEY: ${DOCUMENT_LIBRARY_OCR_KEY:-}
+      REMINDERS_WORKER_KEY: ${REMINDERS_WORKER_KEY:-}
+      SENTINEL_WORKER_KEY: ${SENTINEL_WORKER_KEY:-}
+      WORKSPACE_WORKER_KEY: ${WORKSPACE_WORKER_KEY:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      N8N_SUPABASE_GATEWAY_URL: ${N8N_SUPABASE_GATEWAY_URL:-}
+      N8N_SUPABASE_GATEWAY_KEY: ${N8N_SUPABASE_GATEWAY_KEY:-}
+      SUPPORT_CALENDAR_ID: ${SUPPORT_CALENDAR_ID:-}
+      WORKSPACE_DRIVE_FOLDER_ID: ${WORKSPACE_DRIVE_FOLDER_ID:-}
+      WORKSPACE_SHEETS_DOCUMENT_ID: ${WORKSPACE_SHEETS_DOCUMENT_ID:-}
+      WORKSPACE_SHEETS_TAB: ${WORKSPACE_SHEETS_TAB:-}
+      WORKSPACE_PROVIDER_ENABLED: ${WORKSPACE_PROVIDER_ENABLED:-false}
+      MCP_EXTERNAL_URL: ${MCP_EXTERNAL_URL:-}
     volumes:
       - ceroa_n8n_data:/home/node/.n8n
       - ./integrations/n8n:/opt/ceroa-workflows:ro
     healthcheck:
-      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:5678/healthz/readiness').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      test: [CMD, node, -e, "fetch('http://127.0.0.1:5678/healthz/readiness').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 15s
+      timeout: 5s
+      retries: 16
+      start_period: 180s
+  workspace-provider:
+    profiles: [google]
+    image: *n8n-image
+    user: root
+    restart: unless-stopped
+    entrypoint: [node, /scripts/workspace-provider.mjs]
+    depends_on:
+      n8n: {condition: service_healthy}
+    environment:
+      GOOGLE_PROVIDER_FROM_N8N: 'true'
+      WORKSPACE_PROVIDER_DB: /data/provider.sqlite
+      SUPPORT_CALENDAR_ID: ${SUPPORT_CALENDAR_ID:-}
+    volumes:
+      - ./integrations/n8n:/scripts:ro
+      - ceroa_n8n_data:/home/node/.n8n:ro
+      - workspace-provider:/data
+    healthcheck:
+      test: [CMD, node, -e, "fetch('http://127.0.0.1:3100').then(r=>process.exit(r.status===401?0:1)).catch(()=>process.exit(1))"]
       interval: 15s
       timeout: 5s
       retries: 10
-      start_period: 90s
-
+  telegram-proxy:
+    profiles: [telegram]
+    image: node:22-alpine@sha256:0a7108bf6c7bf5de370ffb1a3ed6be93d405b43ff159f681a8d18c0e2bc2e402
+    restart: unless-stopped
+    command: [node, /app/telegram-proxy.mjs]
+    environment:
+      TELEGRAM_WEBHOOK_PATH: ${TELEGRAM_WEBHOOK_PATH:-}
+      TELEGRAM_WEBHOOK_SECRET: ${TELEGRAM_WEBHOOK_SECRET:-}
+    volumes: [./integrations/n8n/telegram-proxy.mjs:/app/telegram-proxy.mjs:ro]
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+  telegram-tunnel:
+    profiles: [telegram]
+    image: cloudflare/cloudflared@sha256:072c067d25ccbe61d46e18f0d0723255f2bb5304f7317caa95b27031520ff92c
+    restart: unless-stopped
+    command: [tunnel, --no-autoupdate, --protocol, http2, --url, "http://telegram-proxy:8080"]
+    depends_on: [telegram-proxy]
+  test-db:
+    profiles: [test]
+    image: pgvector/pgvector:pg17
+    environment:
+      POSTGRES_DB: ${TEST_DB_NAME:-ceroa_test}
+      POSTGRES_USER: ${TEST_DB_USER:-ceroa_test}
+      POSTGRES_PASSWORD: ${TEST_DB_PASSWORD:-synthetic-local-test-only}
+    volumes: [test-db:/var/lib/postgresql/data]
+    healthcheck:
+      test: [CMD-SHELL, 'pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB']
+      interval: 3s
+      retries: 20
 volumes:
   ceroa_n8n_data:
+  workspace-provider:
+  test-db:

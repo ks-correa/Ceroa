@@ -1,20 +1,22 @@
 // Run inside n8n. Only approved-product questions and unrelated synthetic negatives.
 const fs=require('fs');const root='/usr/local/lib/node_modules/n8n/node_modules/.pnpm/';
+const sources=JSON.parse(fs.readFileSync(__dirname+'/sources.json','utf8')).sources;
+const source=name=>{const s=sources.find(s=>s.path.endsWith('/'+name));if(!s?.approved)throw Error('Approved source required');return s.sourceId??s.path;};
 const sqlite=require(root+fs.readdirSync(root).find(x=>x.startsWith('sqlite3@'))+'/node_modules/sqlite3');
-const db=new sqlite.Database('/home/node/.n8n/database.sqlite');
-db.get('SELECT data FROM credentials_entity WHERE id=?',['ceroaRagGemini03'],async(e,row)=>{
+const db=new sqlite.Database('/home/node/.n8n/database.sqlite',sqlite.OPEN_READONLY);
+db.all('SELECT data FROM credentials_entity WHERE name=? AND type=?',['Ceroa RAG Gemini Embeddings','httpHeaderAuth'],async(e,rows)=>{
   db.close();try{
-    if(e||!row)throw Error();const dir='/usr/local/lib/node_modules/n8n/node_modules/n8n-core/dist/encryption/';
+    if(e||rows?.length!==1)throw Error();const row=rows[0];const dir='/usr/local/lib/node_modules/n8n/node_modules/n8n-core/dist/encryption/';
     const {Cipher}=require(dir+'cipher'),{CipherAes256CBC}=require(dir+'aes-256-cbc'),{CipherAes256GCM}=require(dir+'aes-256-gcm');
     const cipher=new Cipher(JSON.parse(fs.readFileSync('/home/node/.n8n/config','utf8')),new CipherAes256GCM(),new CipherAes256CBC(),null);
     const decoded=cipher.decrypt(row.data);const credential=typeof decoded==='string'?JSON.parse(decoded):decoded;
     const cases=[
-      ['¿Qué es la estrategia Bola de Nieve en Ceroa?',true,'docs/knowledge/estrategias.md'],
-      ['¿Qué es Avalancha y cómo prioriza las deudas?',true,'docs/knowledge/estrategias.md'],
-      ['¿Una tasa mensual se compara directamente con una anual?',true,'docs/knowledge/estrategias.md'],
-      ['¿Cuáles formatos puedo subir para leer un documento financiero?',true,'docs/knowledge/registro-y-consultas.md'],
-      ['¿La lectura de un documento guarda la deuda automáticamente?',true,'docs/knowledge/registro-y-consultas.md'],
-      ['¿El próximo vencimiento demuestra un día de pago fijo cada mes?',true,'docs/knowledge/registro-y-consultas.md'],
+      ['¿Qué es la estrategia Bola de Nieve en Ceroa?',true,source('estrategias.md')],
+      ['¿Qué es Avalancha y cómo prioriza las deudas?',true,source('estrategias.md')],
+      ['¿Una tasa mensual se compara directamente con una anual?',true,source('estrategias.md')],
+      ['¿Cuáles formatos puedo subir para leer un documento financiero?',true,source('registro-y-consultas.md')],
+      ['¿La lectura de un documento guarda la deuda automáticamente?',true,source('registro-y-consultas.md')],
+      ['¿El próximo vencimiento demuestra un día de pago fijo cada mes?',true,source('registro-y-consultas.md')],
       ['¿Qué tiempo hará mañana en Bogotá?',false,''],
       ['Dame una receta para hacer pan de chocolate.',false,''],
       ['¿Quién ganó el campeonato mundial de fútbol?',false,''],

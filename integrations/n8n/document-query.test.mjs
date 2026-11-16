@@ -1,6 +1,6 @@
 import test from 'node:test';import assert from 'node:assert/strict';import {readFile} from 'node:fs/promises';
 import {extendDocumentQuery} from './extend-document-query.mjs';
-const workflow=()=>readFile(new URL('hybrid-rag-query.json',import.meta.url),'utf8').then(JSON.parse);
+const workflow=()=>readFile(new URL('testing/fixtures/hybrid-rag-query.json',import.meta.url),'utf8').then(JSON.parse);
 test('iteration budget is server-bound and clamped; telemetry contains no model content',async()=>{
  const w=await workflow(),agent=w.nodes.find(n=>n.name==='Analizar finanzas');
  const evaluate=(expression,$)=>new Function('$',`return (${expression.slice(3,-2)});`)($);

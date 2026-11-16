@@ -9,4 +9,4 @@ export function applyRuntimeProfile(workflow,profile) {
  if(p.connections)w.connections=structuredClone(p.connections);
  return w;
 }
-export const readRuntimeProfile=()=>JSON.parse(fs.readFileSync(new URL('./block8-runtime-profile.json',import.meta.url),'utf8'));
+export const readRuntimeProfile=()=>JSON.parse(fs.readFileSync(new URL('./testing/fixtures/block8-runtime-profile.json',import.meta.url),'utf8'));

@@ -1,6 +1,6 @@
 import {readFile,writeFile} from 'node:fs/promises';
 const [output]=process.argv.slice(2);if(!output)throw Error('Output path required');
-const w=JSON.parse(await readFile(new URL('hybrid-rag-query.json',import.meta.url),'utf8'));
+const w=JSON.parse(await readFile(new URL('testing/fixtures/hybrid-rag-query.json',import.meta.url),'utf8'));
 w.id='ceroaQueryFixture23';w.name='TEST ONLY - Query telemetry failure';
 const set=(name,json)=>{const n=w.nodes.find(n=>n.name===name);n.type='n8n-nodes-base.set';n.typeVersion=3.4;n.parameters={mode:'raw',jsonOutput:JSON.stringify(json),options:{}};delete n.credentials;delete n.webhookId;};
 set('Recibir consulta',{body:{requestId:'00000000-0000-4000-8000-000000000001',message:'Consulta sintética',year:2026,month:8,executionBudget:{maxIterations:4}}});

@@ -1,27 +1,34 @@
-import fs from 'node:fs';import path from 'node:path';import os from 'node:os';import crypto from 'node:crypto';import {spawnSync} from 'node:child_process';import {fileURLToPath} from 'node:url';
-const args=process.argv.slice(2),option=name=>{const i=args.indexOf(name);return i>=0?args[i+1]:undefined;};
-const archive=option('--archive'),key=option('--key'),destination=option('--destination'),project=option('--project')??'ceroa';
-if(!archive||!key||!destination||!project.match(/^[a-z][a-z0-9_-]{1,40}$/))throw Error('Required: --archive FILE --key FILE --destination EMPTY_DIRECTORY [--project ceroa] [--offline-test]');
-const here=path.dirname(fileURLToPath(import.meta.url)),target=path.resolve(destination),stage=fs.mkdtempSync(path.join(os.tmpdir(),'ceroa-restore-'));
-const offline=args.includes('--offline-test'),volume=offline?'ceroa-restore-test-'+crypto.randomBytes(6).toString('hex'):project+'_ceroa_n8n_data';let created=false;
-const run=(cmd,argv,extra={})=>{const r=spawnSync(cmd,argv,{encoding:'utf8',maxBuffer:16*1024*1024,...extra});if(r.status!==0)throw Error('Command failed: '+cmd+' '+argv[0]);return r.stdout;};
-const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
-function safeArchive(file,gzip){const entries=run('tar',[gzip?'-tzf':'-tf',file]).split(/\r?\n/).filter(Boolean);for(const entry of entries){const normalized=entry.replaceAll('\\','/');if(normalized.startsWith('/')||/^[A-Za-z]:/.test(normalized)||normalized.split('/').includes('..'))throw Error('Unsafe archive path');}}
+import fs from 'node:fs';import path from 'node:path';import crypto from 'node:crypto';import {repo,args,option,run,hash,outside,stage,cleanup,safeTar} from './transfer.mjs';
+const archive=option('--archive'),key=option('--key'),project=option('--project')??'ceroa',offline=args.includes('--offline-test');
+if(!archive||!key||!/^[a-z][a-z0-9_-]{1,40}$/.test(project))throw Error('Usage: node integrations/migration/restore-ceroa.mjs --archive FILE --key FILE [--project ceroa] --offline-test|--confirm-source-stopped');
+if(!offline&&!args.includes('--confirm-source-stopped'))throw Error('Confirm desktop consumers are stopped before restoration');
+const temp=stage(),prefix=offline?'ceroa-transfer-test-'+crypto.randomBytes(5).toString('hex'):project;const created=[];
 try{
- if(fs.existsSync(target)&&fs.readdirSync(target).length)throw Error('Destination must be empty; no existing project overwritten');fs.mkdirSync(target,{recursive:true});
- const metadata=JSON.parse(fs.readFileSync(path.join(path.dirname(path.resolve(archive)),'manifest.json'),'utf8'));if(metadata.format!=='CEROA_MIGRATION_V1'||hash(archive)!==metadata.archiveSha256||!/^docker\.n8n\.io\/n8nio\/n8n@sha256:[a-f0-9]{64}$/.test(metadata.n8nImage))throw Error('Invalid migration manifest');
- const cryptoScript=fs.existsSync(path.join(here,'backup-crypto.mjs'))?path.join(here,'backup-crypto.mjs'):path.resolve(here,'../n8n/backup-crypto.mjs');
- run(process.execPath,[cryptoScript,'decrypt',path.resolve(archive),path.join(stage,'bundle.tar.gz'),path.resolve(key)]);safeArchive(path.join(stage,'bundle.tar.gz'),true);run('tar',['-xzf',path.join(stage,'bundle.tar.gz'),'-C',stage]);
- const inner=JSON.parse(fs.readFileSync(path.join(stage,'manifest.json'),'utf8'));for(const field of ['id','gitCommit','n8nImage','sourceArchiveSha256','n8nVolumeSha256'])if(inner[field]!==metadata[field])throw Error('Manifest mismatch');if(hash(path.join(stage,'project.tar'))!==inner.sourceArchiveSha256||hash(path.join(stage,'n8n-volume.tar.gz'))!==inner.n8nVolumeSha256)throw Error('Archive checksum mismatch');
- safeArchive(path.join(stage,'project.tar'),false);run('tar',['-xf',path.join(stage,'project.tar'),'-C',target]);
- for(const file of inner.privateFiles){if(!/^\.env(?:\.[a-z0-9-]+)?$/.test(file))throw Error('Unexpected private config path');fs.copyFileSync(path.join(stage,'private',file),path.join(target,file));}
- for(const file of fs.readdirSync(path.join(stage,'private/backup-keys'))){if(path.basename(file)!==file||!file.endsWith('.key'))throw Error('Unexpected backup key path');fs.mkdirSync(path.join(target,'backups/n8n'),{recursive:true});fs.copyFileSync(path.join(stage,'private/backup-keys',file),path.join(target,'backups/n8n',file));}
- const existing=spawnSync('docker',['volume','inspect',volume],{encoding:'utf8'});if(existing.status===0)throw Error('Target Docker volume already exists; refusing overwrite');
- run('docker',['volume','create',volume]);created=true;run('docker',['run','--rm','--network','none','--user','0:0','--entrypoint','/bin/sh','-v',volume+':/data','-v',stage+':/backup:ro',inner.n8nImage,'-c','tar -xzf /backup/n8n-volume.tar.gz -C /data']);
- const check=run('docker',['run','--rm','--network','none','--entrypoint','node','-v',volume+':/home/node/.n8n:ro','-v',path.join(target,'integrations/migration')+':/verification:ro',inner.n8nImage,'/verification/verify-n8n-snapshot.cjs']);const verification=JSON.parse(check);if(verification.status!=='VERIFIED_OFFLINE')throw Error('Restored credential decryption failed');
- fs.writeFileSync(path.join(target,'RESTORE-VERIFICATION.json'),JSON.stringify({restoredAt:new Date().toISOString(),sourceCommit:inner.gitCommit,volume,offlineTest:offline,...verification},null,2));
- console.log(JSON.stringify({status:'RESTORED_AND_DECRYPTION_VERIFIED',destination:target,volume,offlineTest:offline,credentials:verification.credentials.length,counts:verification.counts,servicesStarted:false}));
-}finally{
- if(offline&&created)run('docker',['volume','rm',volume]);
- const resolved=path.resolve(stage);if(path.dirname(resolved)!==path.resolve(os.tmpdir())||!path.basename(resolved).startsWith('ceroa-restore-'))throw Error('Unsafe temporary cleanup target');fs.rmSync(resolved,{recursive:true,force:true});
-}
+ run(process.execPath,[path.join(repo,'integrations/n8n/backup-crypto.mjs'),'decrypt',outside(archive),path.join(temp,'transfer.tar.gz'),outside(key)]);safeTar(path.join(temp,'transfer.tar.gz'));run('tar',['-xzf',path.join(temp,'transfer.tar.gz'),'-C',temp]);
+ const m=JSON.parse(fs.readFileSync(path.join(temp,'manifest.json')));if(m.format!=='CEROA_TRANSFER_V2'||!/^docker\.n8n\.io\/n8nio\/n8n@sha256:[a-f0-9]{64}$/.test(m.image)||hash(path.join(temp,'config'))!==m.files.config||hash(path.join(temp,'.env'))!==m.files.env)throw Error('Invalid transfer');
+ if(run('git',['rev-parse','HEAD']).trim()!==m.gitCommit)throw Error('Checkout package sourceCommit before restoring');
+ if(m.ledger&&hash(path.join(temp,'bootstrap.json'))!==m.files.ledger)throw Error('Version ledger mismatch');
+ if(!offline&&!m.handoff)throw Error('Export with --handoff to stop source consumers first');
+ if(!offline&&fs.existsSync(path.join(repo,'.env')))throw Error('Existing .env preserved; move it privately before restore');
+ for(const file of m.privateFiles??[]){if(file!=='.env.rag-admin'||hash(path.join(temp,file))!==m.files.private?.[file])throw Error('Private configuration mismatch');if(!offline&&fs.existsSync(path.join(repo,file)))throw Error('Existing private configuration preserved');}
+ const volume=prefix+'_ceroa_n8n_data',provider=prefix+'_workspace-provider';
+ for(const name of [volume,...(m.provider?[provider]:[])]){if(spawnInspect(name))throw Error('Destination volume exists; refusing overwrite');run('docker',['volume','create',name]);created.push(name);}
+ const helper=command=>run('docker',['run','--rm','--network','none','--user','0:0','-e','N8N_USER_FOLDER=/home/node','--entrypoint','/bin/sh','-v',volume+':/home/node/.n8n','-v',temp+':/transfer','-v',path.join(repo,'integrations/n8n')+':/scripts:ro',m.image,'-c',command]);
+ helper('cp /transfer/config /home/node/.n8n/config && chown -R node:node /home/node/.n8n && n8n import:entities --inputDir=/transfer/entities --truncateTables');
+ if(m.ledger)helper('cp /transfer/bootstrap.json /home/node/.n8n/ceroa-bootstrap.json && chown node:node /home/node/.n8n/ceroa-bootstrap.json');
+ // Never activate copied external consumers on the destination. Backend remains stopped.
+ const manifest=JSON.parse(fs.readFileSync(path.join(repo,'integrations/n8n/workflows.manifest.json')));for(const e of manifest.workflows.filter(x=>x.externalEffects||x.disabled))helper('n8n unpublish:workflow --id='+e.id);
+ if(m.provider){if(hash(path.join(temp,'provider.tar.gz'))!==m.files.provider)throw Error('Provider state mismatch');safeTar(path.join(temp,'provider.tar.gz'));run('docker',['run','--rm','--network','none','--user','0:0','--entrypoint','/bin/sh','-v',provider+':/data','-v',temp+':/transfer:ro',m.image,'-c','tar -xzf /transfer/provider.tar.gz -C /data']);
+  const durable=JSON.parse(run('docker',['run','--rm','--network','none','--entrypoint','node','-v',provider+':/data:ro','-v',path.join(repo,'integrations/migration')+':/verification:ro',m.image,'/verification/verify-provider-snapshot.cjs']));if(!m.durable||durable.sha256!==m.durable.sha256||durable.receipts!==m.durable.receipts)throw Error('Durable journal recovery mismatch');
+ }
+ const raw=run('docker',['run','--rm','--network','none','--entrypoint','node','-v',volume+':/home/node/.n8n:ro','-v',path.join(repo,'integrations/migration')+':/verification:ro',m.image,'/verification/verify-n8n-snapshot.cjs']);const verification=JSON.parse(raw);if(verification.status!=='VERIFIED_OFFLINE')throw Error('Credential recovery failed');
+ if(!offline){
+  if(fs.existsSync(path.join(repo,'.env')))throw Error('Existing .env preserved; move it privately before restore');
+  let env=fs.readFileSync(path.join(temp,'.env'),'utf8');const safe={COMPOSE_PROJECT_NAME:project,REMINDERS_ENABLED:'false',WORKSPACE_GMAIL_ENABLED:'false',WORKSPACE_SHEETS_ENABLED:'false',WORKSPACE_CALENDAR_ENABLED:'false',CEROA_RECOVERY_DELIVERY_ENABLED:'false'};
+  for(const [key,value] of Object.entries(safe)){const pattern=new RegExp('^'+key+'=.*$','m');env=pattern.test(env)?env.replace(pattern,key+'='+value):env+'\n'+key+'='+value;}
+  fs.writeFileSync(path.join(repo,'.env'),env+'\n',{flag:'wx',mode:0o600});
+  for(const file of m.privateFiles??[])fs.copyFileSync(path.join(temp,file),path.join(repo,file),fs.constants.COPYFILE_EXCL);
+ }
+ console.log(JSON.stringify({status:'RESTORED_AND_VERIFIED',offline,credentials:verification.credentials.length,counts:verification.counts,providerStateRestored:m.provider,servicesStarted:false,sourceCommit:m.gitCommit}));
+}finally{if(offline)for(const name of created)run('docker',['volume','rm',name]);cleanup(temp);}
+function spawnInspect(name){try{run('docker',['volume','inspect',name]);return true;}catch{return false;}}

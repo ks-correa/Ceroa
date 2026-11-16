@@ -1,1 +1,0 @@
-[{"id":118,"modelNodeRuns":4,"orchestration":{"maxIterations":10,"maxToolCalls":16,"maxLibraryCalls":6,"maxContextCharacters":90000,"deadlineMs":150000}},{"id":119,"maxIterations":3,"role":"RAG","modelNodeRuns":2},{"id":120,"maxIterations":3,"role":"FINANCIAL","modelNodeRuns":3},{"id":121,"maxIterations":3,"role":"SUPPORT","modelNodeRuns":1}]

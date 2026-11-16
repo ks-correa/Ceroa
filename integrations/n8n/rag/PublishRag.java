@@ -9,7 +9,7 @@ class PublishRag {
             Path file=Path.of(source.path("path").asText()).toAbsolutePath().normalize();
             if(!source.path("approved").asBoolean()||source.path("approvedBy").asText().isBlank()||!file.startsWith(Path.of("").toAbsolutePath()))throw new IllegalArgumentException();
             String hash=HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(Files.readAllBytes(file)));
-            if(!hash.equals(source.path("sha256").asText()))throw new IllegalArgumentException();approved.put(source.path("path").asText(),List.of(hash,source.path("title").asText(),source.path("version").asText()));
+            if(!hash.equals(source.path("sha256").asText()))throw new IllegalArgumentException();approved.put(source.path("sourceId").asText(source.path("path").asText()),List.of(hash,source.path("title").asText(),source.path("version").asText()));
         }
         if(approved.isEmpty())throw new IllegalArgumentException();
         for(var chunk:chunks){var m=chunk.path("metadata");if(!List.of(m.path("sourceHash").asText(),m.path("title").asText(),m.path("version").asText()).equals(approved.get(m.path("source").asText())))throw new IllegalArgumentException();}

@@ -1,7 +1,5 @@
 #!/bin/sh
 set -eu
 
-# Publication is an explicit deployment operation. n8n restores the existing
-# active versions itself; publishing here could activate an unreviewed draft.
-
+node /opt/ceroa-workflows/bootstrap.mjs
 exec /docker-entrypoint.sh

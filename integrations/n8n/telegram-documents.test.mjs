@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
-const workflow=JSON.parse(await readFile(new URL('assistant-telegram.json',import.meta.url),'utf8'));
+const workflow=JSON.parse(await readFile(new URL('testing/fixtures/assistant-telegram.json',import.meta.url),'utf8'));
 const node=name=>workflow.nodes.find(n=>n.name===name);
 const code=name=>node(name).parameters.jsCode;
 const AsyncFunction=Object.getPrototypeOf(async function(){}).constructor;

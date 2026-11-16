@@ -1,0 +1,129 @@
+{
+  "id": "ceroaGoogleDraftFinal",
+  "name": "Ceroa - Gmail borrador durable",
+  "active": false,
+  "nodes": [
+    {
+      "id": "hook",
+      "name": "Entrada autorizada",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ceroa-google-draft",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "ceroa-google-draft",
+      "credentials": {
+        "httpHeaderAuth": {
+          "name": "Ceroa Workspace privado"
+        }
+      }
+    },
+    {
+      "id": "provider",
+      "name": "Proveedor Google controlado",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "parameters": {
+        "method": "POST",
+        "url": "http://workspace-provider:3100/gmail/createDraft",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($(\"Entrada autorizada\").first().json.body) }}",
+        "options": {
+          "timeout": 14000
+        }
+      },
+      "position": [
+        500,
+        0
+      ],
+      "onError": "continueErrorOutput",
+      "credentials": {
+        "httpHeaderAuth": {
+          "name": "Ceroa Workspace privado"
+        }
+      }
+    },
+    {
+      "id": "response",
+      "name": "Responder resultado verificado",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "position": [
+        800,
+        0
+      ]
+    },
+    {
+      "id": "failure",
+      "name": "Conservar resultado incierto",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"error\":\"PROVIDER_UNCONFIRMED\"}",
+        "options": {
+          "responseCode": 503
+        }
+      },
+      "position": [
+        800,
+        220
+      ]
+    }
+  ],
+  "connections": {
+    "Entrada autorizada": {
+      "main": [
+        [
+          {
+            "node": "Proveedor Google controlado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Proveedor Google controlado": {
+      "main": [
+        [
+          {
+            "node": "Responder resultado verificado",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Conservar resultado incierto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Bogota",
+    "executionTimeout": 120,
+    "saveDataSuccessExecution": "none",
+    "saveDataErrorExecution": "none",
+    "saveManualExecutions": false
+  }
+}

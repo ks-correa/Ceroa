@@ -1,7 +1,7 @@
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';
 import {patchBlock5} from './prepare-block5-runtime.mjs';import {buildMultiagent} from './multiagent-workflows.mjs';import {driveWorkflow} from './workspace-drive.mjs';
 test('Block 5 patches preserve authoritative credentials, tools, graphs and inactive connectors',()=>{
- const baseline=JSON.parse(fs.readFileSync(new URL('./hybrid-rag-query.json',import.meta.url)));
+ const baseline=JSON.parse(fs.readFileSync(new URL('./testing/fixtures/hybrid-rag-query.json',import.meta.url)));
  const original=[...buildMultiagent(baseline),driveWorkflow()];
  original.forEach(w=>w.nodes.forEach(n=>n.credentials={synthetic:{id:'preserve-this'}}));
  const before=structuredClone(original),patched=patchBlock5(original);

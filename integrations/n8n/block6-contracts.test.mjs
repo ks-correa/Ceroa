@@ -1,6 +1,6 @@
 import test from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';
 import {buildMultiagent} from './multiagent-workflows.mjs';import {patchBlock6} from './prepare-block6-runtime.mjs';
-const baseline=JSON.parse(fs.readFileSync(new URL('./hybrid-rag-query.json',import.meta.url)));
+const baseline=JSON.parse(fs.readFileSync(new URL('./testing/fixtures/hybrid-rag-query.json',import.meta.url)));
 test('failure telemetry distinguishes quota, parser, contract and tool failures without exporting errors',()=>{
  const expression=buildMultiagent(baseline)[1].nodes.find(n=>n.id==='fail').parameters.jsonBody;
  const classify=new Function('$json','return JSON.parse('+expression.slice(3,-2)+')');

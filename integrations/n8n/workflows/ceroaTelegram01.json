@@ -1,0 +1,922 @@
+{
+  "id": "ceroaTelegram01",
+  "name": "RA-N8N-001 - Telegram financiero",
+  "active": false,
+  "nodes": [
+    {
+      "id": "4b5e7595-59d0-4911-ad7e-da820162c4eb",
+      "name": "Recibir Telegram",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "webhookId": "4cd74354-282c-4b10-8421-1184639d1dc2",
+      "credentials": {
+        "telegramApi": {
+          "name": "Ceroa Telegram"
+        }
+      }
+    },
+    {
+      "id": "normalize",
+      "name": "Validar chat privado",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const u=$input.first().json,m=u.message;\nif(!m||m.chat?.type!=='private'||m.from?.is_bot||!Number.isSafeInteger(m.from?.id)||m.from.id<=0||m.chat.id!==m.from.id||!Number.isSafeInteger(u.update_id)||u.update_id<0)return [];\nconst voice=m.voice,document=m.document;\nconst body={updateId:u.update_id,senderId:m.from.id,chatId:m.chat.id,privateChat:true,text:document?(m.caption||''):(m.text||''),audio:'',mime:'',document:document?{fileName:document.file_name||'',mime:document.mime_type||'',data:''}:null};\nconst invalid=body.text.length>2000||voice&&(voice.duration>60||!voice.file_size||voice.file_size>4194304||voice.mime_type!=='audio/ogg')||document&&(!Number.isSafeInteger(document.file_size)||document.file_size<1||document.file_size>8388608||!document.file_id||!document.file_name||document.file_name.length>160||!(/\\.(pdf|docx|xlsx)$/i).test(document.file_name))||!body.text&&!voice&&!document||!!voice&&!!document;\nreturn [{json:{body,isAudio:Boolean(voice&&!invalid),isDocument:Boolean(document&&!invalid),hasFile:Boolean((voice||document)&&!invalid),invalid:Boolean(invalid),fileId:document?.file_id||voice?.file_id||''}}];"
+      }
+    },
+    {
+      "id": "Formato permitido",
+      "name": "Formato permitido",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        430,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "invalid",
+              "leftValue": "={{ Boolean($json.invalid) }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "invalid",
+      "name": "Explicar formato",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        650,
+        -200
+      ],
+      "parameters": {
+        "jsCode": "const source=$('Validar chat privado').first().json; return [{json:{send:true,chatId:source.body.chatId,answer:'Envía texto de hasta 2.000 caracteres, una nota de voz de hasta 60 segundos y 4 MB, o un archivo PDF, DOCX o XLSX de hasta 8 MB como documento. Para la biblioteca usa /ayuda. Las fotos sueltas no se indexan: envíalas dentro de un PDF.'}}];"
+      }
+    },
+    {
+      "id": "Es archivo adjunto",
+      "name": "Es archivo adjunto",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        650,
+        100
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "hasFile",
+              "leftValue": "={{ Boolean($json.hasFile) }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "authorize",
+      "name": "Comprobar vinculación",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        870,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://backend:8080/api/v1/assistant-tools/telegram/authorize",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.body) }}",
+        "options": {
+          "timeout": 165000
+        }
+      },
+      "onError": "continueErrorOutput",
+      "credentials": {
+        "httpHeaderAuth": {
+          "name": "Ceroa assistant bridge"
+        }
+      }
+    },
+    {
+      "id": "Cuenta vinculada",
+      "name": "Cuenta vinculada",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1090,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "allowed",
+              "leftValue": "={{ Boolean($json.allowed) }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "unlinked",
+      "name": "Indicar vinculación",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1310,
+        150
+      ],
+      "parameters": {
+        "jsCode": "const a=$input.first().json; return [{json:{send:a.chatId>0,chatId:a.chatId,answer:a.answer}}];"
+      }
+    },
+    {
+      "id": "download",
+      "name": "Descargar voz autorizada",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1310,
+        -100
+      ],
+      "parameters": {
+        "resource": "file",
+        "operation": "get",
+        "fileId": "={{ $(\"Validar chat privado\").first().json.fileId }}",
+        "download": true,
+        "additionalFields": {
+          "mimeType": "audio/ogg"
+        }
+      },
+      "onError": "continueErrorOutput",
+      "credentials": {
+        "telegramApi": {
+          "name": "Ceroa Telegram"
+        }
+      }
+    },
+    {
+      "id": "audio",
+      "name": "Preparar voz",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1530,
+        -100
+      ],
+      "parameters": {
+        "jsCode": "const body={...$('Validar chat privado').first().json.body};\nconst buffer=await this.helpers.getBinaryDataBuffer(0,'data');\nif(buffer.length<12||buffer.length>4194304||buffer.subarray(0,4).toString()!=='OggS') throw new Error('Audio no válido');\nbody.audio=buffer.toString('base64');body.mime='audio/ogg';return [{json:{body}}];"
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "media",
+      "name": "Preparar medio autorizado",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1240,
+        -100
+      ],
+      "parameters": {
+        "jsCode": "return [{json:$('Validar chat privado').first().json}];"
+      }
+    },
+    {
+      "id": "Es documento autorizado",
+      "name": "Es documento autorizado",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1420,
+        -180
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "isDocument",
+              "leftValue": "={{ Boolean($json.isDocument) }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "download-document",
+      "name": "Descargar documento autorizado",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1620,
+        -300
+      ],
+      "parameters": {
+        "resource": "file",
+        "operation": "get",
+        "fileId": "={{ $(\"Validar chat privado\").first().json.fileId }}",
+        "download": true
+      },
+      "onError": "continueErrorOutput",
+      "credentials": {
+        "telegramApi": {
+          "name": "Ceroa Telegram"
+        }
+      }
+    },
+    {
+      "id": "document",
+      "name": "Preparar documento",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1840,
+        -300
+      ],
+      "parameters": {
+        "jsCode": "const source=$('Validar chat privado').first().json;const buffer=await this.helpers.getBinaryDataBuffer(0,'data');if(buffer.length<1||buffer.length>8388608)throw new Error('Archivo fuera de límites');const body={...source.body,document:{...source.body.document,data:buffer.toString('base64')}};return [{json:{body}}];"
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "process",
+      "name": "Procesar con Ceroa",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1750,
+        0
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://backend:8080/api/v1/assistant-tools/telegram/updates",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json.body) }}",
+        "options": {
+          "timeout": 165000
+        }
+      },
+      "onError": "continueErrorOutput",
+      "credentials": {
+        "httpHeaderAuth": {
+          "name": "Ceroa assistant bridge"
+        }
+      }
+    },
+    {
+      "id": "Verificar entrega",
+      "name": "Verificar entrega",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1850,
+        0
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "deliveryToken",
+              "leftValue": "={{ Boolean($json.deliveryToken) }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "delivery",
+      "name": "Confirmar cuenta antes de enviar",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1970,
+        -150
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://backend:8080/api/v1/assistant-tools/telegram/delivery",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({token:$json.deliveryToken}) }}",
+        "options": {
+          "timeout": 165000
+        }
+      },
+      "onError": "continueErrorOutput",
+      "credentials": {
+        "httpHeaderAuth": {
+          "name": "Ceroa assistant bridge"
+        }
+      }
+    },
+    {
+      "id": "failure",
+      "name": "Explicar fallo temporal",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1750,
+        320
+      ],
+      "parameters": {
+        "jsCode": "const source=$('Validar chat privado').first().json;return [{json:{send:true,chatId:source.body.chatId,answer:'No pude procesar tu consulta. Inténtalo de nuevo en un momento.'}}];"
+      }
+    },
+    {
+      "id": "split",
+      "name": "Preparar respuesta",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1970,
+        0
+      ],
+      "parameters": {
+        "jsCode": "const r=$input.first().json;if(!r.send||!Number.isSafeInteger(r.chatId)||r.chatId<=0||typeof r.answer!=='string')return [];\nconst items=[];let chunk='';for(const char of Array.from(r.answer)){const escaped=char.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');if(chunk.length+escaped.length>3500){items.push({json:{chatId:r.chatId,answer:chunk}});chunk='';}chunk+=escaped;}if(chunk)items.push({json:{chatId:r.chatId,answer:chunk}});return items;"
+      }
+    },
+    {
+      "id": "send",
+      "name": "Responder por Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2190,
+        0
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "sendMessage",
+        "chatId": "={{ $json.chatId }}",
+        "text": "={{ $json.answer }}",
+        "replyMarkup": "replyKeyboard",
+        "replyKeyboard": {
+          "rows": [
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "/documentos"
+                  },
+                  {
+                    "text": "/ayuda"
+                  }
+                ]
+              }
+            },
+            {
+              "row": {
+                "buttons": [
+                  {
+                    "text": "/autorizar_documentos"
+                  },
+                  {
+                    "text": "/cancelar_documento"
+                  }
+                ]
+              }
+            }
+          ]
+        },
+        "replyKeyboardOptions": {
+          "resize_keyboard": true
+        },
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "credentials": {
+        "telegramApi": {
+          "name": "Ceroa Telegram"
+        }
+      }
+    },
+    {
+      "id": "outgoing",
+      "name": "Clasificar respuesta autorizada",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2150,
+        -180
+      ],
+      "parameters": {
+        "jsCode": "const r=$input.first().json;return [{json:{...r,hasDocument:Boolean(r.send&&r.attachment?.data)}}];"
+      }
+    },
+    {
+      "id": "Entregar archivo",
+      "name": "Entregar archivo",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2350,
+        -180
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "hasDocument",
+              "leftValue": "={{ Boolean($json.hasDocument) }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "binary",
+      "name": "Preparar original privado",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2550,
+        -300
+      ],
+      "parameters": {
+        "jsCode": "const r=$input.first().json,a=r.attachment;if(!r.send||!Number.isSafeInteger(r.chatId)||r.chatId<=0||!a||typeof a.data!=='string'||a.data.length>11184812||!(/\\.(pdf|docx|xlsx)$/i).test(a.fileName))return [];return [{json:{chatId:r.chatId,caption:String(r.answer||'Documento privado').slice(0,1000)},binary:{data:{data:a.data,mimeType:a.mime,fileName:a.fileName}}}];"
+      },
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "send-document",
+      "name": "Enviar original por Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2770,
+        -300
+      ],
+      "parameters": {
+        "resource": "message",
+        "operation": "sendDocument",
+        "chatId": "={{ $json.chatId }}",
+        "binaryData": true,
+        "binaryPropertyName": "data",
+        "additionalFields": {
+          "caption": "={{ $json.caption }}"
+        }
+      },
+      "credentials": {
+        "telegramApi": {
+          "name": "Ceroa Telegram"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Recibir Telegram": {
+      "main": [
+        [
+          {
+            "node": "Validar chat privado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar chat privado": {
+      "main": [
+        [
+          {
+            "node": "Formato permitido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Formato permitido": {
+      "main": [
+        [
+          {
+            "node": "Explicar formato",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Es archivo adjunto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Explicar formato": {
+      "main": [
+        [
+          {
+            "node": "Preparar respuesta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Es archivo adjunto": {
+      "main": [
+        [
+          {
+            "node": "Comprobar vinculación",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Procesar con Ceroa",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Comprobar vinculación": {
+      "main": [
+        [
+          {
+            "node": "Cuenta vinculada",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Explicar fallo temporal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cuenta vinculada": {
+      "main": [
+        [
+          {
+            "node": "Preparar medio autorizado",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Indicar vinculación",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar medio autorizado": {
+      "main": [
+        [
+          {
+            "node": "Es documento autorizado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Es documento autorizado": {
+      "main": [
+        [
+          {
+            "node": "Descargar documento autorizado",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Descargar voz autorizada",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Descargar documento autorizado": {
+      "main": [
+        [
+          {
+            "node": "Preparar documento",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Explicar fallo temporal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar documento": {
+      "main": [
+        [
+          {
+            "node": "Procesar con Ceroa",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Explicar fallo temporal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Descargar voz autorizada": {
+      "main": [
+        [
+          {
+            "node": "Preparar voz",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Explicar fallo temporal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar voz": {
+      "main": [
+        [
+          {
+            "node": "Procesar con Ceroa",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Explicar fallo temporal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Procesar con Ceroa": {
+      "main": [
+        [
+          {
+            "node": "Verificar entrega",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Explicar fallo temporal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verificar entrega": {
+      "main": [
+        [
+          {
+            "node": "Confirmar cuenta antes de enviar",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Preparar respuesta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Confirmar cuenta antes de enviar": {
+      "main": [
+        [
+          {
+            "node": "Clasificar respuesta autorizada",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Explicar fallo temporal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clasificar respuesta autorizada": {
+      "main": [
+        [
+          {
+            "node": "Entregar archivo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Entregar archivo": {
+      "main": [
+        [
+          {
+            "node": "Preparar original privado",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Preparar respuesta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar original privado": {
+      "main": [
+        [
+          {
+            "node": "Enviar original por Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Explicar fallo temporal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Indicar vinculación": {
+      "main": [
+        [
+          {
+            "node": "Preparar respuesta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Preparar respuesta": {
+      "main": [
+        [
+          {
+            "node": "Responder por Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Explicar fallo temporal": {
+      "main": [
+        [
+          {
+            "node": "Preparar respuesta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "executionTimeout": 180,
+    "saveDataSuccessExecution": "none",
+    "saveDataErrorExecution": "none",
+    "saveManualExecutions": false
+  }
+}

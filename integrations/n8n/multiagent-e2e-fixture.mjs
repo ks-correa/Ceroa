@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 import {buildMultiagent} from './multiagent-workflows.mjs';
-const dir=process.argv[2];const workflows=buildMultiagent(JSON.parse(fs.readFileSync(new URL('./hybrid-rag-query.json',import.meta.url),'utf8')));
+const dir=process.argv[2];const workflows=buildMultiagent(JSON.parse(fs.readFileSync(new URL('./testing/fixtures/hybrid-rag-query.json',import.meta.url),'utf8')));
 for(const w of workflows){for(const n of w.nodes){
  if(n.type.endsWith('.webhook'))n.credentials={httpHeaderAuth:{id:'fixture-worker',name:'Synthetic only'}};
  if(n.type.endsWith('.lmChatGoogleGemini')){n.type='@n8n/n8n-nodes-langchain.lmChatOpenAi';n.typeVersion=1.2;n.parameters={model:{__rl:true,value:w===workflows[0]?'fixture-root':w.id,mode:'id'},options:{baseURL:'http://127.0.0.1:18080/v1',maxRetries:0,temperature:0}};n.credentials={openAiApi:{id:'fixture-openai',name:'Synthetic only'}};}

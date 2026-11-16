@@ -1,6 +1,6 @@
 ﻿param(
  [string]$Image='sha256:ffeb52485f78b1b06c9a832205853cf75da72a07a514c9a27724df85979d6c34',
- [string]$OutputDirectory='docs/benchmarks/ceroa-recovery-2026-11-14'
+ [string]$OutputDirectory='tmp/verification/ceroa-recovery-2026-11-14'
 )
 $ErrorActionPreference='Stop'
 $root=(Resolve-Path (Join-Path $PSScriptRoot '../..')).Path

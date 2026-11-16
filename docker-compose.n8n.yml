@@ -1,4 +1,0 @@
-# Compatibility with existing commands that include this file.
-# n8n now starts with the main Ceroa Compose project.
-services:
-  n8n: {}

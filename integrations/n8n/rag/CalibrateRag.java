@@ -8,7 +8,7 @@ class CalibrateRag {
     public static void main(String[]args)throws Exception{
         var json=new ObjectMapper();var env=new HashMap<String,String>();for(String line:Files.readAllLines(Path.of(".env"))){int i=line.indexOf('=');if(i>0)env.put(line.substring(0,i),line.substring(i+1));}
         byte[] bytes=Files.readAllBytes(Path.of("tmp/rag/approved-chunks.json"));var chunks=json.readTree(bytes);
-        // Same canonical JSON serialization as build-rag-workflows.mjs.
+        // Canonical JSON serialization shared by the RAG workflow contracts.
         String snapshot=HexFormat.of().formatHex(MessageDigest.getInstance("SHA-256").digest(json.writeValueAsBytes(chunks)));
         var inputs=json.readTree(Files.readString(Path.of(args[0])));var report=json.createObjectNode();report.put("snapshot",snapshot);report.put("model","gemini-embedding-001");report.put("dimensions",768);var results=report.putArray("cases");double maxNegative=0,minRequired=1;
         try(var c=DriverManager.getConnection(env.get("RAG_DB_URL"),env.get("RAG_DB_USERNAME"),env.get("RAG_DB_PASSWORD"))){

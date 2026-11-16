@@ -15,6 +15,8 @@ test('only an approved unchanged document can enter the corpus', async () => {
       version: '1', sha256: createHash('sha256').update(content).digest('hex') };
     const manifest = { version: 1, sources: [source] };
     assert.equal((await prepareCorpus(root, manifest))[0].pageContent, content);
+    const original=(await prepareCorpus(root,manifest))[0];await writeFile(path.join(root,'moved.md'),content);
+    const moved=(await prepareCorpus(root,{version:1,sources:[{...source,path:'moved.md',sourceId:'guide.md'}]}))[0];assert.deepEqual(moved,original);
     await assert.rejects(prepareCorpus(root, { ...manifest, sources: [{ ...source, approved: false }] }), /approval/);
     await assert.rejects(prepareCorpus(root, { ...manifest, sources: [{ ...source, path: '../private.md' }] }), /repository/);
     await assert.rejects(prepareCorpus(root, { ...manifest, sources: [{ ...source, path: '.env.md' }] }), /repository/);

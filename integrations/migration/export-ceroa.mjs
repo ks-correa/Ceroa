@@ -1,31 +1,27 @@
-import fs from 'node:fs';import path from 'node:path';import os from 'node:os';import crypto from 'node:crypto';import {spawnSync} from 'node:child_process';import {fileURLToPath} from 'node:url';
-const here=path.dirname(fileURLToPath(import.meta.url)),workspace=path.resolve(here,'../..');
-const run=(cmd,args,options={})=>{const r=spawnSync(cmd,args,{cwd:workspace,encoding:'utf8',maxBuffer:8*1024*1024,...options});if(r.status!==0)throw Error('Command failed: '+cmd+' '+args[0]);return r.stdout;};
-const hash=file=>crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
-const id='ceroa-'+new Date().toISOString().slice(0,10)+'-'+crypto.randomBytes(4).toString('hex');
-const output=path.join(workspace,'backups/migration',id),keyDir=path.join(workspace,'backups/migration-keys');
-const stage=fs.mkdtempSync(path.join(os.tmpdir(),'ceroa-export-'));let stopped=false;
+import fs from 'node:fs';import path from 'node:path';import {repo,args,option,run,hash,outside,stage,cleanup} from './transfer.mjs';
+const output=option('--output'),keyPath=option('--key'),project=option('--project')??'ceroa';
+if(!output||!keyPath)throw Error('Usage: node integrations/migration/export-ceroa.mjs --output PRIVATE_DIR --key SEPARATE_KEY_FILE [--project ceroa] [--handoff]');
+const destination=outside(output),key=outside(keyPath),relativeKey=path.relative(destination,key);if(!relativeKey.startsWith('..')&&!path.isAbsolute(relativeKey))throw Error('Keep key separate from package');fs.mkdirSync(destination,{recursive:true});fs.mkdirSync(path.dirname(key),{recursive:true});
+const temp=stage(),stopped=[];const handoff=args.includes('--handoff');let completed=false;
 try{
- if(run('git',['status','--porcelain']).trim())throw Error('Commit source changes before exporting');
- const container=JSON.parse(run('docker',['inspect','ceroa-n8n']))[0];if(!container.State.Running)throw Error('Expected running n8n');
- const volume=container.Mounts.find(m=>m.Type==='volume'&&m.Destination==='/home/node/.n8n')?.Name;if(!volume)throw Error('Persistent n8n volume missing');
- const image=JSON.parse(run('docker',['image','inspect',container.Image]))[0].RepoDigests.find(d=>d.startsWith('docker.n8n.io/n8nio/n8n@sha256:'));if(!image)throw Error('Pullable pinned n8n image required');
- fs.mkdirSync(output,{recursive:true});fs.mkdirSync(keyDir,{recursive:true});fs.mkdirSync(path.join(stage,'private'),{recursive:true});
- const privateFiles=['.env','.env.telegram-local','.env.n8n-sandbox','.env.rag-admin'].filter(f=>fs.existsSync(path.join(workspace,f)));
- for(const file of privateFiles)fs.copyFileSync(path.join(workspace,file),path.join(stage,'private',file));
- const oldKeys=path.join(workspace,'backups/n8n');fs.mkdirSync(path.join(stage,'private/backup-keys'),{recursive:true});for(const file of fs.readdirSync(oldKeys).filter(f=>f.endsWith('.key')))fs.copyFileSync(path.join(oldKeys,file),path.join(stage,'private/backup-keys',file));
- run('git',['archive','--format=tar','--output='+path.join(stage,'project.tar'),'HEAD']);
- run('docker',['stop','ceroa-n8n']);stopped=true;
- try{run('docker',['run','--rm','--network','none','--user','0:0','--entrypoint','/bin/sh','-v',volume+':/data:ro','-v',stage+':/backup',image,'-c','tar -czf /backup/n8n-volume.tar.gz -C /data .']);}finally{run('docker',['start','ceroa-n8n']);stopped=false;}
- const manifest={format:'CEROA_MIGRATION_V1',id,createdAt:new Date().toISOString(),gitCommit:run('git',['rev-parse','HEAD']).trim(),n8nImage:image,sourceArchiveSha256:hash(path.join(stage,'project.tar')),n8nVolumeSha256:hash(path.join(stage,'n8n-volume.tar.gz')),privateFiles,externalDatabase:'Existing remote database and storage; credentials preserved, no database dump',calendarConsent:'Stored OAuth tokens; checked by offline restoration, provider may require renewal',startAutomatically:false};
- fs.writeFileSync(path.join(stage,'manifest.json'),JSON.stringify(manifest,null,2));
- run('tar',['-czf',path.join(stage,'bundle.tar.gz'),'-C',stage,'project.tar','n8n-volume.tar.gz','private','manifest.json']);
- const archive=path.join(output,id+'.ceroa'),key=path.join(keyDir,id+'.key');
- run(process.execPath,[path.join(workspace,'integrations/n8n/backup-crypto.mjs'),'encrypt',path.join(stage,'bundle.tar.gz'),archive,key]);
- const publicManifest={...manifest,archiveFile:path.basename(archive),archiveSha256:hash(archive)};fs.writeFileSync(path.join(output,'manifest.json'),JSON.stringify(publicManifest,null,2));
- for(const file of ['restore-ceroa.mjs','verify-n8n-snapshot.cjs'])fs.copyFileSync(path.join(here,file),path.join(output,file));fs.copyFileSync(path.join(workspace,'integrations/n8n/backup-crypto.mjs'),path.join(output,'backup-crypto.mjs'));fs.copyFileSync(path.join(here,'README.md'),path.join(output,'LEEME.md'));
- console.log(JSON.stringify({status:'ENCRYPTED_EXPORT_READY',directory:output,archive,keyFile:key,sourceCommit:manifest.gitCommit,n8nRestarted:true}));
-}finally{
- if(stopped)run('docker',['start','ceroa-n8n']);
- const resolved=path.resolve(stage);if(path.dirname(resolved)!==path.resolve(os.tmpdir())||!path.basename(resolved).startsWith('ceroa-export-'))throw Error('Unsafe temporary cleanup target');fs.rmSync(resolved,{recursive:true,force:true});
-}
+ const ids=run('docker',['ps','-aq','--filter','label=com.docker.compose.project='+project]).trim().split(/\r?\n/).filter(Boolean);const containers=ids.length?JSON.parse(run('docker',['inspect',...ids])):[];
+ // Compatibility with the prior manually started backend; new installs use Compose labels.
+ if(project==='ceroa'){try{const c=JSON.parse(run('docker',['inspect','ceroa-backend']))[0];if(!containers.some(x=>x.Id===c.Id)){c.Config.Labels={...c.Config.Labels,'com.docker.compose.service':'backend'};containers.push(c);}}catch{}}
+ const n8n=containers.find(c=>c.Config.Labels['com.docker.compose.service']==='n8n');if(!n8n)throw Error('n8n project not found');
+ const image=JSON.parse(run('docker',['image','inspect',n8n.Image]))[0].RepoDigests.find(x=>x.startsWith('docker.n8n.io/n8nio/n8n@sha256:'));if(!image)throw Error('Pinned image required');
+ const n8nVolume=n8n.Mounts.find(m=>m.Destination==='/home/node/.n8n'&&m.Type==='volume')?.Name;if(!n8nVolume)throw Error('Persistent n8n volume required');
+ for(const c of containers.filter(c=>c.State.Running&&['backend','n8n','workspace-provider','telegram-proxy','telegram-tunnel'].includes(c.Config.Labels['com.docker.compose.service']))){run('docker',['stop',c.Id]);stopped.push(c.Id);}
+ fs.copyFileSync(path.join(repo,'.env'),path.join(temp,'.env'));
+ const privateFiles=['.env.rag-admin'].filter(file=>fs.existsSync(path.join(repo,file)));for(const file of privateFiles)fs.copyFileSync(path.join(repo,file),path.join(temp,file));
+ // Official entity export excludes execution history by default; preserve the encryption key verbatim.
+ run('docker',['run','--rm','--network','none','--user','0:0','-e','N8N_USER_FOLDER=/home/node','--entrypoint','/bin/sh','-v',n8nVolume+':/home/node/.n8n','-v',temp+':/transfer',image,'-c','cp /home/node/.n8n/config /transfer/config && if [ -f /home/node/.n8n/ceroa-bootstrap.json ]; then cp /home/node/.n8n/ceroa-bootstrap.json /transfer/bootstrap.json; fi && n8n export:entities --outputDir=/transfer/entities']);
+ const provider=containers.find(c=>c.Config.Labels['com.docker.compose.service']==='workspace-provider');const providerVolume=provider?.Mounts.find(m=>m.Destination==='/data'&&m.Type==='volume')?.Name;
+ if(providerVolume)run('docker',['run','--rm','--network','none','--user','0:0','--entrypoint','/bin/sh','-v',providerVolume+':/data:ro','-v',temp+':/transfer',image,'-c','tar -czf /transfer/provider.tar.gz -C /data .']);
+ const durable=providerVolume?JSON.parse(run('docker',['run','--rm','--network','none','--entrypoint','node','-v',providerVolume+':/data:ro','-v',path.join(repo,'integrations/migration')+':/verification:ro',image,'/verification/verify-provider-snapshot.cjs'])):null;
+ const ledger=fs.existsSync(path.join(temp,'bootstrap.json'));
+ const manifest={format:'CEROA_TRANSFER_V2',gitCommit:run('git',['rev-parse','HEAD']).trim(),createdAt:new Date().toISOString(),image,handoff,provider:!!providerVolume,durable,privateFiles,ledger,sourceHost:process.env.COMPUTERNAME??'local',database:'existing Supabase; no financial data exported',files:{config:hash(path.join(temp,'config')),env:hash(path.join(temp,'.env')),private:Object.fromEntries(privateFiles.map(file=>[file,hash(path.join(temp,file))])),...(ledger?{ledger:hash(path.join(temp,'bootstrap.json'))}:{}),...(providerVolume?{provider:hash(path.join(temp,'provider.tar.gz'))}:{})}};
+ fs.writeFileSync(path.join(temp,'manifest.json'),JSON.stringify(manifest));
+ run('tar',['-czf',path.join(temp,'transfer.tar.gz'),'-C',temp,'.env',...privateFiles,'config','entities','manifest.json',...(ledger?['bootstrap.json']:[]),...(providerVolume?['provider.tar.gz']:[])]);
+ const archive=path.join(destination,'ceroa-'+Date.now()+'.ceroa');run(process.execPath,[path.join(repo,'integrations/n8n/backup-crypto.mjs'),'encrypt',path.join(temp,'transfer.tar.gz'),archive,key]);completed=true;
+ console.log(JSON.stringify({archive,keyFile:key,sha256:hash(archive),handoff,servicesStopped:handoff,providerStateIncluded:!!providerVolume}));
+}finally{if(!handoff||!completed)for(const id of stopped.reverse())run('docker',['start',id]);cleanup(temp);}

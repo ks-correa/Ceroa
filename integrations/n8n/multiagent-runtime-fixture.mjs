@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import {buildMultiagent} from './multiagent-workflows.mjs';
 import {scopedMcpClientWorkflow} from './workspace-mcp.mjs';
 const dir=process.argv[2];fs.mkdirSync(dir,{recursive:true});
-const original=JSON.parse(fs.readFileSync(new URL('./hybrid-rag-query.json',import.meta.url),'utf8'));
+const original=JSON.parse(fs.readFileSync(new URL('./testing/fixtures/hybrid-rag-query.json',import.meta.url),'utf8'));
 const all=buildMultiagent(original);
 const [root,...children]=all;
 all.push(scopedMcpClientWorkflow());

@@ -1,1 +1,4 @@
 integrations/n8n/*.sh text eol=lf
+integrations/n8n/workflows/*.json text eol=lf
+integrations/n8n/workflows.manifest.json text eol=lf
+integrations/n8n/rag/knowledge/*.md text eol=lf

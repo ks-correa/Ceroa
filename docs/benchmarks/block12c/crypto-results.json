@@ -1,1 +1,0 @@
-{"cipher":"AES-256-GCM","authenticatedRoundTripVerified":true,"realArchiveTamperingRejected":true,"realArchiveWrongKeyRejected":true,"noPlaintextOutputOnFailure":true,"ciphertextSha256":"a6ae87db40d37e7721c0e445774888fa53c30e72d367c22803afce7bcdd20762","ciphertextBytes":2252860}

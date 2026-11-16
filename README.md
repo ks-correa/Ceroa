@@ -1,240 +1,95 @@
 # Ceroa
 
-Biblioteca financiera y RAG: [estado actual V21, OCR con Gemini, historial y nodos Supabase](docs/RAG_V21_REPLACEMENT_OCR.md). Funcionalidad desplegada con Storage privado y cuatro workflows activos.
+Aplicación para registrar obligaciones y pagos, consultar la situación financiera, comparar estrategias y realizar simulaciones. Incluye asistencia con evidencia, biblioteca documental y automatizaciones sujetas a permisos y confirmación.
 
-La misma biblioteca está disponible desde Telegram: [carga, búsqueda, descargas, versiones y comandos](docs/TELEGRAM_DOCUMENT_LIBRARY.md).
+React y TypeScript · Spring Boot y Java 25 · PostgreSQL/Supabase · n8n 2.40.7 · Gemini.
 
-Ceroa es una aplicación web de bienestar financiero para registrar, organizar y dar seguimiento a obligaciones y pagos. No presta dinero, no refinancia deudas y no reemplaza a una entidad financiera.
-
-La aplicación conserva la experiencia React existente y agrega persistencia real para cuentas, sesiones, perfil personal y financiero, deudas, pagos y estrategia mediante una API Java y PostgreSQL.
-
-## Arquitectura
-
-```text
-React + TypeScript + Vite
-          |
-       REST API
-          |
-Java 25 + Spring Boot
-          |
-Spring Data JPA / Hibernate
-          |
-      PostgreSQL
-```
-
-El backend es un monolito modular. React nunca se conecta directamente a PostgreSQL.
-
-La clasificación de hallazgos, decisiones y validaciones de la refactorización está en [ARCHITECTURE_AUDIT.md](ARCHITECTURE_AUDIT.md).
-
-El estado de vencimientos y notificaciones, incluidas las tareas pendientes de Telegram, está en [EP12.md](EP12.md).
-
-El alcance, funcionamiento y límites del resumen mensual están en [README_EP16.md](README_EP16.md).
-
-## Navegación
-
-El área autenticada mantiene exactamente cinco secciones principales, tanto en escritorio como en móvil:
-
-- Inicio
-- Deudas
-- Estrategia
-- Simular
-- Perfil
-
-Detalle de deuda, pagos, vencimientos, notificaciones y suscripción son flujos secundarios, no destinos principales.
-
-## Stack
-
-- Frontend: React 19, TypeScript, Vite y Tailwind CSS 4.
-- Backend: Java 25, Spring Boot 3.5, Spring Web, Spring Data JPA, Hibernate, Validation y Spring Security.
-- Datos: PostgreSQL 17 y Flyway.
-- API: OpenAPI 3 y Swagger UI.
-- Pruebas backend: JUnit 5, Mockito y AssertJ.
-- Desarrollo local: Docker Compose y Maven Wrapper.
+NEXUS, ATLAS, ORACLE y LUMEN son los cuatro agentes cognitivos. AEGIS conserva la validación determinista del backend; CHRONOS integra Calendar/MCP sin añadir agentes cognitivos.
 
 ## Estructura
 
-```text
-.
-|-- frontend/                  # Prototipo React conectado a la API
-|   |-- src/components/
-|   |-- src/context/
-|   |-- src/services/
-|   `-- src/types/
-|-- backend/                   # API Spring Boot
-|   |-- src/main/java/com/ceroa/
-|   |   |-- api/               # Controllers, DTOs y errores HTTP
-|   |   |-- config/            # Security, CORS y OpenAPI
-|   |   |-- domain/            # Entidades y enumeraciones
-|   |   |-- repository/
-|   |   `-- service/
-|   `-- src/main/resources/db/migration/
-|-- docker-compose.yml
-`-- .env.example
-```
+- `backend/`: API, seguridad, migraciones Flyway y pruebas.
+- `frontend/`: interfaz y pruebas de navegador.
+- `integrations/n8n/workflows/`: definiciones definitivas exportadas del runtime.
+- `integrations/n8n/workflows.manifest.json`: hashes, dependencias, credenciales y política de publicación.
+- `integrations/n8n/rag/`: fuentes aprobadas y herramientas administrativas del RAG.
+- `integrations/n8n/testing/`: fixtures de regresión; no se importan al iniciar.
+- `integrations/migration/`: traslado privado cifrado.
+- `integrations/verification/`: comprobaciones nativas aisladas.
 
-## Requisitos previos
+## Inicio
 
-- Java 25 y Node.js 20 o superior con npm para ejecutar sin Docker.
-- Docker Desktop para ejecutar frontend/backend con Compose (opcional).
-- Proyecto Supabase Cloud y credenciales PostgreSQL Direct o Session Pooler.
+Requiere Git y Docker Desktop con Compose v2 y contenedores Linux. Los scripts de traslado requieren Node.js 24 o posterior y `tar` disponible en PATH.
 
-## Configuración y ejecución con Supabase
+1. Copia `.env.example` a `.env`, si todavía no existe.
+2. Completa `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` y `DB_SCHEMA` de la base Supabase existente. Usa conexión directa o Session Pooler; conserva TLS. No crees otra base financiera.
+3. Configura las integraciones opcionales que vayas a utilizar.
+4. Ejecuta desde la raíz:
 
-El backend mantiene JPA/Hibernate y Flyway V1–V14, y agrega V15 para credenciales
-e idempotencia de automatizaciones. El perfil `supabase` usa SSL,
-un pool limitado y el esquema privado `ceroa`. El Compose principal ejecuta
-frontend/backend sin PostgreSQL local. No requiere SDK ni API keys de Supabase.
-
-El análisis, plan, configuración manual, transferencia de datos y comprobaciones
-están en [docs/SUPABASE.md](docs/SUPABASE.md). La conexión real fue verificada el
-26 de septiembre de 2026 con Supabase como única base de datos. Las credenciales permanecen
-en `.env` privado; no hay secretos en el ejemplo.
-
-1. Crear `.env` desde [.env.example](.env.example) solo si no existe.
-2. Completar `DB_URL` JDBC con el host/puerto/base exactos de **Connect**,
-   `DB_USERNAME` y `DB_PASSWORD` de la base. Mantener `SPRING_PROFILES_ACTIVE=supabase`.
-3. Mantener `ceroa` fuera de la Data API; Flyway crea sus tablas al arrancar.
-4. Ejecutar desde la raíz:
-
-```powershell
-docker compose config --quiet
+```sh
 docker compose up -d --build
-docker compose logs --tail 100 backend
 ```
 
-No sobrescribir un `.env` existente. No compartir la salida de `docker compose config`
-sin `--quiet`, porque puede revelar credenciales. La conexión utiliza exclusivamente Supabase.
+Accesos predeterminados: [Ceroa](http://localhost:3000), [API](http://localhost:8080/api/v1/auth/csrf), [n8n](http://localhost:5678). Los puertos se pueden cambiar en `.env`. El backend y frontend se construyen desde el código; no usan JAR externos.
 
-Sin Docker, ejecutar desde `backend` `.\mvnw.cmd spring-boot:run`; importa `../.env`.
-Desde `frontend`, crear `.env.local` desde su ejemplo si no existe y ejecutar
-`npm ci` y `npm run dev`. React sigue llamando a Spring Boot mediante `VITE_API_URL`.
+Supabase y Storage conservan sus datos remotos. `ceroa_n8n_data` conserva la configuración y clave de cifrado de n8n; `workspace-provider` conserva los recibos de idempotencia. No cambies la clave de cifrado de un volumen existente.
 
-- Aplicación: `http://localhost:3000`
-- API: `http://localhost:8080/api/v1`
-- Swagger: `http://localhost:8080/swagger-ui.html`
-- OpenAPI: `http://localhost:8080/v3/api-docs`
+## n8n y credenciales
 
-| Variable | Uso |
-|---|---|
-| `SPRING_PROFILES_ACTIVE` | `supabase` |
-| `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` | Conexión JDBC obligatoria, sin fallback localhost |
-| `DB_SCHEMA` | `ceroa` en perfil Supabase, compartido por Flyway, Hibernate y JDBC |
-| `DB_POOL_MAX_SIZE`, `DB_POOL_MIN_IDLE` | 5 y 1 por instancia por defecto |
-| `SERVER_PORT` | Puerto backend; en Compose controla el puerto publicado |
-| `FRONTEND_URL` | Origen exacto permitido por CORS |
-| `SESSION_DAYS`, `SESSION_SECURE_COOKIE` | Duración de sesión y cookie HTTPS |
-| `VITE_API_URL` | URL REST de Spring Boot, nunca de Supabase |
+En un volumen nuevo se verifican los hashes, se importan los 26 workflows con IDs estables y se asocian credenciales por **nombre lógico y tipo**, sin depender de IDs del escritorio. Las claves internas de `.env` crean las credenciales Header Auth correspondientes; `GEMINI_API_KEY` permite preparar Gemini. El gateway Supabase usa una credencial restringida, nunca la contraseña financiera ni una clave con acceso financiero general.
 
-La base de datos de Ceroa se aloja exclusivamente en Supabase.
+La inicialización indica únicamente los nombres de configuración faltantes. Publica los webhooks y subworkflows preparados; deja sin publicar los flujos incompletos. Telegram, Drive, recordatorios, Centinela, sincronización documental y otros consumidores requieren activación manual. **Sheets permanece deshabilitado; sus eventos pendientes se conservan.**
 
-n8n puede utilizar las APIs de automatización con credenciales por usuario, caducidad,
-revocación, permisos e idempotencia. Se gestionan en Perfil → Automatizaciones.
-La configuración y workflows importables están en [docs/N8N.md](docs/N8N.md).
-RA-N8N-004 programa recordatorios y resúmenes por Telegram con consentimiento separado
-en Perfil, Ceroa Plus y estados persistentes en Supabase: [guía](docs/RA-N8N-004.md).
-Al iniciar Ceroa con `docker compose up -d --build`, n8n arranca con la aplicación
-y publica los workflows operativos que ya estén instalados. El workflow de indexación
-administrativa sigue siendo manual. Abrir `http://localhost:5678` para crear la cuenta
-local y configurar Bearer Auth siguiendo la guía.
-RA-N8N-003 está activo con documentación aprobada en PGVector/Supabase, roles auxiliares
-sin acceso a `ceroa` y memoria de contexto separada por usuario, canal y conversación.
-Los datos personales se consultan mediante las APIs GET del backend. Configuración,
-corpus y verificación: [docs/RA-N8N-003.md](docs/RA-N8N-003.md).
+Los reinicios normales conservan workflows, borradores, credenciales e historial; no reimportan ni republican versiones existentes. Los cambios inesperados o divergencias entre borrador y publicación impiden una actualización automática.
 
-## Endpoints implementados
+En la primera apertura de n8n crea su cuenta administradora local. Configura las credenciales indicadas en el manifiesto, con sus nombres y tipos exactos. Para Google: `Gmail account`, `Ceroa Calendar`, `Google Drive account`, `Google Sheets account`. Reconecta OAuth cuando lo solicite Google. Para asociar nuevas credenciales:
 
-### Autenticación y perfil
-
-- `POST /api/v1/auth/register`
-- `POST /api/v1/auth/login`
-- `GET /api/v1/auth/csrf`
-- `GET /api/v1/auth/me`
-- `POST /api/v1/auth/logout`
-- `GET /api/v1/users/me`
-- `PUT /api/v1/users/me`
-
-Las rutas financieras requieren una sesión válida. El navegador recibe una cookie `HttpOnly`; en PostgreSQL solo se almacena el hash del token de sesión. Las operaciones mutables también requieren el token CSRF que obtiene automáticamente el cliente web.
-
-### Perfil financiero
-
-- `GET /api/v1/financial-profile`
-- `PUT /api/v1/financial-profile`
-
-### Deudas
-
-- `GET /api/v1/debts`
-- `GET /api/v1/debts/{id}`
-- `POST /api/v1/debts`
-- `PUT /api/v1/debts/{id}`
-- `DELETE /api/v1/debts/{id}`
-
-### Pagos
-
-- `GET /api/v1/payments`
-- `GET /api/v1/payments?debtId={debtId}`
-- `GET /api/v1/payments/{id}`
-- `POST /api/v1/payments`
-- `PUT /api/v1/payments/{id}`
-- `DELETE /api/v1/payments/{id}`
-
-### Estrategia
-
-- `GET /api/v1/strategies/comparison`
-
-La comparación Bola de Nieve/Avalancha y el orden de prioridad se calculan en el backend con los saldos, tasas y pagos persistidos.
-
-Los pagos se validan como valores positivos y fechas no futuras. Crear, editar o eliminar un pago recalcula el saldo de la deuda dentro de una transacción. Eliminar una deuda elimina sus pagos asociados. El backend bloquea una tercera deuda cuando el usuario tiene Plan Cero.
-
-## Datos de demostración
-
-El asistente web RA-N8N-001 analiza preguntas por texto y audio, combina datos financieros
-y cálculos del backend y genera explicaciones para cada usuario autenticado. Su configuración, pruebas y límites están en
-[docs/RA-N8N-001.md](docs/RA-N8N-001.md). Telegram permite vincular una cuenta desde
-Perfil mediante un enlace de un solo uso y consultar por texto o voz en un chat privado.
-La prueba local usa `docker-compose.telegram-local.yml` y un túnel HTTPS temporal;
-ver instrucciones en la misma guía. RA-N8N-001 quedó completado y aceptado por el usuario
-el 27 de septiembre de 2026, tras confirmar el funcionamiento de Telegram. Los demás requerimientos
-de n8n permanecen independientes y con el estado documentado en [docs/N8N.md](docs/N8N.md).
-
-
-Flyway carga una cuenta y una cartera editable para probar el sistema sin capturar todo desde cero:
-
-- Correo: `demo@ceroa.local`
-- Contraseña: `Demo123!`
-- Plan: Ceroa Plus
-- 3 deudas y 3 pagos simulados, almacenados en PostgreSQL
-
-Los cambios hechos desde la interfaz permanecen después de cerrar sesión o reiniciar la aplicación mientras se conserve el volumen de PostgreSQL.
-
-## Pruebas y compilación
-
-Backend:
-
-```powershell
-cd backend
-.\mvnw.cmd clean test package
+```sh
+docker compose exec n8n node /opt/ceroa-workflows/bootstrap.mjs --configure
+docker compose restart n8n
 ```
 
-Frontend:
+Una actualización revisada de las definiciones utiliza `--update` en lugar de `--configure`; se rechazan cambios locales inesperados. La instancia anterior solo se adopta si coincide exactamente con el snapshot verificado del manifiesto y no hay divergencia entre borrador y publicación. Las demás instancias se conservan intactas hasta reconciliar sus versiones.
 
-```powershell
-cd frontend
-npm run lint
-npm run build
+Gmail durable y Calendar/MCP requieren `COMPOSE_PROFILES=google`, OAuth válido, `SUPPORT_CALENDAR_ID`, `WORKSPACE_PROVIDER_ENABLED=true` y `WORKSPACE_WORKER_KEY`. `WORKSPACE_DRAFT_URL` apunta al webhook durable; un borrador no envía correo. El envío requiere confirmación y un consumidor habilitado por separado.
+
+Telegram requiere `COMPOSE_PROFILES=telegram` (o `google,telegram`), su credencial y un webhook público protegido. Tras comprobar que el escritorio anterior está detenido, publica su workflow y actualiza el webhook con `integrations/n8n/sync-telegram-tunnel.ps1` si usas el túnel local. No se descartan actualizaciones pendientes.
+
+MCP personal requiere las credenciales Header Auth `Ceroa MCP personal entrada` y `Ceroa MCP personal backend`; esta última contiene un token personal con scopes emitido por Ceroa. MCP externo requiere `MCP_EXTERNAL_URL` y `Ceroa MCP externo`. No se publican automáticamente.
+
+SMTP, OAuth Google/Microsoft y Mercado Pago sandbox son opcionales y necesitan credenciales reales locales. Los callbacks de acceso son `/login/oauth2/code/google` y `/login/oauth2/code/microsoft` sobre `OAUTH_REDIRECT_BASE_URL`.
+
+## Traslado al portátil
+
+Clonar Git no restaura credenciales. Antes de trasladar consumidores, detén los del escritorio para no duplicar recordatorios, eventos, cobros ni webhooks. Usa rutas absolutas fuera del repositorio. Desde el escritorio:
+
+```sh
+node integrations/migration/export-ceroa.mjs --output RUTA_PRIVADA/paquete --key OTRA_RUTA/traslado.key --handoff
 ```
 
-## Alcance pendiente
+El paquete AES-256-GCM incluye configuración privada, entidades de n8n sin historial de ejecuciones, clave de cifrado, OAuth y estado durable del proveedor. No exporta la base Supabase. `--handoff` deja detenidos backend, n8n, proveedor y transportes de Telegram; sin esa opción, el respaldo normal restaura su estado previo. Guarda paquete y clave por separado, fuera de Git.
 
-RA-N8N-002 está implementado para leer PDF con texto, DOCX y XLSX desde Registrar/Editar obligación > Leer documento financiero. Requiere consentimiento, revisión y guardado explícito; persiste mediante el backend en Supabase. Los documentos escaneados requieren registro manual (OCR no incluido). Configuración y límites: [docs/RA-N8N-002.md](docs/RA-N8N-002.md).
+Las herramientas administrativas RAG pueden usar `.env.rag-admin`, privado y separado de los servicios; el traslado lo incluye si existe.
 
-OAuth2 con Google/Microsoft, recuperación de contraseña por correo, onboarding financiero guiado, simulador backend, suscripciones, Mercado Pago y notificaciones persistentes (incluidos avisos automáticos por Telegram) pertenecen a fases posteriores. Los botones OAuth visibles no simulan acceso: informan que la integración aún no está habilitada.
-# Registro y acceso (EP-02)
+En el portátil, clona la misma versión del repositorio y restaura **antes** del primer inicio, sin `.env` ni volúmenes de destino existentes:
 
-Consulta [EP02.md](EP02.md) para la configuración de Google/Microsoft, migraciones, ejecución de pruebas y matrices de aceptación. La validación real con proveedores requiere credenciales externas.
-# Ceroa Plus (EP-14)
+```sh
+node integrations/migration/restore-ceroa.mjs --archive RUTA/archivo.ceroa --key OTRA_RUTA/traslado.key --confirm-source-stopped
+docker compose up -d --build
+```
 
-La oferta comercial la publica el backend en `GET /api/v1/plus/offers`. Configure `PLUS_MONTHLY_PRICE`, `PLUS_YEARLY_PRICE` y `PLUS_CURRENCY` en el entorno; no hay precios predeterminados. Sin precios positivos, `MP_ACCESS_TOKEN` y `MP_WEBHOOK_SECRET`, el checkout permanece deshabilitado.
+La restauración comprueba integridad y descifrado; no inicia servicios ni activa consumidores externos. Usa `--offline-test` para probar la recuperación en volúmenes temporales sin red. Antes de publicar consumidores, verifica de nuevo que el escritorio esté detenido. Google puede exigir reconexión y Telegram un cambio de URL pública.
 
-Configure en Mercado Pago el webhook público `POST https://<backend>/api/v1/plus/webhook` para el tópico `subscription_preapproval`, y copie su secreto de firma a `MP_WEBHOOK_SECRET`. `FRONTEND_URL` debe ser la URL pública HTTPS de Ceroa para el retorno. Use el token y el secreto del mismo entorno de Mercado Pago; las pruebas y producción requieren configuraciones separadas.
+## Detención y comprobación
 
-El backend crea `/preapproval` con el monto configurado, guarda la referencia y conserva `PENDING` hasta consultar el recurso mediante la API de Mercado Pago. El webhook valida `x-signature` y vuelve a consultar el recurso; el retorno de navegador también consulta al backend. Solo `authorized` con referencia, monto, moneda y frecuencia coincidentes actualiza el plan central a Plus. No se guardan datos de tarjeta.
+```sh
+docker compose stop
+docker compose ps
+docker compose logs --tail 50 n8n
+```
+
+No uses `down -v` para detener o trasladar Ceroa. Los perfiles opcionales no deben ejecutarse simultáneamente en ambos computadores contra los mismos recursos.
+
+Para verificar el inicializador y los contratos: `node --test integrations/n8n/*.test.mjs integrations/n8n/rag/*.test.mjs integrations/n8n/testing/*.test.mjs`. El perfil `test` incluye PostgreSQL aislado únicamente para validaciones con variables sintéticas; nunca debe apuntar a Supabase operativo.
+
+Gemini puede devolver PARTIAL o FAILED y debe abstenerse ante tasas contradictorias; ORACLE + ATLAS continúa siendo variable. Las siete pruebas opt-in requieren proveedores/configuración adicional. Los fixtures simulados de Gmail no prueban envíos reales; Calendar/MCP productivo necesita OAuth y validación independiente. El despliegue productivo mantiene sus prerrequisitos y estado NO-GO; arrancar Docker no lo autoriza.

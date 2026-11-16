@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import {buildMultiagent,ids} from './multiagent-workflows.mjs';
-const baseline=JSON.parse(fs.readFileSync(new URL('./hybrid-rag-query.json',import.meta.url),'utf8'));
+const baseline=JSON.parse(fs.readFileSync(new URL('./testing/fixtures/hybrid-rag-query.json',import.meta.url),'utf8'));
 test('native specialists expose only their assigned tools and cannot delegate recursively',()=>{
  const [root,...specialists]=buildMultiagent(baseline);
  assert.equal(root.nodes.filter(n=>n.type.endsWith('.agent')).length,1);

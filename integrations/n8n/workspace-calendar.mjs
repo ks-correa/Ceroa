@@ -12,4 +12,4 @@ export function calendarWorkflow(){
  const result=native('result','Responder proveedor','n8n-nodes-base.respondToWebhook',1.4,{respondWith:'json',responseBody:'={{ $json }}',options:{}},800);
  return{id:'ceroaWorkspaceCalendar40',name:'CEROA AI | CHRONOS — Scheduling & External Integration',active:false,nodes:[hook,gate,availability,create,get,remove,result],connections:{[hook.name]:{main:[[edge(gate.name)]]},[gate.name]:{main:[availability,create,get,remove].map(n=>[edge(n.name)])},...Object.fromEntries([availability,create,get,remove].map(n=>[n.name,{main:[[edge(result.name)]]}]))},settings:workspaceSettings};
 }
-if(process.argv[1]===fileURLToPath(import.meta.url))fs.writeFileSync(new URL('workspace-calendar.json',import.meta.url),JSON.stringify(calendarWorkflow(),null,2)+'\n');
+if(process.argv[1]===fileURLToPath(import.meta.url))fs.writeFileSync(new URL('testing/fixtures/workspace-calendar.json',import.meta.url),JSON.stringify(calendarWorkflow(),null,2)+'\n');

@@ -1,6 +1,6 @@
 import fs from 'node:fs';import path from 'node:path';import {fileURLToPath} from 'node:url';import assert from 'node:assert/strict';
 import {buildMultiagent} from './multiagent-workflows.mjs';
-const templates=()=>buildMultiagent(JSON.parse(fs.readFileSync(new URL('./hybrid-rag-query.json',import.meta.url))));
+const templates=()=>buildMultiagent(JSON.parse(fs.readFileSync(new URL('./testing/fixtures/hybrid-rag-query.json',import.meta.url))));
 /** Change only existing conversational workflows; preserve live tool configuration and credentials. */
 export function patchBlock6(authoritative){
  return templates().map(template=>{

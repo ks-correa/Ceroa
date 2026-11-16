@@ -1,0 +1,73 @@
+{
+  "id": "ceroaRagIngest20",
+  "name": "Ceroa - RAG - Ingestión documental",
+  "active": false,
+  "nodes": [
+    {
+      "id": "entry",
+      "name": "Evento documental autorizado",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ceroa-library-ingest-v1",
+        "authentication": "headerAuth",
+        "responseMode": "onReceived",
+        "options": {}
+      },
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "ceroa-library-ingest-private",
+      "credentials": {
+        "httpHeaderAuth": {
+          "name": "Ceroa biblioteca privada"
+        }
+      }
+    },
+    {
+      "id": "process-queue",
+      "name": "Ejecutar procesador compartido",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        300,
+        0
+      ],
+      "parameters": {
+        "source": "database",
+        "workflowId": {
+          "__rl": true,
+          "value": "ceroaDocumentProcessor22",
+          "mode": "id"
+        },
+        "mode": "once",
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Evento documental autorizado": {
+      "main": [
+        [
+          {
+            "node": "Ejecutar procesador compartido",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Bogota",
+    "executionTimeout": 240,
+    "saveDataSuccessExecution": "none",
+    "saveDataErrorExecution": "none",
+    "saveManualExecutions": false
+  }
+}

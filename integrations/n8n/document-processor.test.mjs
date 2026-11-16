@@ -4,18 +4,18 @@ import {readFile} from 'node:fs/promises';
 import {shareDocumentProcessor} from './document-processor.mjs';
 const load=async file=>JSON.parse(await readFile(new URL(file,import.meta.url),'utf8'));
 test('both adapters call one worker and retain the original channel contract',async()=>{
-  const worker=await load('document-processor.json');
-  for(const file of ['hybrid-rag-ingestion.json','hybrid-rag-sync.json']){
+  const worker=await load('testing/fixtures/document-processor.json');
+  for(const file of ['testing/fixtures/hybrid-rag-ingestion.json','testing/fixtures/hybrid-rag-sync.json']){
     const w=await load(file);assert.equal(w.nodes.length,2);
     assert.equal(w.nodes[1].parameters.workflowId.value,worker.id);
     assert.equal(w.nodes[1].parameters.options.waitForSubWorkflow,true);
   }
   assert.equal(worker.nodes.find(n=>n.id==='entry').type,'n8n-nodes-base.executeWorkflowTrigger');
   assert.equal(worker.nodes.filter(n=>n.id==='claim').length,1);
-  assert.equal((await load('hybrid-rag-ingestion.json')).nodes[0].parameters.path,'ceroa-library-ingest-v1');
+  assert.equal((await load('testing/fixtures/hybrid-rag-ingestion.json')).nodes[0].parameters.path,'ceroa-library-ingest-v1');
 });
 test('shared worker rejects absent, malformed and incomplete vector evidence before persistence',async()=>{
-  const w=await load('document-processor.json');
+  const w=await load('testing/fixtures/document-processor.json');
   const code=id=>w.nodes.find(n=>n.id===id).parameters.jsCode;
   const guard=new Function('$json',code('guard'));
   assert.deepEqual(guard({}),[]);
