@@ -3,6 +3,14 @@ import org.junit.jupiter.api.Test;
 import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 class AgentContractsTest {
+    @Test void operationalFollowUpWithDemonstrativesDoesNotBecomeFinancialAnalysis(){
+        for(String question:List.of("Explícame mejor cómo registrar ese pago, sin ejecutar cambios.","¿Cómo edito esa deuda?","¿Dónde agrego mi obligación?","¿Cómo registrar este abono?")){
+            assertEquals(Set.of(AgentContracts.Role.SUPPORT),AgentContracts.selectedRoles(question,false),question);
+            assertEquals(AgentContracts.Intent.SUPPORT,AgentContracts.intent(question,false),question);
+        }
+        assertEquals(Set.of(AgentContracts.Role.FINANCIAL),AgentContracts.selectedRoles("Analiza el saldo de mis deudas",false));
+        assertEquals(Set.of(AgentContracts.Role.RAG),AgentContracts.selectedRoles("Analiza este extracto",false));
+    }
     @Test void deterministicSpecialtiesDoNotUseSupportAsFallback(){
         assertEquals(Set.of(AgentContracts.Role.SUPPORT),AgentContracts.selectedRoles(AgentContracts.routingQuestion("¿Y eso?","Cómo registrar un pago",false),false));
         assertTrue(AgentContracts.selectedRoles(AgentContracts.routingQuestion("Quién ganará un partido mañana","Cómo registrar un pago",false),false).isEmpty());

@@ -58,10 +58,35 @@ class WorkspaceDraftProviderTest {
         user.setActive(false);assertStatus(403);user.setActive(true);
         when(actions.byCode(user.getId(),"CODE")).thenReturn(Optional.empty());assertStatus(404);when(actions.byCode(user.getId(),"CODE")).thenReturn(Optional.of(proposal));
         proposal.expiresAt=OffsetDateTime.now().minusMinutes(1);assertStatus(410);proposal.expiresAt=OffsetDateTime.now().plusMinutes(5);
-        proposal.kind="SUBSCRIPTION_INFO";assertStatus(400);verifyNoInteractions(dashboard);
+        proposal.kind="WELCOME";assertStatus(400);verifyNoInteractions(dashboard);
     }
     @Test void emptyAdapterConfigurationCannotInvokeProvider(){
         var disabled=new WorkspaceDraftService(actions,current,dashboard,"",KEY);
         assertEquals(503,assertThrows(ResponseStatusException.class,()->disabled.prepare("CODE")).getStatusCode().value());verifyNoInteractions(dashboard);
+    }
+    @Test void retriesKeepTheReviewedSnapshotWhenFinancialDataChanges(){
+        for(int i=0;i<2;i++)provider.expect(requestTo(URL)).andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("123.45")))
+            .andRespond(withSuccess(response("draft","false"),MediaType.APPLICATION_JSON));
+        var first=service.prepare("CODE");
+        when(dashboard.getSummary()).thenThrow(new AssertionError("Snapshot must not be recomputed"));
+        assertEquals(first,service.prepare("CODE"));assertNotNull(proposal.draftSnapshot);assertEquals("draft",proposal.draftProviderId);provider.verify();
+    }
+    @Test void timeoutRetainsSnapshotForReconciliationAndCannotAuthorizeConfirmation(){
+        provider.expect(requestTo(URL)).andRespond(withException(new java.net.SocketTimeoutException("ambiguous")));
+        assertStatus(503);assertNotNull(proposal.draftSnapshot);assertNull(proposal.draftProviderId);
+    }
+    @Test void changedEmailAndChangedProviderIdInvalidateTheExistingPreview(){
+        provider.expect(requestTo(URL)).andRespond(withSuccess(response("draft","false"),MediaType.APPLICATION_JSON));service.prepare("CODE");
+        user.setEmail("different@example.invalid");assertStatus(409);user.setEmail("owner@example.invalid");
+        provider.reset();provider.expect(requestTo(URL)).andRespond(withSuccess(response("different","false"),MediaType.APPLICATION_JSON));assertStatus(502);
+    }
+    @ParameterizedTest @ValueSource(strings={"UPCOMING_DUES","SUBSCRIPTION_INFO"})
+    void existingProposalKindsAlsoProvideAReviewableBoundDraft(String kind){
+        var dues=mock(UpcomingDueService.class);when(dues.getUpcomingDues()).thenReturn(List.of());
+        var subscriptions=mock(com.ceroa.repository.PlusSubscriptionRepository.class);
+        when(subscriptions.findFirstByUserIdOrderByCreatedAtDesc(user.getId())).thenReturn(Optional.empty());
+        var instance=new WorkspaceDraftService(actions,current,dashboard,dues,subscriptions,mock(PlusSubscriptionService.class),URL,KEY){@Override RestClient client(){return service.client();}};
+        proposal.kind=kind;provider.expect(requestTo(URL)).andExpect(jsonPath("$.recipient").value(user.getEmail())).andRespond(withSuccess(response("draft","false"),MediaType.APPLICATION_JSON));
+        var preview=instance.prepare("CODE");assertFalse(preview.path("message").asText().isBlank());assertFalse(preview.path("subject").asText().isBlank());assertEquals("draft",proposal.draftProviderId);verifyNoInteractions(dashboard);provider.verify();
     }
 }

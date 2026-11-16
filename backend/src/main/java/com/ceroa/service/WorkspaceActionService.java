@@ -31,6 +31,14 @@ public class WorkspaceActionService {
         var user=current.entityForUpdate();var a=actions.byCode(user.getId(),code).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
         if(a.status.equals("CONFIRMED"))return view(a);
         if(!a.status.equals("PROPOSED")||!a.expiresAt.isAfter(OffsetDateTime.now()))throw new ResponseStatusException(HttpStatus.GONE,"Propuesta vencida");
+        if(a.draftSnapshot!=null){
+            if(a.draftProviderId==null)throw new ResponseStatusException(HttpStatus.CONFLICT,"Comprueba el borrador antes de confirmar");
+            com.fasterxml.jackson.databind.JsonNode snapshot;
+            try{snapshot=new com.fasterxml.jackson.databind.ObjectMapper().readTree(a.draftSnapshot);}catch(Exception e){throw new ResponseStatusException(HttpStatus.CONFLICT);}
+            if(!user.isActive()||!user.getEmail().equals(snapshot.path("recipient").asText())||!a.id.toString().equals(snapshot.path("proposalId").asText())||!snapshot.path("subject").isTextual()||!snapshot.path("message").isTextual())throw new ResponseStatusException(HttpStatus.CONFLICT,"La vista previa ya no es valida");
+            a.eventId=events.mail(user,IntegrationEventService.MailKind.valueOf(a.kind),"confirmed-mail:"+a.id,Map.of("approvedSubject",snapshot.path("subject").asText(),"approvedMessage",snapshot.path("message").asText(),"draftId",a.draftProviderId));
+            a.status="CONFIRMED";return view(a);
+        }
         var payload=new LinkedHashMap<String,Object>();payload.put("asOf",OffsetDateTime.now().toString());
         switch(IntegrationEventService.MailKind.valueOf(a.kind)){
             case FINANCIAL_SUMMARY -> {var s=dashboard.getSummary();payload.put("totalRegisteredDebt",s.totalRegisteredDebt());payload.put("activeDebtCount",s.activeDebtCount());payload.put("requiredPayments",s.requiredPaymentsCurrentPeriod());payload.put("allocatedBudget",s.availableForDebt());payload.put("partialCoverage",s.partialCoverage());}

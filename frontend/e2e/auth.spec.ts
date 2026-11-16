@@ -16,11 +16,11 @@ test('local registration, backend confirmation, reload, login and remembered ema
   await page.getByLabel('Acepto los términos').check();
   await page.getByLabel('Acepto la política').check();
   await page.getByRole('button', { name: 'Crear cuenta', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Configuración financiera inicial' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Situación financiera inicial' })).toBeVisible();
   const cookie = (await context.cookies()).find(cookie => cookie.name === 'ceroa_session');
   expect(cookie?.httpOnly).toBe(true);
   await page.reload();
-  await expect(page.getByRole('heading', { name: 'Configuración financiera inicial' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Situación financiera inicial' })).toBeVisible();
   // Exercise the pre-existing logout endpoint solely to verify HU-009 across sessions.
   const csrf = await (await context.request.get(api + '/auth/csrf')).json();
   await context.request.post(api + '/auth/logout', { headers: { 'X-XSRF-TOKEN': csrf.token } });
@@ -29,7 +29,7 @@ test('local registration, backend confirmation, reload, login and remembered ema
   await page.getByLabel('Contraseña', { exact: true }).fill('Integration!23');
   await page.getByLabel('Recordar correo').check();
   await page.getByRole('button', { name: 'Iniciar sesión', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Configuración financiera inicial' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Situación financiera inicial' })).toBeVisible();
   const stored = await page.evaluate(() => ({ ...localStorage }));
   expect(stored.ceroa_remembered_email).toBe(email);
   expect(JSON.stringify(stored)).not.toContain('Integration!23');

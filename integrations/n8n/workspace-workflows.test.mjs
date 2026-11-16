@@ -9,6 +9,8 @@ test('native templates preserve exact backend values and keep untrusted names as
  const template=mailWorkflow().nodes.find(n=>n.id==='template').parameters.jsonOutput;
  const run=input=>JSON.parse(new Function('$json','return '+template.slice(3,-2))(input));
  assert.match(run({kind:'WELCOME',payload:{}}).message,/registrada correctamente/);
+ const approved=run({kind:'FINANCIAL_SUMMARY',payload:{approvedSubject:'Reviewed subject',approvedMessage:'Reviewed balance 123',totalRegisteredDebt:999}});
+ assert.equal(approved.subject,'Reviewed subject');assert.equal(approved.message,'Reviewed balance 123');
  const mail=run({kind:'UPCOMING_DUES',payload:{asOf:'synthetic',dues:[{name:'<script>alert(1)</script>',amount:'123.45',dueDate:'2026-11-09'}]}});
  assert(mail.message.includes('123.45'));assert(mail.message.includes('<script>'));assert.equal(mail.subject,'Tus próximos vencimientos');
  assert.equal(run({kind:'PASSWORD_RESET',payload:{}}).subject,undefined);

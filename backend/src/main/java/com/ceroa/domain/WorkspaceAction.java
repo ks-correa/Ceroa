@@ -11,6 +11,8 @@ public class WorkspaceAction {
     @Column(nullable=false,length=20) public String status="PROPOSED";
     @Column(name="expires_at",nullable=false) public OffsetDateTime expiresAt;
     @Column(name="event_id") public UUID eventId;
+    @Column(name="draft_snapshot",columnDefinition="text") public String draftSnapshot;
+    @Column(name="draft_provider_id",length=256) public String draftProviderId;
     @Column(name="created_at",nullable=false) public OffsetDateTime createdAt;
     @PrePersist void create(){if(id==null)id=UUID.randomUUID();createdAt=OffsetDateTime.now();}
 }

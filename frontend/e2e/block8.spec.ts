@@ -1,5 +1,5 @@
 import {test,expect} from '@playwright/test';
-const api='http://127.0.0.1:18088/api/v1';
+const api=process.env.BLOCK8_API_URL||'http://127.0.0.1:18088/api/v1';
 const reactWarnings=new WeakMap<object,string[]>();
 test.beforeAll(()=>{if(process.env.BLOCK8_SYNTHETIC!=='true')throw Error('Requires disposable Block 8 database and backend on port 18088');});
 test.beforeEach(async({page})=>{
@@ -61,4 +61,22 @@ test('React strategy update survives reload and assistant reads fresh strategy w
  await expect(page.getByRole('radio',{name:new RegExp(label)})).toHaveAttribute('aria-checked','true');
  const csrf=await (await context.request.get(api+'/auth/csrf')).json();const answer=await context.request.post(api+'/assistant/messages',{headers:{'X-XSRF-TOKEN':csrf.token},data:{message:'¿Qué estrategia de pago tengo activa?'}});
  expect(answer.status()).toBe(200);expect((await answer.json()).answer).toContain(label);await page.screenshot({path:'test-results/block8-strategy.png',fullPage:true});
+});
+
+test('Plus simulation is hypothetical and profile remains accessible across reload',async({page,context})=>{
+ const before=await (await context.request.get(api+'/debts')).json();
+ const payments=await (await context.request.get(api+'/payments')).json();
+ await page.getByRole('button',{name:'Simular',exact:true}).first().click();
+ await expect(page.getByLabel('Obligación a simular')).toBeVisible();
+ await page.getByLabel('Abono adicional (COP)').fill('10000');
+ const response=page.waitForResponse(r=>r.url()===api+'/simulations'&&r.request().method()==='POST');
+ await page.getByRole('button',{name:'Ejecutar simulación',exact:true}).click();
+ expect((await response).status()).toBe(200);
+ expect(await (await context.request.get(api+'/debts')).json()).toEqual(before);
+ expect(await (await context.request.get(api+'/payments')).json()).toEqual(payments);
+ await page.getByRole('button',{name:'Perfil',exact:true}).first().click();
+ await expect(page.getByText('demo@ceroa.local',{exact:true})).toBeVisible();
+ await page.reload();
+ await page.getByRole('button',{name:'Perfil',exact:true}).first().click();
+ await expect(page.getByText('demo@ceroa.local',{exact:true})).toBeVisible();
 });

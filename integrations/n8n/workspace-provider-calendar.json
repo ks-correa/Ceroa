@@ -1,0 +1,247 @@
+{
+  "id": "ceroaGoogleCalendarFinal",
+  "name": "Ceroa - CHRONOS Google Calendar MCP",
+  "active": false,
+  "nodes": [
+    {
+      "id": "hook",
+      "name": "Entrada autorizada",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ceroa-google-calendar",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "ceroa-google-calendar"
+    },
+    {
+      "id": "provider",
+      "name": "Proveedor Google controlado",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "parameters": {
+        "method": "POST",
+        "url": "http://workspace-provider:3100/calendar",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($(\"Entrada autorizada\").first().json.body) }}",
+        "options": {
+          "timeout": 14000
+        }
+      },
+      "position": [
+        500,
+        0
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "response",
+      "name": "Responder resultado verificado",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      },
+      "position": [
+        800,
+        0
+      ]
+    },
+    {
+      "id": "failure",
+      "name": "Conservar resultado incierto",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\"error\":\"PROVIDER_UNCONFIRMED\"}",
+        "options": {
+          "responseCode": 503
+        }
+      },
+      "position": [
+        800,
+        220
+      ]
+    },
+    {
+      "id": "availability",
+      "name": "Solo lectura MCP",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "parameters": {
+        "conditions": {
+          "options": {
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.body.operation === \"availability\" }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "position": [
+        220,
+        0
+      ]
+    },
+    {
+      "id": "mcp",
+      "name": "MCP Calendar disponibilidad",
+      "type": "@n8n/n8n-nodes-langchain.mcpClient",
+      "typeVersion": 1.1,
+      "parameters": {
+        "serverTransport": "httpStreamable",
+        "endpointUrl": "http://workspace-provider:3100/mcp",
+        "authentication": "headerAuth",
+        "tool": {
+          "__rl": true,
+          "mode": "id",
+          "value": "calendar_availability"
+        },
+        "inputMode": "json",
+        "jsonInput": "={{ JSON.stringify({start:$(\"Entrada autorizada\").first().json.body.start,end:$(\"Entrada autorizada\").first().json.body.end}) }}",
+        "options": {
+          "timeout": 14000,
+          "convertToBinary": false
+        }
+      },
+      "position": [
+        500,
+        -220
+      ],
+      "onError": "continueErrorOutput"
+    },
+    {
+      "id": "normalize",
+      "name": "Validar disponibilidad MCP",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "={{ JSON.stringify($json.structuredContent ?? ($json.content ? (typeof $json.content[0].text === \"string\" ? JSON.parse($json.content[0].text) : $json.content[0].text) : $json)) }}",
+        "options": {}
+      },
+      "position": [
+        700,
+        -220
+      ],
+      "onError": "continueErrorOutput"
+    }
+  ],
+  "connections": {
+    "Entrada autorizada": {
+      "main": [
+        [
+          {
+            "node": "Solo lectura MCP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Proveedor Google controlado": {
+      "main": [
+        [
+          {
+            "node": "Responder resultado verificado",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Conservar resultado incierto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Solo lectura MCP": {
+      "main": [
+        [
+          {
+            "node": "MCP Calendar disponibilidad",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Proveedor Google controlado",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MCP Calendar disponibilidad": {
+      "main": [
+        [
+          {
+            "node": "Validar disponibilidad MCP",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Conservar resultado incierto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validar disponibilidad MCP": {
+      "main": [
+        [
+          {
+            "node": "Responder resultado verificado",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Conservar resultado incierto",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "America/Bogota",
+    "executionTimeout": 120,
+    "saveDataSuccessExecution": "none",
+    "saveDataErrorExecution": "none",
+    "saveManualExecutions": false
+  }
+}
