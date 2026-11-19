@@ -18,9 +18,11 @@ public class AssistantErrorAdvice {
     }
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<Map<String,String>> status(ResponseStatusException error) {
+        if(error instanceof com.ceroa.service.AssistantProviderGate.Throttled throttled)
+            return ResponseEntity.status(429).header("Retry-After",String.valueOf(throttled.retryAfter)).body(Map.of("code","ASSISTANT_BUSY","message",throttled.getReason()));
         int status=error.getStatusCode().value();
         String message=switch(status) {
-            case 429 -> "Espera un minuto antes de enviar otra consulta.";
+            case 429 -> "Has alcanzado el límite temporal de solicitudes o propuestas pendientes. Espera unos segundos antes de intentarlo de nuevo.";
             case 403 -> "No tienes autorización para esta consulta.";
             case 410 -> "La consulta expiró. Envía una nueva pregunta.";
             default -> "No pude consultar tu información. Intenta nuevamente; no se realizó ningún cambio.";

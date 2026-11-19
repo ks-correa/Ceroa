@@ -65,3 +65,20 @@ test('a known OAuth rejection before draft creation can retry safely after recon
  let calls=0;const p=new WorkspaceProvider(':memory:',{createDraft:async()=>{if(++calls===1)throw new ProviderError(503,'GOOGLE_OAUTH_RECONNECT_REQUIRED',true);return receipt;}});
  try{await assert.rejects(p.draft(input));assert.equal(p.db.prepare('SELECT status FROM drafts').get().status,'RETRY_SAFE');assert.deepEqual(await p.draft(input),receipt);assert.equal(calls,2);}finally{p.close();}
 });
+
+test('read-only availability accepts a bounded range while event writes stay thirty minutes',async()=>{
+ const google={availability:async(start,end)=>({available:true,busy:[],start,end})};const p=new WorkspaceProvider(':memory:',google);
+ try{
+  const start='2026-11-19T09:00:00-05:00',end='2026-11-19T17:00:00-05:00';
+  assert.deepEqual((await p.calendar({operation:'availability',start,end},true)).busy,[]);
+  await assert.rejects(p.calendar({operation:'create',start,end,eventId:'a'.repeat(32),email:input.recipient}),e=>e.status===400);
+  await assert.rejects(p.calendar({operation:'availability',start,end:'2026-12-19T17:00:00-05:00'},true),e=>e.status===400);
+ }finally{p.close();}
+});
+test('availability returns only validated busy intervals without event details',async()=>{
+ const g=new GoogleProvider({calendarId:'support'});
+ g.request=async()=>({calendars:{support:{busy:[{start:'2026-11-19T10:00:00-05:00',end:'2026-11-19T10:30:00-05:00',summary:'private'}]}}});
+ const result=await g.availability('2026-11-19T09:00:00-05:00','2026-11-19T17:00:00-05:00');
+ assert.equal(result.available,false);assert.deepEqual(Object.keys(result.busy[0]),['start','end']);
+ g.request=async()=>({calendars:{support:{busy:[{start:'invalid',end:'invalid'}]}}});await assert.rejects(g.availability('start','end'));
+});

@@ -36,7 +36,7 @@ Supabase y Storage conservan sus datos remotos. `ceroa_n8n_data` conserva la con
 
 ## n8n y credenciales
 
-En un volumen nuevo se verifican los hashes, se importan los 26 workflows con IDs estables y se asocian credenciales por **nombre lógico y tipo**, sin depender de IDs del escritorio. Las claves internas de `.env` crean las credenciales Header Auth correspondientes; `GEMINI_API_KEY` permite preparar Gemini. El gateway Supabase usa una credencial restringida, nunca la contraseña financiera ni una clave con acceso financiero general.
+En un volumen nuevo se verifican los hashes, se importan los 21 workflows con IDs estables y se asocian credenciales por **nombre lógico y tipo**, sin depender de IDs del escritorio. Las claves internas de `.env` crean las credenciales Header Auth correspondientes; `GEMINI_API_KEY` permite preparar Gemini. El gateway Supabase usa una credencial restringida, nunca la contraseña financiera ni una clave con acceso financiero general.
 
 La inicialización indica únicamente los nombres de configuración faltantes. Publica los webhooks y subworkflows preparados; deja sin publicar los flujos incompletos. Telegram, Drive, recordatorios, Centinela, sincronización documental y otros consumidores requieren activación manual. **Sheets permanece deshabilitado; sus eventos pendientes se conservan.**
 
@@ -55,7 +55,7 @@ Gmail durable y Calendar/MCP requieren `COMPOSE_PROFILES=google`, OAuth válido,
 
 Telegram requiere `COMPOSE_PROFILES=telegram` (o `google,telegram`), su credencial y un webhook público protegido. Tras comprobar que el escritorio anterior está detenido, publica su workflow y actualiza el webhook con `integrations/n8n/sync-telegram-tunnel.ps1` si usas el túnel local. No se descartan actualizaciones pendientes.
 
-MCP personal requiere las credenciales Header Auth `Ceroa MCP personal entrada` y `Ceroa MCP personal backend`; esta última contiene un token personal con scopes emitido por Ceroa. MCP externo requiere `MCP_EXTERNAL_URL` y `Ceroa MCP externo`. No se publican automáticamente.
+CHRONOS usa el webhook durable de Calendar y el proveedor Google con MCP de disponibilidad. Los cuatro workflows MCP opcionales sin configurar y el webhook Calendar anterior fueron retirados del runtime y del manifiesto. La indexación administrativa aprobada del RAG se conserva como herramienta manual.
 
 SMTP, OAuth Google/Microsoft y Mercado Pago sandbox son opcionales y necesitan credenciales reales locales. Los callbacks de acceso son `/login/oauth2/code/google` y `/login/oauth2/code/microsoft` sobre `OAUTH_REDIRECT_BASE_URL`.
 
@@ -93,3 +93,11 @@ No uses `down -v` para detener o trasladar Ceroa. Los perfiles opcionales no deb
 Para verificar el inicializador y los contratos: `node --test integrations/n8n/*.test.mjs integrations/n8n/rag/*.test.mjs integrations/n8n/testing/*.test.mjs`. El perfil `test` incluye PostgreSQL aislado únicamente para validaciones con variables sintéticas; nunca debe apuntar a Supabase operativo.
 
 Gemini puede devolver PARTIAL o FAILED y debe abstenerse ante tasas contradictorias; ORACLE + ATLAS continúa siendo variable. Las siete pruebas opt-in requieren proveedores/configuración adicional. Los fixtures simulados de Gmail no prueban envíos reales; Calendar/MCP productivo necesita OAuth y validación independiente. El despliegue productivo mantiene sus prerrequisitos y estado NO-GO; arrancar Docker no lo autoriza.
+
+## Consultas de correo y asesorías
+
+El chat devuelve propuestas de correo estructuradas y abre una vista previa con destinatario, asunto y contenido. Solo la confirmación explícita autoriza el envío al correo registrado. Una solicitud a otra dirección recibe orientación para revisar el perfil; no se cambia silenciosamente el destinatario.
+
+Las preguntas sobre horarios consultan los intervalos ocupados de Google Calendar y muestran opciones libres y un selector de fecha. Se ofrecen citas de treinta minutos en Bogotá, en días hábiles, con una hora de anticipación y hasta dos semanas. La disponibilidad se vuelve a comprobar al proponer y confirmar. Un fallo de Calendar muestra orientación y no se interpreta como agenda libre.
+
+El bloqueo por reservas estimadas de iteraciones está desactivado por defecto (`ASSISTANT_ESTIMATED_MINUTE_LIMIT_ENABLED=false`). Siguen activos la concurrencia, el límite de solicitudes por usuario y la pausa ante un límite real informado por el proveedor. `ASSISTANT_PROVIDER_CALLS_PER_MINUTE` solo se aplica cuando se habilita expresamente el presupuesto preventivo estimado; no representa una medición de llamadas reales.

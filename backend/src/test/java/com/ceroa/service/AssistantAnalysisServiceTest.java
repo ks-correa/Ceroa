@@ -9,6 +9,12 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class AssistantAnalysisServiceTest {
+    @Test void groundsIssuedMailConfirmationWithoutAcceptingInventedCodes(){
+        String instruction="Para autorizar el envío a tu correo registrado escribe: Confirmar envio ABCDEFGHIJKLMNOPQRST";
+        var facts=Map.of("f1",new AssistantAnalysisService.Fact("workspaceProposal/instruction",TextNode.valueOf(instruction)));
+        assertEquals(instruction,service.resolve(facts,"Confirmar envio ABCDEFGHIJKLMNOPQRST"));
+        assertThrows(IllegalArgumentException.class,()->service.resolve(facts,"Confirmar envio ZZZZZZZZZZZZZZZZZZZZ"));
+    }
     final AssistantAnalysisService service=new AssistantAnalysisService(new ObjectMapper(),null,null,null,null,null,null,null,null);
     @Test void typedDocumentNumbersCannotBypassUnitAwareDocumentComparisons(){
         var facts=Map.of("f1",new AssistantAnalysisService.Fact("financialDocuments/trace/verifiedData/analysis/facts/0/numericValue",DecimalNode.valueOf(new BigDecimal("100"))),"f2",new AssistantAnalysisService.Fact("financialDocuments/trace/verifiedData/analysis/facts/1/numericValue",DecimalNode.valueOf(new BigDecimal("2"))));

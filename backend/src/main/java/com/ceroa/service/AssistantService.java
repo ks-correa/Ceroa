@@ -25,7 +25,8 @@ public class AssistantService {
     private record CachedLibrary(com.ceroa.api.dto.DocumentContracts.Result result,com.ceroa.api.dto.DocumentContracts.Intent intent,LibraryEvidence response) {}
     public record DocumentEvidence(String status,Map<String,RagVectorStore.Chunk> sources) {}
     public enum Intent { debts, highest_interest, upcoming, payments, strategy, progress, write_request, unknown }
-    public record Reply(String answer, String intent, List<com.ceroa.api.dto.DocumentContracts.Document> documents, UUID traceId,String functionalStatus) {
+    public record Reply(String answer, String intent, List<com.ceroa.api.dto.DocumentContracts.Document> documents, UUID traceId,String functionalStatus,WorkspaceActionService.Proposal mailProposal,SupportBookingService.Availability bookingAvailability) {
+        public Reply(String answer,String intent,List<com.ceroa.api.dto.DocumentContracts.Document> documents,UUID traceId,String functionalStatus){this(answer,intent,documents,traceId,functionalStatus,null,null);}
         public Reply(String answer,String intent){this(answer,intent,List.of(),null,"COMPLETE");}
         public Reply(String answer,String intent,List<com.ceroa.api.dto.DocumentContracts.Document> documents,UUID traceId){this(answer,intent,documents,traceId,"COMPLETE");}
     }
@@ -52,6 +53,8 @@ public class AssistantService {
         final Map<com.ceroa.api.dto.DocumentContracts.Query,CachedLibrary> libraryCache=new HashMap<>();
         final Set<String> partialLibraryFacts=new HashSet<>();
         AgentRuntime runtime;
+        WorkspaceActionService.Proposal mailProposal;
+        Reply bookingGuidance;
         DocumentEvidence approvedKnowledge;
         int providerReservation;
         Channel channel;
@@ -170,6 +173,9 @@ public class AssistantService {
             long workflowStart=System.nanoTime();
             HttpResponse<String> response;
             try{response=client.send(request,HttpResponse.BodyHandlers.ofString());}finally{job.metrics.stage("n8nRoundTrip",System.nanoTime()-workflowStart);}
+            // A successful proposal is authoritative even if the model fails to render its confirmation instruction.
+            if(job.mailProposal!=null){job.result=communicationReply(job.mailProposal);recordTurn(conversation,context,"communication",job.question,job.result.answer());return job.result;}
+            if(job.bookingGuidance!=null&&(job.result==null||!"COMPLETE".equals(job.result.functionalStatus()))){job.result=job.bookingGuidance;recordTurn(conversation,context,"support",job.question,job.result.answer());return job.result;}
             if (response.statusCode()!=200 || job.result==null) {
                 log.warn("Assistant workflow unavailable: status={}, prepared={}, toolCalls={}, libraryCalls={}, audio={}",
                     response.statusCode(),!job.question.isBlank(),job.toolCalls,job.libraryCalls,hasAudio);
@@ -216,20 +222,43 @@ public class AssistantService {
         var confirmation=java.util.regex.Pattern.compile("(?i)^\\s*confirmar env[ií]o ([A-Z]{20})\\s*$").matcher(message);
         if(confirmation.matches()){var result=workspaceActions.confirmMail(confirmation.group(1).toUpperCase(Locale.ROOT));return new Reply(result.status().equals("CONFIRMED")?"Autorización registrada. El correo queda pendiente de envío; todavía no hay confirmación de Gmail.":result.instruction(),"communication");}
         String q=java.text.Normalizer.normalize(message.toLowerCase(Locale.ROOT),java.text.Normalizer.Form.NFD).replaceAll("\\p{M}","").replaceAll("[¿?!.]","").strip();
+        if(q.matches("(?s).*(?:asesoria|asesorias|cita).*" )&&q.matches("(?s).*(?:horario|disponib|agendar|reservar|quiero una|necesito una).*")){
+            LocalDate date=null;
+            var dateMatch=Pattern.compile("\\b(\\d{4}-\\d{2}-\\d{2})\\b").matcher(message);
+            try{if(dateMatch.find())date=LocalDate.parse(dateMatch.group(1));else if(q.contains("pasado manana"))date=LocalDate.now(ZONE).plusDays(2);else if(q.contains("manana")&&!q.contains("la manana"))date=LocalDate.now(ZONE).plusDays(1);else if(q.contains("hoy"))date=LocalDate.now(ZONE);}catch(java.time.DateTimeException invalid){return new Reply("Esa fecha no es válida. Escribe, por ejemplo, ‘horarios para una asesoría mañana’, o usa una fecha en formato año-mes-día.","support");}
+            var availability=supportBookings.availableSlots(date);
+            String options=availability.slots().stream().limit(6).map(s->"• "+s.start().format(java.time.format.DateTimeFormatter.ofPattern("EEEE d 'de' MMMM, HH:mm",Locale.forLanguageTag("es-CO")))).collect(java.util.stream.Collectors.joining("\n"));
+            return new Reply(availability.message()+(options.isEmpty()?"":"\n\n"+options),"support",List.of(),null,"COMPLETE",null,availability);
+        }
         IntegrationEventService.MailKind kind=switch(q){
             case "enviame al correo mis proximos vencimientos","enviame mis proximos vencimientos al correo" -> IntegrationEventService.MailKind.UPCOMING_DUES;
             case "enviame un resumen financiero a mi correo","enviame al correo mi resumen financiero" -> IntegrationEventService.MailKind.FINANCIAL_SUMMARY;
             case "enviame informacion de mi suscripcion al correo" -> IntegrationEventService.MailKind.SUBSCRIPTION_INFO;
             default -> null;
         };
-        return kind==null?null:new Reply(workspaceActions.propose(kind).instruction(),"communication");
+        if(kind==null&&q.matches("(?s).*(?:\\benvia\\w*|\\bmanda\\w*|\\benviar\\b).*" )&&q.matches("(?s).*(?:correo|email|e-mail).*" )&&!q.matches("(?s).*\\bno\\s+(?:me\\s+)?(?:env|mand).*")){
+            if(q.matches("(?s).*(?:vencimiento|proximos pagos).*"))kind=IntegrationEventService.MailKind.UPCOMING_DUES;
+            else if(q.contains("suscripcion"))kind=IntegrationEventService.MailKind.SUBSCRIPTION_INFO;
+            else if(q.matches("(?s).*(?:deuda|financ|saldo|obligacion).*"))kind=IntegrationEventService.MailKind.FINANCIAL_SUMMARY;
+            else return new Reply("Puedo preparar un correo con tu resumen financiero, tus próximos vencimientos o tu suscripción. Indica cuál quieres y te mostraré el borrador antes de enviarlo.","communication");
+        }
+        if(kind==null)return null;
+        var recipient=Pattern.compile("[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}").matcher(message);
+        while(recipient.find())if(!recipient.group().equalsIgnoreCase(current.entity().getEmail()))
+            return new Reply("Los resúmenes se envían al correo registrado en tu cuenta. La dirección que indicaste no coincide. Puedes revisar tu correo en tu perfil o pedirme ‘Envíame un resumen financiero a mi correo’ para preparar una vista previa con el destinatario correcto.","communication");
+        return communicationReply(workspaceActions.propose(kind));
     }
+    private Reply communicationReply(WorkspaceActionService.Proposal proposal){return new Reply("Preparé una propuesta de correo. Revisa el destinatario y el contenido en la vista previa antes de confirmar. Todavía no se ha enviado.\n\n"+proposal.instruction(),"communication",List.of(),null,"COMPLETE",proposal,null);}
     private Reply bookingReply(SupportBookingService.View result){return new Reply("Estado de asesoria: "+result.status()+". Horario: "+result.start()+". "+(result.meetUrl()==null?"":result.meetUrl()+" ")+result.instruction(),"support");}
     public AssistantAnalysisService.Evidence bookingTool(UUID id,String operation,String value){return withJob(id,"supportBooking",job->{
         guard(job,"support.booking");if(activeScope.get()==null||activeScope.get().role!=AgentContracts.Role.SUPPORT||job.selectedDocument!=null)throw AgentRuntime.denied();
         String requested=java.text.Normalizer.normalize(job.question.toLowerCase(Locale.ROOT),java.text.Normalizer.Form.NFD).replaceAll("\\p{M}","");
         if(operation.equals("propose")&&requested.contains("disponibilidad")&&!requested.matches("(?s).*(?:propon|propuest|reserv|agend|program).*"))throw AgentRuntime.denied();
-        Object result=switch(operation){case "availability"->supportBookings.availability(OffsetDateTime.parse(value));case "propose"->supportBookings.propose(OffsetDateTime.parse(value));case "get"->supportBookings.get(value);case "cancel"->supportBookings.proposeCancellation(value);default->throw AgentRuntime.denied();};
+        Object result;
+        try{result=switch(operation){case "availability"->value==null||value.isBlank()?supportBookings.availableSlots(null):supportBookings.availability(OffsetDateTime.parse(value));case "propose"->supportBookings.propose(OffsetDateTime.parse(value));case "get"->supportBookings.get(value);case "cancel"->supportBookings.proposeCancellation(value);default->throw AgentRuntime.denied();};}
+        catch(java.time.DateTimeException|IllegalArgumentException error){result=Map.of("status","NEEDS_DATE","message","Necesito una fecha y hora válidas en Bogotá para consultar ese horario. Pregunta qué día prefiere el usuario; puede consultar los horarios disponibles en el chat. No se ha reservado nada.");}
+        if(result instanceof Map<?,?> data&&("NEEDS_DATE".equals(data.get("status"))||"CALENDAR_DISABLED".equals(data.get("status"))))
+            job.bookingGuidance=new Reply("Para ayudarte con la asesoría, indica el día que prefieres o pregunta ‘¿Qué horarios hay disponibles para una asesoría?’. Puedes elegir un día hábil dentro de las próximas dos semanas, entre las 9:00 a. m. y las 4:30 p. m., hora de Bogotá. Si la agenda no responde, vuelve a consultar. Todavía no hay una reserva.","support");
         return analysis.evidence(job.facts,json.valueToTree(result),"supportBooking");
     });}
     public Object authorizeMcpClient(UUID id){return withJob(id,"externalMcp",job->{guard(job,"support.external");if(activeScope.get()==null||activeScope.get().role!=AgentContracts.Role.SUPPORT||job.selectedDocument!=null)throw AgentRuntime.denied();return Map.of("authorized",true,"server","CONTROLLED_CAPABILITIES","tool","ceroa_capabilities");});}
@@ -239,7 +268,8 @@ public class AssistantService {
     });}
     public AssistantAnalysisService.Evidence proposeMail(UUID id,IntegrationEventService.MailKind kind){return withJob(id,"communicationProposal",job->{
         guard(job,"communications.propose");var scope=activeScope.get();if(scope==null||job.selectedDocument!=null||scope.role==AgentContracts.Role.SUPPORT&&kind!=IntegrationEventService.MailKind.SUBSCRIPTION_INFO||scope.role==AgentContracts.Role.FINANCIAL&&!Set.of(IntegrationEventService.MailKind.FINANCIAL_SUMMARY,IntegrationEventService.MailKind.UPCOMING_DUES).contains(kind))throw AgentRuntime.denied();
-        return analysis.evidence(job.facts,json.valueToTree(workspaceActions.propose(kind)),"workspaceProposal");
+        if(job.mailProposal==null)job.mailProposal=workspaceActions.propose(kind);
+        return analysis.evidence(job.facts,json.valueToTree(job.mailProposal),"workspaceProposal");
     });}
     private boolean isDebtListQuestion(String question) {
         String plain=java.text.Normalizer.normalize(question.toLowerCase(Locale.ROOT),java.text.Normalizer.Form.NFD)
@@ -712,8 +742,9 @@ public class AssistantService {
         requests.values().forEach(v->v.removeIf(t->t.isBefore(now.minusSeconds(60))));
         requests.entrySet().removeIf(e->e.getValue().isEmpty());
         var times=requests.computeIfAbsent(user,u->new ArrayList<>());
-        if (times.size()>=5 || jobs.values().stream().anyMatch(j->j.user.equals(user)) || jobs.size()>=100)
-            throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS);
+        if(jobs.values().stream().anyMatch(j->j.user.equals(user))||jobs.size()>=100)
+            throw new AssistantProviderGate.Throttled("Hay una consulta en curso. Vuelve a intentarlo cuando termine.",2);
+        if(times.size()>=5)throw new AssistantProviderGate.Throttled("Has enviado varias consultas seguidas. Intenta de nuevo en unos segundos.",Duration.between(now,times.getFirst().plusSeconds(60)).toSeconds()+1);
         times.add(now);
     }
     private synchronized Job start(UUID user,UUID id) {

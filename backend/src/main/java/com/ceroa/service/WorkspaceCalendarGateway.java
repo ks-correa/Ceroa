@@ -20,5 +20,18 @@ public class WorkspaceCalendarGateway {
   if(result==null||result.toString().length()>24000)throw new IllegalStateException("Respuesta Calendar invalida");return result;
  }
  public boolean isEnabled(){return enabled&&key.length()>=32&&url.matches("http://n8n:5678/webhook/[A-Za-z0-9/_-]+");}
+ public record Busy(Instant start,Instant end){}
+ public java.util.List<Busy> busy(OffsetDateTime start,OffsetDateTime end){
+  var response=call("availability",start,end,null,null);
+  if(!response.path("busy").isArray())throw new IllegalStateException("Calendar no devolvió los intervalos verificados");
+  var result=new ArrayList<Busy>();
+  for(var interval:response.path("busy")){
+   var from=OffsetDateTime.parse(interval.path("start").asText()).toInstant();
+   var to=OffsetDateTime.parse(interval.path("end").asText()).toInstant();
+   if(!to.isAfter(from))throw new IllegalStateException("Intervalo Calendar inválido");
+   result.add(new Busy(from,to));
+  }
+  return List.copyOf(result);
+ }
  public boolean available(OffsetDateTime start,OffsetDateTime end){return call("availability",start,end,null,null).path("available").asBoolean(false);}
 }

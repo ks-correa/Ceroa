@@ -268,6 +268,8 @@ public class AssistantAnalysisService {
                 candidates.add(fact.value().asText());
             } else if(fact.value().isTextual()) {
                 String value=fact.value().asText();candidates.add(value);
+                if(fact.source().equals("workspaceProposal/instruction")&&value.contains("Confirmar envio "))
+                    candidates.add(value.substring(value.indexOf("Confirmar envio ")));
                 if(value.matches("\\d+(?:[.,]\\d+)?\\s*%")) {
                     String compact=value.replace(" ","");
                     candidates.add(compact.replace(',','.'));

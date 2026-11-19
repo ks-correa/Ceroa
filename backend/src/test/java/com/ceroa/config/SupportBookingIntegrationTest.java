@@ -11,6 +11,21 @@ class SupportBookingIntegrationTest {
  @BeforeEach void setup(){bookings.deleteAll();owner=new User();owner.setFullName("Calendar fixture");owner.setEmail(UUID.randomUUID()+"@example.invalid");owner=users.saveAndFlush(owner);as(owner.getId());slot=LocalDate.now(ZoneId.of("America/Bogota")).plusDays(2).atTime(10,0).atOffset(ZoneOffset.ofHours(-5));while(slot.getDayOfWeek().getValue()>5)slot=slot.plusDays(1);when(calendar.available(any(),any())).thenReturn(true);}
  void as(UUID id){var c=SecurityContextHolder.createEmptyContext();c.setAuthentication(new UsernamePasswordAuthenticationToken(id.toString(),null,List.of()));SecurityContextHolder.setContext(c);}
  @AfterEach void clear(){SecurityContextHolder.clearContext();}
+ @Test void listsOnlyFreeSlotsAndNeverCreatesEvents(){
+  when(calendar.busy(any(),any())).thenReturn(List.of(new WorkspaceCalendarGateway.Busy(slot.toInstant(),slot.plusMinutes(30).toInstant())));
+  var result=service.availableSlots(slot.toLocalDate());
+  assertEquals("AVAILABLE",result.status());assertEquals(15,result.slots().size());
+  assertFalse(result.slots().stream().anyMatch(s->s.start().toInstant().equals(slot.toInstant())));
+  verify(calendar,never()).call(eq("create"),any(),any(),any(),any());
+ }
+ @Test void missingCalendarDataIsNotReportedAsFreeTime(){
+  when(calendar.busy(any(),any())).thenThrow(new IllegalStateException());
+  var result=service.availableSlots(slot.toLocalDate());assertEquals("UNAVAILABLE",result.status());assertTrue(result.slots().isEmpty());assertTrue(result.message().contains("volver a consultar"));
+ }
+ @Test void invalidDatesGuideTheUserWithoutCallingCalendar(){
+  assertEquals("NEEDS_DATE",service.availableSlots(LocalDate.now(ZoneId.of("America/Bogota")).minusDays(1)).status());
+  assertEquals("NEEDS_DATE",service.availability(null).get("status"));verify(calendar,never()).busy(any(),any());
+ }
  @Test void proposalDoesNotCreateAndOtherOwnerCannotConfirm(){var p=service.propose(slot);verify(calendar,never()).call(eq("create"),any(),any(),any(),any());as(UUID.randomUUID());assertThrows(RuntimeException.class,()->service.confirm(p.code()));}
  @Test void expiredProposalAndOccupiedSlotCannotCreate(){var p=service.propose(slot);var b=bookings.findAll().getFirst();b.expiresAt=OffsetDateTime.now().minusMinutes(1);bookings.saveAndFlush(b);assertThrows(RuntimeException.class,()->service.confirm(p.code()));var p2=service.propose(slot.plusMinutes(30));when(calendar.available(any(),any())).thenReturn(false);assertEquals("CONFLICT",service.confirm(p2.code()).status());verify(calendar,never()).call(eq("create"),any(),any(),any(),any());}
  @Test void confirmedProviderProofIsRequiredAndConfirmIsIdempotent() throws Exception {var p=service.propose(slot);when(calendar.call(eq("create"),any(),any(),any(),any())).thenAnswer(i->json.readTree("{\"id\":\""+i.getArgument(3)+"\",\"status\":\"confirmed\",\"start\":{\"dateTime\":\""+slot+"\"},\"end\":{\"dateTime\":\""+slot.plusMinutes(30)+"\"},\"hangoutLink\":\"https://meet.google.com/abc-defg-hij\"}"));assertEquals("CONFIRMED",service.confirm(p.code()).status());service.confirm(p.code());verify(calendar,times(1)).call(eq("create"),any(),any(),any(),any());var cancel=service.proposeCancellation(p.code());String nonce=cancel.instruction().substring(cancel.instruction().lastIndexOf(' ')+1);when(calendar.call(eq("delete"),any(),any(),any(),any())).thenReturn(json.createObjectNode());assertThrows(RuntimeException.class,()->service.confirmCancellation(p.code(),"wrong"));assertEquals("CANCELLED",service.confirmCancellation(p.code(),nonce).status());assertNull(bookings.findAll().getFirst().activeSlot);}

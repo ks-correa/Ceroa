@@ -188,3 +188,29 @@ it('cancels a pending microphone request when the panel closes', async () => {
     else Reflect.deleteProperty(navigator, 'mediaDevices');
   }
 });
+
+it('opens a structured mail preview and sends nothing until the user confirms', async()=>{
+ const code='ABCDEFGHIJKLMNOPQRST';
+ vi.mocked(apiRequest).mockResolvedValueOnce({answer:'Propuesta preparada.',mailProposal:{confirmationCode:code}})
+  .mockResolvedValueOnce({recipient:'fixture@example.invalid',subject:'Resumen financiero',message:'Contenido verificado',provider:'GOOGLE'})
+  .mockResolvedValueOnce({answer:'Autorización registrada.'});
+ render(<AssistantFab/>);fireEvent.click(screen.getByRole('button',{name:'Abrir asistente financiero'}));
+ fireEvent.change(screen.getByRole('textbox'),{target:{value:'Manda un correo con mis deudas'}});fireEvent.click(screen.getByRole('button',{name:'Enviar pregunta'}));
+ await screen.findByText('Contenido verificado');expect(screen.getByText('Para: fixture@example.invalid')).toBeTruthy();
+ expect(apiRequest).toHaveBeenCalledTimes(2);expect(vi.mocked(apiRequest).mock.calls[1][0]).toBe('/workspace-actions/'+code+'/draft');
+ await waitFor(()=>expect(screen.getByRole('button',{name:'Confirmar propuesta'})).toHaveProperty('disabled',false));
+ fireEvent.click(screen.getByRole('button',{name:'Confirmar propuesta'}));await screen.findByText('Autorización registrada.');
+ expect(JSON.parse(vi.mocked(apiRequest).mock.calls[2][1]!.body as string).message).toBe('Confirmar envio '+code);
+ expect(screen.queryByRole('region',{name:'Revisión de correo'})).toBeNull();
+});
+it('shows calendar slots and requires a separate confirmation after choosing one',async()=>{
+ const slot={start:'2026-11-20T10:00:00-05:00',end:'2026-11-20T10:30:00-05:00'};
+ vi.mocked(apiRequest).mockResolvedValueOnce({answer:'Consulté Calendar.',bookingAvailability:{status:'AVAILABLE',message:'Elige un horario.',timezone:'America/Bogota',minDate:'2026-11-19',maxDate:'2026-12-03',slots:[slot]}})
+  .mockResolvedValueOnce({code:'ABCDEFGHIJKLMNOPQRST',status:'PROPOSED',start:slot.start});
+ render(<AssistantFab/>);fireEvent.click(screen.getByRole('button',{name:'Abrir asistente financiero'}));
+ fireEvent.change(screen.getByRole('textbox'),{target:{value:'Horarios para asesoría'}});fireEvent.click(screen.getByRole('button',{name:'Enviar pregunta'}));
+ const panel=await screen.findByRole('region',{name:'Horarios de asesoría'});expect(screen.queryByRole('button',{name:'Confirmar asesoría'})).toBeNull();
+ const slotButton=Array.from(panel.querySelectorAll('button')).find(b=>b.textContent?.includes('10:00'))!;fireEvent.click(slotButton);
+ await screen.findByRole('button',{name:'Confirmar asesoría'});expect(apiRequest).toHaveBeenCalledTimes(2);
+ expect(vi.mocked(apiRequest).mock.calls[1][0]).toBe('/support/bookings');
+});

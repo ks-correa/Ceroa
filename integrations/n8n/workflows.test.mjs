@@ -1,9 +1,9 @@
 import {test} from 'node:test';import assert from 'node:assert/strict';import fs from 'node:fs';import {digest,inspect} from './bootstrap.mjs';
 const manifest=JSON.parse(fs.readFileSync(new URL('./workflows.manifest.json',import.meta.url)));const workflows=manifest.workflows.map(e=>JSON.parse(fs.readFileSync(new URL('./workflows/'+e.file,import.meta.url))));
 test('definitive exports have verified hashes, stable references and logical credentials only',()=>{
- inspect(manifest,workflows);const paths=new Set();assert.equal(workflows.length,26);
+ inspect(manifest,workflows);const paths=new Set();assert.equal(workflows.length,21);
  for(const entry of manifest.workflows){const bytes=fs.readFileSync(new URL('./workflows/'+entry.file,import.meta.url),'utf8');assert.equal(digest(bytes),entry.sha256);const w=workflows.find(x=>x.id===entry.id);assert.equal(w.active,false);assert.equal(w.pinData,undefined);assert.equal(w.staticData,undefined);
-  const names=new Set(w.nodes.map(n=>n.name));for(const n of w.nodes){for(const c of Object.values(n.credentials??{}))assert.deepEqual(Object.keys(c),['name']);
+  const names=new Set(w.nodes.map(n=>n.name));for(const n of w.nodes){if(n.parameters.workflowId?.value)assert(workflows.some(target=>target.id===n.parameters.workflowId.value),'Missing subworkflow '+n.parameters.workflowId.value);for(const c of Object.values(n.credentials??{}))assert.deepEqual(Object.keys(c),['name']);
    if(n.type==='n8n-nodes-base.webhook'){const key=n.parameters.httpMethod+':'+n.parameters.path;assert(!paths.has(key));paths.add(key);assert.equal(n.parameters.authentication,'headerAuth');}
   }
   for(const match of JSON.stringify(w.nodes).replaceAll('\\"','"').matchAll(/\$\(['"]([^'"]+)['"]\)/g))assert(names.has(match[1]),w.id+':'+match[1]);

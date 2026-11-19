@@ -13,12 +13,40 @@ import java.security.SecureRandom;
 @Service
 public class SupportBookingService {
  public record View(String code,String status,OffsetDateTime start,OffsetDateTime end,OffsetDateTime expiresAt,String meetUrl,String instruction){}
+ public record Slot(OffsetDateTime start,OffsetDateTime end){}
+ public record Availability(String status,String message,String timezone,LocalDate minDate,LocalDate maxDate,List<Slot> slots){}
+ private static final ZoneId ZONE=ZoneId.of("America/Bogota");
+ public Availability availableSlots(LocalDate date){
+  var now=ZonedDateTime.now(ZONE);var today=now.toLocalDate();var last=today.plusDays(14);
+  String guide="Las asesorías duran 30 minutos, de lunes a viernes de 9:00 a. m. a 5:00 p. m., hora de Bogotá, con una hora de anticipación. Elige una fecha y después un horario; la reserva requiere tu confirmación.";
+  if(date!=null&&(date.isBefore(today)||date.isAfter(last)||date.getDayOfWeek().getValue()>5))
+   return new Availability("NEEDS_DATE","Selecciona un día hábil dentro de las próximas dos semanas. "+guide,ZONE.getId(),today,last,List.of());
+  var first=date==null?today:date;var endDate=date==null?last:date;
+  try{
+   var busy=calendar.busy(first.atTime(9,0).atZone(ZONE).toOffsetDateTime(),endDate.atTime(17,0).atZone(ZONE).toOffsetDateTime());
+   var slots=new ArrayList<Slot>();
+   for(var day=first;!day.isAfter(endDate);day=day.plusDays(1)){
+    if(day.getDayOfWeek().getValue()>5)continue;
+    int perDay=0;
+    for(int minute=9*60;minute<17*60;minute+=30){
+     var start=day.atTime(minute/60,minute%60).atZone(ZONE).toOffsetDateTime();var end=start.plusMinutes(30);
+     if(start.toInstant().isBefore(now.plusHours(1).toInstant())||start.toInstant().isAfter(now.plusDays(14).toInstant()))continue;
+     if(busy.stream().noneMatch(b->b.start().isBefore(end.toInstant())&&b.end().isAfter(start.toInstant()))){slots.add(new Slot(start,end));perDay++;}
+     if(date==null&&(perDay>=3||slots.size()>=12))break;
+    }
+    if(date==null&&slots.size()>=12)break;
+   }
+   return new Availability("AVAILABLE",(slots.isEmpty()?"Calendar no muestra espacios libres en el período consultado. Prueba otra fecha. ":"Consulté Google Calendar. Estos horarios están disponibles por ahora; volveré a comprobarlos al reservar. ")+guide,ZONE.getId(),today,last,List.copyOf(slots));
+  }catch(RuntimeException error){
+   return new Availability("UNAVAILABLE","No pude verificar Google Calendar en este momento. Puedes elegir una fecha y volver a consultar; todavía no hay una reserva. "+guide,ZONE.getId(),today,last,List.of());
+  }
+ }
  private final SupportBookingRepository bookings;private final CurrentUserService current;private final WorkspaceCalendarGateway calendar;private final TransactionTemplate tx;private final IntegrationEventService events;
  public SupportBookingService(SupportBookingRepository bookings,CurrentUserService current,WorkspaceCalendarGateway calendar,PlatformTransactionManager tm,IntegrationEventService events){this.bookings=bookings;this.current=current;this.calendar=calendar;this.events=events;tx=new TransactionTemplate(tm);}
  private static String code(){var random=new SecureRandom();var s=new StringBuilder();for(int i=0;i<20;i++)s.append((char)('A'+random.nextInt(26)));return s.toString();}
  private void slot(OffsetDateTime start){if(start==null)throw new IllegalArgumentException();var local=start.atZoneSameInstant(ZoneId.of("America/Bogota"));if(start.isBefore(OffsetDateTime.now().plusHours(1))||start.isAfter(OffsetDateTime.now().plusDays(14))||local.getDayOfWeek().getValue()>5||local.getHour()<9||local.getHour()>=17||local.getMinute()%30!=0||local.getSecond()!=0||local.getNano()!=0)throw new IllegalArgumentException("Selecciona un horario habil de treinta minutos en Bogota");}
  public Map<String,Object> availability(OffsetDateTime start){
-  slot(start);
+  try{slot(start);}catch(IllegalArgumentException error){return Map.of("status","NEEDS_DATE","message","Indica un día hábil dentro de las próximas dos semanas y una hora entre 09:00 y 16:30 en Bogotá, en bloques de 30 minutos y con una hora de anticipación. No se ha reservado nada.");}
   try{
    return Map.of("start",start,"end",start.plusMinutes(30),"available",calendar.available(start,start.plusMinutes(30)),"calendarConfigured",true,"timezone","America/Bogota");
   }catch(ResponseStatusException ex){

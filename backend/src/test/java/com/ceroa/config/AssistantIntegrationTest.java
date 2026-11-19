@@ -191,7 +191,7 @@ class AssistantIntegrationTest {
     }
     @Test void availabilityOnlyDoesNotAuthorizeProposalEvenWhenModelAsksForOne()throws Exception {
         mvc.perform(post("/api/v1/assistant/messages").with(user(owner)).with(csrf()).contentType("application/json")
-            .content(JSON.writeValueAsString(Map.of("message","multiagent support-info consulta disponibilidad para asesoria"))))
+            .content(JSON.writeValueAsString(Map.of("message","multiagent support-info soporte consulta disponibilidad"))))
             .andExpect(status().isOk());
         org.mockito.Mockito.verifyNoInteractions(calendar);
     }
@@ -215,6 +215,30 @@ class AssistantIntegrationTest {
     @BeforeEach void seed() {
         callback=mvc; owner=UUID.randomUUID().toString();
         var u=new User();u.setId(UUID.fromString(owner));u.setFullName("Assistant test");u.setEmail(owner+"@example.com");u.setPlan(UserPlan.CERO);u.setActive(true);users.saveAndFlush(u);
+    }
+    @Test void naturalMailRequestReturnsStructuredProposalWithoutModelOrSending() throws Exception {
+        lastJob=null;
+        mvc.perform(post("/api/v1/assistant/messages").with(user(owner)).with(csrf()).contentType("application/json")
+            .content(JSON.writeValueAsString(Map.of("message","manda un correo a "+owner+"@example.com sobre los estados de mis deudas"))))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.mailProposal.status").value("PROPOSED"))
+            .andExpect(jsonPath("$.mailProposal.confirmationCode").isString()).andExpect(jsonPath("$.functionalStatus").value("COMPLETE"));
+        org.junit.jupiter.api.Assertions.assertNull(lastJob);
+    }
+    @Test void anotherRecipientGetsGuidanceWithoutCreatingAProposal() throws Exception {
+        mvc.perform(post("/api/v1/assistant/messages").with(user(owner)).with(csrf()).contentType("application/json")
+            .content(JSON.writeValueAsString(Map.of("message","manda un correo a otra@example.com sobre mis deudas"))))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.mailProposal").isEmpty())
+            .andExpect(jsonPath("$.answer").value(org.hamcrest.Matchers.containsString("no coincide")));
+    }
+    @Test void broadAvailabilityReturnsCalendarOptionsAndGuidance() throws Exception {
+        lastJob=null;
+        org.mockito.Mockito.when(calendar.busy(org.mockito.ArgumentMatchers.any(),org.mockito.ArgumentMatchers.any())).thenReturn(List.of());
+        mvc.perform(post("/api/v1/assistant/messages").with(user(owner)).with(csrf()).contentType("application/json")
+            .content(JSON.writeValueAsString(Map.of("message","que horarios tienes disponibles para una asesoria?"))))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.bookingAvailability.status").value("AVAILABLE"))
+            .andExpect(jsonPath("$.bookingAvailability.slots").isNotEmpty()).andExpect(jsonPath("$.functionalStatus").value("COMPLETE"));
+        org.junit.jupiter.api.Assertions.assertNull(lastJob);
+        org.mockito.Mockito.verify(calendar,org.mockito.Mockito.never()).call(org.mockito.ArgumentMatchers.eq("create"),org.mockito.ArgumentMatchers.any(),org.mockito.ArgumentMatchers.any(),org.mockito.ArgumentMatchers.any(),org.mockito.ArgumentMatchers.any());
     }
     @AfterAll static void stop() { stub.stop(0); }
     void debt(String user,String name,int balance) throws Exception {

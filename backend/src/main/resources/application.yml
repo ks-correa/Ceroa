@@ -109,6 +109,7 @@ ceroa:
     provider-limits:
       enabled: ${ASSISTANT_PROVIDER_LIMITS_ENABLED:true}
       calls-per-minute: ${ASSISTANT_PROVIDER_CALLS_PER_MINUTE:15}
+      estimated-minute-limit-enabled: ${ASSISTANT_ESTIMATED_MINUTE_LIMIT_ENABLED:false}
       concurrency: ${ASSISTANT_PROVIDER_CONCURRENCY:1}
       cooldown-seconds: ${ASSISTANT_PROVIDER_COOLDOWN_SECONDS:60}
   plus:

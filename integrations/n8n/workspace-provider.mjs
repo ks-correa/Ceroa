@@ -35,7 +35,9 @@ export class WorkspaceProvider {
  }
  async calendar(input,readOnly=false){
   if(!input||!['availability','create','get','delete'].includes(input.operation)||readOnly&&input.operation!=='availability')throw new ProviderError(400);
-  if(!Number.isFinite(Date.parse(input.start))||Date.parse(input.end)-Date.parse(input.start)!==1800000)throw new ProviderError(400);
+  const duration=Date.parse(input.end)-Date.parse(input.start);
+  if(!Number.isFinite(Date.parse(input.start))||!Number.isFinite(duration)||duration<=0||
+    (input.operation==='availability'?duration>15*86400000:duration!==1800000))throw new ProviderError(400);
   if(input.operation==='availability')return this.google.availability(input.start,input.end);
   if(!/^[a-f0-9]{32}$/.test(input.eventId||'')||input.operation==='create'&&!/^[^\s<>@]+@[^\s<>@]+$/.test(input.email||''))throw new ProviderError(400);
   const r=await this.google.event(input.operation,input);

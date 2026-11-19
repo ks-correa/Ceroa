@@ -32,6 +32,6 @@ test('fresh install and ordinary restart never duplicate or overwrite persisted 
   else if(command==='publish:workflow')workflows.find(w=>w.id===argv[1].slice(5)).active=true;
   else throw Error(command);
  };
- try{initialize({env,cli});assert.equal(workflows.length,26);assert.equal(credentials.length,1);assert.equal(workflows.filter(w=>w.active).length,2);workflows[0].name='Local draft preserved';initialize({env,cli});assert.equal(imports,1);assert.equal(credentials.length,1);assert.equal(workflows[0].name,'Local draft preserved');assert.equal(workflows.find(w=>w.id==='ceroaWorkspaceSheets40').active,false);
+ try{initialize({env,cli});assert.equal(workflows.length,21);assert.equal(credentials.length,1);assert.equal(workflows.filter(w=>w.active).length,2);workflows[0].name='Local draft preserved';initialize({env,cli});assert.equal(imports,1);assert.equal(credentials.length,1);assert.equal(workflows[0].name,'Local draft preserved');assert.equal(workflows.find(w=>w.id==='ceroaWorkspaceSheets40').active,false);
  }finally{fs.rmSync(dir,{recursive:true,force:true});}
 });

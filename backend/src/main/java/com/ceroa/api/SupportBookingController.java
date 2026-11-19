@@ -8,6 +8,7 @@ public class SupportBookingController {
  private final SupportBookingService service;public SupportBookingController(SupportBookingService service){this.service=service;}
  public record Slot(OffsetDateTime start){} public record Confirmation(String confirmation){}
  @GetMapping("/availability") public Object availability(@RequestParam OffsetDateTime start){return service.availability(start);}
+ @GetMapping("/slots") public Object slots(@RequestParam(required=false) java.time.LocalDate date){return service.availableSlots(date);}
  @PostMapping public Object propose(@RequestBody Slot slot){return service.propose(slot.start());}
  @PostMapping("/{code}/confirm") public Object confirm(@PathVariable String code){return service.confirm(code);}
  @GetMapping("/{code}") public Object get(@PathVariable String code){return service.get(code);}

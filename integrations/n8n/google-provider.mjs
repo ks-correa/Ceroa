@@ -48,7 +48,11 @@ export class GoogleProvider {
   const r=await this.request('calendar','/freeBusy','POST',{timeMin:start,timeMax:end,items:[{id}]});
   const calendar=r?.calendars?.[id];
   if(!calendar||calendar.errors?.length||!Array.isArray(calendar.busy))throw new ProviderError();
-  return {available:calendar.busy.length===0,provider:'GOOGLE',start,end};
+  const busy=calendar.busy.map(({start,end})=>{
+   if(!Number.isFinite(Date.parse(start))||!Number.isFinite(Date.parse(end))||Date.parse(end)<=Date.parse(start))throw new ProviderError();
+   return {start,end};
+  });
+  return {available:busy.length===0,busy,provider:'GOOGLE',start,end};
  }
  async event(operation,input){
   const base='/calendars/'+encodeURIComponent(this.config.calendarId)+'/events';
