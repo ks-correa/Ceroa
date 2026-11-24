@@ -192,7 +192,7 @@
     {
       "id": "ceroaHybridQuery20",
       "file": "ceroaHybridQuery20.json",
-      "sha256": "5d538c59257be33430a3dd974b16cfa0829adee14985d4c5fbff2ea3453689bc",
+      "sha256": "5803c5b6f057af9248c929708a296098fb274247a083a81ae7776381ccef8779",
       "dependencies": [
         "ceroaFinancialAgent30",
         "ceroaKnowledgeAgent30",

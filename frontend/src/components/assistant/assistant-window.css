@@ -1,0 +1,36 @@
+﻿.assistant-window {
+  position: fixed;
+  container-type: inline-size;
+  transition: width 180ms ease, height 180ms ease, bottom 180ms ease, right 180ms ease, opacity 160ms ease, transform 160ms ease;
+  transform-origin: bottom right;
+}
+.assistant-window[data-open="false"] { opacity: 0; transform: translateY(12px) scale(.98); pointer-events: none; }
+.assistant-window[data-resizing="true"] { transition: none; user-select: none; }
+.assistant-window-header { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 14px 16px; }
+.assistant-resize { position: absolute; z-index: 10; touch-action: none; border: 0; background: transparent; padding: 0; }
+.assistant-resize::after { content: ''; position: absolute; border-radius: 4px; background: #5eead4; opacity: .45; }
+.assistant-resize:hover::after, .assistant-resize:focus-visible::after { opacity: 1; }
+.assistant-resize-top { top: 0; left: 24px; right: 24px; height: 8px; cursor: ns-resize; }
+.assistant-resize-top::after { top: 2px; left: calc(50% - 18px); width: 36px; height: 3px; }
+.assistant-resize-left { left: 0; top: 24px; bottom: 24px; width: 8px; cursor: ew-resize; }
+.assistant-resize-left::after { left: 2px; top: calc(50% - 18px); height: 36px; width: 3px; }
+.assistant-resize-corner { top: 0; left: 0; width: 22px; height: 22px; cursor: nwse-resize; }
+.assistant-resize-corner::after { top: 6px; left: 6px; width: 9px; height: 9px; background: transparent; border-top: 2px solid #5eead4; border-left: 2px solid #5eead4; }
+.assistant-history { overflow-x: hidden; overflow-wrap: anywhere; }
+.assistant-history > * { min-width: 0; max-width: 100%; }
+.assistant-document-actions { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@container (max-width: 460px) {
+  .assistant-window-header { flex-wrap: wrap; padding: 10px 14px; }
+  .assistant-window-header > div:first-child { flex: 1 1 160px; }
+  .assistant-document-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 639px) {
+  .assistant-window { border-radius: 0; border: 0; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+  .assistant-window input { font-size: 16px; }
+}
+@media (prefers-reduced-motion: reduce) { .assistant-window { transition: none; } }
+.assistant-window[data-open="true"] { animation: assistant-window-enter 160ms ease-out; }
+@keyframes assistant-window-enter { from { opacity: 0; transform: translateY(12px) scale(.98); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .assistant-window[data-open="true"] { animation: none; } }
+/* The launcher must not cover the full-screen conversation or its composer. */
+.assistant-launcher > button[aria-expanded="true"] { visibility: hidden; }

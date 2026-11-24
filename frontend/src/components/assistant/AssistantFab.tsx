@@ -1,5 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { MessageCircle, Mic, X, Send, RotateCcw } from 'lucide-react';
+import { MessageCircle, Mic, Send } from 'lucide-react';
+import { AssistantWindowHeader } from './AssistantWindowHeader';
+import { useAssistantWindow, type ResizeEdge } from './useAssistantWindow';
+import './assistant-window.css';
 import { apiRequest } from '../../services/api';
 import { DocumentLibraryPanel, type DocumentView } from './DocumentLibraryPanel';
 import { DocumentReferences } from './DocumentReferences';
@@ -21,8 +24,10 @@ function ChatAudio({ blob }: { blob: Blob }) {
 export function AssistantFab() {
   const [documentView, setDocumentView] = useState<DocumentView | null>(null);
   const [selectedDocument, setSelectedDocument] = useState<FinancialDocument | null>(null);
-  const [chatWidth, setChatWidth] = useState(416);
-  const [chatHeight, setChatHeight] = useState(650);
+  const windowState = useAssistantWindow();
+  const [infoOpen, setInfoOpen] = useState(false);
+  const launcher = useRef<HTMLButtonElement>(null);
+  const [mounted, setMounted] = useState(false);
   const [open, setOpen] = useState(false);
   const [text, setText] = useState('');
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -74,7 +79,12 @@ export function AssistantFab() {
       stream.current?.getTracks().forEach(t => t.stop());
     };
   }, []);
-  useEffect(() => { if (open) input.current?.focus(); }, [open]);
+  useEffect(() => {
+    if (open) { setMounted(true); return; }
+    const timeout = setTimeout(() => setMounted(false), 180);
+    return () => clearTimeout(timeout);
+  }, [open]);
+  useEffect(() => { if (open && mounted) input.current?.focus(); }, [open, mounted]);
   useEffect(() => {
     if (!audioDraft) { setAudioPreview(''); return; }
     const url = URL.createObjectURL(audioDraft);
@@ -218,7 +228,7 @@ export function AssistantFab() {
   function close() {
     cancelAudio();
     recordingAttempt.current++; starting.current = false; setStartingRecording(false);
-    setRecording(false); setOpen(false);
+    setRecording(false); setOpen(false); launcher.current?.focus();
   }
   async function resetConversation() {
     if(busy||recording||startingRecording)return;
@@ -228,12 +238,12 @@ export function AssistantFab() {
     finally{if(alive.current)setBusy(false);}
   }
   return <div className="assistant-launcher fixed right-4 z-40">
-    {open && <section aria-label="Asistente financiero" style={{ width: chatWidth, height: chatHeight }} className="floating-assistant-panel flex flex-col overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-2xl shadow-slate-900/15 dark:border-slate-700 dark:bg-slate-900">
-      <div className="flex shrink-0 items-center justify-between gap-2 bg-gradient-to-r from-teal-800 to-cyan-700 px-4 py-3 text-white"><div className="flex items-center gap-3"><span className="rounded-2xl bg-white/20 p-2"><MessageCircle size={20} /></span><div><h2 className="font-semibold leading-tight">Asistente de Ceroa</h2><p className="text-xs text-teal-50">{import.meta.env.VITE_DEMO_MODE === 'true' ? 'Demo: datos sintéticos; Calendar y Gmail simulados' : 'Tu espacio para resolver dudas'}</p></div></div><div className="flex items-center gap-1"><button type="button" aria-label="Nueva conversación" title="Nueva conversación" disabled={busy||recording||startingRecording} className="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-white/20 disabled:opacity-40" onClick={()=>void resetConversation()}><RotateCcw size={18}/></button><button type="button" className="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-white/20" aria-label="Cerrar asistente" onClick={close}><X size={20} /></button></div></div>
-      <details className="shrink-0 border-b border-slate-100 px-4 py-2 text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400"><summary className="cursor-pointer py-1 font-medium">Tamaño del chat</summary><div className="grid grid-cols-2 gap-3 pb-2"><label>Ancho<input aria-label="Ancho del chat" type="range" min="320" max="1000" step="20" value={chatWidth} onChange={e => setChatWidth(Number(e.target.value))} className="block w-full" /></label><label>Alto<input aria-label="Alto del chat" type="range" min="360" max="1000" step="20" value={chatHeight} onChange={e => setChatHeight(Number(e.target.value))} className="block w-full" /></label></div></details>
-      <details className="shrink-0 border-b border-slate-100 px-4 py-2 text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400"><summary className="cursor-pointer py-1 font-medium">Sobre el asistente y tus datos</summary><p className="pb-2 pt-1 leading-relaxed">Analiza tus finanzas y compara opciones. Gemini procesa tus preguntas, audio y los datos financieros necesarios para responder. Las sugerencias no realizan cambios en tu cuenta.</p></details>
-      <div ref={chatLog} role="log" aria-live="polite" className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain [scrollbar-gutter:stable] bg-slate-50/80 p-4 dark:bg-slate-950/40">
-        <nav aria-label="Acciones de documentos" className="flex flex-wrap gap-2">{([{view:'upload',label:'Subir archivo'},{view:'search',label:'Consultar archivos'},{view:'review',label:'Revisar archivos'}] as const).map(item => <button key={item.view} type="button" aria-pressed={documentView === item.view} className={`rounded-full border px-3 py-2 text-xs font-semibold transition-colors ${documentView === item.view ? 'border-teal-700 bg-teal-700 text-white' : 'border-teal-200 bg-teal-50 text-teal-800 hover:bg-teal-100 dark:border-teal-800 dark:bg-teal-950 dark:text-teal-200'}`} onClick={() => setDocumentView(documentView === item.view ? null : item.view)}>{item.label}</button>)}</nav>
+    {mounted && <section aria-label="Asistente financiero" id="ceroa-assistant" inert={!open} data-open={open} data-resizing={windowState.resizing} style={windowState.style} onKeyDown={event => { if (event.key === 'Escape') { event.stopPropagation(); close(); } }} className="assistant-window flex flex-col overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-2xl shadow-slate-900/15 dark:border-slate-700 dark:bg-slate-900">
+      {!windowState.mobile && !windowState.maximized && (['top', 'left', 'corner'] as ResizeEdge[]).map(edge => <button key={edge} type="button" aria-label={{top:'Redimensionar desde el borde superior',left:'Redimensionar desde el borde izquierdo',corner:'Redimensionar desde la esquina superior izquierda'}[edge]} title="Arrastra o usa las flechas del teclado; Mayús para ajustes mayores" className={`assistant-resize assistant-resize-${edge}`} {...windowState.resizeProps(edge)} />)}
+      <AssistantWindowHeader disabled={busy || recording || startingRecording} mobile={windowState.mobile} maximized={windowState.maximized} onReset={() => void resetConversation()} onMaximize={windowState.toggleMaximized} onClose={close} onInfo={() => setInfoOpen(value => !value)} infoOpen={infoOpen} />
+      {infoOpen && <div id="assistant-data-info" className="max-h-[25%] shrink-0 overflow-y-auto border-b border-slate-100 px-4 py-3 text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400"><p className="mb-1 font-semibold">Sobre el asistente y tus datos</p><p>Analiza tus finanzas y compara opciones. Gemini procesa tus preguntas, audio y los datos financieros necesarios para responder. Las sugerencias no realizan cambios en tu cuenta.</p></div>}
+      <div ref={chatLog} role="log" aria-live="polite" className="assistant-history min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain [scrollbar-gutter:stable] bg-slate-50/80 p-4 dark:bg-slate-950/40">
+        <nav aria-label="Acciones de documentos" className="assistant-document-actions gap-2">{([{view:'upload',label:'Subir archivo'},{view:'search',label:'Consultar archivos'},{view:'review',label:'Revisar archivos'}] as const).map(item => <button key={item.view} type="button" aria-pressed={documentView === item.view} className={`rounded-full border px-3 py-2 text-xs font-semibold transition-colors ${documentView === item.view ? 'border-teal-700 bg-teal-700 text-white' : 'border-teal-200 bg-teal-50 text-teal-800 hover:bg-teal-100 dark:border-teal-800 dark:bg-teal-950 dark:text-teal-200'}`} onClick={() => setDocumentView(documentView === item.view ? null : item.view)}>{item.label}</button>)}</nav>
         {selectedDocument && <div className="rounded-xl border border-teal-300 bg-teal-50 p-3 text-sm dark:border-teal-700 dark:bg-teal-950"><p className="font-semibold">Conversación enfocada en este archivo</p><p className="truncate">{selectedDocument.financialEntity || 'Documento'} · {selectedDocument.documentType} · {selectedDocument.periodStart || 'Sin período'}</p><div className="mt-2 flex flex-wrap gap-3"><button type="button" className="text-xs font-semibold underline" onClick={() => {generation.current++;setSelectedDocument(null);setMessages([]);setText('');setDraftCode('');setMailDraft(null);setBookingAvailability(null);}}>Salir del archivo</button><button type="button" className="text-xs font-semibold underline" onClick={() => {const period=selectedDocument.periodStart;generation.current++;setSelectedDocument(null);setMessages([]);setText(period?`Analiza todos mis extractos de ${new Intl.DateTimeFormat('es-CO',{month:'long',timeZone:'UTC'}).format(new Date(`${period.slice(0,7)}-01T12:00:00Z`))} de ${period.slice(0,4)}: `:'Analiza todos mis extractos del período: ');input.current?.focus();}}>Analizar varios extractos</button></div></div>}
         {documentView && <DocumentLibraryPanel view={documentView} onDiscuss={document => { if(busy||recording||startingRecording)return;generation.current++;setSelectedDocument(document);setMessages([]);setText('');setDraftCode('');setMailDraft(null);setBookingAvailability(null);setDocumentView(null);input.current?.focus(); }} />}
         {messages.length === 0 && <p className="rounded-2xl border border-dashed border-slate-200 bg-white p-4 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">Escribe una pregunta para empezar la conversación.</p>}
@@ -244,22 +254,22 @@ export function AssistantFab() {
         </section>}
         {bookingAvailability && <BookingAvailabilityPanel key={JSON.stringify(bookingAvailability)} initial={bookingAvailability} disabled={busy} onConfirm={code => void send('Confirmar asesoria '+code)} />}
         {startingRecording && <p role="status">Esperando permiso del micrófono… Revisa la solicitud de permisos del navegador.</p>}
+        {busy && <p role="status">Consultando…</p>}
+        {error && <p role="alert" className="text-red-700 dark:text-red-400">{error}</p>}
+      </div>
+      <form className="shrink-0 space-y-2 border-t border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900" onSubmit={e => { e.preventDefault(); submit(); }}>
         {(recording || audioDraft) && <div className="rounded-xl bg-teal-50 p-3 dark:bg-teal-950">
           <div className="flex items-center gap-2 text-teal-800 dark:text-teal-200"><Mic size={20} className={recording ? 'animate-pulse' : ''} /><span role="status">{recording ? 'Escuchando…' : 'Audio listo para enviar'} {String(Math.floor(elapsed / 60)).padStart(2, '0')}:{String(elapsed % 60).padStart(2, '0')} / 01:00</span></div>
           {recording && <><div role="meter" aria-label="Nivel del micrófono" aria-valuemin={0} aria-valuemax={100} aria-valuenow={level} className="mt-3 flex h-16 items-center justify-center gap-1 rounded-lg bg-teal-100 px-3 dark:bg-slate-800">{bars.map((height, index) => <span key={index} aria-hidden="true" className="w-1.5 rounded-full bg-teal-600 transition-[height] duration-75 motion-reduce:transition-none dark:bg-teal-400" style={{ height: `${4 + height * 52}px` }} />)}</div><p className="mt-2 text-xs">Habla y pulsa Enviar cuando termines.</p></>}
           {audioDraft && <audio controls src={audioPreview || undefined} className="mt-2 w-full" />}
           <button type="button" onClick={cancelAudio} className="mt-2 text-sm underline">Cancelar audio</button>
         </div>}
-        {busy && <p role="status">Consultando…</p>}
-        {error && <p role="alert" className="text-red-700 dark:text-red-400">{error}</p>}
-      </div>
-      <form className="shrink-0 space-y-2 border-t border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900" onSubmit={e => { e.preventDefault(); submit(); }}>
         <div className="flex gap-2"><input ref={input} aria-label="Pregunta al asistente" maxLength={2000} value={text} onChange={e => setText(e.target.value)} disabled={busy || recording || startingRecording || !!audioDraft} placeholder="¿Cuál es mi estrategia activa?" className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm dark:border-slate-700 dark:bg-slate-800" /><button aria-label={recording || audioDraft ? "Enviar audio" : "Enviar pregunta"} disabled={busy || startingRecording || (!recording && !audioDraft && !text.trim())} className="shrink-0 rounded-xl bg-teal-700 p-2.5 text-white disabled:opacity-50"><Send size={18} /></button></div>
-        <div className="flex items-center gap-3 text-sm"><button type="button" disabled={busy || startingRecording || recording || !!audioDraft} aria-label="Grabar audio" onClick={() => void record()} className="flex gap-1 items-center disabled:opacity-50"><Mic size={16} />Grabar</button>
-          <label className="cursor-pointer">Adjuntar audio<input aria-label="Adjuntar audio" type="file" accept="audio/webm,audio/ogg,audio/wav,audio/mpeg,audio/mp4" className="sr-only" disabled={busy || recording || startingRecording || !!audioDraft} onChange={e => { const file = e.target.files?.[0]; if (file) void send(undefined, file); e.target.value = ''; }} /></label>
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm"><button type="button" disabled={busy || startingRecording || recording || !!audioDraft} aria-label="Grabar audio" onClick={() => void record()} className="flex gap-1 items-center disabled:opacity-50"><Mic size={16} />Grabar</button>
+          <label className="cursor-pointer rounded focus-within:outline-2 focus-within:outline-teal-600">Adjuntar audio<input aria-label="Adjuntar audio" type="file" accept="audio/webm,audio/ogg,audio/wav,audio/mpeg,audio/mp4" className="sr-only" disabled={busy || recording || startingRecording || !!audioDraft} onChange={e => { const file = e.target.files?.[0]; if (file) void send(undefined, file); e.target.value = ''; }} /></label>
         </div>
       </form>
     </section>}
-    <button type="button" aria-label="Abrir asistente financiero" aria-expanded={open} onClick={() => open ? close() : setOpen(true)} className="ml-auto flex rounded-full bg-gradient-to-br from-teal-700 to-cyan-700 p-4 text-white shadow-lg shadow-teal-900/20 transition-transform hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600"><MessageCircle size={24} /></button>
+    <button type="button" ref={launcher} aria-label="Abrir asistente financiero" aria-controls="ceroa-assistant" aria-expanded={open} onClick={() => open ? close() : setOpen(true)} className="ml-auto flex rounded-full bg-gradient-to-br from-teal-700 to-cyan-700 p-4 text-white shadow-lg shadow-teal-900/20 transition-transform hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-teal-600"><MessageCircle size={24} /></button>
   </div>;
 }

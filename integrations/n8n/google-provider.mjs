@@ -3,6 +3,10 @@ import {createHash} from 'node:crypto';
 export class ProviderError extends Error {
  constructor(status=503,code='GOOGLE_PROVIDER_UNAVAILABLE',safeRetry=false){super(code);this.status=status;this.safeRetry=safeRetry;}
 }
+function googleDateTime(value){
+ const date=new Date(value);if(!Number.isFinite(date.getTime()))throw new ProviderError(400);
+ return date.toISOString();
+}
 export class GoogleProvider {
  constructor(config,fetcher=fetch,reload=null){this.config=config;this.fetcher=fetcher;this.reload=reload;this.tokens=new Map();}
  async request(kind,path,method='GET',body){
@@ -45,7 +49,7 @@ export class GoogleProvider {
  }
  async availability(start,end){
   const id=this.config.calendarId;if(!id)throw new ProviderError();
-  const r=await this.request('calendar','/freeBusy','POST',{timeMin:start,timeMax:end,items:[{id}]});
+  const r=await this.request('calendar','/freeBusy','POST',{timeMin:googleDateTime(start),timeMax:googleDateTime(end),items:[{id}]});
   const calendar=r?.calendars?.[id];
   if(!calendar||calendar.errors?.length||!Array.isArray(calendar.busy))throw new ProviderError();
   const busy=calendar.busy.map(({start,end})=>{
@@ -62,7 +66,7 @@ export class GoogleProvider {
   const existing=await this.request('calendar',url);
   if(existing)return existing;
   if(!(await this.availability(input.start,input.end)).available)throw new ProviderError(409);
-  try{return await this.request('calendar',base+'?conferenceDataVersion=1&sendUpdates=none','POST',{id:input.eventId,summary:'Asesoria Ceroa',description:'Solicitud confirmada en Ceroa. Sin datos financieros adjuntos.',start:{dateTime:input.start},end:{dateTime:input.end},attendees:[{email:input.email}],conferenceData:{createRequest:{requestId:input.eventId,conferenceSolutionKey:{type:'hangoutsMeet'}}}});}
+  try{return await this.request('calendar',base+'?conferenceDataVersion=1&sendUpdates=none','POST',{id:input.eventId,summary:'Asesoria Ceroa',description:'Solicitud confirmada en Ceroa. Sin datos financieros adjuntos.',start:{dateTime:googleDateTime(input.start)},end:{dateTime:googleDateTime(input.end)},attendees:[{email:input.email}],conferenceData:{createRequest:{requestId:input.eventId,conferenceSolutionKey:{type:'hangoutsMeet'}}}});}
   catch(e){if(e.status===409)return this.request('calendar',url);throw e;}
  }
 }

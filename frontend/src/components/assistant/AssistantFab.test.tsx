@@ -18,15 +18,23 @@ it('starts a new conversation only after the backend forgets the previous contex
   await waitFor(()=>expect(screen.queryByText('Respuesta anterior')).toBeNull());
   expect(apiRequest).toHaveBeenCalledWith('/assistant/conversation',{method:'DELETE'});
 });
-it('lets the user resize the chat in both directions', () => {
+it('resizes with the keyboard and restores geometry without losing the conversation', async () => {
   render(<AssistantFab />);
   fireEvent.click(screen.getByRole('button',{name:'Abrir asistente financiero'}));
-  fireEvent.click(screen.getByText('Tamaño del chat'));
-  fireEvent.change(screen.getByLabelText('Ancho del chat'),{target:{value:'800'}});
-  fireEvent.change(screen.getByLabelText('Alto del chat'),{target:{value:'900'}});
-  const panel = screen.getByRole('region',{name:'Asistente financiero'}) as HTMLElement;
-  expect(panel.style.width).toBe('800px');
-  expect(panel.style.height).toBe('900px');
+  const panel = screen.getByRole('region',{name:'Asistente financiero'});
+  const before = panel.style.width;
+  fireEvent.keyDown(screen.getByRole('button',{name:'Redimensionar desde el borde izquierdo'}),{key:'ArrowLeft'});
+  expect(panel.style.width).not.toBe(before);
+  const resized = panel.style.width;
+  fireEvent.change(screen.getByRole('textbox'),{target:{value:'Borrador conservado'}});
+  fireEvent.click(screen.getByRole('button',{name:'Maximizar ventana'}));
+  fireEvent.click(screen.getByRole('button',{name:'Restaurar tamaño anterior'}));
+  expect(panel.style.width).toBe(resized);
+  expect(screen.getByRole('textbox')).toHaveProperty('value','Borrador conservado');
+  expect(JSON.parse(localStorage.getItem('ceroa.assistant.size')!)).toEqual({width:432,height:650});
+  fireEvent.click(screen.getByRole('button',{name:'Cerrar asistente'}));
+  fireEvent.click(screen.getByRole('button',{name:'Abrir asistente financiero'}));
+  expect(screen.getByRole('textbox')).toHaveProperty('value','Borrador conservado');
 });
 it('sends captured audio using the main send button', async () => {
   const createObjectURL = vi.fn((_blob: Blob) => 'blob:recorded-audio');
@@ -80,7 +88,7 @@ it('sends captured audio using the main send button', async () => {
     else Reflect.deleteProperty(navigator, 'mediaDevices');
   }
 });
-afterEach(() => { cleanup(); vi.clearAllMocks(); vi.unstubAllGlobals(); });
+afterEach(() => { cleanup(); localStorage.clear(); vi.clearAllMocks(); vi.unstubAllGlobals(); });
 it('sends a question through the authenticated API and displays backend text literally', async () => {
   vi.mocked(apiRequest).mockResolvedValue({ answer: '<script>not executable</script> 1000.00' });
   render(<AssistantFab />);
@@ -90,7 +98,7 @@ it('sends a question through the authenticated API and displays backend text lit
   await waitFor(() => expect(apiRequest).toHaveBeenCalledWith('/assistant/messages', { method: 'POST', body: '{"message":"Mis deudas"}' }));
   expect(await screen.findByText(/not executable/)).toBeTruthy();
   expect(document.querySelector('script')).toBeNull();
-  expect(localStorage.length).toBe(0);
+  expect(Object.keys(localStorage)).toEqual(['ceroa.assistant.size']);
 });
 it('keeps follow-up questions scoped to a selected indexed document', async () => {
   vi.mocked(apiRequest).mockImplementation(async path => {
