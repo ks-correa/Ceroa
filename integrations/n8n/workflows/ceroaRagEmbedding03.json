@@ -4,6 +4,13 @@
   "active": false,
   "nodes": [
     {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "ceroa-rag-embedding-v1",
+        "authentication": "headerAuth",
+        "responseMode": "responseNode",
+        "options": {}
+      },
       "id": "entry",
       "name": "Recibir texto autorizado",
       "type": "n8n-nodes-base.webhook",
@@ -13,13 +20,6 @@
         0
       ],
       "webhookId": "ceroa-rag-embedding-private",
-      "parameters": {
-        "httpMethod": "POST",
-        "path": "ceroa-rag-embedding-v1",
-        "authentication": "headerAuth",
-        "responseMode": "responseNode",
-        "options": {}
-      },
       "credentials": {
         "httpHeaderAuth": {
           "name": "Ceroa RAG privado"
@@ -27,6 +27,9 @@
       }
     },
     {
+      "parameters": {
+        "jsCode": "const b=$json.body;if(typeof b?.text!=='string'||!b.text.trim()||b.text.length>4000||b.task!=='RETRIEVAL_QUERY')throw new Error('Consulta inválida');return [{json:{text:b.text,task:'RETRIEVAL_QUERY'}}];"
+      },
       "id": "validate",
       "name": "Validar texto de consulta",
       "type": "n8n-nodes-base.code",
@@ -35,86 +38,83 @@
         240,
         0
       ],
-      "parameters": {
-        "jsCode": "const b=$json.body;if(typeof b?.text!=='string'||!b.text.trim()||b.text.length>4000||b.task!=='RETRIEVAL_QUERY')throw new Error('Consulta inválida');return [{json:{text:b.text,task:'RETRIEVAL_QUERY'}}];"
-      },
       "onError": "continueErrorOutput"
     },
     {
-      "id": "embed",
-      "name": "Embedding Gemini",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        480,
-        0
-      ],
       "parameters": {
         "method": "POST",
         "url": "https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent",
         "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({model:\"models/gemini-embedding-001\",content:{parts:[{text:$json.text}]},taskType:$json.task,outputDimensionality:768,...($json.title?{title:$json.title}:{})}) }}",
         "options": {
           "timeout": 20000
-        },
-        "genericAuthType": "httpHeaderAuth"
+        }
       },
-      "onError": "continueErrorOutput",
+      "id": "embed",
+      "name": "Embedding Gemini",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        512,
+        -96
+      ],
       "credentials": {
         "httpHeaderAuth": {
           "name": "Ceroa RAG Gemini Embeddings"
         }
-      }
+      },
+      "onError": "continueErrorOutput"
     },
     {
+      "parameters": {
+        "jsCode": "const values=$json.embedding?.values;if(!Array.isArray(values)||values.length!==768||values.some(v=>!Number.isFinite(v))||values.every(v=>v===0))throw new Error('Vector incompatible');return [{json:{model:'gemini-embedding-001',values}}];"
+      },
       "id": "contract",
       "name": "Validar dimensiones",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        720,
-        0
+        752,
+        -160
       ],
-      "parameters": {
-        "jsCode": "const values=$json.embedding?.values;if(!Array.isArray(values)||values.length!==768||values.some(v=>!Number.isFinite(v))||values.every(v=>v===0))throw new Error('Vector incompatible');return [{json:{model:'gemini-embedding-001',values}}];"
-      },
       "onError": "continueErrorOutput"
     },
     {
-      "id": "reply",
-      "name": "Devolver vector",
-      "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1.4,
-      "position": [
-        960,
-        0
-      ],
       "parameters": {
         "respondWith": "json",
         "responseBody": "={{ JSON.stringify($json) }}",
         "options": {
           "responseCode": 200
         }
-      }
-    },
-    {
-      "id": "error",
-      "name": "Error seguro",
+      },
+      "id": "reply",
+      "name": "Devolver vector",
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.4,
       "position": [
-        720,
-        240
-      ],
+        992,
+        -224
+      ]
+    },
+    {
       "parameters": {
         "respondWith": "json",
         "responseBody": "{\"available\":false}",
         "options": {
           "responseCode": 503
         }
-      }
+      },
+      "id": "error",
+      "name": "Error seguro",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        896,
+        272
+      ]
     }
   ],
   "connections": {
@@ -187,9 +187,11 @@
   "settings": {
     "executionOrder": "v1",
     "timezone": "America/Bogota",
-    "saveDataSuccessExecution": "none",
-    "saveDataErrorExecution": "none",
-    "saveManualExecutions": false,
-    "executionTimeout": 120
+    "saveDataSuccessExecution": "all",
+    "saveDataErrorExecution": "all",
+    "saveManualExecutions": true,
+    "executionTimeout": 120,
+    "saveExecutionProgress": true,
+    "binaryMode": "separate"
   }
 }

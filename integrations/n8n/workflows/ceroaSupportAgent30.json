@@ -4,23 +4,19 @@
   "active": false,
   "nodes": [
     {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
       "id": "entry",
       "name": "Recibir delegación",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
-      "parameters": {
-        "inputSource": "passthrough"
-      },
       "position": [
-        0,
+        -208,
         0
       ]
     },
     {
-      "id": "begin",
-      "name": "Autorizar alcance",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
       "parameters": {
         "method": "POST",
         "url": "={{ \"http://backend:8080/api/v1/assistant-tools/requests/\" + $json.requestId + \"/delegations/SUPPORT/begin\" }}",
@@ -33,9 +29,13 @@
           "timeout": 15000
         }
       },
+      "id": "begin",
+      "name": "Autorizar alcance",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
       "position": [
-        240,
-        0
+        192,
+        -48
       ],
       "credentials": {
         "httpHeaderAuth": {
@@ -44,14 +44,11 @@
       }
     },
     {
-      "id": "cached",
-      "name": "Resultado reutilizable",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
       "parameters": {
         "conditions": {
           "options": {
             "caseSensitive": true,
+            "leftValue": "",
             "typeValidation": "strict",
             "version": 2
           },
@@ -71,35 +68,31 @@
         },
         "options": {}
       },
+      "id": "cached",
+      "name": "Resultado reutilizable",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
       "position": [
         480,
         0
       ]
     },
     {
-      "id": "reuse",
-      "name": "Devolver resultado autorizado",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
       "parameters": {
         "mode": "raw",
         "jsonOutput": "={{ JSON.stringify($json.cached) }}",
         "options": {}
       },
+      "id": "reuse",
+      "name": "Devolver resultado autorizado",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
       "position": [
         720,
-        -220
+        -224
       ]
     },
     {
-      "id": "agent",
-      "name": "LUMEN",
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 3,
-      "position": [
-        720,
-        80
-      ],
       "parameters": {
         "promptType": "define",
         "text": "={{ JSON.stringify({task:$json.task,evidence:$json.evidence,requestId:$json.requestId,correlationId:$json.correlationId,role:$json.role,channel:$json.channel,capabilities:$json.capabilities,budget:{maxIterations:$json.maxIterations,remainingMs:$json.remainingMs,maxContextCharacters:$json.maxContextCharacters},context:$(\"Recibir delegación\").first().json.context }) }}",
@@ -110,26 +103,34 @@
           "returnIntermediateSteps": true
         }
       },
+      "id": "agent",
+      "name": "LUMEN",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        720,
+        80
+      ],
+      "notesInFlow": true,
       "onError": "continueRegularOutput",
-      "notes": "LUMEN — Customer Experience & Support. Alcances y evidencia autorizados por AEGIS en Spring Boot.",
-      "notesInFlow": true
+      "notes": "LUMEN — Customer Experience & Support. Alcances y evidencia autorizados por AEGIS en Spring Boot."
     },
     {
+      "parameters": {
+        "modelName": "models/gemini-3.5-flash-lite",
+        "options": {
+          "maxOutputTokens": 8000,
+          "temperature": 0
+        }
+      },
       "id": "model",
       "name": "Gemini Ceroa",
       "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
       "typeVersion": 1,
       "position": [
-        640,
-        360
+        352,
+        384
       ],
-      "parameters": {
-        "modelName": "models/gemini-3.5-flash-lite",
-        "options": {
-          "temperature": 0,
-          "maxOutputTokens": 8000
-        }
-      },
       "credentials": {
         "googlePalmApi": {
           "name": "Ceroa Gemini"
@@ -137,34 +138,25 @@
       }
     },
     {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\"type\":\"object\",\"additionalProperties\":false,\"required\":[\"schemaVersion\",\"role\",\"status\",\"answer\",\"evidenceRefs\",\"sources\",\"coverage\",\"missingData\",\"requiresConfirmation\",\"requiresClarification\"],\"properties\":{\"schemaVersion\":{\"type\":\"string\",\"pattern\":\"^1[.]1$\"},\"role\":{\"type\":\"string\",\"pattern\":\"^SUPPORT$\"},\"status\":{\"enum\":[\"OK\",\"PARTIAL\",\"INSUFFICIENT\",\"FAILED\"]},\"answer\":{\"type\":\"string\",\"minLength\":1,\"maxLength\":10000},\"evidenceRefs\":{\"type\":\"array\",\"maxItems\":100,\"uniqueItems\":true,\"items\":{\"type\":\"string\",\"pattern\":\"^f[1-9][0-9]*$\"}},\"sources\":{\"type\":\"array\",\"maxItems\":8,\"uniqueItems\":true,\"items\":{\"type\":\"string\",\"pattern\":\"^d[1-8]$\"}},\"coverage\":{\"enum\":[\"COMPLETE\",\"PARTIAL\",\"NONE\"]},\"missingData\":{\"type\":\"array\",\"maxItems\":12,\"items\":{\"type\":\"string\",\"maxLength\":200}},\"requiresConfirmation\":{\"type\":\"boolean\"},\"requiresClarification\":{\"type\":\"boolean\"}}}"
+      },
       "id": "parser",
       "name": "Contrato del especialista",
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.3,
-      "parameters": {
-        "schemaType": "manual",
-        "inputSchema": "{\"type\":\"object\",\"additionalProperties\":false,\"required\":[\"schemaVersion\",\"role\",\"status\",\"answer\",\"evidenceRefs\",\"sources\",\"coverage\",\"missingData\",\"requiresConfirmation\",\"requiresClarification\"],\"properties\":{\"schemaVersion\":{\"type\":\"string\",\"pattern\":\"^1[.]1$\"},\"role\":{\"type\":\"string\",\"pattern\":\"^SUPPORT$\"},\"status\":{\"enum\":[\"OK\",\"PARTIAL\",\"INSUFFICIENT\",\"FAILED\"]},\"answer\":{\"type\":\"string\",\"minLength\":1,\"maxLength\":10000},\"evidenceRefs\":{\"type\":\"array\",\"maxItems\":100,\"uniqueItems\":true,\"items\":{\"type\":\"string\",\"pattern\":\"^f[1-9][0-9]*$\"}},\"sources\":{\"type\":\"array\",\"maxItems\":8,\"uniqueItems\":true,\"items\":{\"type\":\"string\",\"pattern\":\"^d[1-8]$\"}},\"coverage\":{\"enum\":[\"COMPLETE\",\"PARTIAL\",\"NONE\"]},\"missingData\":{\"type\":\"array\",\"maxItems\":12,\"items\":{\"type\":\"string\",\"maxLength\":200}},\"requiresConfirmation\":{\"type\":\"boolean\"},\"requiresClarification\":{\"type\":\"boolean\"}}}",
-        "autoFix": false
-      },
       "position": [
-        880,
-        360
+        480,
+        384
       ]
     },
     {
-      "id": "rag-tool",
-      "name": "Consultar documentación aprobada",
-      "type": "n8n-nodes-base.httpRequestTool",
-      "typeVersion": 4.2,
-      "position": [
-        1000,
-        420
-      ],
       "parameters": {
-        "authentication": "genericCredentialType",
-        "genericAuthType": "httpHeaderAuth",
         "toolDescription": "Retrieve approved Ceroa documentation only. Returns relevance-filtered chunks and dID references, or an explicit absence status. No financial data, writes, SQL or arbitrary URLs. Rewrite follow-up references into a self-contained query using conversation context.",
         "url": "={{ \"http://backend:8080/api/v1/assistant-tools/requests/\" + $(\"Recibir delegación\").first().json.requestId + \"/documents\" }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
@@ -182,6 +174,14 @@
           "timeout": 30000
         }
       },
+      "id": "rag-tool",
+      "name": "Consultar documentación aprobada",
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        608,
+        384
+      ],
       "credentials": {
         "httpHeaderAuth": {
           "name": "Ceroa assistant bridge"
@@ -189,10 +189,6 @@
       }
     },
     {
-      "id": "finish",
-      "name": "Validar resultado en Spring Boot",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
       "parameters": {
         "method": "POST",
         "url": "={{ \"http://backend:8080/api/v1/assistant-tools/requests/\" + $(\"Autorizar alcance\").first().json.requestId + \"/delegations/\" + $(\"Autorizar alcance\").first().json.scopeToken + \"/complete\" }}",
@@ -205,9 +201,13 @@
           "timeout": 15000
         }
       },
+      "id": "finish",
+      "name": "Validar resultado en Spring Boot",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
       "position": [
-        1100,
-        0
+        1296,
+        -224
       ],
       "credentials": {
         "httpHeaderAuth": {
@@ -217,25 +217,25 @@
       "onError": "continueRegularOutput"
     },
     {
-      "id": "fail",
-      "name": "Devolver fallo recuperable",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
       "parameters": {
         "method": "POST",
         "url": "={{ \"http://backend:8080/api/v1/assistant-tools/requests/\" + $(\"Autorizar alcance\").first().json.requestId + \"/delegations/\" + $(\"Autorizar alcance\").first().json.scopeToken + \"/fail\" }}",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
-        "options": {
-          "timeout": 15000
-        },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({errorCode: /\\b429\\b|quota|RESOURCE_EXHAUSTED|too many requests|rate.?limit/i.test(JSON.stringify($json.error ?? $json ?? {})) ? \"PROVIDER_QUOTA\" : /max(?:imum)?\\s*(?:number of\\s*)?iterations?|iteration limit|stopped.*iterations/i.test(JSON.stringify($json.error ?? $json ?? {})) ? \"ITERATION_LIMIT\" : !$json.output && !/\\b(?:400|403|409)\\b|Bad request|Forbidden/i.test(JSON.stringify($json.error ?? $json ?? {})) && /parse|schema|OutputParser/i.test(JSON.stringify($json.error ?? $json ?? {})) ? \"PARSER_ERROR\" : /\\b(?:400|403|409)\\b|contract|referen|eviden|Bad request|Forbidden/i.test(JSON.stringify($json.error ?? $json ?? {})) || $json.output ? \"CONTRACT_ERROR\" : /httpRequest|tool/i.test(JSON.stringify($json.error ?? $json ?? {})) ? \"TOOL_ERROR\" : \"PROVIDER_UNAVAILABLE\"}) }}"
+        "jsonBody": "={{ JSON.stringify({errorCode: /\\b429\\b|quota|RESOURCE_EXHAUSTED|too many requests|rate.?limit/i.test(JSON.stringify($json.error ?? $json ?? {})) ? \"PROVIDER_QUOTA\" : /max(?:imum)?\\s*(?:number of\\s*)?iterations?|iteration limit|stopped.*iterations/i.test(JSON.stringify($json.error ?? $json ?? {})) ? \"ITERATION_LIMIT\" : !$json.output && !/\\b(?:400|403|409)\\b|Bad request|Forbidden/i.test(JSON.stringify($json.error ?? $json ?? {})) && /parse|schema|OutputParser/i.test(JSON.stringify($json.error ?? $json ?? {})) ? \"PARSER_ERROR\" : /\\b(?:400|403|409)\\b|contract|referen|eviden|Bad request|Forbidden/i.test(JSON.stringify($json.error ?? $json ?? {})) || $json.output ? \"CONTRACT_ERROR\" : /httpRequest|tool/i.test(JSON.stringify($json.error ?? $json ?? {})) ? \"TOOL_ERROR\" : \"PROVIDER_UNAVAILABLE\"}) }}",
+        "options": {
+          "timeout": 15000
+        }
       },
+      "id": "fail",
+      "name": "Devolver fallo recuperable",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
       "position": [
-        1340,
-        0
+        1712,
+        96
       ],
       "credentials": {
         "httpHeaderAuth": {
@@ -244,25 +244,12 @@
       }
     },
     {
-      "id": "workspace-mail-proposal",
-      "name": "Proponer correo autorizado",
-      "type": "n8n-nodes-base.httpRequestTool",
-      "typeVersion": 4.2,
-      "position": [
-        1240,
-        420
-      ],
-      "credentials": {
-        "httpHeaderAuth": {
-          "name": "Ceroa assistant bridge"
-        }
-      },
       "parameters": {
+        "toolDescription": "Prepare a persistent proposal to email the user registered address. Does not send mail. The real user must subsequently confirm using the returned instruction. Never choose recipient, supply email text, or claim Gmail delivery. Allowed SUBSCRIPTION_INFO only.",
         "method": "POST",
+        "url": "={{ \"http://backend:8080/api/v1/assistant-tools/requests/\" + $(\"Recibir delegación\").first().json.requestId + \"/communications/propose\" }}",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
-        "url": "={{ \"http://backend:8080/api/v1/assistant-tools/requests/\" + $(\"Recibir delegación\").first().json.requestId + \"/communications/propose\" }}",
-        "toolDescription": "Prepare a persistent proposal to email the user registered address. Does not send mail. The real user must subsequently confirm using the returned instruction. Never choose recipient, supply email text, or claim Gmail delivery. Allowed SUBSCRIPTION_INFO only.",
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
@@ -279,23 +266,28 @@
         "options": {
           "timeout": 15000
         }
-      }
-    },
-    {
-      "id": "booking-availability",
-      "name": "consultar_disponibilidad_soporte",
+      },
+      "id": "workspace-mail-proposal",
+      "name": "Proponer correo autorizado",
       "type": "n8n-nodes-base.httpRequestTool",
       "typeVersion": 4.2,
       "position": [
-        1930,
-        600
+        768,
+        384
       ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "name": "Ceroa assistant bridge"
+        }
+      }
+    },
+    {
       "parameters": {
+        "toolDescription": "Check real availability for a requested ISO8601 slot.",
         "method": "POST",
         "url": "={{ \"http://backend:8080/api/v1/assistant-tools/requests/\" + $(\"Recibir delegación\").first().json.requestId + \"/support/booking\" }}",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
-        "toolDescription": "Check real availability for a requested ISO8601 slot.",
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
@@ -317,6 +309,14 @@
           "timeout": 25000
         }
       },
+      "id": "booking-availability",
+      "name": "consultar_disponibilidad_soporte",
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        944,
+        384
+      ],
       "credentials": {
         "httpHeaderAuth": {
           "name": "Ceroa assistant bridge"
@@ -324,20 +324,12 @@
       }
     },
     {
-      "id": "booking-propose",
-      "name": "proponer_asesoria",
-      "type": "n8n-nodes-base.httpRequestTool",
-      "typeVersion": 4.2,
-      "position": [
-        1960,
-        600
-      ],
       "parameters": {
+        "toolDescription": "Propose an expiring slot after checking Calendar. User must confirm in Ceroa. Never confirms a reservation.",
         "method": "POST",
         "url": "={{ \"http://backend:8080/api/v1/assistant-tools/requests/\" + $(\"Recibir delegación\").first().json.requestId + \"/support/booking\" }}",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
-        "toolDescription": "Propose an expiring slot after checking Calendar. User must confirm in Ceroa. Never confirms a reservation.",
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
@@ -359,6 +351,14 @@
           "timeout": 25000
         }
       },
+      "id": "booking-propose",
+      "name": "proponer_asesoria",
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        1120,
+        384
+      ],
       "credentials": {
         "httpHeaderAuth": {
           "name": "Ceroa assistant bridge"
@@ -366,20 +366,12 @@
       }
     },
     {
-      "id": "booking-get",
-      "name": "consultar_asesoria",
-      "type": "n8n-nodes-base.httpRequestTool",
-      "typeVersion": 4.2,
-      "position": [
-        1990,
-        600
-      ],
       "parameters": {
+        "toolDescription": "Read own reservation status by proposal code.",
         "method": "POST",
         "url": "={{ \"http://backend:8080/api/v1/assistant-tools/requests/\" + $(\"Recibir delegación\").first().json.requestId + \"/support/booking\" }}",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
-        "toolDescription": "Read own reservation status by proposal code.",
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
@@ -401,6 +393,14 @@
           "timeout": 25000
         }
       },
+      "id": "booking-get",
+      "name": "consultar_asesoria",
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        1296,
+        384
+      ],
       "credentials": {
         "httpHeaderAuth": {
           "name": "Ceroa assistant bridge"
@@ -408,20 +408,12 @@
       }
     },
     {
-      "id": "booking-cancel",
-      "name": "cancelar_asesoria",
-      "type": "n8n-nodes-base.httpRequestTool",
-      "typeVersion": 4.2,
-      "position": [
-        2020,
-        600
-      ],
       "parameters": {
+        "toolDescription": "Propose cancellation of own booking. Does not cancel until user confirms in Ceroa.",
         "method": "POST",
         "url": "={{ \"http://backend:8080/api/v1/assistant-tools/requests/\" + $(\"Recibir delegación\").first().json.requestId + \"/support/booking\" }}",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
-        "toolDescription": "Propose cancellation of own booking. Does not cancel until user confirms in Ceroa.",
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
@@ -443,6 +435,14 @@
           "timeout": 25000
         }
       },
+      "id": "booking-cancel",
+      "name": "cancelar_asesoria",
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        1488,
+        384
+      ],
       "credentials": {
         "httpHeaderAuth": {
           "name": "Ceroa assistant bridge"
@@ -450,13 +450,11 @@
       }
     },
     {
-      "id": "single",
-      "name": "Una solicitud por delegacion",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
       "parameters": {
         "conditions": {
           "options": {
+            "caseSensitive": true,
+            "leftValue": "",
             "typeValidation": "strict",
             "version": 2
           },
@@ -475,32 +473,34 @@
         },
         "options": {}
       },
+      "id": "single",
+      "name": "Una solicitud por delegacion",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
       "position": [
-        120,
+        -32,
         0
       ]
     },
     {
+      "parameters": {
+        "errorMessage": "Exactly one request item is required for a specialist delegation"
+      },
       "id": "reject",
       "name": "Rechazar items ambiguos",
       "type": "n8n-nodes-base.stopAndError",
       "typeVersion": 1,
-      "parameters": {
-        "errorMessage": "Exactly one request item is required for a specialist delegation"
-      },
       "position": [
-        120,
-        240
+        192,
+        176
       ]
     },
     {
-      "id": "output",
-      "name": "Resultado estructurado presente",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
       "parameters": {
         "conditions": {
           "options": {
+            "caseSensitive": true,
+            "leftValue": "",
             "typeValidation": "strict",
             "version": 2
           },
@@ -519,19 +519,21 @@
         },
         "options": {}
       },
+      "id": "output",
+      "name": "Resultado estructurado presente",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
       "position": [
-        1000,
-        0
+        1056,
+        -96
       ]
     },
     {
-      "id": "accepted",
-      "name": "Resultado autorizado presente",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
       "parameters": {
         "conditions": {
           "options": {
+            "caseSensitive": true,
+            "leftValue": "",
             "typeValidation": "strict",
             "version": 2
           },
@@ -550,105 +552,29 @@
         },
         "options": {}
       },
+      "id": "accepted",
+      "name": "Resultado autorizado presente",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
       "position": [
-        1250,
-        0
+        1488,
+        -224
       ]
     },
     {
-      "id": "returned",
-      "name": "Devolver resultado validado",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
       "parameters": {
         "mode": "raw",
         "jsonOutput": "={{ JSON.stringify($json) }}",
         "options": {}
       },
+      "id": "returned",
+      "name": "Devolver resultado validado",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
       "position": [
-        1500,
-        0
+        1760,
+        -240
       ]
-    },
-    {
-      "id": "ceroa-identity-entry",
-      "name": "CEROA AI · Entrada y autenticación",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        -120,
-        -480
-      ],
-      "parameters": {
-        "content": "## Entrada y autenticación\nContexto autorizado por Spring Boot; no agregar memoria compartida.",
-        "height": 180,
-        "width": 580,
-        "color": 5
-      }
-    },
-    {
-      "id": "ceroa-identity-agent",
-      "name": "CEROA AI · LUMEN — Customer Experience & Support",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        520,
-        -480
-      ],
-      "parameters": {
-        "content": "## LUMEN — Customer Experience & Support\nAgente nativo, Gemini y contrato estructurado. Solo herramientas del dominio.",
-        "height": 180,
-        "width": 700,
-        "color": 5
-      }
-    },
-    {
-      "id": "ceroa-identity-governance",
-      "name": "CEROA AI · AEGIS — Seguridad y gobernanza",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        1300,
-        -480
-      ],
-      "parameters": {
-        "content": "## AEGIS — Seguridad y gobernanza\nValidación determinista de identidad, alcance, evidencia y resultados. HITL fuera del LLM.",
-        "height": 180,
-        "width": 650,
-        "color": 5
-      }
-    },
-    {
-      "id": "ceroa-identity-result",
-      "name": "CEROA AI · Validación, errores y respuesta final",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        2050,
-        -480
-      ],
-      "parameters": {
-        "content": "## Validación, errores y respuesta final\nResultado validado o fallo recuperable; conservar requestId y cobertura.",
-        "height": 180,
-        "width": 650,
-        "color": 5
-      }
-    },
-    {
-      "id": "ceroa-identity-chronos",
-      "name": "CEROA AI · CHRONOS — Integraciones externas",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        700,
-        760
-      ],
-      "parameters": {
-        "content": "## CHRONOS — Integraciones externas\nCalendar/Meet: gateway REST y nodos Calendar. MCP: frontera separada y controlada. Propuesta no equivale a confirmación.",
-        "height": 180,
-        "width": 1000,
-        "color": 5
-      }
     }
   ],
   "connections": {
@@ -861,8 +787,10 @@
     "executionOrder": "v1",
     "timezone": "America/Bogota",
     "executionTimeout": 150,
-    "saveDataSuccessExecution": "none",
-    "saveDataErrorExecution": "none",
-    "saveManualExecutions": false
+    "saveDataSuccessExecution": "all",
+    "saveDataErrorExecution": "all",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true,
+    "binaryMode": "separate"
   }
 }

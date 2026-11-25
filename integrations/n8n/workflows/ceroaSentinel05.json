@@ -593,9 +593,10 @@
     "executionOrder": "v1",
     "timezone": "America/Bogota",
     "executionTimeout": 240,
-    "saveDataSuccessExecution": "none",
-    "saveDataErrorExecution": "none",
-    "saveManualExecutions": false,
-    "errorWorkflow": "ceroaSentinelError05"
+    "saveDataSuccessExecution": "all",
+    "saveDataErrorExecution": "all",
+    "saveManualExecutions": true,
+    "errorWorkflow": "ceroaSentinelError05",
+    "saveExecutionProgress": true
   }
 }

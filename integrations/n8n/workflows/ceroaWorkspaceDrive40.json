@@ -356,8 +356,9 @@
     "executionOrder": "v1",
     "timezone": "America/Bogota",
     "executionTimeout": 120,
-    "saveDataSuccessExecution": "none",
-    "saveDataErrorExecution": "none",
-    "saveManualExecutions": false
+    "saveDataSuccessExecution": "all",
+    "saveDataErrorExecution": "all",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true
   }
 }

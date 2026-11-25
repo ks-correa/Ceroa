@@ -12,8 +12,8 @@
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        0,
-        0
+        -208,
+        16
       ]
     },
     {
@@ -48,6 +48,7 @@
         "conditions": {
           "options": {
             "caseSensitive": true,
+            "leftValue": "",
             "typeValidation": "strict",
             "version": 2
           },
@@ -110,9 +111,9 @@
         720,
         80
       ],
+      "notesInFlow": true,
       "onError": "continueRegularOutput",
-      "notes": "ATLAS — Financial Intelligence. Alcances y evidencia autorizados por AEGIS en Spring Boot.",
-      "notesInFlow": true
+      "notes": "ATLAS — Financial Intelligence. Alcances y evidencia autorizados por AEGIS en Spring Boot."
     },
     {
       "parameters": {
@@ -369,8 +370,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1024,
-        -160
+        1248,
+        -224
       ],
       "credentials": {
         "httpHeaderAuth": {
@@ -385,20 +386,20 @@
         "url": "={{ \"http://backend:8080/api/v1/assistant-tools/requests/\" + $(\"Autorizar alcance\").first().json.requestId + \"/delegations/\" + $(\"Autorizar alcance\").first().json.scopeToken + \"/fail\" }}",
         "authentication": "genericCredentialType",
         "genericAuthType": "httpHeaderAuth",
-        "options": {
-          "timeout": 15000
-        },
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({errorCode: /\\b429\\b|quota|RESOURCE_EXHAUSTED|too many requests|rate.?limit/i.test(JSON.stringify($json.error ?? $json ?? {})) ? \"PROVIDER_QUOTA\" : /max(?:imum)?\\s*(?:number of\\s*)?iterations?|iteration limit|stopped.*iterations/i.test(JSON.stringify($json.error ?? $json ?? {})) ? \"ITERATION_LIMIT\" : !$json.output && !/\\b(?:400|403|409)\\b|Bad request|Forbidden/i.test(JSON.stringify($json.error ?? $json ?? {})) && /parse|schema|OutputParser/i.test(JSON.stringify($json.error ?? $json ?? {})) ? \"PARSER_ERROR\" : /\\b(?:400|403|409)\\b|contract|referen|eviden|Bad request|Forbidden/i.test(JSON.stringify($json.error ?? $json ?? {})) || $json.output ? \"CONTRACT_ERROR\" : /httpRequest|tool/i.test(JSON.stringify($json.error ?? $json ?? {})) ? \"TOOL_ERROR\" : \"PROVIDER_UNAVAILABLE\"}) }}"
+        "jsonBody": "={{ JSON.stringify({errorCode: /\\b429\\b|quota|RESOURCE_EXHAUSTED|too many requests|rate.?limit/i.test(JSON.stringify($json.error ?? $json ?? {})) ? \"PROVIDER_QUOTA\" : /max(?:imum)?\\s*(?:number of\\s*)?iterations?|iteration limit|stopped.*iterations/i.test(JSON.stringify($json.error ?? $json ?? {})) ? \"ITERATION_LIMIT\" : !$json.output && !/\\b(?:400|403|409)\\b|Bad request|Forbidden/i.test(JSON.stringify($json.error ?? $json ?? {})) && /parse|schema|OutputParser/i.test(JSON.stringify($json.error ?? $json ?? {})) ? \"PARSER_ERROR\" : /\\b(?:400|403|409)\\b|contract|referen|eviden|Bad request|Forbidden/i.test(JSON.stringify($json.error ?? $json ?? {})) || $json.output ? \"CONTRACT_ERROR\" : /httpRequest|tool/i.test(JSON.stringify($json.error ?? $json ?? {})) ? \"TOOL_ERROR\" : \"PROVIDER_UNAVAILABLE\"}) }}",
+        "options": {
+          "timeout": 15000
+        }
       },
       "id": "fail",
       "name": "Devolver fallo recuperable",
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1344,
-        0
+        1872,
+        48
       ],
       "credentials": {
         "httpHeaderAuth": {
@@ -445,13 +446,11 @@
       }
     },
     {
-      "id": "single",
-      "name": "Una solicitud por delegacion",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
       "parameters": {
         "conditions": {
           "options": {
+            "caseSensitive": true,
+            "leftValue": "",
             "typeValidation": "strict",
             "version": 2
           },
@@ -470,32 +469,34 @@
         },
         "options": {}
       },
+      "id": "single",
+      "name": "Una solicitud por delegacion",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
       "position": [
-        120,
-        0
+        -16,
+        -16
       ]
     },
     {
+      "parameters": {
+        "errorMessage": "Exactly one request item is required for a specialist delegation"
+      },
       "id": "reject",
       "name": "Rechazar items ambiguos",
       "type": "n8n-nodes-base.stopAndError",
       "typeVersion": 1,
-      "parameters": {
-        "errorMessage": "Exactly one request item is required for a specialist delegation"
-      },
       "position": [
-        120,
+        128,
         240
       ]
     },
     {
-      "id": "output",
-      "name": "Resultado estructurado presente",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
       "parameters": {
         "conditions": {
           "options": {
+            "caseSensitive": true,
+            "leftValue": "",
             "typeValidation": "strict",
             "version": 2
           },
@@ -514,19 +515,21 @@
         },
         "options": {}
       },
+      "id": "output",
+      "name": "Resultado estructurado presente",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
       "position": [
-        1000,
-        0
+        1104,
+        16
       ]
     },
     {
-      "id": "accepted",
-      "name": "Resultado autorizado presente",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
       "parameters": {
         "conditions": {
           "options": {
+            "caseSensitive": true,
+            "leftValue": "",
             "typeValidation": "strict",
             "version": 2
           },
@@ -545,89 +548,29 @@
         },
         "options": {}
       },
+      "id": "accepted",
+      "name": "Resultado autorizado presente",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
       "position": [
-        1250,
-        0
+        1584,
+        -160
       ]
     },
     {
-      "id": "returned",
-      "name": "Devolver resultado validado",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
       "parameters": {
         "mode": "raw",
         "jsonOutput": "={{ JSON.stringify($json) }}",
         "options": {}
       },
+      "id": "returned",
+      "name": "Devolver resultado validado",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
       "position": [
-        1500,
-        0
+        1840,
+        -208
       ]
-    },
-    {
-      "id": "ceroa-identity-entry",
-      "name": "CEROA AI · Entrada y autenticación",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        -120,
-        -480
-      ],
-      "parameters": {
-        "content": "## Entrada y autenticación\nContexto autorizado por Spring Boot; no agregar memoria compartida.",
-        "height": 180,
-        "width": 580,
-        "color": 5
-      }
-    },
-    {
-      "id": "ceroa-identity-agent",
-      "name": "CEROA AI · ATLAS — Financial Intelligence",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        520,
-        -480
-      ],
-      "parameters": {
-        "content": "## ATLAS — Financial Intelligence\nAgente nativo, Gemini y contrato estructurado. Solo herramientas del dominio.",
-        "height": 180,
-        "width": 700,
-        "color": 5
-      }
-    },
-    {
-      "id": "ceroa-identity-governance",
-      "name": "CEROA AI · AEGIS — Seguridad y gobernanza",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        1300,
-        -480
-      ],
-      "parameters": {
-        "content": "## AEGIS — Seguridad y gobernanza\nValidación determinista de identidad, alcance, evidencia y resultados. HITL fuera del LLM.",
-        "height": 180,
-        "width": 650,
-        "color": 5
-      }
-    },
-    {
-      "id": "ceroa-identity-result",
-      "name": "CEROA AI · Validación, errores y respuesta final",
-      "type": "n8n-nodes-base.stickyNote",
-      "typeVersion": 1,
-      "position": [
-        2050,
-        -480
-      ],
-      "parameters": {
-        "content": "## Validación, errores y respuesta final\nResultado validado o fallo recuperable; conservar requestId y cobertura.",
-        "height": 180,
-        "width": 650,
-        "color": 5
-      }
     }
   ],
   "connections": {
@@ -840,9 +783,10 @@
     "executionOrder": "v1",
     "timezone": "America/Bogota",
     "executionTimeout": 150,
-    "saveDataSuccessExecution": "none",
-    "saveDataErrorExecution": "none",
-    "saveManualExecutions": false,
-    "binaryMode": "separate"
+    "saveDataSuccessExecution": "all",
+    "saveDataErrorExecution": "all",
+    "saveManualExecutions": true,
+    "binaryMode": "separate",
+    "saveExecutionProgress": true
   }
 }

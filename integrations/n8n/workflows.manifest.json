@@ -5,7 +5,7 @@
     {
       "id": "ceroaTelegram01",
       "file": "ceroaTelegram01.json",
-      "sha256": "7373014444626c1429fd862464be7d46002be4eace1aada21c8f0d6be50a5ddf",
+      "sha256": "b075ac0e5840ca3088e32ee0545d2a0c79782affe7772dfc97a5192e71b918d7",
       "dependencies": [],
       "credentials": [
         {
@@ -21,12 +21,12 @@
       "publication": "manual",
       "externalEffects": true,
       "disabled": false,
-      "adoptDigest": "adf71ddf2a75e947348d23f7116622f8635989bdf791610647f1096f2809be00"
+      "adoptDigest": "c3e40e7b1280bdad76cef2f955f2fbfe93df8e796c54844a81d898a1c8748306"
     },
     {
       "id": "ceroaDocuments02",
       "file": "ceroaDocuments02.json",
-      "sha256": "dcbbc41aae40b46b6697b6b0edbee4ecffa9e5fb6b796a375c34a4c4e2ccf73d",
+      "sha256": "c2b66bc2656554706926851b2f45b1d3c0189d6a4316c54d37621d9cad3db584",
       "dependencies": [],
       "credentials": [
         {
@@ -42,12 +42,12 @@
       "publication": "ready",
       "externalEffects": false,
       "disabled": false,
-      "adoptDigest": "58a51fdc17a593fd31b6f7ee94d671b769e6876ec960849ce727fe0f173fea82"
+      "adoptDigest": "0301e220c0efef5644d01e51b05ab7500b000805f0b63457a6627424da94df43"
     },
     {
       "id": "ceroaRagEmbedding03",
       "file": "ceroaRagEmbedding03.json",
-      "sha256": "ea2d1bde06fe77187358ad51465f8db2cd85b5c04c9af8cd2b6d2ea738c7d039",
+      "sha256": "aaa60fc7aebb5bff6a6e8c92d409a22d45e9c0d23c3d0fab0e3dac5a2eed71ee",
       "dependencies": [],
       "credentials": [
         {
@@ -63,12 +63,12 @@
       "publication": "ready",
       "externalEffects": false,
       "disabled": false,
-      "adoptDigest": "61be1811b4130d4d1bc0d10fc339134b741e8c842a0cfa6d814f513ab74c792c"
+      "adoptDigest": "195fd93971e8fcf306f8da4d0af5639231e3d806effbfcc0cc1fc858aed2f56a"
     },
     {
       "id": "ceroaRagIndex03",
       "file": "ceroaRagIndex03.json",
-      "sha256": "78710949c85200f48a0f7bb1abab26bd15ba1cc13de70ac0128721e0d6e2a0de",
+      "sha256": "e012ac59b96eaab86eedc70fc9077988aef85402109b2f17ab48405441d1396d",
       "dependencies": [],
       "credentials": [
         {
@@ -84,12 +84,12 @@
       "publication": "manual",
       "externalEffects": false,
       "disabled": false,
-      "adoptDigest": "f1286037e57daf3c4e0a674546324a5f41467a24516a1548648f79ad3cffd803"
+      "adoptDigest": "d2492d5462f1256eade040b9ec3ca1f36d8c1b8eeb90dac2e5a65f25ea246875"
     },
     {
       "id": "ceroaReminders04",
       "file": "ceroaReminders04.json",
-      "sha256": "e91c42f3e41569c6ef429eb3e6fd86ab9614d8d7339a269472356d20abd47e98",
+      "sha256": "0523a006730ee94b9ac16f100e34ce77d106ba2db5e43368ff1775e12f0351d8",
       "dependencies": [
         "ceroaReminderError04"
       ],
@@ -107,24 +107,24 @@
       "publication": "manual",
       "externalEffects": true,
       "disabled": false,
-      "adoptDigest": "4877e286d0d8a10088729179a52f0532381c4c8faf8f5c9b5caa8cf276d0e48b"
+      "adoptDigest": "23a97b44c80b03d1bf0c8a097b8032df6449b30b89727d93c1dcacd2399a64e0"
     },
     {
       "id": "ceroaReminderError04",
       "file": "ceroaReminderError04.json",
-      "sha256": "d5dc79dfece951a782092bdae378b4aa43cf5a0d4c3dacd44b8accf9b66fb446",
+      "sha256": "56bcded1cd67da7c9b6dd7e2495a0a237f9645987ecba6374cce9cbb6a6d1a61",
       "dependencies": [],
       "credentials": [],
       "parameters": [],
       "publication": "ready",
       "externalEffects": false,
       "disabled": false,
-      "adoptDigest": "a1495debd0fa3b7825342377d9fef962458de566778a4503784344dfdd1a0472"
+      "adoptDigest": "d1277da4bb609e5d6209be483ff68f0c4fe4d496799d6195b2e61205e63ec305"
     },
     {
       "id": "ceroaSentinel05",
       "file": "ceroaSentinel05.json",
-      "sha256": "1e0117c1bad8605f75f3610502e7c925c9f89648834f0023894261e671966c83",
+      "sha256": "87399480373979277286a5bf4ae005b5188c3692054f3a2f6a1cb1500aba5229",
       "dependencies": [
         "ceroaSentinelError05"
       ],
@@ -142,24 +142,24 @@
       "publication": "manual",
       "externalEffects": true,
       "disabled": false,
-      "adoptDigest": "290cba086c3003f59c7550b5f2d0e303c9b90ae9076c9df64d2e62beef87a8df"
+      "adoptDigest": "741013bd05539c07cd3a2a0b0125c10fbe2fdf65b4d4339a90e00a2515195bc2"
     },
     {
       "id": "ceroaSentinelError05",
       "file": "ceroaSentinelError05.json",
-      "sha256": "48d7d13c63876a098771fcd239b26a8263831c4d249483b1370089d75fbc31c4",
+      "sha256": "98eefb7e917a0080e9063b31c8da5fda69f92b391e29de2f3e0130911047e72d",
       "dependencies": [],
       "credentials": [],
       "parameters": [],
       "publication": "ready",
       "externalEffects": false,
       "disabled": false,
-      "adoptDigest": "3e6b4c140f329ea1493b6e79fe0a1c47ad7129ae22685f5dac3a139c24b15563"
+      "adoptDigest": "58692f3e07ed7adaedb623a597fa05a19b80bdd8d11a7df8c779b3757f8d9fb0"
     },
     {
       "id": "ceroaRagIngest20",
       "file": "ceroaRagIngest20.json",
-      "sha256": "baa1f366c942b61c95c7854d864e8c28376a2fc99502b75543260a035417e447",
+      "sha256": "f6a9a63b8308c6679fd5eeaed2687cc1a8f5a070bef4436d6829fb5d691b908d",
       "dependencies": [
         "ceroaDocumentProcessor22"
       ],
@@ -173,12 +173,12 @@
       "publication": "ready",
       "externalEffects": false,
       "disabled": false,
-      "adoptDigest": "505d2c2fb43231e336a231bce4939bd90674cf626b00a2110ea9947580ecec34"
+      "adoptDigest": "beb734802090b2313fa0fdfcfb25be26fcf6b819e9d69ec6b309b00e479fa4fe"
     },
     {
       "id": "ceroaRagSync20",
       "file": "ceroaRagSync20.json",
-      "sha256": "f86bbc80f402c5cef3cb2f0c9e74ffdd891b64c06fbe601ca929a084809d5ad2",
+      "sha256": "e7412cf67b57d40e5b115c89672293b9887b0199e175f0e9ebc595ba0d9d552c",
       "dependencies": [
         "ceroaDocumentProcessor22"
       ],
@@ -187,12 +187,12 @@
       "publication": "manual",
       "externalEffects": true,
       "disabled": false,
-      "adoptDigest": "32a7b019ec0c69f513fa2c0dbc952da643d2dea872c194622814c0e10bd7d202"
+      "adoptDigest": "b208858d5cacc1694f646bc9a1fcba792a0b0155a34020dc6935bf2a71ad26fb"
     },
     {
       "id": "ceroaHybridQuery20",
       "file": "ceroaHybridQuery20.json",
-      "sha256": "4859105f6377092c9b9efe12397d47436dacc4ba37cc6783dcda63c775f67a48",
+      "sha256": "7c827fd698e6daf53ef7eb14d25e24f08591be1e3ded8efcdfdaacf06fa83ef0",
       "dependencies": [
         "ceroaFinancialAgent30",
         "ceroaKnowledgeAgent30",
@@ -216,12 +216,12 @@
       "publication": "ready",
       "externalEffects": false,
       "disabled": false,
-      "adoptDigest": "8d590ef05df4e145d2cd9e76c7b12f6736df1932d99a7036aba4aefc650eeae0"
+      "adoptDigest": "35a1eef7996870c01afd2d823febd072b976c9eeab86eb5076b71cf8c1e405b5"
     },
     {
       "id": "ceroaOcr21",
       "file": "ceroaOcr21.json",
-      "sha256": "722d7d3165f0bd7ad101c2a23b71bf7b25be371a5ae8dbe6037ea10cb691d4f9",
+      "sha256": "2de30e70f2511e7a2f011ca8bb985b3c6bc377c205e3a1e1f621d6e1e09dd848",
       "dependencies": [],
       "credentials": [
         {
@@ -241,12 +241,12 @@
       "publication": "ready",
       "externalEffects": false,
       "disabled": false,
-      "adoptDigest": "faa75a7b046306b56f13dba68c3d7efcc6b83edb2d0d3cb9181199bdaa6d9c76"
+      "adoptDigest": "7caedb0a9a9c1a836b7ccfa8e5a12984fd7fbb097c64fef5f822b98ce71fd467"
     },
     {
       "id": "ceroaDocumentProcessor22",
       "file": "ceroaDocumentProcessor22.json",
-      "sha256": "b887afa7d136efa16b70517905f13a7a98c77502417ddcbd41d4512498088e1e",
+      "sha256": "e1cf291d5c8bc89787b9fddbb0c35e0a9ce452b577ae1154a6ce70410385d2b4",
       "dependencies": [],
       "credentials": [
         {
@@ -270,12 +270,12 @@
       "publication": "ready",
       "externalEffects": false,
       "disabled": false,
-      "adoptDigest": "244d5953fe5465def0b2ccb559c58846728ab4cb434695da78d0b124b34610dd"
+      "adoptDigest": "a0f8c2d68238a4e23e10b70eb45b2ae6f837a253fd505cac92ce03289bb7b283"
     },
     {
       "id": "ceroaFinancialAgent30",
       "file": "ceroaFinancialAgent30.json",
-      "sha256": "c8565f5ca81bd1cd5c336d62b9c0007dce6c15927895d5529a1c213f1bd5c2e1",
+      "sha256": "25b8fdf502a4d86aec71b7fe2ecb231baa882028f7b99568ec36d8e3a7a5a83d",
       "dependencies": [],
       "credentials": [
         {
@@ -291,12 +291,12 @@
       "publication": "ready",
       "externalEffects": false,
       "disabled": false,
-      "adoptDigest": "5f5f827d6e15968fec9c41cc5d70a2d2b59efd22eaff804cbd7a4affddc96622"
+      "adoptDigest": "0acd10da7b344262300e60831b1d6bfcabbcf79defb8f20a7f45e173fa9e6b6a"
     },
     {
       "id": "ceroaKnowledgeAgent30",
       "file": "ceroaKnowledgeAgent30.json",
-      "sha256": "2e152726878068720e4e49293ac12e35cbe255a90580494346d177330856662f",
+      "sha256": "4c8a4d5467655f7edb0fba1e8f48486f98f358f37e65fc8309bd58bc2c8d429b",
       "dependencies": [],
       "credentials": [
         {
@@ -312,12 +312,12 @@
       "publication": "ready",
       "externalEffects": false,
       "disabled": false,
-      "adoptDigest": "5ee0731a8ed138696f6a3af07d1151cf0ed1fc54a86eb770fad230a14a5529e5"
+      "adoptDigest": "072257a1e46ef52a5aed806263a281fef0cc67f4ddd74761294b3ea530af4242"
     },
     {
       "id": "ceroaSupportAgent30",
       "file": "ceroaSupportAgent30.json",
-      "sha256": "fffbfaa29f79536e2d53752f73c587914dd05f05e412d21299d5048ee4d216ec",
+      "sha256": "e63744c8b35fba8303561048c732d60616749630dfa2f81510d52ada139663c6",
       "dependencies": [],
       "credentials": [
         {
@@ -333,12 +333,12 @@
       "publication": "ready",
       "externalEffects": false,
       "disabled": false,
-      "adoptDigest": "a5b1a2f41b810b352892dd1768a9c129d20629a57233403daf31fede53af8d40"
+      "adoptDigest": "f63650a3c1e41e7f5f81eab7b31b33c9daad63b725e0785f874480d57d10d2c2"
     },
     {
       "id": "ceroaWorkspaceMail40",
       "file": "ceroaWorkspaceMail40.json",
-      "sha256": "05c4430f3583bc338574dc8441e13e3fae1f67747f2e6e4455ca793b2ebea0a6",
+      "sha256": "622453f7bf5e1e6a2b94b148c946c7561f43511b80bb3079f48543beb21709a1",
       "dependencies": [],
       "credentials": [
         {
@@ -354,12 +354,12 @@
       "publication": "manual",
       "externalEffects": true,
       "disabled": false,
-      "adoptDigest": "c5c57becda070ba43f9c85b2a5705e7b8489ed6e357fc96751b9d6bf2106518b"
+      "adoptDigest": "e06e8f4a71601bf07dabd1fc7265316fbc74cd5c74aa83b19e14bced09ad9914"
     },
     {
       "id": "ceroaWorkspaceSheets40",
       "file": "ceroaWorkspaceSheets40.json",
-      "sha256": "583edf5843c44708c987188af40d5ef1754504f99ea094ed909469b652e9e067",
+      "sha256": "f1028a0e28444e674e2dfbc4855a76eef3605f748ee9ec00d199a533e6aeedb9",
       "dependencies": [],
       "credentials": [
         {
@@ -378,12 +378,12 @@
       "publication": "manual",
       "externalEffects": true,
       "disabled": true,
-      "adoptDigest": "66666efd69ec437404f320cc5caa1aea8a5323a7f036428f1c34ef9dfeab4419"
+      "adoptDigest": "345b21b82802eb7839918db49111a89cbe6709de77d288300fa78f7aa94a57f9"
     },
     {
       "id": "ceroaWorkspaceDrive40",
       "file": "ceroaWorkspaceDrive40.json",
-      "sha256": "9bda39d62d4d0b4a3c5177884e13a5ad74df33ea5d4bdde4e2b73e04a822f0db",
+      "sha256": "f6b161d66496df69502dbfe26738ce652cdf89e234dbfbefb46dfa9ffde2830d",
       "dependencies": [],
       "credentials": [
         {
@@ -401,12 +401,12 @@
       "publication": "manual",
       "externalEffects": true,
       "disabled": false,
-      "adoptDigest": "e782f821974c7056c72f508f48ce1113147b0c972030f671c934fb831df862ca"
+      "adoptDigest": "6c88cd44380fe553f6a836ec5dab63191b19c449640e99eaa8ddcd375657298d"
     },
     {
       "id": "ceroaGoogleDraftFinal",
       "file": "ceroaGoogleDraftFinal.json",
-      "sha256": "92c60230fa566fb697cc1181fb8d11631f23b1862108ca8e9d8829732f4d64b6",
+      "sha256": "c919dc01bd33b8f39b661025de612347be7ed3ad14388b16ab92832fd66dac93",
       "dependencies": [],
       "credentials": [
         {
@@ -430,12 +430,12 @@
         "WORKSPACE_PROVIDER_ENABLED",
         "SUPPORT_CALENDAR_ID"
       ],
-      "adoptDigest": "7951c4ca3b042711412c6745b0492b45c8caed9d34afa25ee65c101c491e02a7"
+      "adoptDigest": "d2b3b8abf1c6172f3fb2549a31ea731dabd605bdcec0ad7a6eec1d8d6aa92969"
     },
     {
       "id": "ceroaGoogleCalendarFinal",
       "file": "ceroaGoogleCalendarFinal.json",
-      "sha256": "cbc3ce6bd9ff38e8f900f289f05320ad27911e7b0ee7d7f4d55b3275c40efa08",
+      "sha256": "9ace00f7b3ddb29bb40d475ae43da14c17da7ee69fa15b1cbea51a4138766df8",
       "dependencies": [],
       "credentials": [
         {
@@ -459,7 +459,7 @@
         "WORKSPACE_PROVIDER_ENABLED",
         "SUPPORT_CALENDAR_ID"
       ],
-      "adoptDigest": "cf41af1f938e752f03cebbe03a082bb1e0c184ef908affdb0ed64440ca2e050b"
+      "adoptDigest": "0dbe4af35ae4262f81144c0984494786e7b877ba5c02550456b2c3fba97e70d7"
     }
   ]
 }

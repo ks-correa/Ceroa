@@ -25,26 +25,24 @@
       ]
     },
     {
-      "id": "process-queue",
-      "name": "Ejecutar procesador compartido",
-      "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.3,
-      "position": [
-        300,
-        0
-      ],
       "parameters": {
-        "source": "database",
         "workflowId": {
           "__rl": true,
           "value": "ceroaDocumentProcessor22",
           "mode": "id"
         },
-        "mode": "once",
         "options": {
           "waitForSubWorkflow": true
         }
-      }
+      },
+      "id": "process-queue",
+      "name": "Ejecutar procesador compartido",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        304,
+        0
+      ]
     }
   ],
   "connections": {
@@ -64,9 +62,10 @@
     "executionOrder": "v1",
     "timezone": "America/Bogota",
     "executionTimeout": 240,
-    "saveDataSuccessExecution": "none",
-    "saveDataErrorExecution": "none",
-    "saveManualExecutions": false,
-    "binaryMode": "separate"
+    "saveDataSuccessExecution": "all",
+    "saveDataErrorExecution": "all",
+    "saveManualExecutions": true,
+    "binaryMode": "separate",
+    "saveExecutionProgress": true
   }
 }

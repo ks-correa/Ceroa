@@ -61,6 +61,8 @@ SMTP, OAuth Google/Microsoft y Mercado Pago sandbox son opcionales y necesitan c
 
 ## Traslado al portátil
 
+Consulta la [guía paso a paso para respaldar, verificar y trasladar](integrations/migration/README.md). Permite mantener el escritorio funcionando durante la preparación y hacer el cambio definitivo después.
+
 Clonar Git no restaura credenciales. Antes de trasladar consumidores, detén los del escritorio para no duplicar recordatorios, eventos, cobros ni webhooks. Usa rutas absolutas fuera del repositorio. Desde el escritorio:
 
 ```sh

@@ -4,10 +4,6 @@
   "active": false,
   "nodes": [
     {
-      "id": "hook",
-      "name": "Entrada autorizada",
-      "type": "n8n-nodes-base.webhook",
-      "typeVersion": 2,
       "parameters": {
         "httpMethod": "POST",
         "path": "ceroa-google-calendar",
@@ -15,6 +11,10 @@
         "responseMode": "responseNode",
         "options": {}
       },
+      "id": "hook",
+      "name": "Entrada autorizada",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
       "position": [
         0,
         0
@@ -27,10 +27,6 @@
       }
     },
     {
-      "id": "provider",
-      "name": "Proveedor Google controlado",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
       "parameters": {
         "method": "POST",
         "url": "http://workspace-provider:3100/calendar",
@@ -43,37 +39,37 @@
           "timeout": 14000
         }
       },
+      "id": "provider",
+      "name": "Proveedor Google controlado",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
       "position": [
-        500,
+        512,
         0
       ],
-      "onError": "continueErrorOutput",
       "credentials": {
         "httpHeaderAuth": {
           "name": "Ceroa Workspace privado"
         }
-      }
+      },
+      "onError": "continueErrorOutput"
     },
     {
-      "id": "response",
-      "name": "Responder resultado verificado",
-      "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1.4,
       "parameters": {
         "respondWith": "json",
         "responseBody": "={{ $json }}",
         "options": {}
       },
+      "id": "response",
+      "name": "Responder resultado verificado",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
       "position": [
-        800,
-        0
+        1024,
+        -224
       ]
     },
     {
-      "id": "failure",
-      "name": "Conservar resultado incierto",
-      "type": "n8n-nodes-base.respondToWebhook",
-      "typeVersion": 1.4,
       "parameters": {
         "respondWith": "json",
         "responseBody": "{\"error\":\"PROVIDER_UNCONFIRMED\"}",
@@ -81,19 +77,21 @@
           "responseCode": 503
         }
       },
+      "id": "failure",
+      "name": "Conservar resultado incierto",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
       "position": [
-        800,
-        220
+        912,
+        112
       ]
     },
     {
-      "id": "availability",
-      "name": "Solo lectura MCP",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
       "parameters": {
         "conditions": {
           "options": {
+            "caseSensitive": true,
+            "leftValue": "",
             "typeValidation": "strict",
             "version": 2
           },
@@ -112,18 +110,17 @@
         },
         "options": {}
       },
+      "id": "availability",
+      "name": "Solo lectura MCP",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
       "position": [
-        220,
+        224,
         0
       ]
     },
     {
-      "id": "mcp",
-      "name": "MCP Calendar disponibilidad",
-      "type": "@n8n/n8n-nodes-langchain.mcpClient",
-      "typeVersion": 1.1,
       "parameters": {
-        "serverTransport": "httpStreamable",
         "endpointUrl": "http://workspace-provider:3100/mcp",
         "authentication": "headerAuth",
         "tool": {
@@ -134,34 +131,38 @@
         "inputMode": "json",
         "jsonInput": "={{ JSON.stringify({start:$(\"Entrada autorizada\").first().json.body.start,end:$(\"Entrada autorizada\").first().json.body.end}) }}",
         "options": {
-          "timeout": 14000,
-          "convertToBinary": false
+          "convertToBinary": false,
+          "timeout": 14000
         }
       },
+      "id": "mcp",
+      "name": "MCP Calendar disponibilidad",
+      "type": "@n8n/n8n-nodes-langchain.mcpClient",
+      "typeVersion": 1.1,
       "position": [
-        500,
-        -220
+        512,
+        -224
       ],
-      "onError": "continueErrorOutput",
       "credentials": {
         "httpHeaderAuth": {
           "name": "Ceroa Workspace privado"
         }
-      }
+      },
+      "onError": "continueErrorOutput"
     },
     {
-      "id": "normalize",
-      "name": "Validar disponibilidad MCP",
-      "type": "n8n-nodes-base.set",
-      "typeVersion": 3.4,
       "parameters": {
         "mode": "raw",
         "jsonOutput": "={{ JSON.stringify($json.structuredContent ?? ($json.content ? (typeof $json.content[0].text === \"string\" ? JSON.parse($json.content[0].text) : $json.content[0].text) : $json)) }}",
         "options": {}
       },
+      "id": "normalize",
+      "name": "Validar disponibilidad MCP",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
       "position": [
-        700,
-        -220
+        704,
+        -224
       ],
       "onError": "continueErrorOutput"
     }
@@ -255,8 +256,10 @@
     "executionOrder": "v1",
     "timezone": "America/Bogota",
     "executionTimeout": 120,
-    "saveDataSuccessExecution": "none",
-    "saveDataErrorExecution": "none",
-    "saveManualExecutions": false
+    "saveDataSuccessExecution": "all",
+    "saveDataErrorExecution": "all",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true,
+    "binaryMode": "separate"
   }
 }

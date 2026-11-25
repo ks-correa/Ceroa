@@ -141,9 +141,10 @@
   "settings": {
     "executionOrder": "v1",
     "timezone": "America/Bogota",
-    "saveDataSuccessExecution": "none",
-    "saveDataErrorExecution": "none",
-    "saveManualExecutions": false,
-    "executionTimeout": 120
+    "saveDataSuccessExecution": "all",
+    "saveDataErrorExecution": "all",
+    "saveManualExecutions": true,
+    "executionTimeout": 120,
+    "saveExecutionProgress": true
   }
 }

@@ -915,8 +915,9 @@
   "settings": {
     "executionOrder": "v1",
     "executionTimeout": 180,
-    "saveDataSuccessExecution": "none",
-    "saveDataErrorExecution": "none",
-    "saveManualExecutions": false
+    "saveDataSuccessExecution": "all",
+    "saveDataErrorExecution": "all",
+    "saveManualExecutions": true,
+    "saveExecutionProgress": true
   }
 }
