@@ -32,6 +32,24 @@ test('selects a distinct statement and resumes its question by full ID on mobile
  await page.getByRole('textbox').fill('¿Y la fecha de corte?');await page.getByRole('button',{name:'Enviar pregunta'}).click();
  await expect.poll(()=>requests.length).toBe(3);expect(requests[2].documentId).toBe(documents[1].id);
 });
+test('lists saved reservations and requests cancellation of the chosen code on mobile',async({page})=>{
+ await page.setViewportSize({width:375,height:900});
+ const code='RTDKTFGYTSPJSXGLZIFS';const requests:Record<string,string>[]=[];
+ await page.route('**/api/v1/auth/csrf',route=>route.fulfill({json:{token:'ui-fixture-token'}}));
+ await page.route('**/api/v1/assistant/messages',async route=>{
+  const body=route.request().postDataJSON();requests.push(body);
+  await route.fulfill({json:body.message==='Cancelar asesoria '+code?{answer:'La cancelación está pendiente de tu confirmación.',functionalStatus:'COMPLETE'}:{answer:'Tus asesorías registradas.\n\nListado para canales de texto.',functionalStatus:'COMPLETE',bookingList:{items:[{code,status:'CONFIRMED',start:'2026-11-25T14:00:00Z',end:'2026-11-25T14:30:00Z',canCancel:true},{code:'ABCDEFGHIJKLMNOPQRST',status:'CANCELLED',start:'2026-11-24T15:00:00Z',end:'2026-11-24T15:30:00Z',canCancel:false}],total:2,nextPage:null}}});
+ });
+ await page.getByRole('textbox').fill('quiero cancelar una asesoria');await page.getByRole('button',{name:'Enviar pregunta'}).click();
+ const list=page.getByRole('region',{name:'Mis asesorías'});
+ await expect(list.getByText('Confirmada',{exact:true})).toBeVisible();
+ await expect(list.getByRole('button',{name:'Solicitar cancelación'})).toHaveCount(1);
+ expect(await list.evaluate(el=>el.scrollWidth<=el.clientWidth)).toBe(true);
+ await page.screenshot({path:'test-results/booking-list-mobile.png'});
+ await list.getByRole('button',{name:'Solicitar cancelación'}).click();
+ await expect(page.getByText('La cancelación está pendiente de tu confirmación.')).toBeVisible();
+ expect(requests).toEqual([{message:'quiero cancelar una asesoria'},{message:'Cancelar asesoria '+code}]);
+});
 for (const width of [375,768,1440]) {
  test(`assistant geometry and controls at ${width}`, async ({page}) => {
   await page.setViewportSize({width,height:900});

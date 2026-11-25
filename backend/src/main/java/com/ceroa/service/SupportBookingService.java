@@ -15,6 +15,14 @@ public class SupportBookingService {
  public record View(String code,String status,OffsetDateTime start,OffsetDateTime end,OffsetDateTime expiresAt,String meetUrl,String instruction){}
  public record Slot(OffsetDateTime start,OffsetDateTime end){}
  public record Availability(String status,String message,String timezone,LocalDate minDate,LocalDate maxDate,List<Slot> slots){}
+ public record BookingItem(String code,String status,OffsetDateTime start,OffsetDateTime end,boolean canCancel){}
+ public record BookingList(List<BookingItem> items,long total,Integer nextPage){}
+ public BookingList list(int page){
+  if(page<0||page>10000)throw new IllegalArgumentException("Página de asesorías inválida");
+  var result=bookings.findByOwnerId(current.id(),org.springframework.data.domain.PageRequest.of(page,10,org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC,"start","id")));
+  var now=OffsetDateTime.now();
+  return new BookingList(result.getContent().stream().map(b->new BookingItem(b.code,"PROPOSED".equals(b.status)&&!b.expiresAt.isAfter(now)?"EXPIRED":b.status,b.start,b.end,Set.of("CONFIRMED","PENDING_MEET").contains(b.status))).toList(),result.getTotalElements(),result.hasNext()?page+1:null);
+ }
  private static final ZoneId ZONE=ZoneId.of("America/Bogota");
  public Availability availableSlots(LocalDate date){
   var now=ZonedDateTime.now(ZONE);var today=now.toLocalDate();var last=today.plusDays(14);

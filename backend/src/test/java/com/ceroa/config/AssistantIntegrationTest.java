@@ -31,6 +31,7 @@ class AssistantIntegrationTest {
     @org.springframework.test.context.bean.override.mockito.MockitoBean com.ceroa.service.WorkspaceCalendarGateway calendar;
     @Autowired MockMvc mvc;
     @Autowired UserRepository users;
+    @Autowired com.ceroa.repository.SupportBookingRepository savedBookings;
     String owner;
     @DynamicPropertySource static void properties(DynamicPropertyRegistry registry) throws Exception {
         stub=HttpServer.create(new InetSocketAddress("127.0.0.1",0),0);
@@ -261,6 +262,21 @@ class AssistantIntegrationTest {
             .andExpect(status().isOk()).andExpect(jsonPath("$.mailProposal.status").value("PROPOSED"))
             .andExpect(jsonPath("$.mailProposal.confirmationCode").isString()).andExpect(jsonPath("$.functionalStatus").value("COMPLETE"));
         org.junit.jupiter.api.Assertions.assertNull(lastJob);
+    }
+    @Test void bookingListEndpointAndChatReadOnlyTheAuthenticatedAccountsStoredReservations()throws Exception{
+        var booking=new SupportBooking();booking.ownerId=UUID.fromString(owner);booking.code="ABCDEFGHIJKLMNOPQRST";booking.status="CONFIRMED";booking.start=java.time.OffsetDateTime.now().plusDays(1);booking.end=booking.start.plusMinutes(30);booking.expiresAt=booking.start;booking.cancelCode="ZZZZZZZZZZZZZZZZZZZZ";savedBookings.saveAndFlush(booking);
+        mvc.perform(get("/api/v1/support/bookings").with(user(owner)))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.total").value(1)).andExpect(jsonPath("$.items[0].code").value(booking.code))
+            .andExpect(jsonPath("$.items[0].cancelCode").doesNotExist());
+        lastJob=null;
+        mvc.perform(post("/api/v1/assistant/messages").with(user(owner)).with(csrf()).contentType("application/json").content(JSON.writeValueAsString(Map.of("message","quiero cancelar una asesoria"))))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.functionalStatus").value("COMPLETE")).andExpect(jsonPath("$.bookingList.items[0].code").value(booking.code));
+        org.junit.jupiter.api.Assertions.assertNull(lastJob);
+        mvc.perform(post("/api/v1/assistant/messages").with(user(owner)).with(csrf()).contentType("application/json").content(JSON.writeValueAsString(Map.of("message","dame los distintos codigos"))))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.bookingList.total").value(1));
+        mvc.perform(get("/api/v1/support/bookings").with(user(UUID.randomUUID().toString())))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.total").value(0));
+        org.mockito.Mockito.verifyNoInteractions(calendar);
     }
     @Test void anotherRecipientGetsGuidanceWithoutCreatingAProposal() throws Exception {
         mvc.perform(post("/api/v1/assistant/messages").with(user(owner)).with(csrf()).contentType("application/json")

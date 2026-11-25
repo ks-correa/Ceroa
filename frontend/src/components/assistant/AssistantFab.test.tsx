@@ -4,6 +4,27 @@ import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-li
 import { AssistantFab } from './AssistantFab';
 import { apiRequest } from '../../services/api';
 vi.mock('../../services/api', () => ({ apiRequest: vi.fn() }));
+it('shows saved bookings and sends the selected full code without confirming cancellation',async()=>{
+ const items=[
+  {code:'ABCDEFGHIJKLMNOPQRST',status:'CONFIRMED',start:'2026-11-25T14:00:00Z',end:'2026-11-25T14:30:00Z',canCancel:true},
+  {code:'ZZZZZZZZZZZZZZZZZZZZ',status:'CANCELLED',start:'2026-11-24T15:00:00Z',end:'2026-11-24T15:30:00Z',canCancel:false},
+ ];
+ vi.mocked(apiRequest).mockResolvedValueOnce({answer:'Tus asesorías registradas.\n\nLista de respaldo para otros canales.',bookingList:{items,total:11,nextPage:1}})
+  .mockResolvedValueOnce({answer:'Reserva consultada.'}).mockResolvedValueOnce({answer:'Cancelación pendiente de confirmación.'}).mockResolvedValueOnce({answer:'Más reservas.'});
+ render(<AssistantFab/>);fireEvent.click(screen.getByRole('button',{name:'Abrir asistente financiero'}));
+ fireEvent.change(screen.getByRole('textbox'),{target:{value:'quiero cancelar una asesoria'}});fireEvent.click(screen.getByRole('button',{name:'Enviar pregunta'}));
+ const first=await screen.findByRole('article',{name:'Asesoría '+items[0].code});
+ const second=screen.getByRole('article',{name:'Asesoría '+items[1].code});
+ expect(within(first).getByText('Confirmada')).toBeTruthy();expect(within(second).queryByRole('button',{name:'Solicitar cancelación'})).toBeNull();
+ expect(screen.queryByText('Lista de respaldo para otros canales.')).toBeNull();
+ fireEvent.click(within(second).getByRole('button',{name:'Consultar estado'}));await screen.findByText('Reserva consultada.');
+ expect(JSON.parse(vi.mocked(apiRequest).mock.calls[1][1]!.body as string).message).toBe('Consultar asesoria '+items[1].code);
+ fireEvent.click(within(first).getByRole('button',{name:'Solicitar cancelación'}));await screen.findByText('Cancelación pendiente de confirmación.');
+ expect(JSON.parse(vi.mocked(apiRequest).mock.calls[2][1]!.body as string).message).toBe('Cancelar asesoria '+items[0].code);
+ fireEvent.click(screen.getByRole('button',{name:'Ver más asesorías'}));await screen.findByText('Más reservas.');
+ expect(JSON.parse(vi.mocked(apiRequest).mock.calls[3][1]!.body as string).message).toBe('Ver mas asesorias 1');
+ expect(vi.mocked(apiRequest).mock.calls.every(call=>!String(call[1]?.body).includes('Confirmar cancelacion'))).toBe(true);
+});
 it('resumes the pending question with the chosen full document ID and scopes follow-ups to it', async () => {
  const question='¿Qué tasa de interés aparece en el extracto que adjunté?';
  const documents=[

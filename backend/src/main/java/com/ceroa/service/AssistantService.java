@@ -25,7 +25,8 @@ public class AssistantService {
     private record CachedLibrary(com.ceroa.api.dto.DocumentContracts.Result result,com.ceroa.api.dto.DocumentContracts.Intent intent,LibraryEvidence response) {}
     public record DocumentEvidence(String status,Map<String,RagVectorStore.Chunk> sources) {}
     public enum Intent { debts, highest_interest, upcoming, payments, strategy, progress, write_request, unknown }
-    public record Reply(String answer, String intent, List<com.ceroa.api.dto.DocumentContracts.Document> documents, UUID traceId,String functionalStatus,WorkspaceActionService.Proposal mailProposal,SupportBookingService.Availability bookingAvailability) {
+    public record Reply(String answer, String intent, List<com.ceroa.api.dto.DocumentContracts.Document> documents, UUID traceId,String functionalStatus,WorkspaceActionService.Proposal mailProposal,SupportBookingService.Availability bookingAvailability,SupportBookingService.BookingList bookingList) {
+        public Reply(String answer,String intent,List<com.ceroa.api.dto.DocumentContracts.Document> documents,UUID traceId,String functionalStatus,WorkspaceActionService.Proposal mailProposal,SupportBookingService.Availability bookingAvailability){this(answer,intent,documents,traceId,functionalStatus,mailProposal,bookingAvailability,null);}
         public Reply(String answer,String intent,List<com.ceroa.api.dto.DocumentContracts.Document> documents,UUID traceId,String functionalStatus){this(answer,intent,documents,traceId,functionalStatus,null,null);}
         public Reply(String answer,String intent){this(answer,intent,List.of(),null,"COMPLETE");}
         public Reply(String answer,String intent,List<com.ceroa.api.dto.DocumentContracts.Document> documents,UUID traceId){this(answer,intent,documents,traceId,"COMPLETE");}
@@ -244,6 +245,8 @@ public class AssistantService {
         String previousBooking=lastBookingCode(context);
         boolean bookingInFocus=previousBooking!=null&&!context.turns.isEmpty()
             &&context.turns.getLast().answer().contains("Código de asesoría: ");
+        var listPage=Pattern.compile("(?i)^\\s*Ver mas asesorias ([0-9]{1,5})\\s*$").matcher(message);
+        if(listPage.matches())return bookingListReply(Integer.parseInt(listPage.group(1)));
         var booking=Pattern.compile("(?i)^\\s*(Confirmar asesoria|Consultar asesoria|Cancelar asesoria) ([A-Z]{20})\\s*$").matcher(message);
         if(booking.matches()){String code=booking.group(2).toUpperCase(Locale.ROOT);var result=switch(booking.group(1).toLowerCase(Locale.ROOT)){case "confirmar asesoria"->supportBookings.confirm(code);case "cancelar asesoria"->supportBookings.proposeCancellation(code);default->supportBookings.get(code);};return bookingReply(result);}
         var cancel=Pattern.compile("(?i)^\\s*Confirmar cancelacion ([A-Z]{20}) ([A-Z]{20})\\s*$").matcher(message);
@@ -252,6 +255,13 @@ public class AssistantService {
         if(confirmation.matches()){var result=workspaceActions.confirmMail(confirmation.group(1).toUpperCase(Locale.ROOT));return new Reply(result.status().equals("CONFIRMED")?"Autorización registrada. El correo queda pendiente de envío; todavía no hay confirmación de Gmail.":result.instruction(),"communication");}
         String q=java.text.Normalizer.normalize(message.toLowerCase(Locale.ROOT),java.text.Normalizer.Form.NFD).replaceAll("\\p{M}","").replaceAll("[¿?!.]","").strip();
         boolean explicitBooking=q.matches("(?s).*(?:asesori|\\bcita\\b|\\breserva\\b|cancelala|anulala).*");
+        boolean bookingContext=context!=null&&context.expires.isAfter(Instant.now())&&!context.turns.isEmpty()
+            &&context.turns.getLast().answer().matches("(?s).*(?:Código de asesoría: |asesorías registradas|código de la asesoría).*");
+        boolean asksCodes=q.matches("(?s).*\\bcodigos?\\b.*")&&q.matches("(?s).*(?:dame|muestra|lista|cuales|ver|distintos|todos).*");
+        boolean asksList=explicitBooking&&q.matches("(?s).*(?:muestra|lista|cuales|mis asesorias|mis citas|mis reservas).*")
+            &&!q.matches("(?s).*(?:cancel|anul|horario|disponib|agend|reservar).*");
+        if(asksList||asksCodes&&(explicitBooking||bookingContext))return bookingListReply(0);
+        if(asksCodes)return new Reply("¿Te refieres a los códigos de tus asesorías? Escribe ‘Muéstrame mis asesorías’ para consultar las reservas de tu cuenta.","support",List.of(),null,"PARTIAL");
         boolean shortStatus=q.matches("(?:solo |solamente |quiero |deseo )?(?:consultar|ver|revisar)(?: (?:su|el))? estado|(?:su|el) estado|solo consultar");
         boolean shortCancellation=q.matches("(?:si )?(?:quiero |deseo )?(?:cancelar(?:la)?|anular(?:la)?|(?:solicitar|pedir) (?:su|la) cancelacion)");
         boolean shortRefusal=q.matches("(?:mejor )?no (?:(?:la|lo) )?(?:(?:quiero|deseo|voy a) )?(?:cancelar(?:la|lo)?|anular(?:la|lo)?|canceles|anules)");
@@ -269,8 +279,8 @@ public class AssistantService {
         boolean consultation=bookingReference&&q.matches("(?s).*(?:consulta|estado|tengo|agendada|programada).*")&&!q.matches("(?s).*(?:horario|disponib|agendar|reservar).*");
         if(cancellation||consultation){
             var explicitCode=Pattern.compile("(?i)\\b([A-Z]{20})\\b").matcher(message);
-            String code=explicitCode.find()?explicitCode.group(1).toUpperCase(Locale.ROOT):explicitBooking||bookingInFocus?previousBooking:null;
-            if(code==null)return new Reply("Indica el código de la asesoría que quieres consultar o cancelar. Puedes copiarlo de la propuesta o de la confirmación de tu reserva.","support",List.of(),null,"PARTIAL");
+            String code=explicitCode.find()?explicitCode.group(1).toUpperCase(Locale.ROOT):bookingInFocus?previousBooking:null;
+            if(code==null)return bookingListReply(0);
             if(cancellation&&consultation)return new Reply("Código de asesoría: "+code+". ¿Quieres consultar su estado o solicitar su cancelación? La cancelación requiere una confirmación adicional.","support",List.of(),null,"PARTIAL");
             return bookingReply(cancellation?supportBookings.proposeCancellation(code):supportBookings.get(code));
         }
@@ -302,6 +312,11 @@ public class AssistantService {
     }
     private Reply communicationReply(WorkspaceActionService.Proposal proposal){return new Reply("Preparé una propuesta de correo. Revisa el destinatario y el contenido en la vista previa antes de confirmar. Todavía no se ha enviado.\n\n"+proposal.instruction(),"communication",List.of(),null,"COMPLETE",proposal,null);}
     private Reply bookingReply(SupportBookingService.View result){return new Reply("Código de asesoría: "+result.code()+". Estado de asesoría: "+result.status()+". Horario de Bogotá: "+result.start().atZoneSameInstant(ZONE).format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))+". "+(result.meetUrl()==null?"":result.meetUrl()+" ")+result.instruction(),"support");}
+    private Reply bookingListReply(int page){
+        var result=supportBookings.list(page);
+        String answer=result.total()==0?"No tienes asesorías registradas en tu cuenta.":result.items().isEmpty()?"No hay más asesorías registradas en esta página.":"Tus asesorías registradas. Selecciona una para consultar su estado o solicitar su cancelación; cancelar requiere una confirmación adicional. Hora de Bogotá.\n\n"+result.items().stream().map(b->"• "+b.start().atZoneSameInstant(ZONE).format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))+" · "+b.status()+" · Código: "+b.code()).collect(java.util.stream.Collectors.joining("\n"))+(result.nextPage()==null?"":"\n\nHay más reservas. Escribe: Ver mas asesorias "+result.nextPage());
+        return new Reply(answer,"support",List.of(),null,"COMPLETE",null,null,result);
+    }
     public AssistantAnalysisService.Evidence bookingTool(UUID id,String operation,String value){return withJob(id,"supportBooking",job->{
         guard(job,"support.booking");if(activeScope.get()==null||activeScope.get().role!=AgentContracts.Role.SUPPORT||job.selectedDocument!=null)throw AgentRuntime.denied();
         String requested=java.text.Normalizer.normalize(job.question.toLowerCase(Locale.ROOT),java.text.Normalizer.Form.NFD).replaceAll("\\p{M}","");

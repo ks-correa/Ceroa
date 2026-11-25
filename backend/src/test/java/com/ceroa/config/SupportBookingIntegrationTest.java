@@ -22,6 +22,21 @@ class SupportBookingIntegrationTest {
   when(calendar.busy(any(),any())).thenThrow(new IllegalStateException());
   var result=service.availableSlots(slot.toLocalDate());assertEquals("UNAVAILABLE",result.status());assertTrue(result.slots().isEmpty());assertTrue(result.message().contains("volver a consultar"));
  }
+ @Test void listsOnlyOwnedReservationsWithPagingAndLabelsExpiredProposals(){
+  for(int i=0;i<12;i++){
+   var b=new SupportBooking();b.ownerId=owner.getId();b.code=String.valueOf((char)('A'+i)).repeat(20);b.start=slot.plusMinutes(i*30);b.end=b.start.plusMinutes(30);b.expiresAt=OffsetDateTime.now().minusMinutes(1);b.status=i==11?"CONFIRMED":"PROPOSED";b.cancelCode="Z".repeat(20);bookings.saveAndFlush(b);
+  }
+  var other=new User();other.setFullName("Other account");other.setEmail(UUID.randomUUID()+"@example.invalid");users.saveAndFlush(other);
+  var foreign=new SupportBooking();foreign.ownerId=other.getId();foreign.code="Z".repeat(20);foreign.start=slot.plusDays(1);foreign.end=foreign.start.plusMinutes(30);foreign.expiresAt=OffsetDateTime.now().plusMinutes(10);foreign.status="CONFIRMED";bookings.saveAndFlush(foreign);
+  var first=service.list(0);assertEquals(12,first.total());assertEquals(10,first.items().size());assertEquals(1,first.nextPage());
+  assertEquals("CONFIRMED",first.items().getFirst().status());assertTrue(first.items().getFirst().canCancel());
+  assertEquals("EXPIRED",first.items().get(1).status());assertFalse(first.items().get(1).canCancel());
+  assertFalse(first.items().stream().anyMatch(b->b.code().equals(foreign.code)));
+  var second=service.list(1);assertEquals(2,second.items().size());assertNull(second.nextPage());
+  assertEquals(12,java.util.stream.Stream.concat(first.items().stream(),second.items().stream()).map(SupportBookingService.BookingItem::code).distinct().count());
+  as(other.getId());assertEquals(List.of(foreign.code),service.list(0).items().stream().map(SupportBookingService.BookingItem::code).toList());
+  verifyNoInteractions(calendar);assertThrows(IllegalArgumentException.class,()->service.list(-1));
+ }
  @Test void invalidDatesGuideTheUserWithoutCallingCalendar(){
   assertEquals("NEEDS_DATE",service.availableSlots(LocalDate.now(ZoneId.of("America/Bogota")).minusDays(1)).status());
   assertEquals("NEEDS_DATE",service.availability(null).get("status"));verify(calendar,never()).busy(any(),any());

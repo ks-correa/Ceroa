@@ -5,5 +5,6 @@ import org.springframework.data.repository.query.Param;
 import jakarta.persistence.LockModeType;
 import java.util.*;
 public interface SupportBookingRepository extends JpaRepository<SupportBooking,UUID>{
+ org.springframework.data.domain.Page<SupportBooking> findByOwnerId(UUID ownerId,org.springframework.data.domain.Pageable pageable);
  @Lock(LockModeType.PESSIMISTIC_WRITE) @Query("select b from SupportBooking b where b.ownerId=:owner and b.code=:code") Optional<SupportBooking> owned(@Param("owner")UUID owner,@Param("code")String code);
 }

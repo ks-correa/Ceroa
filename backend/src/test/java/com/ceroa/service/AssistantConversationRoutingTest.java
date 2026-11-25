@@ -26,6 +26,7 @@ class AssistantConversationRoutingTest {
     @BeforeEach void setup(){
         var user=new User();user.setId(UUID.randomUUID());user.setActive(true);user.setEmail("owner@example.invalid");
         when(current.entity()).thenReturn(user);when(current.id()).thenReturn(user.getId());
+        when(bookings.list(anyInt())).thenReturn(new SupportBookingService.BookingList(List.of(),0,null));
         assistant=new AssistantService(current,mock(DebtService.class),mock(PaymentService.class),mock(UpcomingDueService.class),mock(StrategyService.class),mock(MonthlyProgressService.class),mock(DashboardService.class),new ObjectMapper(),mock(RateNormalizationService.class),mock(AssistantAnalysisService.class),mock(RagRetrievalService.class),library,mock(SimulationService.class),mock(SentinelService.class),actions,bookings,true,"http://unused.invalid","a".repeat(32));
     }
     SupportBookingService.View booking(String instruction){
@@ -76,15 +77,31 @@ class AssistantConversationRoutingTest {
         assertEquals("COMPLETE",result.functionalStatus());assertTrue(result.answer().contains("Confirmar cancelacion "+code));
         verify(bookings).proposeCancellation(code);verify(bookings,never()).confirmCancellation(any(),any());
     }
-    @Test void bareCancelWithoutReservationContextAsksForTheCode(){
-        assertTrue(assistant.message("cancelar",null,null).answer().contains("Indica el código"));
-        verifyNoInteractions(bookings);
+    @Test void bareCancelWithoutReservationContextListsStoredReservations(){
+        assertTrue(assistant.message("cancelar",null,null).answer().contains("No tienes asesorías registradas"));
+        verify(bookings).list(0);verify(bookings,never()).proposeCancellation(any());
+    }
+    @Test void listsReservationCodesWithoutRememberingAnEarlierConfirmation(){
+        var start=OffsetDateTime.parse("2026-11-25T14:00:00Z");
+        var page=new SupportBookingService.BookingList(List.of(new SupportBookingService.BookingItem(code,"CONFIRMED",start,start.plusMinutes(30),true)),11,1);
+        when(bookings.list(0)).thenReturn(page);
+        var first=assistant.message("quiero cancelar una asesoria",null,null);
+        assertEquals(page,first.bookingList());assertTrue(first.answer().contains(code));assertTrue(first.answer().contains("09:00"));
+        assertEquals(page,assistant.message("dame los distintos codigos",null,null).bookingList());
+        assistant.forget(AssistantService.Channel.web);
+        assertEquals(page,assistant.message("Muéstrame mis asesorías",null,null).bookingList());
+        when(bookings.confirm(code)).thenReturn(booking(""));assistant.message("Confirmar asesoria "+code,null,null);
+        assistant.message("Muéstrame mis asesorías",null,null);
+        assertEquals(page,assistant.message("quiero cancelar una asesoria",null,null).bookingList());
+        when(bookings.list(1)).thenReturn(new SupportBookingService.BookingList(List.of(),11,null));
+        assertTrue(assistant.message("Ver mas asesorias 1",null,null).answer().contains("No hay más"));
+        verify(bookings,never()).proposeCancellation(any());verify(bookings,never()).confirmCancellation(any(),any());
     }
     @Test void shortStatusNeedsContextInTheSameUserChannelAndConversation(){
         when(bookings.confirm(code)).thenReturn(booking(""));assistant.message("Confirmar asesoria "+code,null,null);
-        assertTrue(assistant.message("consultar su estado",null,null,AssistantService.Channel.telegram).answer().contains("Indica el código"));
+        assertNotNull(assistant.message("consultar su estado",null,null,AssistantService.Channel.telegram).bookingList());
         assistant.forget(AssistantService.Channel.web);
-        assertTrue(assistant.message("consultar su estado",null,null).answer().contains("Indica el código"));
+        assertNotNull(assistant.message("consultar su estado",null,null).bookingList());
         verify(bookings,never()).get(any());
     }
     @Test void explicitBookingRefusalDoesNotBecomeACancellationProposal(){
@@ -95,13 +112,13 @@ class AssistantConversationRoutingTest {
     }
     @Test void reservationContextDoesNotCrossUsersChannelsOrNewConversations(){
         when(bookings.confirm(code)).thenReturn(booking(""));assistant.message("Confirmar asesoria "+code,null,null);
-        assertTrue(assistant.message("Quiero cancelar mi asesoría",null,null,AssistantService.Channel.telegram).answer().contains("Indica el código"));
+        assertNotNull(assistant.message("Quiero cancelar mi asesoría",null,null,AssistantService.Channel.telegram).bookingList());
         var other=new User();other.setId(UUID.randomUUID());other.setActive(true);when(current.entity()).thenReturn(other);
-        assertTrue(assistant.message("Quiero cancelar mi asesoría",null,null).answer().contains("Indica el código"));
+        assertNotNull(assistant.message("Quiero cancelar mi asesoría",null,null).bookingList());
     }
     @Test void forgettingConversationClearsReservationReference(){
         when(bookings.confirm(code)).thenReturn(booking(""));assistant.message("Confirmar asesoria "+code,null,null);assistant.forget(AssistantService.Channel.web);
-        assertTrue(assistant.message("Quiero cancelar mi asesoría",null,null).answer().contains("Indica el código"));
+        assertNotNull(assistant.message("Quiero cancelar mi asesoría",null,null).bookingList());
     }
     @Test void availabilityQuestionsAreNotMistakenForReservationStatus(){
         when(bookings.availableSlots(any())).thenReturn(new SupportBookingService.Availability("AVAILABLE","Horarios consultados","America/Bogota",LocalDate.now(),LocalDate.now().plusDays(14),List.of()));
