@@ -4,6 +4,15 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { AssistantFab } from './AssistantFab';
 import { apiRequest } from '../../services/api';
 vi.mock('../../services/api', () => ({ apiRequest: vi.fn() }));
+it('keeps a rate-limited question and shows the retry message in the conversation without resending',async()=>{
+ const question='¿Tengo suficiente capacidad financiera para cubrir mis cuotas?';
+ const message='Gemini tiene un límite temporal de solicitudes. Espera 60 segundos y vuelve a enviar tu pregunta.';
+ vi.mocked(apiRequest).mockRejectedValueOnce(Object.assign(new Error(message),{status:429}));
+ render(<AssistantFab/>);fireEvent.click(screen.getByRole('button',{name:'Abrir asistente financiero'}));
+ fireEvent.change(screen.getByRole('textbox'),{target:{value:question}});fireEvent.click(screen.getByRole('button',{name:'Enviar pregunta'}));
+ expect(await screen.findByText(message)).toBeTruthy();expect(screen.getByRole('textbox')).toHaveProperty('value',question);
+ expect(screen.queryByText('Evidencia insuficiente')).toBeNull();expect(apiRequest).toHaveBeenCalledTimes(1);
+});
 it('labels an HTTP-success response as partial when the backend reports partial evidence',async()=>{
  vi.mocked(apiRequest).mockResolvedValueOnce({answer:'Solo hay evidencia de una parte.',functionalStatus:'PARTIAL'});
  render(<AssistantFab/>);fireEvent.click(screen.getByRole('button',{name:'Abrir asistente financiero'}));

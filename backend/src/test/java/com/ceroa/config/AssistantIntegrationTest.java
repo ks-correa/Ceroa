@@ -38,9 +38,10 @@ class AssistantIntegrationTest {
             try {
                 var body=JSON.readTree(exchange.getRequestBody()); lastJob=body.path("requestId").asText();
                 String message=body.path("message").asText();
+                if(message.equals("provider-root-quota")){exchange.sendResponseHeaders(503,0);exchange.getResponseBody().write("{\"stage\":\"agent\",\"category\":\"PROVIDER_LIMIT\"}".getBytes());return;}
                 if(!body.path("audio").asText().isBlank())message="analysis-audio";
                 lastConversation=body.path("conversation").toString();
-                if(message.startsWith("multiagent")){ multiagentCallback(lastJob,message);exchange.sendResponseHeaders(200,0);exchange.getResponseBody().write("{}".getBytes());return;}
+                if(message.startsWith("multiagent")){ multiagentCallback(lastJob,message);exchange.sendResponseHeaders(message.contains("quota-root-failure")?503:200,0);exchange.getResponseBody().write("{}".getBytes());return;}
                 if(message.startsWith("analysis")) {
                     String base="/api/v1/assistant-tools/requests/"+lastJob;
                     var preparation=callback.perform(post(base+"/prepare").header("X-Ceroa-Assistant",KEY)
@@ -107,6 +108,13 @@ class AssistantIntegrationTest {
         String base="/api/v1/assistant-tools/requests/"+id;
         callback.perform(post(base+"/prepare").header("X-Ceroa-Assistant",KEY).contentType("application/json").content(JSON.writeValueAsString(Map.of("transcript",question)))).andExpect(status().isOk());
         callback.perform(post(base+"/orchestration/start").header("X-Ceroa-Assistant",KEY)).andExpect(status().isOk());
+        if(question.contains("quota")){
+            var grant=callback.perform(post(base+"/delegations/FINANCIAL/begin").header("X-Ceroa-Assistant",KEY).contentType("application/json").content("{\"task\":\"Analizar cuotas\",\"evidenceRefs\":[]}")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+            String token=JSON.readTree(grant).path("scopeToken").asText();
+            callback.perform(post(base+"/delegations/"+token+"/fail").header("X-Ceroa-Assistant",KEY).contentType("application/json").content("{\"errorCode\":\"PROVIDER_QUOTA\"}")).andExpect(status().isOk());
+            if(!question.contains("quota-root-failure"))callback.perform(post(base+"/complete").header("X-Ceroa-Assistant",KEY).contentType("application/json").content(JSON.writeValueAsString(Map.of("answer",com.ceroa.service.RagRetrievalService.ABSTENTION,"transcript",question,"mode","personal","sources",List.of())))).andExpect(status().isOk());
+            return;
+        }
         if(question.contains("clarification")){
             var grant=callback.perform(post(base+"/delegations/FINANCIAL/begin").header("X-Ceroa-Assistant",KEY).contentType("application/json").content("{\"task\":\"Aclarar escenario de abono\",\"evidenceRefs\":[]}")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
             String token=JSON.readTree(grant).path("scopeToken").asText();
@@ -184,6 +192,14 @@ class AssistantIntegrationTest {
             .content(JSON.writeValueAsString(Map.of("message","multiagent clarification simula un abono adicional a mis deudas"))))
             .andExpect(status().isOk()).andExpect(jsonPath("$.functionalStatus").value("PARTIAL"))
             .andExpect(jsonPath("$.answer").value(org.hamcrest.Matchers.containsString("¿A qué deuda")));
+    }
+    @Test void rootAndSpecialistQuotaErrorsReachTheClientAsRetryableRateLimits()throws Exception{
+        for(String question:List.of("provider-root-quota","multiagent quota mis deudas","multiagent quota-root-failure mis deudas")){
+            mvc.perform(post("/api/v1/assistant/messages").with(user(owner)).with(csrf()).contentType("application/json").content(JSON.writeValueAsString(Map.of("message",question))))
+                .andExpect(status().isTooManyRequests()).andExpect(header().exists("Retry-After"))
+                .andExpect(jsonPath("$.code").value("ASSISTANT_BUSY"))
+                .andExpect(jsonPath("$.message").value(org.hamcrest.Matchers.containsString("Gemini")));
+        }
     }
     @Test void simpleUpcomingAndStrategyAvoidTheWebhook() throws Exception {
         for(String question:List.of("Muéstrame mis próximos vencimientos","¿Cuál es mi estrategia activa?","¿Qué estrategia de pago tengo activa?","¿Qué estrategia tengo activa?")){

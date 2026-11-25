@@ -348,7 +348,7 @@
       ],
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ JSON.stringify({available:false,stage:\"transcribe\",category:/format|parse|schema|structured/i.test(JSON.stringify($json.error??$json))?'FORMAT':/rate limit|quota|429/i.test(JSON.stringify($json.error??$json))?'PROVIDER_LIMIT':'OTHER'}) }}",
+        "responseBody": "={{ JSON.stringify({available:false,stage:\"transcribe\",category:/format|parse|schema|structured/i.test(JSON.stringify($json.error??$json))?'FORMAT':/rate limit|quota|429|too many requests|RESOURCE_EXHAUSTED/i.test(JSON.stringify($json.error??$json))?'PROVIDER_LIMIT':'OTHER'}) }}",
         "options": {
           "responseCode": 503
         }
@@ -365,7 +365,7 @@
       ],
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ JSON.stringify({available:false,stage:\"text\",category:/format|parse|schema|structured/i.test(JSON.stringify($json.error??$json))?'FORMAT':/rate limit|quota|429/i.test(JSON.stringify($json.error??$json))?'PROVIDER_LIMIT':'OTHER'}) }}",
+        "responseBody": "={{ JSON.stringify({available:false,stage:\"text\",category:/format|parse|schema|structured/i.test(JSON.stringify($json.error??$json))?'FORMAT':/rate limit|quota|429|too many requests|RESOURCE_EXHAUSTED/i.test(JSON.stringify($json.error??$json))?'PROVIDER_LIMIT':'OTHER'}) }}",
         "options": {
           "responseCode": 503
         }
@@ -382,7 +382,7 @@
       ],
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ JSON.stringify({available:false,stage:\"prepare-context\",category:/format|parse|schema|structured/i.test(JSON.stringify($json.error??$json))?'FORMAT':/rate limit|quota|429/i.test(JSON.stringify($json.error??$json))?'PROVIDER_LIMIT':'OTHER'}) }}",
+        "responseBody": "={{ JSON.stringify({available:false,stage:\"prepare-context\",category:/format|parse|schema|structured/i.test(JSON.stringify($json.error??$json))?'FORMAT':/rate limit|quota|429|too many requests|RESOURCE_EXHAUSTED/i.test(JSON.stringify($json.error??$json))?'PROVIDER_LIMIT':'OTHER'}) }}",
         "options": {
           "responseCode": 503
         }
@@ -399,7 +399,7 @@
       ],
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ JSON.stringify({available:false,stage:\"agent\",category:/format|parse|schema|structured/i.test(JSON.stringify($json.error??$json))?'FORMAT':/rate limit|quota|429/i.test(JSON.stringify($json.error??$json))?'PROVIDER_LIMIT':'OTHER'}) }}",
+        "responseBody": "={{ JSON.stringify({available:false,stage:\"agent\",category:/format|parse|schema|structured/i.test(JSON.stringify($json.error??$json))?'FORMAT':/rate limit|quota|429|too many requests|RESOURCE_EXHAUSTED/i.test(JSON.stringify($json.error??$json))?'PROVIDER_LIMIT':'OTHER'}) }}",
         "options": {
           "responseCode": 503
         }
@@ -416,7 +416,7 @@
       ],
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ JSON.stringify({available:false,stage:\"check\",category:/format|parse|schema|structured/i.test(JSON.stringify($json.error??$json))?'FORMAT':/rate limit|quota|429/i.test(JSON.stringify($json.error??$json))?'PROVIDER_LIMIT':'OTHER'}) }}",
+        "responseBody": "={{ JSON.stringify({available:false,stage:\"check\",category:/format|parse|schema|structured/i.test(JSON.stringify($json.error??$json))?'FORMAT':/rate limit|quota|429|too many requests|RESOURCE_EXHAUSTED/i.test(JSON.stringify($json.error??$json))?'PROVIDER_LIMIT':'OTHER'}) }}",
         "options": {
           "responseCode": 503
         }
@@ -433,7 +433,7 @@
       ],
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ JSON.stringify({available:false,stage:\"complete\",category:/format|parse|schema|structured/i.test(JSON.stringify($json.error??$json))?'FORMAT':/rate limit|quota|429/i.test(JSON.stringify($json.error??$json))?'PROVIDER_LIMIT':'OTHER'}) }}",
+        "responseBody": "={{ JSON.stringify({available:false,stage:\"complete\",category:/format|parse|schema|structured/i.test(JSON.stringify($json.error??$json))?'FORMAT':/rate limit|quota|429|too many requests|RESOURCE_EXHAUSTED/i.test(JSON.stringify($json.error??$json))?'PROVIDER_LIMIT':'OTHER'}) }}",
         "options": {
           "responseCode": 503
         }
@@ -450,7 +450,7 @@
       ],
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ JSON.stringify({available:false,stage:\"review-evidence\",category:/format|parse|schema|structured/i.test(JSON.stringify($json.error??$json))?'FORMAT':/rate limit|quota|429/i.test(JSON.stringify($json.error??$json))?'PROVIDER_LIMIT':'OTHER'}) }}",
+        "responseBody": "={{ JSON.stringify({available:false,stage:\"review-evidence\",category:/format|parse|schema|structured/i.test(JSON.stringify($json.error??$json))?'FORMAT':/rate limit|quota|429|too many requests|RESOURCE_EXHAUSTED/i.test(JSON.stringify($json.error??$json))?'PROVIDER_LIMIT':'OTHER'}) }}",
         "options": {
           "responseCode": 503
         }
@@ -467,7 +467,7 @@
       ],
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ JSON.stringify({available:false,stage:\"repair-draft\",category:/format|parse|schema|structured/i.test(JSON.stringify($json.error??$json))?'FORMAT':/rate limit|quota|429/i.test(JSON.stringify($json.error??$json))?'PROVIDER_LIMIT':'OTHER'}) }}",
+        "responseBody": "={{ JSON.stringify({available:false,stage:\"repair-draft\",category:/format|parse|schema|structured/i.test(JSON.stringify($json.error??$json))?'FORMAT':/rate limit|quota|429|too many requests|RESOURCE_EXHAUSTED/i.test(JSON.stringify($json.error??$json))?'PROVIDER_LIMIT':'OTHER'}) }}",
         "options": {
           "responseCode": 503
         }
@@ -484,7 +484,7 @@
       ],
       "parameters": {
         "respondWith": "json",
-        "responseBody": "={{ JSON.stringify({available:false,stage:\"check-repair\",category:/format|parse|schema|structured/i.test(JSON.stringify($json.error??$json))?'FORMAT':/rate limit|quota|429/i.test(JSON.stringify($json.error??$json))?'PROVIDER_LIMIT':'OTHER'}) }}",
+        "responseBody": "={{ JSON.stringify({available:false,stage:\"check-repair\",category:/format|parse|schema|structured/i.test(JSON.stringify($json.error??$json))?'FORMAT':/rate limit|quota|429|too many requests|RESOURCE_EXHAUSTED/i.test(JSON.stringify($json.error??$json))?'PROVIDER_LIMIT':'OTHER'}) }}",
         "options": {
           "responseCode": 503
         }

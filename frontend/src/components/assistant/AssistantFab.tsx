@@ -119,7 +119,13 @@ export function AssistantFab() {
         }
       }
     } catch (cause) {
-      if (alive.current && generation.current === turn) setError(cause instanceof Error ? cause.message : 'No pude procesar la consulta.');
+      if (alive.current && generation.current === turn) {
+        if(cause instanceof Error&&'status' in cause&&cause.status===429){
+          setMessages(m=>[...m,{role:'assistant' as const,text:cause.message}].slice(-20));
+          if(message)setText(message);
+          setError('');
+        }else setError(cause instanceof Error ? cause.message : 'No pude procesar la consulta.');
+      }
     } finally { if (alive.current && generation.current === turn) setBusy(false); }
   }
   async function record() {

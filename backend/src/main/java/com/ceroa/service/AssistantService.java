@@ -191,16 +191,19 @@ public class AssistantService {
             // A successful proposal is authoritative even if the model fails to render its confirmation instruction.
             if(job.mailProposal!=null){job.result=communicationReply(job.mailProposal);recordTurn(conversation,context,"communication",job.question,job.result.answer());return job.result;}
             if(job.bookingGuidance!=null&&(job.result==null||!"COMPLETE".equals(job.result.functionalStatus()))){job.result=job.bookingGuidance;recordTurn(conversation,context,"support",job.question,job.result.answer());return job.result;}
+            if(job.runtime!=null&&job.runtime.providerQuotaReached())throw providerGate.quotaExceeded();
             if (response.statusCode()!=200 || job.result==null) {
                 log.warn("Assistant workflow unavailable: status={}, prepared={}, toolCalls={}, libraryCalls={}, audio={}",
                     response.statusCode(),!job.question.isBlank(),job.toolCalls,job.libraryCalls,hasAudio);
+                boolean quota=false;
                 try {
                     var diagnostic=json.readTree(response.body());
                     String stage=diagnostic.path("stage").asText("unknown");
                     String category=diagnostic.path("category").asText("unknown");
-                    if(Set.of("PROVIDER_LIMIT","PROVIDER_QUOTA").contains(category))providerGate.quotaFailure();
+                    quota=Set.of("PROVIDER_LIMIT","PROVIDER_QUOTA").contains(category);
                     if(stage.matches("[a-z0-9-]{1,80}")&&category.matches("[A-Z_]{1,30}"))log.warn("Assistant workflow failure: stage={}, category={}",stage,category);
                 }catch(Exception ignored){/* Do not log provider payloads or user data. */}
+                if(quota)throw providerGate.quotaExceeded();
                 throw unavailable();
             }
             recordTurn(conversation,context,job.result.intent,job.question,job.result.answer);

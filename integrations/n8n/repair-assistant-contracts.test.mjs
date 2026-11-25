@@ -15,3 +15,12 @@ test('restores lost ATLAS request/task/context and preserves evidence, credentia
  assert.deepEqual(w.connections,before.connections);assert.deepEqual(n.credentials,before.nodes.find(old=>old.id===n.id)?.credentials);
  assert.deepEqual(repairAssistantContracts([structuredClone(w)]),[w]);
 });
+test('root failure branches recognize the actual generic n8n quota error',()=>{
+ const w=JSON.parse(fs.readFileSync(new URL('./workflows/ceroaHybridQuery20.json',import.meta.url)));
+ repairAssistantContracts([w]);
+ for(const n of w.nodes.filter(n=>n.id?.startsWith('failure-'))){
+  const evaluate=new Function('$json','return '+n.parameters.responseBody.slice(3,-2));
+  assert.equal(JSON.parse(evaluate({error:'The service is receiving too many requests from you'})).category,'PROVIDER_LIMIT');
+ }
+ assert.deepEqual(repairAssistantContracts([structuredClone(w)]),[w]);
+});

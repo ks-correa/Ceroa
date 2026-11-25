@@ -12,6 +12,8 @@ export function repairAssistantContracts(workflows) {
    if(failure)failure.parameters.jsonBody=specialistFailureExpression;
   }
   if (w.id === 'ceroaHybridQuery20') {
+   for(const node of w.nodes.filter(n=>n.id?.startsWith('failure-')))
+    if(typeof node.parameters.responseBody==='string')node.parameters.responseBody=node.parameters.responseBody.replace('rate limit|quota|429/i','rate limit|quota|429|too many requests|RESOURCE_EXHAUSTED/i');
    fixDelegationEvidence(w);
    for (const n of w.nodes.filter(n => n.id?.startsWith('delegate-'))) {
    if(n.id==='delegate-FINANCIAL'){

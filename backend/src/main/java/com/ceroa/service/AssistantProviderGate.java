@@ -13,6 +13,9 @@ public class AssistantProviderGate {
  private record Reservation(Instant at,int calls){}
  private final boolean enabled;private final int perMinute,concurrency,cooldownSeconds;private final Clock clock;
  private final Deque<Reservation> reservations=new ArrayDeque<>();private int active;private Instant cooldownUntil=Instant.MIN;
+ private final Deque<Instant> admissions=new ArrayDeque<>();
+ @Value("${ceroa.assistant.provider-limits.queries-per-minute:3}")
+ int queriesPerMinute=3;
  // Worst-case iteration reservations are not measured provider requests. Enforce them only when explicitly configured.
  @Value("${ceroa.assistant.provider-limits.estimated-minute-limit-enabled:false}")
  boolean estimatedMinuteLimit=true;
@@ -28,10 +31,14 @@ public class AssistantProviderGate {
  public final class Lease implements AutoCloseable {private boolean closed;private Lease(){}public void close(){synchronized(AssistantProviderGate.this){if(!closed){closed=true;active--;}}}}
  public synchronized Lease acquire(int calls){
   var now=clock.instant();while(!reservations.isEmpty()&&!reservations.getFirst().at().plusSeconds(60).isAfter(now))reservations.removeFirst();
+  while(!admissions.isEmpty()&&!admissions.getFirst().plusSeconds(60).isAfter(now))admissions.removeFirst();
   if(enabled&&active>=concurrency)throw new Throttled("Hay una consulta en curso. Vuelve a intentarlo cuando termine.",2);
-  if(enabled&&cooldownUntil.isAfter(now))throw new Throttled("El proveedor alcanzó su límite temporal. Intenta de nuevo en unos segundos.",Duration.between(now,cooldownUntil).toSeconds()+1);
+  if(enabled&&cooldownUntil.isAfter(now))throw waiting(Duration.between(now,cooldownUntil).toSeconds()+1);
+  if(enabled&&queriesPerMinute>0&&admissions.size()>=queriesPerMinute)throw waiting(Duration.between(now,admissions.getFirst().plusSeconds(60)).toSeconds()+1);
   if(enabled&&estimatedMinuteLimit&&(calls>perMinute||reservations.stream().mapToInt(Reservation::calls).sum()+calls>perMinute))throw new Throttled("Se alcanzó el presupuesto preventivo de consultas. Intenta de nuevo en unos segundos.",reservations.isEmpty()?60:Duration.between(now,reservations.getFirst().at().plusSeconds(60)).toSeconds()+1);
-  if(calls<1)throw new IllegalArgumentException();if(enabled&&estimatedMinuteLimit)reservations.addLast(new Reservation(now,calls));active++;return new Lease();
+  if(calls<1)throw new IllegalArgumentException();if(enabled&&estimatedMinuteLimit)reservations.addLast(new Reservation(now,calls));if(enabled&&queriesPerMinute>0)admissions.addLast(now);active++;return new Lease();
  }
  public synchronized void quotaFailure(){if(enabled)cooldownUntil=clock.instant().plusSeconds(cooldownSeconds);}
+ public synchronized Throttled quotaExceeded(){quotaFailure();return waiting(cooldownSeconds);}
+ private Throttled waiting(long seconds){return new Throttled("Gemini tiene un límite temporal de solicitudes. Espera "+Math.max(1,seconds)+" segundos y vuelve a enviar tu pregunta.",seconds);}
 }
