@@ -9,6 +9,17 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class AssistantAnalysisServiceTest {
+    @Test void profileCancellationButtonNeedsItsOwnTrustedEvidenceAndDoesNotAuthorizeChatCommands(){
+        var facts=Map.of("f1",new AssistantAnalysisService.Fact("supportGuide/subscriptionCancellationButton",TextNode.valueOf("Confirmar cancelación")));
+        String answer="En Tu Perfil, abre Mi suscripción, pulsa Cancelar renovación y después Confirmar cancelación.";
+        assertEquals(answer,service.resolve(facts,answer));
+        assertEquals(answer,service.resolveConservatively(facts,answer));
+        assertThrows(IllegalArgumentException.class,()->service.resolve(Map.of(),answer));
+        var document=Map.of("f1",new AssistantAnalysisService.Fact("financialDocuments/documentValues/0/literal",TextNode.valueOf("Confirmar cancelación")));
+        assertThrows(IllegalArgumentException.class,()->service.resolve(document,answer));
+        for(String command:List.of("Confirmar envio ABCDEFGHIJKLMNOPQRST","Confirmar asesoría ABCDEFGHIJKLMNOPQRST","Confirmar cancelación ABCDEFGHIJKLMNOPQRST"))
+            assertThrows(IllegalArgumentException.class,()->service.resolve(facts,command));
+    }
     @Test void capacityAliasesAcceptTheirMeaningButCannotBeSwapped(){
         var facts=Map.of(
             "f1",new AssistantAnalysisService.Fact("capacity/budget",DecimalNode.valueOf(new BigDecimal("1000000"))),

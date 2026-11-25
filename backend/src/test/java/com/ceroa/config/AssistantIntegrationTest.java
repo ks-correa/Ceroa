@@ -137,7 +137,9 @@ class AssistantIntegrationTest {
             var guide=JSON.readTree(support).path("evidence");String procedure=null;
             for(var entry:(Iterable<Map.Entry<String,com.fasterxml.jackson.databind.JsonNode>>)guide::fields)
                 if(entry.getValue().path("source").asText().endsWith(question.contains("suscripción")?"/subscriptionCancellation":"/advisoryProcedure"))procedure=entry.getKey();
-            org.junit.jupiter.api.Assertions.assertNotNull(procedure);String answer="{{"+procedure+"}}";
+            org.junit.jupiter.api.Assertions.assertNotNull(procedure);
+            // LUMEN emits navigation as prose, including the real confirmation button label.
+            String answer=question.contains("suscripción")?guide.path(procedure).path("value").asText():"{{"+procedure+"}}";
             var result=Map.of("schemaVersion","1.1","role","SUPPORT","status","OK","answer",answer,"evidenceRefs",List.of(procedure),"sources",List.of(),"coverage","COMPLETE","missingData",List.of(),"requiresConfirmation",false);
             callback.perform(post(base+"/delegations/"+denied+"/complete").header("X-Ceroa-Assistant",KEY).contentType("application/json").content(JSON.writeValueAsString(result))).andExpect(status().isOk());
             callback.perform(post(base+"/complete").header("X-Ceroa-Assistant",KEY).contentType("application/json").content(JSON.writeValueAsString(Map.of("answer",answer,"transcript",question,"mode","personal","sources",List.of())))).andExpect(status().isOk());return;

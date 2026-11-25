@@ -258,7 +258,8 @@ public class AssistantAnalysisService {
             StringBuffer guideBuf=new StringBuffer();
             while(guideMatcher.find()) {
                 Fact fact=facts.get(guideMatcher.group(1));
-                if(fact!=null && fact.source().startsWith("supportGuide/")) {
+                if(fact!=null && fact.source().startsWith("supportGuide/")
+                    && !fact.source().equals("supportGuide/subscriptionCancellationButton")) {
                     guideMatcher.appendReplacement(guideBuf,"");
                 } else {
                     guideMatcher.appendReplacement(guideBuf,Matcher.quoteReplacement(guideMatcher.group()));
@@ -294,7 +295,10 @@ public class AssistantAnalysisService {
                     if(value.length()>=19)candidates.add(value.substring(11,19));
                 }
             }
-            boolean confirmationFact=fact.source().matches("(?i)(?:.*/)?(?:supportBooking/(?:code|instruction)|workspaceProposal/(?:confirmationCode|instruction))$");
+            // A verified profile button label is guidance, not a chat confirmation command.
+            boolean profileButton=fact.source().equals("supportGuide/subscriptionCancellationButton")
+                && fact.value().isTextual() && fact.value().asText().equals("Confirmar cancelación");
+            boolean confirmationFact=profileButton||fact.source().matches("(?i)(?:.*/)?(?:supportBooking/(?:code|instruction)|workspaceProposal/(?:confirmationCode|instruction))$");
             for(String candidate:candidates)
                 if(candidate.length()>=1&&candidate.length()<=120&&!candidate.matches("f[1-9][0-9]*")&&(candidate.codePoints().anyMatch(Character::isDigit)||confirmationFact))
                     literals.add(Map.entry(candidate,entry.getKey()));
