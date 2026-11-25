@@ -75,7 +75,16 @@ class AssistantConversationRoutingTest {
         assistant.message("Consulta o solicita la cancelación usando el código de esa reserva.",null,null);
         var result=assistant.message("cancelar",null,null);
         assertEquals("COMPLETE",result.functionalStatus());assertTrue(result.answer().contains("Confirmar cancelacion "+code));
+        assertEquals(code,result.bookingCancellation().code());assertEquals("Z".repeat(20),result.bookingCancellation().confirmationCode());
         verify(bookings).proposeCancellation(code);verify(bookings,never()).confirmCancellation(any(),any());
+    }
+    @Test void structuredConfirmationExecutesCancellationAndRemovesThePendingAction(){
+        String nonce="Z".repeat(20);
+        var start=OffsetDateTime.parse("2026-11-25T14:00:00Z");
+        when(bookings.confirmCancellation(code,nonce)).thenReturn(new SupportBookingService.View(code,"CANCELLED",start,start.plusMinutes(30),start,null,""));
+        var result=assistant.message("Confirmar cancelacion "+code+" "+nonce,null,null);
+        assertTrue(result.answer().contains("CANCELLED"));assertNull(result.bookingCancellation());
+        verify(bookings).confirmCancellation(code,nonce);
     }
     @Test void bareCancelWithoutReservationContextListsStoredReservations(){
         assertTrue(assistant.message("cancelar",null,null).answer().contains("No tienes asesorías registradas"));

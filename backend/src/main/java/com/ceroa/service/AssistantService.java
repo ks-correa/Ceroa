@@ -25,7 +25,9 @@ public class AssistantService {
     private record CachedLibrary(com.ceroa.api.dto.DocumentContracts.Result result,com.ceroa.api.dto.DocumentContracts.Intent intent,LibraryEvidence response) {}
     public record DocumentEvidence(String status,Map<String,RagVectorStore.Chunk> sources) {}
     public enum Intent { debts, highest_interest, upcoming, payments, strategy, progress, write_request, unknown }
-    public record Reply(String answer, String intent, List<com.ceroa.api.dto.DocumentContracts.Document> documents, UUID traceId,String functionalStatus,WorkspaceActionService.Proposal mailProposal,SupportBookingService.Availability bookingAvailability,SupportBookingService.BookingList bookingList) {
+    public record BookingCancellation(String code,String confirmationCode,OffsetDateTime start) {}
+    public record Reply(String answer, String intent, List<com.ceroa.api.dto.DocumentContracts.Document> documents, UUID traceId,String functionalStatus,WorkspaceActionService.Proposal mailProposal,SupportBookingService.Availability bookingAvailability,SupportBookingService.BookingList bookingList,BookingCancellation bookingCancellation) {
+        public Reply(String answer,String intent,List<com.ceroa.api.dto.DocumentContracts.Document> documents,UUID traceId,String functionalStatus,WorkspaceActionService.Proposal mailProposal,SupportBookingService.Availability bookingAvailability,SupportBookingService.BookingList bookingList){this(answer,intent,documents,traceId,functionalStatus,mailProposal,bookingAvailability,bookingList,null);}
         public Reply(String answer,String intent,List<com.ceroa.api.dto.DocumentContracts.Document> documents,UUID traceId,String functionalStatus,WorkspaceActionService.Proposal mailProposal,SupportBookingService.Availability bookingAvailability){this(answer,intent,documents,traceId,functionalStatus,mailProposal,bookingAvailability,null);}
         public Reply(String answer,String intent,List<com.ceroa.api.dto.DocumentContracts.Document> documents,UUID traceId,String functionalStatus){this(answer,intent,documents,traceId,functionalStatus,null,null);}
         public Reply(String answer,String intent){this(answer,intent,List.of(),null,"COMPLETE");}
@@ -311,7 +313,11 @@ public class AssistantService {
         return communicationReply(workspaceActions.propose(kind));
     }
     private Reply communicationReply(WorkspaceActionService.Proposal proposal){return new Reply("Preparé una propuesta de correo. Revisa el destinatario y el contenido en la vista previa antes de confirmar. Todavía no se ha enviado.\n\n"+proposal.instruction(),"communication",List.of(),null,"COMPLETE",proposal,null);}
-    private Reply bookingReply(SupportBookingService.View result){return new Reply("Código de asesoría: "+result.code()+". Estado de asesoría: "+result.status()+". Horario de Bogotá: "+result.start().atZoneSameInstant(ZONE).format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))+". "+(result.meetUrl()==null?"":result.meetUrl()+" ")+result.instruction(),"support");}
+    private Reply bookingReply(SupportBookingService.View result){
+        var pending=Pattern.compile("^Confirmar cancelacion ([A-Z]{20}) ([A-Z]{20})$").matcher(result.instruction());
+        BookingCancellation cancellation=pending.matches()&&result.code().equals(pending.group(1))&&Set.of("CONFIRMED","PENDING_MEET").contains(result.status())?new BookingCancellation(result.code(),pending.group(2),result.start()):null;
+        return new Reply("Código de asesoría: "+result.code()+". Estado de asesoría: "+result.status()+". Horario de Bogotá: "+result.start().atZoneSameInstant(ZONE).format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))+". "+(result.meetUrl()==null?"":result.meetUrl()+" ")+result.instruction(),"support",List.of(),null,"COMPLETE",null,null,null,cancellation);
+    }
     private Reply bookingListReply(int page){
         var result=supportBookings.list(page);
         String answer=result.total()==0?"No tienes asesorías registradas en tu cuenta.":result.items().isEmpty()?"No hay más asesorías registradas en esta página.":"Tus asesorías registradas. Selecciona una para consultar su estado o solicitar su cancelación; cancelar requiere una confirmación adicional. Hora de Bogotá.\n\n"+result.items().stream().map(b->"• "+b.start().atZoneSameInstant(ZONE).format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))+" · "+b.status()+" · Código: "+b.code()).collect(java.util.stream.Collectors.joining("\n"))+(result.nextPage()==null?"":"\n\nHay más reservas. Escribe: Ver mas asesorias "+result.nextPage());

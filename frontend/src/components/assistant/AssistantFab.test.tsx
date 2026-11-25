@@ -4,6 +4,28 @@ import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-li
 import { AssistantFab } from './AssistantFab';
 import { apiRequest } from '../../services/api';
 vi.mock('../../services/api', () => ({ apiRequest: vi.fn() }));
+it('confirms booking cancellation through the button without asking the user to copy tokens',async()=>{
+ const proposal={code:'BQMNQPZFQBASIQSAIOIV',confirmationCode:'NBQTWMPGDBPUNJHNKWMY',start:'2026-11-25T18:30:00Z'};
+ vi.mocked(apiRequest).mockResolvedValueOnce({answer:'Confirmar cancelacion '+proposal.code+' '+proposal.confirmationCode,bookingCancellation:proposal})
+  .mockResolvedValueOnce({answer:'Estado de asesoría: CANCELLED.'});
+ render(<AssistantFab/>);fireEvent.click(screen.getByRole('button',{name:'Abrir asistente financiero'}));
+ fireEvent.change(screen.getByRole('textbox'),{target:{value:'cancelar'}});fireEvent.click(screen.getByRole('button',{name:'Enviar pregunta'}));
+ const confirm=await screen.findByRole('button',{name:'Confirmar cancelación'});
+ expect(screen.queryByText(new RegExp(proposal.confirmationCode))).toBeNull();expect(apiRequest).toHaveBeenCalledTimes(1);
+ fireEvent.click(confirm);await screen.findByText('Estado de asesoría: CANCELLED.');
+ expect(JSON.parse(vi.mocked(apiRequest).mock.calls[1][1]!.body as string).message).toBe('Confirmar cancelacion '+proposal.code+' '+proposal.confirmationCode);
+ expect(screen.queryByRole('button',{name:'Confirmar cancelación'})).toBeNull();
+});
+it('can keep the appointment instead of confirming cancellation',async()=>{
+ const proposal={code:'BQMNQPZFQBASIQSAIOIV',confirmationCode:'NBQTWMPGDBPUNJHNKWMY',start:'2026-11-25T18:30:00Z'};
+ vi.mocked(apiRequest).mockResolvedValueOnce({answer:'Confirmar cancelacion '+proposal.code+' '+proposal.confirmationCode,bookingCancellation:proposal})
+  .mockResolvedValueOnce({answer:'Solicitud descartada. Tu asesoría sigue confirmada.'});
+ render(<AssistantFab/>);fireEvent.click(screen.getByRole('button',{name:'Abrir asistente financiero'}));
+ fireEvent.change(screen.getByRole('textbox'),{target:{value:'cancelar'}});fireEvent.click(screen.getByRole('button',{name:'Enviar pregunta'}));
+ fireEvent.click(await screen.findByRole('button',{name:'Conservar asesoría'}));await screen.findByText('Solicitud descartada. Tu asesoría sigue confirmada.');
+ expect(JSON.parse(vi.mocked(apiRequest).mock.calls[1][1]!.body as string).message).toBe('No cancelar asesoria '+proposal.code);
+ expect(screen.queryByRole('button',{name:'Confirmar cancelación'})).toBeNull();
+});
 it('shows saved bookings and sends the selected full code without confirming cancellation',async()=>{
  const items=[
   {code:'ABCDEFGHIJKLMNOPQRST',status:'CONFIRMED',start:'2026-11-25T14:00:00Z',end:'2026-11-25T14:30:00Z',canCancel:true},

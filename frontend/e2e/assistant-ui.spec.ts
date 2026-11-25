@@ -50,6 +50,24 @@ test('lists saved reservations and requests cancellation of the chosen code on m
  await expect(page.getByText('La cancelación está pendiente de tu confirmación.')).toBeVisible();
  expect(requests).toEqual([{message:'quiero cancelar una asesoria'},{message:'Cancelar asesoria '+code}]);
 });
+test('confirms cancellation by button without copying codes on mobile',async({page})=>{
+ await page.setViewportSize({width:375,height:900});
+ const proposal={code:'BQMNQPZFQBASIQSAIOIV',confirmationCode:'NBQTWMPGDBPUNJHNKWMY',start:'2026-11-25T18:30:00Z'};
+ const requests:Record<string,string>[]=[];
+ await page.route('**/api/v1/auth/csrf',route=>route.fulfill({json:{token:'ui-fixture-token'}}));
+ await page.route('**/api/v1/assistant/messages',async route=>{
+  const body=route.request().postDataJSON();requests.push(body);
+  await route.fulfill({json:body.message==='cancelar'?{answer:'Confirmar cancelacion '+proposal.code+' '+proposal.confirmationCode,bookingCancellation:proposal}:{answer:'Estado de asesoría: CANCELLED.'}});
+ });
+ await page.getByRole('textbox').fill('cancelar');await page.getByRole('button',{name:'Enviar pregunta'}).click();
+ const panel=page.getByRole('region',{name:'Confirmar cancelación de asesoría'});
+ await expect(panel).toBeVisible();await expect(page.getByText(proposal.confirmationCode,{exact:false})).toHaveCount(0);
+ expect(requests).toHaveLength(1);expect(await panel.evaluate(el=>el.scrollWidth<=el.clientWidth)).toBe(true);
+ await page.screenshot({path:'test-results/booking-cancellation-mobile.png'});
+ await panel.getByRole('button',{name:'Confirmar cancelación',exact:true}).click();
+ await expect(page.getByText('Estado de asesoría: CANCELLED.')).toBeVisible();await expect(panel).toHaveCount(0);
+ expect(requests[1].message).toBe('Confirmar cancelacion '+proposal.code+' '+proposal.confirmationCode);
+});
 for (const width of [375,768,1440]) {
  test(`assistant geometry and controls at ${width}`, async ({page}) => {
   await page.setViewportSize({width,height:900});

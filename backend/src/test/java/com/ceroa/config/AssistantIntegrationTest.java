@@ -250,6 +250,14 @@ class AssistantIntegrationTest {
         org.mockito.Mockito.verify(calendar,org.mockito.Mockito.never()).call(org.mockito.ArgumentMatchers.eq("create"),org.mockito.ArgumentMatchers.any(),org.mockito.ArgumentMatchers.any(),org.mockito.ArgumentMatchers.any(),org.mockito.ArgumentMatchers.any());
         for(int i=0;i<2;i++)mvc.perform(post("/api/v1/assistant/messages").with(user(owner)).with(csrf()).contentType("application/json").content(JSON.writeValueAsString(Map.of("message","Confirmar asesoria "+lastBookingCode)))).andExpect(status().isOk()).andExpect(jsonPath("$.answer").value(org.hamcrest.Matchers.containsString("https://meet.google.com/abc-defg-hij")));
         org.mockito.Mockito.verify(calendar,org.mockito.Mockito.times(1)).call(org.mockito.ArgumentMatchers.eq("create"),org.mockito.ArgumentMatchers.any(),org.mockito.ArgumentMatchers.any(),org.mockito.ArgumentMatchers.any(),org.mockito.ArgumentMatchers.any());
+        var pending=mvc.perform(post("/api/v1/assistant/messages").with(user(owner)).with(csrf()).contentType("application/json").content(JSON.writeValueAsString(Map.of("message","cancelar")))).andExpect(status().isOk())
+            .andExpect(jsonPath("$.bookingCancellation.code").value(lastBookingCode)).andReturn().getResponse().getContentAsString();
+        org.mockito.Mockito.verify(calendar,org.mockito.Mockito.never()).call(org.mockito.ArgumentMatchers.eq("delete"),org.mockito.ArgumentMatchers.any(),org.mockito.ArgumentMatchers.any(),org.mockito.ArgumentMatchers.any(),org.mockito.ArgumentMatchers.any());
+        String nonce=JSON.readTree(pending).path("bookingCancellation").path("confirmationCode").asText();
+        org.mockito.Mockito.when(calendar.call(org.mockito.ArgumentMatchers.eq("delete"),org.mockito.ArgumentMatchers.any(),org.mockito.ArgumentMatchers.any(),org.mockito.ArgumentMatchers.any(),org.mockito.ArgumentMatchers.any())).thenReturn(JSON.createObjectNode());
+        mvc.perform(post("/api/v1/assistant/messages").with(user(owner)).with(csrf()).contentType("application/json").content(JSON.writeValueAsString(Map.of("message","Confirmar cancelacion "+lastBookingCode+" "+nonce))))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.answer").value(org.hamcrest.Matchers.containsString("CANCELLED"))).andExpect(jsonPath("$.bookingCancellation").isEmpty());
+        org.mockito.Mockito.verify(calendar,org.mockito.Mockito.times(1)).call(org.mockito.ArgumentMatchers.eq("delete"),org.mockito.ArgumentMatchers.any(),org.mockito.ArgumentMatchers.any(),org.mockito.ArgumentMatchers.any(),org.mockito.ArgumentMatchers.any());
     }
     @BeforeEach void seed() {
         callback=mvc; owner=UUID.randomUUID().toString();
