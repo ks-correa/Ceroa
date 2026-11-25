@@ -46,6 +46,40 @@ class AssistantConversationRoutingTest {
         var result=assistant.message("Consulta o solicita la cancelación usando el código de esa reserva.",null,null);
         assertTrue(result.answer().contains("¿Quieres consultar"));verify(bookings,never()).proposeCancellation(any());
     }
+    @Test void shortStatusChoiceResolvesTheReservationFromTheClarification(){
+        when(bookings.confirm(code)).thenReturn(booking(""));when(bookings.get(code)).thenReturn(booking(""));
+        assistant.message("Confirmar asesoria "+code,null,null);
+        assistant.message("Consulta o solicita la cancelación usando el código de esa reserva.",null,null);
+        for(String question:List.of("consultar su estado","quiero ver el estado","solo consultar")){
+            var reply=assistant.message(question,null,null);
+            assertEquals("COMPLETE",reply.functionalStatus());assertTrue(reply.answer().contains("CONFIRMED"));assertTrue(reply.answer().contains(code));
+        }
+        verify(bookings,times(3)).get(code);verify(bookings,never()).proposeCancellation(any());verify(bookings,never()).confirmCancellation(any(),any());
+    }
+    @Test void shortCancellationChoiceOnlyProposesAndRefusalWithdrawsThePendingRequest(){
+        when(bookings.confirm(code)).thenReturn(booking(""));
+        when(bookings.proposeCancellation(code)).thenReturn(booking("Confirmar cancelacion "+code+" "+"Z".repeat(20)));
+        when(bookings.withdrawCancellation(code)).thenReturn(booking(""));
+        assistant.message("Confirmar asesoria "+code,null,null);
+        assistant.message("Consulta o solicita la cancelación usando el código de esa reserva.",null,null);
+        assertTrue(assistant.message("solicitar su cancelación",null,null).answer().contains("Confirmar cancelacion"));
+        var refusal=assistant.message("no la quiero cancelar",null,null);
+        assertTrue(refusal.answer().contains("descarté"));assertTrue(refusal.answer().contains("CONFIRMED"));assertFalse(refusal.answer().contains("Confirmar cancelacion"));
+        verify(bookings).withdrawCancellation(code);verify(bookings,never()).confirmCancellation(any(),any());
+    }
+    @Test void shortStatusNeedsContextInTheSameUserChannelAndConversation(){
+        when(bookings.confirm(code)).thenReturn(booking(""));assistant.message("Confirmar asesoria "+code,null,null);
+        assertTrue(assistant.message("consultar su estado",null,null,AssistantService.Channel.telegram).answer().contains("Indica el código"));
+        assistant.forget(AssistantService.Channel.web);
+        assertTrue(assistant.message("consultar su estado",null,null).answer().contains("Indica el código"));
+        verify(bookings,never()).get(any());
+    }
+    @Test void explicitBookingRefusalDoesNotBecomeACancellationProposal(){
+        when(bookings.confirm(code)).thenReturn(booking(""));when(bookings.withdrawCancellation(code)).thenReturn(booking(""));
+        assistant.message("Confirmar asesoria "+code,null,null);
+        assistant.message("No quiero cancelar mi cita",null,null);
+        verify(bookings).withdrawCancellation(code);verify(bookings,never()).proposeCancellation(any());
+    }
     @Test void reservationContextDoesNotCrossUsersChannelsOrNewConversations(){
         when(bookings.confirm(code)).thenReturn(booking(""));assistant.message("Confirmar asesoria "+code,null,null);
         assertTrue(assistant.message("Quiero cancelar mi asesoría",null,null,AssistantService.Channel.telegram).answer().contains("Indica el código"));

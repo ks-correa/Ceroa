@@ -136,7 +136,7 @@ public class AssistantService {
         var existingContext=existingConvId==null?null:history.get(new Conversation(userId,channel,existingConvId));
         String previousQuestion=existingContext!=null&&existingContext.expires.isAfter(Instant.now())&&!existingContext.turns.isEmpty()?existingContext.turns.get(existingContext.turns.size()-1).question:"";
         if(hasText&&selected==null){
-            var operational=workspaceMessage(message,lastBookingCode(existingContext));
+            var operational=workspaceMessage(message,existingContext);
             if(operational!=null){
                 var operationalConv=new Conversation(userId,channel,conversations.computeIfAbsent(audience,a->UUID.randomUUID()));
                 recordTurn(operationalConv,existingContext,operational.intent(),message,operational.answer());
@@ -240,7 +240,10 @@ public class AssistantService {
         }
         return null;
     }
-    private Reply workspaceMessage(String message,String previousBooking){
+    private Reply workspaceMessage(String message,Context context){
+        String previousBooking=lastBookingCode(context);
+        boolean bookingInFocus=previousBooking!=null&&!context.turns.isEmpty()
+            &&context.turns.getLast().answer().contains("Código de asesoría: ");
         var booking=Pattern.compile("(?i)^\\s*(Confirmar asesoria|Consultar asesoria|Cancelar asesoria) ([A-Z]{20})\\s*$").matcher(message);
         if(booking.matches()){String code=booking.group(2).toUpperCase(Locale.ROOT);var result=switch(booking.group(1).toLowerCase(Locale.ROOT)){case "confirmar asesoria"->supportBookings.confirm(code);case "cancelar asesoria"->supportBookings.proposeCancellation(code);default->supportBookings.get(code);};return bookingReply(result);}
         var cancel=Pattern.compile("(?i)^\\s*Confirmar cancelacion ([A-Z]{20}) ([A-Z]{20})\\s*$").matcher(message);
@@ -248,12 +251,25 @@ public class AssistantService {
         var confirmation=java.util.regex.Pattern.compile("(?i)^\\s*confirmar env[ií]o ([A-Z]{20})\\s*$").matcher(message);
         if(confirmation.matches()){var result=workspaceActions.confirmMail(confirmation.group(1).toUpperCase(Locale.ROOT));return new Reply(result.status().equals("CONFIRMED")?"Autorización registrada. El correo queda pendiente de envío; todavía no hay confirmación de Gmail.":result.instruction(),"communication");}
         String q=java.text.Normalizer.normalize(message.toLowerCase(Locale.ROOT),java.text.Normalizer.Form.NFD).replaceAll("\\p{M}","").replaceAll("[¿?!.]","").strip();
-        boolean bookingReference=q.matches("(?s).*(?:asesori|\\bcita\\b|\\breserva\\b|cancelala|anulala).*");
+        boolean explicitBooking=q.matches("(?s).*(?:asesori|\\bcita\\b|\\breserva\\b|cancelala|anulala).*");
+        boolean shortStatus=q.matches("(?:solo |solamente |quiero |deseo )?(?:consultar|ver|revisar)(?: (?:su|el))? estado|(?:su|el) estado|solo consultar");
+        boolean shortCancellation=q.matches("(?:si )?(?:quiero |deseo )?(?:cancelarla|anularla|(?:solicitar|pedir) (?:su|la) cancelacion)");
+        boolean shortRefusal=q.matches("(?:mejor )?no (?:(?:la|lo) )?(?:(?:quiero|deseo|voy a) )?(?:cancelar(?:la|lo)?|anular(?:la|lo)?|canceles|anules)");
+        boolean refusal=q.matches("(?s).*\\bno (?:(?:la|lo) )?(?:(?:quiero|deseo|voy a) )?(?:cancel\\w*|anul\\w*).*")||shortRefusal;
+        boolean implicitBooking=shortStatus||shortCancellation||shortRefusal;
+        boolean bookingReference=explicitBooking||implicitBooking;
+        if(bookingReference&&refusal){
+            var explicitCode=Pattern.compile("(?i)\\b([A-Z]{20})\\b").matcher(message);
+            String code=explicitCode.find()?explicitCode.group(1).toUpperCase(Locale.ROOT):bookingInFocus?previousBooking:null;
+            if(code==null)return new Reply("Entendido, no solicitaré la cancelación. Si quieres revisar una reserva, indica su código.","support");
+            var result=supportBookings.withdrawCancellation(code);
+            return new Reply("Entendido, descarté la solicitud de cancelación pendiente. "+bookingReply(result).answer(),"support");
+        }
         boolean cancellation=bookingReference&&q.matches("(?s).*(?:cancel|anul).*");
         boolean consultation=bookingReference&&q.matches("(?s).*(?:consulta|estado|tengo|agendada|programada).*")&&!q.matches("(?s).*(?:horario|disponib|agendar|reservar).*");
         if(cancellation||consultation){
             var explicitCode=Pattern.compile("(?i)\\b([A-Z]{20})\\b").matcher(message);
-            String code=explicitCode.find()?explicitCode.group(1).toUpperCase(Locale.ROOT):previousBooking;
+            String code=explicitCode.find()?explicitCode.group(1).toUpperCase(Locale.ROOT):explicitBooking||bookingInFocus?previousBooking:null;
             if(code==null)return new Reply("Indica el código de la asesoría que quieres consultar o cancelar. Puedes copiarlo de la propuesta o de la confirmación de tu reserva.","support",List.of(),null,"PARTIAL");
             if(cancellation&&consultation)return new Reply("Código de asesoría: "+code+". ¿Quieres consultar su estado o solicitar su cancelación? La cancelación requiere una confirmación adicional.","support",List.of(),null,"PARTIAL");
             return bookingReply(cancellation?supportBookings.proposeCancellation(code):supportBookings.get(code));
