@@ -67,6 +67,19 @@ class AssistantConversationRoutingTest {
         assertTrue(refusal.answer().contains("descarté"));assertTrue(refusal.answer().contains("CONFIRMED"));assertFalse(refusal.answer().contains("Confirmar cancelacion"));
         verify(bookings).withdrawCancellation(code);verify(bookings,never()).confirmCancellation(any(),any());
     }
+    @Test void bareCancelAfterTheChoiceProposesCancellationOfThatReservation(){
+        when(bookings.confirm(code)).thenReturn(booking(""));
+        when(bookings.proposeCancellation(code)).thenReturn(booking("Confirmar cancelacion "+code+" "+"Z".repeat(20)));
+        assistant.message("Confirmar asesoria "+code,null,null);
+        assistant.message("Consulta o solicita la cancelación usando el código de esa reserva.",null,null);
+        var result=assistant.message("cancelar",null,null);
+        assertEquals("COMPLETE",result.functionalStatus());assertTrue(result.answer().contains("Confirmar cancelacion "+code));
+        verify(bookings).proposeCancellation(code);verify(bookings,never()).confirmCancellation(any(),any());
+    }
+    @Test void bareCancelWithoutReservationContextAsksForTheCode(){
+        assertTrue(assistant.message("cancelar",null,null).answer().contains("Indica el código"));
+        verifyNoInteractions(bookings);
+    }
     @Test void shortStatusNeedsContextInTheSameUserChannelAndConversation(){
         when(bookings.confirm(code)).thenReturn(booking(""));assistant.message("Confirmar asesoria "+code,null,null);
         assertTrue(assistant.message("consultar su estado",null,null,AssistantService.Channel.telegram).answer().contains("Indica el código"));

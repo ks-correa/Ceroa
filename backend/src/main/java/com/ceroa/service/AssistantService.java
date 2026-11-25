@@ -253,7 +253,7 @@ public class AssistantService {
         String q=java.text.Normalizer.normalize(message.toLowerCase(Locale.ROOT),java.text.Normalizer.Form.NFD).replaceAll("\\p{M}","").replaceAll("[¿?!.]","").strip();
         boolean explicitBooking=q.matches("(?s).*(?:asesori|\\bcita\\b|\\breserva\\b|cancelala|anulala).*");
         boolean shortStatus=q.matches("(?:solo |solamente |quiero |deseo )?(?:consultar|ver|revisar)(?: (?:su|el))? estado|(?:su|el) estado|solo consultar");
-        boolean shortCancellation=q.matches("(?:si )?(?:quiero |deseo )?(?:cancelarla|anularla|(?:solicitar|pedir) (?:su|la) cancelacion)");
+        boolean shortCancellation=q.matches("(?:si )?(?:quiero |deseo )?(?:cancelar(?:la)?|anular(?:la)?|(?:solicitar|pedir) (?:su|la) cancelacion)");
         boolean shortRefusal=q.matches("(?:mejor )?no (?:(?:la|lo) )?(?:(?:quiero|deseo|voy a) )?(?:cancelar(?:la|lo)?|anular(?:la|lo)?|canceles|anules)");
         boolean refusal=q.matches("(?s).*\\bno (?:(?:la|lo) )?(?:(?:quiero|deseo|voy a) )?(?:cancel\\w*|anul\\w*).*")||shortRefusal;
         boolean implicitBooking=shortStatus||shortCancellation||shortRefusal;
