@@ -3,6 +3,10 @@ import org.junit.jupiter.api.Test;
 import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 class AgentContractsTest {
+    @Test void naturalSimulatorAndExtraPaymentQuestionsAcquireTheirSpecialty(){
+        assertEquals(Set.of(AgentContracts.Role.SUPPORT),AgentContracts.selectedRoles("¿Cómo puedo utilizar el simulador?",false));
+        assertEquals(Set.of(AgentContracts.Role.FINANCIAL),AgentContracts.selectedRoles("¿Cuánto podría ahorrar en intereses si realizo un abono adicional de $200.000?",false));
+    }
     @Test void operationalFollowUpWithDemonstrativesDoesNotBecomeFinancialAnalysis(){
         for(String question:List.of("Explícame mejor cómo registrar ese pago, sin ejecutar cambios.","¿Cómo edito esa deuda?","¿Dónde agrego mi obligación?","¿Cómo registrar este abono?")){
             assertEquals(Set.of(AgentContracts.Role.SUPPORT),AgentContracts.selectedRoles(question,false),question);

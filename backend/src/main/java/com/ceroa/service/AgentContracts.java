@@ -67,14 +67,14 @@ public final class AgentContracts {
         boolean operational=q.matches("(?s).*("
             + "registr(?:ar|o|e|as|an|amos)\\s+(?:un |el |una |la |mi |mis |las |los |este |esta |estos |estas |ese |esa |esos |esas )?(?:nuev[oa]s? )?(?:pagos?|obligacion(?:es)?|deudas?|abonos?)"
             + "|(?:como|donde|pasos para|manera de|forma de|quiero saber como|explicame como)\\s+(?:se\\s+|puedo\\s+)?(?:registr\\w*|agreg\\w*|cre\\w*|anad\\w*|carg\\w*|sub\\w*|edit\\w*|modific\\w*|actualiz\\w*|elimin\\w*|borr\\w*)\\s+(?:un |el |una |la |mi |mis |las |los |este |esta |estos |estas |ese |esa |esos |esas )?(?:nuev[oa]s? )?(?:pagos?|obligacion(?:es)?|deudas?|abonos?|extractos?|documentos?|archivos?)"
-            + "|(?:como\\s+funciona|para\\s+que\\s+sirve|como\\s+se\\s+usa|como\\s+uso|como\\s+utiliz\\w*)\\s+(?:el\\s+|la\\s+)?(?:simulador|seccion\\s+simular|biblioteca|centinela)"
+            + "|(?:como\\s+funciona|para\\s+que\\s+sirve|como\\s+se\\s+usa|como\\s+(?:puedo\\s+)?(?:uso|usar|utiliz\\w*))\\s+(?:el\\s+|la\\s+)?(?:simulador|seccion\\s+simular|biblioteca|centinela)"
             + "|\\bplan(?:es)?\\s+cero\\b|\\bceroa\\s+plus\\b|(?:diferencias?|compar\\w*)\\s+entre\\s+(?:el\\s+|los\\s+)?plan(?:es)?"
             + "|soporte|ayuda con (?:la|mi) cuenta|asesori\\w*|\\bcitas?\\b|contrasen\\w*|iniciar sesion|cerrar sesion|navegacion|suscripcion\\w*|\\bmcp\\b"
             + ").*");
         boolean concept=q.matches("(?s).*(concepto|bola de nieve|avalancha|amortizacion|(?:que es |que significa|como se interpreta)(?![^.;!?]*(?:plan cero|ceroa plus|simulador|asesoria|soporte|cuenta))).*")
             ||(q.matches("(?s).*como funciona.*")&&!operational);
         boolean personal=q.matches("(?s).*(\\bmis? (?:deudas?|obligacion(?:es)?|finanzas|pagos?|vencimientos?|saldos?|estrategias?|capacidad|progreso|ingresos?|gastos?)\\b|(?:obligacion(?:es)?|deudas?|pagos?|saldos?|vencimientos?)\\s+registrad[oa]s?|datos financieros actuales|(?:mas\\s+proxim[oa]|cual|que)\\s+(?:a\\s+)?venc(?:er|e|en)).*");
-        boolean finance=q.matches("(?s).*(saldo|deuda|obligacion|tasa|pago|capacidad|estrategia|ingreso|gasto|vencimiento|vencer|vence|vencen|priorizar|financial|finance|analysis).*");
+        boolean finance=q.matches("(?s).*(saldo|deuda|obligacion|tasa|pago|capacidad|estrategia|ingreso|gasto|vencimiento|vencer|vence|vencen|priorizar|financial|finance|analysis|ahorr\\w*.*interes|abono adicional).*");
         var roles=EnumSet.noneOf(Role.class);
         if(document||concept)roles.add(Role.RAG);
         if(operational)roles.add(Role.SUPPORT);

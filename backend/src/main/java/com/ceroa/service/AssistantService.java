@@ -32,6 +32,7 @@ public class AssistantService {
     }
     private static final ZoneId ZONE = ZoneId.of("America/Bogota");
     private static final Set<String> AUDIO = Set.of("audio/webm", "audio/ogg", "audio/wav", "audio/mpeg", "audio/mp4");
+    private static final Pattern EMAIL_ADDRESS=Pattern.compile("[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}");
     static class Job {
         final UUID user; final Instant expires = Instant.now().plusSeconds(180);
         volatile Reply result;
@@ -117,7 +118,13 @@ public class AssistantService {
         boolean hasText=message!=null && !message.isBlank(), hasAudio=audio!=null && !audio.isBlank();
         if (hasText==hasAudio || (hasText && message.length()>2000)) throw new IllegalArgumentException();
         if (hasAudio) validateAudio(audio,mime);
-        if(hasText&&selectedDocumentId==null){var operational=workspaceMessage(message);if(operational!=null)return operational;}
+        if(hasText&&selectedDocumentId==null&&message.toLowerCase(Locale.ROOT).matches("(?su).*(?:extracto|documento|archivo)\\s+(?:que\\s+(?:adjunté|adjunte|subí|subi|cargué|cargue)|adjunto).*")){
+            var candidates=library.query(new com.ceroa.api.dto.DocumentContracts.Query(com.ceroa.api.dto.DocumentContracts.Intent.METADATA_SEARCH,"",com.ceroa.api.dto.DocumentContracts.Filters.empty(),0,2));
+            if(candidates.documents().size()==1&&"INDEXED".equals(candidates.documents().get(0).status())){
+                selectedDocumentId=candidates.documents().get(0).id();
+                audience=new Audience(userId,channel,selectedDocumentId);
+            }else return new Reply(candidates.documents().isEmpty()?"No encuentro un archivo para esa consulta. Carga tu extracto y espera a que esté indexado antes de preguntarme por su contenido.":"Tengo varios archivos posibles o alguno sigue procesándose. Selecciona el extracto en Consultar archivos y vuelve a preguntar por la tasa; así consultaré únicamente ese documento.","analysis",candidates.documents(),candidates.traceId(),"PARTIAL");
+        }
         com.ceroa.api.dto.DocumentContracts.Document selected=null;
         if(selectedDocumentId!=null){
             selected=library.get(selectedDocumentId);
@@ -128,6 +135,14 @@ public class AssistantService {
         UUID existingConvId=conversations.get(audience);
         var existingContext=existingConvId==null?null:history.get(new Conversation(userId,channel,existingConvId));
         String previousQuestion=existingContext!=null&&existingContext.expires.isAfter(Instant.now())&&!existingContext.turns.isEmpty()?existingContext.turns.get(existingContext.turns.size()-1).question:"";
+        if(hasText&&selected==null){
+            var operational=workspaceMessage(message,lastBookingCode(existingContext));
+            if(operational!=null){
+                var operationalConv=new Conversation(userId,channel,conversations.computeIfAbsent(audience,a->UUID.randomUUID()));
+                recordTurn(operationalConv,existingContext,operational.intent(),message,operational.answer());
+                return operational;
+            }
+        }
         if (hasText && selected==null) {
             Intent direct=deterministicIntent(message);
             if(direct!=null){
@@ -214,7 +229,15 @@ public class AssistantService {
         if(q.matches("(?:cual es mi estrategia activa|muestrame mi estrategia activa|que estrategia(?: de pago)? tengo activa|cual es mi estrategia de pago activa)"))return Intent.strategy;
         return null;
     }
-    private Reply workspaceMessage(String message){
+    private String lastBookingCode(Context context){
+        if(context==null||!context.expires.isAfter(Instant.now()))return null;
+        for(int i=context.turns.size()-1;i>=0;i--){
+            var match=Pattern.compile("Código de asesoría: ([A-Z]{20})").matcher(context.turns.get(i).answer());
+            if(match.find())return match.group(1);
+        }
+        return null;
+    }
+    private Reply workspaceMessage(String message,String previousBooking){
         var booking=Pattern.compile("(?i)^\\s*(Confirmar asesoria|Consultar asesoria|Cancelar asesoria) ([A-Z]{20})\\s*$").matcher(message);
         if(booking.matches()){String code=booking.group(2).toUpperCase(Locale.ROOT);var result=switch(booking.group(1).toLowerCase(Locale.ROOT)){case "confirmar asesoria"->supportBookings.confirm(code);case "cancelar asesoria"->supportBookings.proposeCancellation(code);default->supportBookings.get(code);};return bookingReply(result);}
         var cancel=Pattern.compile("(?i)^\\s*Confirmar cancelacion ([A-Z]{20}) ([A-Z]{20})\\s*$").matcher(message);
@@ -222,6 +245,16 @@ public class AssistantService {
         var confirmation=java.util.regex.Pattern.compile("(?i)^\\s*confirmar env[ií]o ([A-Z]{20})\\s*$").matcher(message);
         if(confirmation.matches()){var result=workspaceActions.confirmMail(confirmation.group(1).toUpperCase(Locale.ROOT));return new Reply(result.status().equals("CONFIRMED")?"Autorización registrada. El correo queda pendiente de envío; todavía no hay confirmación de Gmail.":result.instruction(),"communication");}
         String q=java.text.Normalizer.normalize(message.toLowerCase(Locale.ROOT),java.text.Normalizer.Form.NFD).replaceAll("\\p{M}","").replaceAll("[¿?!.]","").strip();
+        boolean bookingReference=q.matches("(?s).*(?:asesori|\\bcita\\b|\\breserva\\b|cancelala|anulala).*");
+        boolean cancellation=bookingReference&&q.matches("(?s).*(?:cancel|anul).*");
+        boolean consultation=bookingReference&&q.matches("(?s).*(?:consulta|estado|tengo|agendada|programada).*")&&!q.matches("(?s).*(?:horario|disponib|agendar|reservar).*");
+        if(cancellation||consultation){
+            var explicitCode=Pattern.compile("(?i)\\b([A-Z]{20})\\b").matcher(message);
+            String code=explicitCode.find()?explicitCode.group(1).toUpperCase(Locale.ROOT):previousBooking;
+            if(code==null)return new Reply("Indica el código de la asesoría que quieres consultar o cancelar. Puedes copiarlo de la propuesta o de la confirmación de tu reserva.","support",List.of(),null,"PARTIAL");
+            if(cancellation&&consultation)return new Reply("Código de asesoría: "+code+". ¿Quieres consultar su estado o solicitar su cancelación? La cancelación requiere una confirmación adicional.","support",List.of(),null,"PARTIAL");
+            return bookingReply(cancellation?supportBookings.proposeCancellation(code):supportBookings.get(code));
+        }
         if(q.matches("(?s).*(?:asesoria|asesorias|cita).*" )&&q.matches("(?s).*(?:horario|disponib|agendar|reservar|quiero una|necesito una).*")){
             LocalDate date=null;
             var dateMatch=Pattern.compile("\\b(\\d{4}-\\d{2}-\\d{2})\\b").matcher(message);
@@ -236,20 +269,20 @@ public class AssistantService {
             case "enviame informacion de mi suscripcion al correo" -> IntegrationEventService.MailKind.SUBSCRIPTION_INFO;
             default -> null;
         };
-        if(kind==null&&q.matches("(?s).*(?:\\benvia\\w*|\\bmanda\\w*|\\benviar\\b).*" )&&q.matches("(?s).*(?:correo|email|e-mail).*" )&&!q.matches("(?s).*\\bno\\s+(?:me\\s+)?(?:env|mand).*")){
+        if(kind==null&&q.matches("(?s).*(?:\\benvia\\w*|\\bmanda\\w*|\\benviar\\b).*" )&&(q.matches("(?s).*(?:correo|email|e-mail).*" )||EMAIL_ADDRESS.matcher(message).find())&&!q.matches("(?s).*\\bno\\s+(?:me\\s+)?(?:env|mand).*")){
             if(q.matches("(?s).*(?:vencimiento|proximos pagos).*"))kind=IntegrationEventService.MailKind.UPCOMING_DUES;
             else if(q.contains("suscripcion"))kind=IntegrationEventService.MailKind.SUBSCRIPTION_INFO;
             else if(q.matches("(?s).*(?:deuda|financ|saldo|obligacion).*"))kind=IntegrationEventService.MailKind.FINANCIAL_SUMMARY;
             else return new Reply("Puedo preparar un correo con tu resumen financiero, tus próximos vencimientos o tu suscripción. Indica cuál quieres y te mostraré el borrador antes de enviarlo.","communication");
         }
         if(kind==null)return null;
-        var recipient=Pattern.compile("[A-Za-z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}").matcher(message);
+        var recipient=EMAIL_ADDRESS.matcher(message);
         while(recipient.find())if(!recipient.group().equalsIgnoreCase(current.entity().getEmail()))
             return new Reply("Los resúmenes se envían al correo registrado en tu cuenta. La dirección que indicaste no coincide. Puedes revisar tu correo en tu perfil o pedirme ‘Envíame un resumen financiero a mi correo’ para preparar una vista previa con el destinatario correcto.","communication");
         return communicationReply(workspaceActions.propose(kind));
     }
     private Reply communicationReply(WorkspaceActionService.Proposal proposal){return new Reply("Preparé una propuesta de correo. Revisa el destinatario y el contenido en la vista previa antes de confirmar. Todavía no se ha enviado.\n\n"+proposal.instruction(),"communication",List.of(),null,"COMPLETE",proposal,null);}
-    private Reply bookingReply(SupportBookingService.View result){return new Reply("Estado de asesoria: "+result.status()+". Horario: "+result.start()+". "+(result.meetUrl()==null?"":result.meetUrl()+" ")+result.instruction(),"support");}
+    private Reply bookingReply(SupportBookingService.View result){return new Reply("Código de asesoría: "+result.code()+". Estado de asesoría: "+result.status()+". Horario de Bogotá: "+result.start().atZoneSameInstant(ZONE).format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))+". "+(result.meetUrl()==null?"":result.meetUrl()+" ")+result.instruction(),"support");}
     public AssistantAnalysisService.Evidence bookingTool(UUID id,String operation,String value){return withJob(id,"supportBooking",job->{
         guard(job,"support.booking");if(activeScope.get()==null||activeScope.get().role!=AgentContracts.Role.SUPPORT||job.selectedDocument!=null)throw AgentRuntime.denied();
         String requested=java.text.Normalizer.normalize(job.question.toLowerCase(Locale.ROOT),java.text.Normalizer.Form.NFD).replaceAll("\\p{M}","");
@@ -685,6 +718,8 @@ public class AssistantService {
                 guide.put("simulatorUsage","El simulador de Ceroa (sección Simular) permite seleccionar una obligación registrada o el portafolio, elegir una estrategia (Avalancha o Bola de Nieve) y agregar abonos extraordinarios hipotéticos por período para proyectar el ahorro en intereses y la reducción de meses sin modificar tus saldos reales.");
                 guide.put("plansComparison","El plan Cero incluye el registro y seguimiento de deudas, control de pagos, próximos vencimientos, progreso mensual y simulaciones básicas. Ceroa Plus desbloquea la Estrategia de Pago personalizada completa (comparativa detallada Avalancha vs. Bola de Nieve, orden de priorización y hoja de ruta), Biblioteca Documental con análisis RAG de extractos y monitoreo avanzado.");
                 guide.put("advisoryProcedure","Para solicitar una asesoría en Ceroa, indica en el chat del asistente la fecha y hora deseada en horario hábil de Bogotá (lunes a viernes, en bloques de treinta minutos) junto con el tema a revisar. El Agente de Soporte verificará disponibilidad y generará una propuesta con código de confirmación; la sesión de Google Calendar y Google Meet solo se crea cuando confirmas explícitamente ese código.");
+                guide.put("subscriptionCancellation","Para cancelar futuras renovaciones de Ceroa Plus, entra a Tu Perfil y busca Mi suscripción. Pulsa Cancelar renovación y revisa el diálogo Cancelar futuras renovaciones; después pulsa Confirmar cancelación. El acceso vigente se conserva hasta la fecha indicada por tu suscripción. Si aparece Procesando cancelación, la cancelación todavía no está confirmada; revisa el estado antes de repetir la solicitud. El chat solo orienta y no cancela tu suscripción.");
+                guide.put("documentUpload","Para cargar un documento financiero, abre el asistente y pulsa Subir archivo. Selecciona el archivo y completa sus datos. Espera a que termine su procesamiento y aparezca como indexado; después selecciónalo para consultar la tasa, las fechas o su contenido. Si tienes varios extractos, selecciona el archivo concreto antes de preguntar por él.");
                 return analysis.evidence(job.facts,guide,"supportGuide");
             });
             job.runtime.scope(grant.scopeToken()).issued.addAll(supportGuide.facts().keySet());

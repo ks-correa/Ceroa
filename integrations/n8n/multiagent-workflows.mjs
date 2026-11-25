@@ -4,6 +4,7 @@ import path from 'node:path';
 import {fileURLToPath} from 'node:url';
 import {extendWorkspaceAgents} from './extend-workspace-agents.mjs';
 import {fixDelegationEvidence} from './delegation-evidence.mjs';
+import {repairAssistantContracts} from './repair-assistant-contracts.mjs';
 
 export const roles=['FINANCIAL','RAG','SUPPORT'];
 export const ids={FINANCIAL:'ceroaFinancialAgent30',RAG:'ceroaKnowledgeAgent30',SUPPORT:'ceroaSupportAgent30'};
@@ -92,7 +93,7 @@ export function buildMultiagent(original){
  }
  const extended=extendWorkspaceAgents([w,...children]);
  fixDelegationEvidence(extended[0]);
- return identifyCeroa(extended);
+ return identifyCeroa(repairAssistantContracts(extended));
 }
 if(process.argv[1]===fileURLToPath(import.meta.url)){
  const input=JSON.parse(fs.readFileSync(process.argv[2]??new URL('./testing/fixtures/hybrid-rag-query.json',import.meta.url),'utf8'));

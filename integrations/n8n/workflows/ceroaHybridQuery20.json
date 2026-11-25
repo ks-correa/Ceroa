@@ -693,8 +693,8 @@
           "value": {
             "requestId": "={{ $(\"Preparar texto\").first().json.requestId }}",
             "task": "={{ $fromAI(\"task\",\"Tarea concreta y mínima para este especialista\", \"string\") }}",
-            "evidenceRefs": "={{ $fromAI(\"evidenceRefs\",\"Authorized fID or dID evidence keys separated by commas; never a document UUID; empty string when absent\", \"string\", \"\").split(\",\").map(x=>x.trim()).filter(x=>x && x !== $(\"Preparar texto\").first().json.selectedDocument?.id) }}",
-            "context": "={{ {year:$(\"Preparar texto\").first().json.year,month:$(\"Preparar texto\").first().json.month,selectedDocument:$(\"Preparar texto\").first().json.selectedDocument} }}"
+            "context": "={{ {year:$(\"Preparar texto\").first().json.year,month:$(\"Preparar texto\").first().json.month,selectedDocument:$(\"Preparar texto\").first().json.selectedDocument} }}",
+            "evidenceRefs": "={{ $fromAI(\"evidenceRefs\",\"Authorized fID or dID evidence keys separated by commas; never a document UUID; empty string when absent\", \"string\", \"\").split(\",\").map(x=>x.trim()).filter(x=>x && x !== $(\"Preparar texto\").first().json.selectedDocument?.id) }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -762,8 +762,8 @@
           "value": {
             "requestId": "={{ $(\"Preparar texto\").first().json.requestId }}",
             "task": "={{ $fromAI(\"task\",\"Tarea concreta y mínima para este especialista\", \"string\") }}",
-            "evidenceRefs": "={{ $fromAI(\"evidenceRefs\",\"Authorized fID or dID evidence keys separated by commas; never a document UUID; empty string when absent\", \"string\", \"\").split(\",\").map(x=>x.trim()).filter(x=>x && x !== $(\"Preparar texto\").first().json.selectedDocument?.id) }}",
-            "context": "={{ {year:$(\"Preparar texto\").first().json.year,month:$(\"Preparar texto\").first().json.month,selectedDocument:$(\"Preparar texto\").first().json.selectedDocument} }}"
+            "context": "={{ {year:$(\"Preparar texto\").first().json.year,month:$(\"Preparar texto\").first().json.month,selectedDocument:$(\"Preparar texto\").first().json.selectedDocument} }}",
+            "evidenceRefs": "={{ $fromAI(\"evidenceRefs\",\"Authorized fID or dID evidence keys separated by commas; never a document UUID; empty string when absent\", \"string\", \"\").split(\",\").map(x=>x.trim()).filter(x=>x && x !== $(\"Preparar texto\").first().json.selectedDocument?.id) }}"
           },
           "matchingColumns": [],
           "schema": [
@@ -831,8 +831,8 @@
           "value": {
             "requestId": "={{ $(\"Preparar texto\").first().json.requestId }}",
             "task": "={{ $fromAI(\"task\",\"Tarea concreta y mínima para este especialista\", \"string\") }}",
-            "evidenceRefs": "={{ $fromAI(\"evidenceRefs\",\"Authorized fID or dID evidence keys separated by commas; never a document UUID; empty string when absent\", \"string\", \"\").split(\",\").map(x=>x.trim()).filter(x=>x && x !== $(\"Preparar texto\").first().json.selectedDocument?.id) }}",
-            "context": "={{ {year:$(\"Preparar texto\").first().json.year,month:$(\"Preparar texto\").first().json.month,selectedDocument:$(\"Preparar texto\").first().json.selectedDocument} }}"
+            "context": "={{ {year:$(\"Preparar texto\").first().json.year,month:$(\"Preparar texto\").first().json.month,selectedDocument:$(\"Preparar texto\").first().json.selectedDocument} }}",
+            "evidenceRefs": "={{ $fromAI(\"evidenceRefs\",\"Authorized fID or dID evidence keys separated by commas; never a document UUID; empty string when absent\", \"string\", \"\").split(\",\").map(x=>x.trim()).filter(x=>x && x !== $(\"Preparar texto\").first().json.selectedDocument?.id) }}"
           },
           "matchingColumns": [],
           "schema": [
