@@ -26,9 +26,10 @@ for(const w of all){
   if(n.type.includes('httpRequest')){n.parameters.url=n.parameters.url.replaceAll('http://backend:8080','http://127.0.0.1:18080');if(n.id==='fail'){n.parameters.sendBody=true;n.parameters.specifyBody='json';n.parameters.jsonBody='={{ JSON.stringify($json) }}';}n.credentials={httpHeaderAuth:{id:'fixture-worker',name:'Fixture only'}};}
  }
 }
-const variants=['FINANCIAL','RAG','SUPPORT','UNKNOWN','EXTRACTS'].map(scenario=>{
+const scenarios=['FINANCIAL','RAG','SUPPORT','UNKNOWN','EXTRACTS','FINANCIALDEEP'];
+const variants=scenarios.map(scenario=>{
  const copy=structuredClone(root);copy.id='ceroaMultiagentFixture30'+scenario;
- copy.nodes.find(n=>n.name==='Preparar texto').parameters.jsonOutput=JSON.stringify({requestId:'00000000-0000-4000-8000-'+String(['FINANCIAL','RAG','SUPPORT','UNKNOWN','EXTRACTS'].indexOf(scenario)+2).padStart(12,'0'),message:'SCENARIO_'+scenario,year:2026,month:11,conversation:[]});return copy;
+ copy.nodes.find(n=>n.name==='Preparar texto').parameters.jsonOutput=JSON.stringify({requestId:'00000000-0000-4000-8000-'+String(scenarios.indexOf(scenario)+2).padStart(12,'0'),message:'SCENARIO_'+scenario,year:2026,month:11,conversation:[]});return copy;
 });
 const previous=['COMPOSITE','FINANCIAL','RAG','EXTRACTS'].map(scenario=>{const w=structuredClone(legacy);w.id+=scenario;w.nodes.find(n=>n.name==='Preparar texto').parameters.jsonOutput=JSON.stringify({requestId:'00000000-0000-4000-8000-000000000020',message:'SCENARIO_'+scenario,year:2026,month:11,conversation:[]});return w;});
 fs.writeFileSync(dir+'/workflows.json',JSON.stringify([...all,...variants,...previous],null,2));

@@ -107,6 +107,13 @@ class AssistantIntegrationTest {
         String base="/api/v1/assistant-tools/requests/"+id;
         callback.perform(post(base+"/prepare").header("X-Ceroa-Assistant",KEY).contentType("application/json").content(JSON.writeValueAsString(Map.of("transcript",question)))).andExpect(status().isOk());
         callback.perform(post(base+"/orchestration/start").header("X-Ceroa-Assistant",KEY)).andExpect(status().isOk());
+        if(question.contains("clarification")){
+            var grant=callback.perform(post(base+"/delegations/FINANCIAL/begin").header("X-Ceroa-Assistant",KEY).contentType("application/json").content("{\"task\":\"Aclarar escenario de abono\",\"evidenceRefs\":[]}")).andExpect(status().isOk()).andReturn().getResponse().getContentAsString();
+            String token=JSON.readTree(grant).path("scopeToken").asText();
+            var result=new HashMap<String,Object>();result.put("schemaVersion","1.1");result.put("role","FINANCIAL");result.put("status","PARTIAL");result.put("coverage","PARTIAL");result.put("answer","¿A qué deuda aplicarías el abono y sería único en el primer período?");result.put("evidenceRefs",List.of());result.put("sources",List.of());result.put("missingData",List.of("debt","timing"));result.put("requiresConfirmation",false);result.put("requiresClarification",true);
+            callback.perform(post(base+"/delegations/"+token+"/complete").header("X-Ceroa-Assistant",KEY).contentType("application/json").content(JSON.writeValueAsString(result))).andExpect(status().isOk());
+            callback.perform(post(base+"/complete").header("X-Ceroa-Assistant",KEY).contentType("application/json").content(JSON.writeValueAsString(Map.of("answer",com.ceroa.service.RagRetrievalService.ABSTENTION,"transcript",question,"mode","documentary","sources",List.of())))).andExpect(status().isOk());return;
+        }
         if(question.contains("finance-only")||question.contains("parser-error")){
             callback.perform(post(base+"/delegations/SUPPORT/begin").header("X-Ceroa-Assistant",KEY).contentType("application/json").content("{\"task\":\"Respaldo innecesario\",\"evidenceRefs\":[]}")).andExpect(status().isForbidden());
             if(question.contains("parser-error")){
@@ -171,6 +178,12 @@ class AssistantIntegrationTest {
     }
     @Test void financeCannotActivateSupportFallbackAndFailedParserCannotProduceAnAcceptedBalance()throws Exception{
         for(String message:List.of("multiagent finance-only saldo de mis obligaciones","multiagent parser-error saldo de mis obligaciones"))mvc.perform(post("/api/v1/assistant/messages").with(user(owner)).with(csrf()).contentType("application/json").content(JSON.writeValueAsString(Map.of("message",message)))).andExpect(status().isOk()).andExpect(jsonPath("$.functionalStatus").value(message.contains("parser-error")?"FAILED":"INSUFFICIENT")).andExpect(jsonPath("$.answer").value(org.hamcrest.Matchers.not(org.hamcrest.Matchers.containsString("999999"))));
+    }
+    @Test void validSimulationClarificationIsNotReplacedByGenericAbstention()throws Exception{
+        mvc.perform(post("/api/v1/assistant/messages").with(user(owner)).with(csrf()).contentType("application/json")
+            .content(JSON.writeValueAsString(Map.of("message","multiagent clarification simula un abono adicional a mis deudas"))))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.functionalStatus").value("PARTIAL"))
+            .andExpect(jsonPath("$.answer").value(org.hamcrest.Matchers.containsString("¿A qué deuda")));
     }
     @Test void simpleUpcomingAndStrategyAvoidTheWebhook() throws Exception {
         for(String question:List.of("Muéstrame mis próximos vencimientos","¿Cuál es mi estrategia activa?","¿Qué estrategia de pago tengo activa?","¿Qué estrategia tengo activa?")){

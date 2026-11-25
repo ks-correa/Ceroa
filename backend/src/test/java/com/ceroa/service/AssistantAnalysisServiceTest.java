@@ -9,6 +9,25 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class AssistantAnalysisServiceTest {
+    @Test void capacityAliasesAcceptTheirMeaningButCannotBeSwapped(){
+        var facts=Map.of(
+            "f1",new AssistantAnalysisService.Fact("capacity/budget",DecimalNode.valueOf(new BigDecimal("1000000"))),
+            "f2",new AssistantAnalysisService.Fact("capacity/requiredPayments",DecimalNode.valueOf(new BigDecimal("1200000"))),
+            "f3",new AssistantAnalysisService.Fact("capacity/shortfall",DecimalNode.valueOf(new BigDecimal("200000"))));
+        assertEquals("Presupuesto: 1.000.000. Cuotas exigibles: 1.200.000. Faltante: 200.000.",service.resolve(facts,"Presupuesto: {{f1}}. Cuotas exigibles: {{f2}}. Faltante: {{f3}}."));
+        assertThrows(IllegalArgumentException.class,()->service.resolve(facts,"Presupuesto: {{f2}}."));
+        assertThrows(IllegalArgumentException.class,()->service.resolve(facts,"Cuotas exigibles: {{f1}}."));
+        assertThrows(IllegalArgumentException.class,()->service.resolve(facts,"Saldo: {{f3}}."));
+    }
+    @Test void debtServicePercentageCannotBeReplacedWithIncomeOrBalance(){
+        var facts=Map.of(
+            "f1",new AssistantAnalysisService.Fact("summary/2026/11/0/monthlyDebtServicePercent",DecimalNode.valueOf(new BigDecimal("37.50"))),
+            "f2",new AssistantAnalysisService.Fact("summary/2026/11/0/monthlyIncome",DecimalNode.valueOf(new BigDecimal("4000000"))),
+            "f3",new AssistantAnalysisService.Fact("debts/items/0/balance",DecimalNode.valueOf(new BigDecimal("108600000"))));
+        assertEquals("Porcentaje de ingresos destinado a cuotas: 37,5%.",service.resolve(facts,"Porcentaje de ingresos destinado a cuotas: {{f1}}%."));
+        assertThrows(IllegalArgumentException.class,()->service.resolve(facts,"Porcentaje de ingresos destinado a cuotas: {{f2}}%."));
+        assertThrows(IllegalArgumentException.class,()->service.resolve(facts,"Porcentaje de ingresos destinado a cuotas: {{f3}}%."));
+    }
     @Test void groundsIssuedMailConfirmationWithoutAcceptingInventedCodes(){
         String instruction="Para autorizar el envío a tu correo registrado escribe: Confirmar envio ABCDEFGHIJKLMNOPQRST";
         var facts=Map.of("f1",new AssistantAnalysisService.Fact("workspaceProposal/instruction",TextNode.valueOf(instruction)));

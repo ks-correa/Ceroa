@@ -43,6 +43,18 @@ public class AssistantAnalysisService {
                     ObjectNode node=(ObjectNode) sanitized(json.valueToTree(summary));
                     if(summary.hasRequiredPaymentsData() && summary.availableForDebt()!=null && summary.requiredPaymentsCurrentPeriod()!=null)
                         node.put("allocatedBudgetAfterRequiredPayments",summary.availableForDebt().subtract(summary.requiredPaymentsCurrentPeriod()));
+                    var financial=profile.get();
+                    node.set("monthlyIncome",json.valueToTree(financial.monthlyIncome()));
+                    boolean complete=!summary.partialCoverage()&&!financial.incompleteCoverage()&&summary.hasRequiredPaymentsData()&&summary.requiredPaymentsCurrentPeriod()!=null;
+                    if(complete&&financial.monthlyIncome()!=null&&financial.monthlyIncome().signum()>0){
+                        node.put("monthlyDebtServicePercent",summary.requiredPaymentsCurrentPeriod().multiply(BigDecimal.valueOf(100)).divide(financial.monthlyIncome(),2,RoundingMode.HALF_UP));
+                        node.put("debtServiceStatus","AVAILABLE");
+                        node.put("debtServiceReason","Porcentaje de ingresos mensuales destinado a las cuotas exigibles registradas; no es saldo total dividido entre ingresos.");
+                    }else{
+                        node.putNull("monthlyDebtServicePercent");
+                        node.put("debtServiceStatus","INSUFFICIENT_DATA");
+                        node.put("debtServiceReason",!complete?"Faltan cuotas exigibles o la cobertura de deudas es parcial.":"Registra ingresos mensuales mayores que cero para calcular el porcentaje destinado a cuotas.");
+                    }
                     node.put("budgetMeaning","availableForDebt es el presupuesto asignado a deudas, no necesariamente todo el ingreso restante.");
                     yield node;
                 }

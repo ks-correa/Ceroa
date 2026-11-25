@@ -12,6 +12,10 @@ final class FinancialClaimGrounding {
     }
     private static String concept(String s) {
         String n=normalized(s);
+        if(n.contains("porcentaje")&&n.contains("ingres"))return "debtServicePercent";
+        if(n.matches("(?s).*(?:pagos exigibles|cuotas exigibles)\\s*(?::|(?:son|es)(?: de)?)?\\s*$"))return "installment";
+        if(n.matches("(?s).*(?:deficit|faltante|shortfall)\\s*(?::|(?:son|es)(?: de)?)?\\s*$"))return "shortfall";
+        if(n.matches("(?s).*(?:ingresos? mensuales?|monthlyincome)\\s*(?::|(?:son|es)(?: de)?)?\\s*$"))return "income";
         var m=Pattern.compile("fecha(?: estimada)? de pago|estimatedPayoffDate|payoffDate|date|presupuesto(?: mensual)?|monthlyBudget|plazo(?: estimado)?|tasa(?:s)? de interes|interestRate|interestSavings|interestDifference|ahorro(?: en intereses)?|diferencia (?:de|en) intereses(?: totales)?|monthsDifference|monthsReduced|meses|months|intereses|interes|interest|basePayment|normalPayment|extraPayment|pago minimo|minimumPayment|saldo|balance|tasa|rate|cuota|installment|monthlyPayment|pagos?|pagaste|pagados?|abonos?|amount|importe|pagina|page|numero de obligacion|cuenta|referencia|priority|prioridad|horario|hora|disponibilidad|asesoria|cita|programad[oa]|agendad[oa]|reserva|propuesta|expira|hasta|fecha|documento|periodo",Pattern.CASE_INSENSITIVE).matcher(n);
         String last="";
         while(m.find())last=switch(m.group().toLowerCase(Locale.ROOT)) {
@@ -57,6 +61,14 @@ final class FinancialClaimGrounding {
         if(!fact.value().isNumber()&&!fact.value().asText().codePoints().anyMatch(Character::isDigit))return true;
         if(path.matches("(?i).*/(?:id|documentId|chunkId|ownerId)$"))return true; // renderer omits internal IDs
         String sourceConcept=concept(path);
+        if(!document)sourceConcept=switch(path.substring(path.lastIndexOf('/')+1).toLowerCase(Locale.ROOT)){
+            case "budget","availablefordebt","availablemoney","paymentcapacity" -> "budget";
+            case "requiredpayments","requiredpaymentscurrentperiod" -> "installment";
+            case "shortfall" -> "shortfall";
+            case "monthlyincome" -> "income";
+            case "monthlydebtservicepercent" -> "debtServicePercent";
+            default -> sourceConcept;
+        };
         if(path.matches("(?i).*/(?:periodStart|periodEnd|periodEndInclusive|issuedAt|dateValue|periodYear|periodMonth|start|end|expiresAt|dueDate|nextDueDate)$"))sourceConcept="date";
         String context=sibling(facts,parent,"context");
         String kind=sibling(facts,parent,"kind");

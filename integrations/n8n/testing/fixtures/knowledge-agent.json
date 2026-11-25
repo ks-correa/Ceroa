@@ -357,7 +357,7 @@
         "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({errorCode: /GoogleGenerative.*429|quota|RESOURCE_EXHAUSTED/i.test(JSON.stringify($json.error ?? $json ?? {})) ? \"PROVIDER_QUOTA\" : !$json.output && !/\\b(?:400|403|409)\\b|Bad request|Forbidden/i.test(JSON.stringify($json.error ?? $json ?? {})) && /parse|schema|OutputParser/i.test(JSON.stringify($json.error ?? $json ?? {})) ? \"PARSER_ERROR\" : /\\b(?:400|403|409)\\b|contract|referen|eviden|Bad request|Forbidden/i.test(JSON.stringify($json.error ?? $json ?? {})) || $json.output ? \"CONTRACT_ERROR\" : /httpRequest|tool/i.test(JSON.stringify($json.error ?? $json ?? {})) ? \"TOOL_ERROR\" : \"PROVIDER_UNAVAILABLE\"}) }}",
+        "jsonBody": "={{ JSON.stringify({errorCode: /GoogleGenerative.*429|quota|RESOURCE_EXHAUSTED/i.test(JSON.stringify($json.error ?? $json ?? {})) ? \"PROVIDER_QUOTA\" : /max(?:imum)?\\s*(?:number of\\s*)?iterations?|iteration limit|stopped.*iterations/i.test(JSON.stringify($json.error ?? $json ?? {})) ? \"ITERATION_LIMIT\" : !$json.output && !/\\b(?:400|403|409)\\b|Bad request|Forbidden/i.test(JSON.stringify($json.error ?? $json ?? {})) && /parse|schema|OutputParser/i.test(JSON.stringify($json.error ?? $json ?? {})) ? \"PARSER_ERROR\" : /\\b(?:400|403|409)\\b|contract|referen|eviden|Bad request|Forbidden/i.test(JSON.stringify($json.error ?? $json ?? {})) || $json.output ? \"CONTRACT_ERROR\" : /httpRequest|tool/i.test(JSON.stringify($json.error ?? $json ?? {})) ? \"TOOL_ERROR\" : \"PROVIDER_UNAVAILABLE\"}) }}",
         "options": {
           "timeout": 15000
         }

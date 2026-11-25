@@ -6,6 +6,16 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.springframework.web.server.ResponseStatusException;
 
 class AgentRuntimeTest {
+    @Test void financialBudgetIncludesFinalAnswerAndReportsExhaustionAccurately(){
+        var budget=AgentContracts.budget(AgentContracts.Intent.FINANCIAL);
+        var roles=Set.of(AgentContracts.Role.FINANCIAL);
+        var runtime=new AgentRuntime(UUID.randomUUID(),budget,List.of(),AssistantProviderGate.reservation(budget,roles),1);
+        var grant=runtime.begin(AgentContracts.Role.FINANCIAL,new AgentRuntime.Task("Analizar cuotas",List.of()),false);
+        assertEquals(6,grant.maxIterations());
+        var result=runtime.fail(runtime.scope(grant.scopeToken()),"ITERATION_LIMIT");
+        assertEquals("ITERATION_LIMIT",result.errorCode());assertTrue(runtime.iterationLimitReached());
+        assertEquals("FAILED",runtime.functionalStatus(roles));
+    }
     @Test void failuresCannotBeReportedAsFunctionalSuccess(){var r=runtime();var g=r.begin(AgentContracts.Role.SUPPORT,new AgentRuntime.Task("Ayuda",List.of()),false);r.fail(r.scope(g.scopeToken()),"PARSER_ERROR");assertTrue(r.noUsableResult());assertEquals("FAILED",r.functionalStatus(Set.of(AgentContracts.Role.SUPPORT)));assertThrows(IllegalArgumentException.class,()->runtime().fail(new AgentRuntime.Scope(AgentContracts.Role.SUPPORT,"Ayuda",3,List.of()),"private prompt"));}
     AgentRuntime runtime(){return new AgentRuntime(UUID.randomUUID(),AgentContracts.budget(AgentContracts.Intent.COMPOSITE),List.of("f1"));}
     AgentRuntime.Result result(AgentContracts.Role role,String coverage,List<String> refs){return new AgentRuntime.Result("1.1",role,"OK","Evidencia {{f1}}",refs,List.of(),coverage,List.of(),false);}

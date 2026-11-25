@@ -6,11 +6,11 @@ class AssistantProviderGateTest {
  @Test void concurrencyAndMinuteBudgetApplyAcrossRequests(){var time=new Time();var gate=new AssistantProviderGate(true,15,1,60,time);var first=gate.acquire(8);assertThrows(org.springframework.web.server.ResponseStatusException.class,()->gate.acquire(1));first.close();first.close();assertThrows(org.springframework.web.server.ResponseStatusException.class,()->gate.acquire(8));try(var second=gate.acquire(7)){}time.value=time.value.plusSeconds(60);try(var third=gate.acquire(15)){} }
  @Test void quotaCooldownIsSharedAndFailureDoesNotRefundReservations(){var time=new Time();var gate=new AssistantProviderGate(true,15,1,90,time);try(var lease=gate.acquire(8)){}gate.quotaFailure();time.value=time.value.plusSeconds(61);assertThrows(org.springframework.web.server.ResponseStatusException.class,()->gate.acquire(1));time.value=time.value.plusSeconds(30);try(var lease=gate.acquire(8)){} }
  @Test void reservationsBoundRootAndSpecialistIterations(){
-  assertEquals(8,AssistantProviderGate.reservation(AgentContracts.budget(AgentContracts.Intent.FINANCIAL),java.util.Set.of(AgentContracts.Role.FINANCIAL)));
+  assertEquals(10,AssistantProviderGate.reservation(AgentContracts.budget(AgentContracts.Intent.FINANCIAL),java.util.Set.of(AgentContracts.Role.FINANCIAL)));
   assertEquals(7,AssistantProviderGate.reservation(AgentContracts.budget(AgentContracts.Intent.SUPPORT),java.util.Set.of(AgentContracts.Role.SUPPORT)));
   assertEquals(10,AssistantProviderGate.reservation(AgentContracts.budget(AgentContracts.Intent.DOCUMENT_SINGLE),java.util.Set.of(AgentContracts.Role.RAG)));
-  assertEquals(13,AssistantProviderGate.reservation(AgentContracts.budget(AgentContracts.Intent.COMPOSITE),java.util.Set.of(AgentContracts.Role.FINANCIAL,AgentContracts.Role.SUPPORT)));
-  assertEquals(14,AssistantProviderGate.reservation(AgentContracts.budget(AgentContracts.Intent.COMPOSITE),java.util.Set.of(AgentContracts.Role.RAG,AgentContracts.Role.FINANCIAL)));
+  assertEquals(15,AssistantProviderGate.reservation(AgentContracts.budget(AgentContracts.Intent.COMPOSITE),java.util.Set.of(AgentContracts.Role.FINANCIAL,AgentContracts.Role.SUPPORT)));
+  assertEquals(16,AssistantProviderGate.reservation(AgentContracts.budget(AgentContracts.Intent.COMPOSITE),java.util.Set.of(AgentContracts.Role.RAG,AgentContracts.Role.FINANCIAL)));
   var threeRoles=java.util.Set.of(AgentContracts.Role.FINANCIAL,AgentContracts.Role.RAG,AgentContracts.Role.SUPPORT);
   int threeReservation=AssistantProviderGate.reservation(AgentContracts.budget(AgentContracts.Intent.COMPOSITE),threeRoles);
   assertEquals(15,threeReservation);

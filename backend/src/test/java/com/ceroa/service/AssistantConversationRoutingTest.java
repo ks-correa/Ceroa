@@ -10,6 +10,13 @@ import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 class AssistantConversationRoutingTest {
+    @Test void extraPaymentCannotChooseItsObligationOrTimingForTheUser(){
+        assertTrue(AssistantService.simulationClarification("Compara mis estrategias con un abono adicional de $200.000 a mis deudas","Tarjeta Nu").contains("qué obligación"));
+        assertTrue(AssistantService.simulationClarification("Simula un abono adicional de $200.000 a Tarjeta Nu","Tarjeta Nu").contains("primer período"));
+        assertNull(AssistantService.simulationClarification("Simula un abono único de $200.000 a Tarjeta Nu","Tarjeta Nu"));
+        assertTrue(AssistantService.simulationClarification("Simula $200.000 cada mes para Tarjeta Nu","Tarjeta Nu").contains("recurrentes"));
+        assertTrue(AssistantService.simulationClarification("Simula $200.000 cada mes desde el primer período para Tarjeta Nu","Tarjeta Nu").contains("recurrentes"));
+    }
     CurrentUserService current=mock(CurrentUserService.class);
     SupportBookingService bookings=mock(SupportBookingService.class);
     WorkspaceActionService actions=mock(WorkspaceActionService.class);

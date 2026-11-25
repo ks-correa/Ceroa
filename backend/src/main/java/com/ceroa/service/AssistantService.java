@@ -390,6 +390,8 @@ public class AssistantService {
                 if(!activeScope.get().issued.contains(extraPaymentRef))throw AgentRuntime.denied();
                 var fact=job.facts.get(extraPaymentRef);
                 if(fact==null||!fact.value().isNumber()||!fact.source().matches("inputs/userProvidedNumbers/[0-9]+/value")||fact.value().decimalValue().signum()<0)throw new IllegalArgumentException("El abono hipotético debe provenir de la pregunta actual");
+                String clarification=simulationClarification(job.question+(AgentContracts.isFollowUp(job.question)?" "+job.previousQuestion:""),debtName);
+                if(clarification!=null)return analysis.evidence(job.facts,json.valueToTree(Map.of("status","NEEDS_CLARIFICATION","reason",clarification)),"hypotheticalSimulation");
                 events.add(new com.ceroa.api.dto.SimulationEventRequest(null,1,fact.value().decimalValue(),null));
             }
             if(++job.toolCalls>toolLimit(job))throw new ResponseStatusException(HttpStatus.TOO_MANY_REQUESTS);
@@ -400,6 +402,13 @@ public class AssistantService {
             ((com.fasterxml.jackson.databind.node.ObjectNode)result).remove("periods");
             return analysis.evidence(job.facts,result,"hypotheticalSimulation");
         });
+    }
+    static String simulationClarification(String question,String debtName){
+        String q=java.text.Normalizer.normalize(question.toLowerCase(Locale.ROOT),java.text.Normalizer.Form.NFD).replaceAll("\\p{M}","");
+        String name=java.text.Normalizer.normalize(debtName.toLowerCase(Locale.ROOT),java.text.Normalizer.Form.NFD).replaceAll("\\p{M}","");
+        if(!q.contains(name))return "Indica a qué obligación aplicarías el abono adicional. No puedo elegir una deuda por ti ni simular todo el portafolio con esta herramienta.";
+        if(q.matches("(?s).*(?:cada mes|todos los meses|abonos? recurrentes?|abonos? mensuales?).*")||!q.matches("(?s).*(?:abono unico|una sola vez|por unica vez|primer (?:mes|periodo)).*"))return "Confirma si el abono será único en el primer período. Esta herramienta no admite asumir abonos recurrentes ni elegir su momento por ti.";
+        return null;
     }
     public record LibraryEvidence(String status, AssistantAnalysisService.Evidence evidence,List<LibrarySnippet> snippets) {}
     public LibraryEvidence financialDocuments(UUID id,com.ceroa.api.dto.DocumentContracts.Query query) {
@@ -602,7 +611,7 @@ public class AssistantService {
             boolean libraryActive=job.libraryResult!=null&&(job.runtime==null||job.selectedDocument!=null||job.runtime.usedLibraryEvidence(job.facts));
             String resolved;
             if(job.runtime!=null&&!job.runtime.hasDelegations()&&!RagRetrievalService.ABSTENTION.equals(answer==null?"":answer.strip()))throw new IllegalArgumentException("Sin delegación solo se permite abstención canónica");
-            if(job.runtime!=null&&job.runtime.noUsableResult())resolved=RagRetrievalService.ABSTENTION;
+            if(job.runtime!=null&&job.runtime.noUsableResult())resolved=job.runtime.clarificationAnswer().map(text->analysis.resolve(job.facts,text)).orElseGet(()->job.runtime.iterationLimitReached()?"No pude completar el análisis dentro del límite de pasos permitido. Divide la consulta o especifica la deuda y los supuestos del escenario para volver a intentarlo.":RagRetrievalService.ABSTENTION);
             else if(job.selectedDocument!=null) {
                 var selected=library.get(job.selectedDocument.id());
                 if(!selected.status().equals("INDEXED")||selected.version()!=job.selectedDocument.version())throw new IllegalArgumentException("Documento modificado; consulta de nuevo");

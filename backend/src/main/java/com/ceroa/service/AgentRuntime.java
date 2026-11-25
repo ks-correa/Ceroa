@@ -81,16 +81,19 @@ public final class AgentRuntime {
         shared.addAll(declared);if(!result.coverage().equals("COMPLETE"))partialRefs.addAll(declared);return s.result;
     }
     Result fail(Scope s){s.partial=true;return complete(s,new Result("1.1",s.role,"FAILED","No fue posible completar esta parte de la consulta.",List.of(),List.of(),"NONE",List.of("SPECIALIST_UNAVAILABLE"),false));}
-    public static final Set<String> FAILURE_CODES=Set.of("PARSER_ERROR","CONTRACT_ERROR","PROVIDER_QUOTA","PROVIDER_UNAVAILABLE","TOOL_ERROR","SPECIALIST_UNAVAILABLE");
+    public static final Set<String> FAILURE_CODES=Set.of("PARSER_ERROR","CONTRACT_ERROR","PROVIDER_QUOTA","PROVIDER_UNAVAILABLE","TOOL_ERROR","SPECIALIST_UNAVAILABLE","ITERATION_LIMIT");
     Result fail(Scope s,String code){if(!FAILURE_CODES.contains(code))throw new IllegalArgumentException();s.partial=true;return complete(s,new Result("1.1",s.role,"FAILED","No fue posible completar esta parte de la consulta.",List.of(),List.of(),"NONE",List.of(code),false,null,null,null,false,code,Map.of()));}
     void validateShared(String answer,List<String> sources){var m=java.util.regex.Pattern.compile("\\{\\{(f[0-9]+)}}").matcher(answer==null?"":answer);while(m.find())if(!shared.contains(m.group(1)))throw denied();if(sources!=null&&!shared.containsAll(sources))throw denied();}
     public boolean limited(){return scopes.values().stream().anyMatch(s->s.result==null||!s.result.status().equals("OK")||!s.result.coverage().equals("COMPLETE"));}
     public boolean noUsableResult(){return scopes.values().stream().noneMatch(s->s.result!=null&&Set.of("OK","PARTIAL").contains(s.result.status())&&(!s.result.evidenceRefs().isEmpty()||!s.result.sources().isEmpty()));}
     public boolean hasDelegations(){return !scopes.isEmpty();}
+    public boolean iterationLimitReached(){return scopes.values().stream().anyMatch(s->s.result!=null&&"ITERATION_LIMIT".equals(s.result.errorCode()));}
+    public Optional<String> clarificationAnswer(){return scopes.values().stream().map(s->s.result).filter(Objects::nonNull).filter(r->r.requiresClarification()&&r.status().equals("PARTIAL")).map(Result::answer).findFirst();}
     public Set<String> operationalReferences(){var refs=new HashSet<String>();for(var s:scopes.values())if(s.result!=null&&Set.of("OK","PARTIAL").contains(s.result.status())&&(s.role==AgentContracts.Role.SUPPORT||s.tools.containsKey("support.booking")||s.tools.containsKey("communications.propose")))refs.addAll(s.result.evidenceRefs());return Set.copyOf(refs);}
     public boolean usedLibraryEvidence(Map<String,AssistantAnalysisService.Fact> facts){return scopes.values().stream().anyMatch(s->s.result!=null&&Set.of("OK","PARTIAL").contains(s.result.status())&&(s.role==AgentContracts.Role.RAG&&(s.tools.containsKey("documents.facts")||s.tools.containsKey("documents.retrieve"))||s.result.evidenceRefs().stream().map(facts::get).filter(Objects::nonNull).anyMatch(f->f.source().startsWith("financialDocuments/"))));}
     public String functionalStatus(Set<AgentContracts.Role> expected){
         if(scopes.isEmpty())return "INSUFFICIENT";
+        if(noUsableResult()&&clarificationAnswer().isPresent())return "PARTIAL";
         if(noUsableResult())return scopes.values().stream().anyMatch(s->s.result!=null&&s.result.status().equals("FAILED"))?"FAILED":"INSUFFICIENT";
         var completed=EnumSet.noneOf(AgentContracts.Role.class);for(var s:scopes.values())if(s.result!=null&&s.result.status().equals("OK")&&s.result.coverage().equals("COMPLETE"))completed.add(s.role);
         return !limited()&&completed.containsAll(expected)?"COMPLETE":"PARTIAL";

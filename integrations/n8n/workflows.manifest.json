@@ -192,7 +192,7 @@
     {
       "id": "ceroaHybridQuery20",
       "file": "ceroaHybridQuery20.json",
-      "sha256": "6715748189bde9cfb7828e8a73a36b638576b07c5f2d8ce5612de05e515d4ac4",
+      "sha256": "9478d1ac97fd18580b3f86093cc99e0830924cf80a279d95d05dfd1fa311909e",
       "dependencies": [
         "ceroaFinancialAgent30",
         "ceroaKnowledgeAgent30",
@@ -275,7 +275,7 @@
     {
       "id": "ceroaFinancialAgent30",
       "file": "ceroaFinancialAgent30.json",
-      "sha256": "6d511b809326f5ab3540c66b585d96b24aee29753adc5d876500c30f1ea6cfa3",
+      "sha256": "9ea131361a79f7c0255fb8c38c80ff20908cf75ecc5749c208fec9de02cc9be7",
       "dependencies": [],
       "credentials": [
         {
@@ -296,7 +296,7 @@
     {
       "id": "ceroaKnowledgeAgent30",
       "file": "ceroaKnowledgeAgent30.json",
-      "sha256": "41221e62e10f0ad5ba2c1bd24be6af362a116838b5df1f32a7af501f7e80ae3f",
+      "sha256": "daaa82e8b68652c663a433470320f37dc260ad0516f200f300ffdf73b73215a0",
       "dependencies": [],
       "credentials": [
         {
@@ -317,7 +317,7 @@
     {
       "id": "ceroaSupportAgent30",
       "file": "ceroaSupportAgent30.json",
-      "sha256": "2ed93ea009d2fd5366555b12ce31184ddafa020b8ff4a5ddaf8c48b7e332180a",
+      "sha256": "a111cdf18f8c66b8422f7ee3baa73f0175216568a428446c895b2244ecee0abd",
       "dependencies": [],
       "credentials": [
         {
