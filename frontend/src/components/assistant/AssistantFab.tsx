@@ -6,11 +6,12 @@ import './assistant-window.css';
 import { apiRequest } from '../../services/api';
 import { DocumentLibraryPanel, type DocumentView } from './DocumentLibraryPanel';
 import { DocumentReferences } from './DocumentReferences';
+import { documentHeading, documentPeriod } from './documentLabels';
 import type { FinancialDocument } from '../../services/documentLibraryService';
 import { BookingAvailabilityPanel, type BookingAvailability } from './BookingAvailabilityPanel';
 
 type FunctionalStatus = 'COMPLETE' | 'PARTIAL' | 'INSUFFICIENT' | 'FAILED';
-type ChatMessage = { functionalStatus?: FunctionalStatus; role: 'user' | 'assistant'; text: string; audio?: Blob; documents?: FinancialDocument[] };
+type ChatMessage = { functionalStatus?: FunctionalStatus; role: 'user' | 'assistant'; text: string; audio?: Blob; documents?: FinancialDocument[]; documentQuestion?: string };
 const LIMIT = 4 * 1024 * 1024;
 function ChatAudio({ blob }: { blob: Blob }) {
   const [url, setUrl] = useState('');
@@ -91,7 +92,7 @@ export function AssistantFab() {
     setAudioPreview(url);
     return () => URL.revokeObjectURL(url);
   }, [audioDraft]);
-  async function send(message?: string, blob?: Blob) {
+  async function send(message?: string, blob?: Blob, options: { document?: FinancialDocument | null; resume?: boolean } = {}) {
     if (busy || (!message && !blob)) return;
     const turn = generation.current;
     setBusy(true); setError('');
@@ -103,12 +104,13 @@ export function AssistantFab() {
         reader.onerror = () => reject(new Error('No pude leer el audio.')); reader.readAsDataURL(blob);
       });
       if (!alive.current || generation.current !== turn) return;
-      setMessages(m => [...m, { role: 'user' as const, text: message || '', audio: blob }].slice(-20));
+      if(!options.resume)setMessages(m => [...m, { role: 'user' as const, text: message || '', audio: blob }].slice(-20));
       setText('');
+      const document = options.document === undefined ? selectedDocument : options.document;
       const result = await apiRequest<{ answer: string; documents?: FinancialDocument[]; functionalStatus?: FunctionalStatus; mailProposal?: { confirmationCode: string }; bookingAvailability?: BookingAvailability }>('/assistant/messages', {
-        method: 'POST', body: JSON.stringify(blob ? { audio, mime: blob.type.split(';')[0], ...(selectedDocument ? { documentId: selectedDocument.id } : {}) } : { message, ...(selectedDocument ? { documentId: selectedDocument.id } : {}) })
+        method: 'POST', body: JSON.stringify(blob ? { audio, mime: blob.type.split(';')[0], ...(document ? { documentId: document.id } : {}) } : { message, ...(document ? { documentId: document.id } : {}) })
       });
-      if (alive.current && generation.current === turn) setMessages(m => [...m, { role: 'assistant' as const, text: result.answer, documents: result.documents, functionalStatus: result.functionalStatus }].slice(-20));
+      if (alive.current && generation.current === turn) setMessages(m => [...m, { role: 'assistant' as const, text: result.answer, documents: result.documents, documentQuestion: message, functionalStatus: result.functionalStatus }].slice(-20));
       if (alive.current && generation.current === turn) {
         setBookingAvailability(result.bookingAvailability || null);
         const code=result.mailProposal?.confirmationCode || (import.meta.env.VITE_MAIL_DRAFTS_ENABLED === 'true' ? result.answer.match(/Confirmar envio ([A-Z]{20})/i)?.[1] : undefined);
@@ -127,6 +129,13 @@ export function AssistantFab() {
         }else setError(cause instanceof Error ? cause.message : 'No pude procesar la consulta.');
       }
     } finally { if (alive.current && generation.current === turn) setBusy(false); }
+  }
+  function discussDocument(document: FinancialDocument, question?: string) {
+    if(busy || recording || startingRecording || document.status !== 'INDEXED')return;
+    generation.current++;
+    setSelectedDocument(document);setDocumentView(null);setText('');setDraftCode('');setMailDraft(null);setBookingAvailability(null);setError('');
+    if(question)void send(question,undefined,{document,resume:true});
+    else { setMessages([]);input.current?.focus(); }
   }
   async function record() {
     if (starting.current || recording || busy) return;
@@ -250,10 +259,10 @@ export function AssistantFab() {
       {infoOpen && <div id="assistant-data-info" className="max-h-[25%] shrink-0 overflow-y-auto border-b border-slate-100 px-4 py-3 text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400"><p className="mb-1 font-semibold">Sobre el asistente y tus datos</p><p>Analiza tus finanzas y compara opciones. Gemini procesa tus preguntas, audio y los datos financieros necesarios para responder. Las sugerencias no realizan cambios en tu cuenta.</p></div>}
       <div ref={chatLog} role="log" aria-live="polite" className="assistant-history min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain [scrollbar-gutter:stable] bg-slate-50/80 p-4 dark:bg-slate-950/40">
         <nav aria-label="Acciones de documentos" className="assistant-document-actions gap-2">{([{view:'upload',label:'Subir archivo'},{view:'search',label:'Consultar archivos'},{view:'review',label:'Revisar archivos'}] as const).map(item => <button key={item.view} type="button" aria-pressed={documentView === item.view} className={`rounded-full border px-3 py-2 text-xs font-semibold transition-colors ${documentView === item.view ? 'border-teal-700 bg-teal-700 text-white' : 'border-teal-200 bg-teal-50 text-teal-800 hover:bg-teal-100 dark:border-teal-800 dark:bg-teal-950 dark:text-teal-200'}`} onClick={() => setDocumentView(documentView === item.view ? null : item.view)}>{item.label}</button>)}</nav>
-        {selectedDocument && <div className="rounded-xl border border-teal-300 bg-teal-50 p-3 text-sm dark:border-teal-700 dark:bg-teal-950"><p className="font-semibold">Conversación enfocada en este archivo</p><p className="truncate">{selectedDocument.financialEntity || 'Documento'} · {selectedDocument.documentType} · {selectedDocument.periodStart || 'Sin período'}</p><div className="mt-2 flex flex-wrap gap-3"><button type="button" className="text-xs font-semibold underline" onClick={() => {generation.current++;setSelectedDocument(null);setMessages([]);setText('');setDraftCode('');setMailDraft(null);setBookingAvailability(null);}}>Salir del archivo</button><button type="button" className="text-xs font-semibold underline" onClick={() => {const period=selectedDocument.periodStart;generation.current++;setSelectedDocument(null);setMessages([]);setText(period?`Analiza todos mis extractos de ${new Intl.DateTimeFormat('es-CO',{month:'long',timeZone:'UTC'}).format(new Date(`${period.slice(0,7)}-01T12:00:00Z`))} de ${period.slice(0,4)}: `:'Analiza todos mis extractos del período: ');input.current?.focus();}}>Analizar varios extractos</button></div></div>}
-        {documentView && <DocumentLibraryPanel view={documentView} onDiscuss={document => { if(busy||recording||startingRecording)return;generation.current++;setSelectedDocument(document);setMessages([]);setText('');setDraftCode('');setMailDraft(null);setBookingAvailability(null);setDocumentView(null);input.current?.focus(); }} />}
+        {selectedDocument && <div role="region" aria-label="Archivo seleccionado" data-document-id={selectedDocument.id} className="rounded-xl border border-teal-300 bg-teal-50 p-3 text-sm dark:border-teal-700 dark:bg-teal-950"><p className="font-semibold">Conversación enfocada en este archivo</p><p className="break-words">{documentHeading(selectedDocument)}</p><p>{documentPeriod(selectedDocument)} · Referencia {selectedDocument.id.slice(0,8)}</p><div className="mt-2 flex flex-wrap gap-3"><button type="button" disabled={busy} className="text-xs font-semibold underline" onClick={() => {generation.current++;setSelectedDocument(null);setMessages([]);setText('');setDraftCode('');setMailDraft(null);setBookingAvailability(null);}}>Salir del archivo</button><button type="button" disabled={busy} className="text-xs font-semibold underline" onClick={() => {const period=selectedDocument.periodStart;generation.current++;setSelectedDocument(null);setMessages([]);setText(period?`Analiza todos mis extractos de ${new Intl.DateTimeFormat('es-CO',{month:'long',timeZone:'UTC'}).format(new Date(`${period.slice(0,7)}-01T12:00:00Z`))} de ${period.slice(0,4)}: `:'Analiza todos mis extractos del período: ');input.current?.focus();}}>Analizar varios extractos</button></div></div>}
+        {documentView && <DocumentLibraryPanel view={documentView} onDiscuss={document => discussDocument(document)} />}
         {messages.length === 0 && <p className="rounded-2xl border border-dashed border-slate-200 bg-white p-4 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-400">Escribe una pregunta para empezar la conversación.</p>}
-        {messages.map((m, i) => <div key={i} className={`max-w-[90%] whitespace-pre-wrap rounded-2xl p-3 text-sm shadow-sm ${m.role === 'user' ? 'ml-auto rounded-br-md bg-teal-700 text-white' : 'mr-auto rounded-bl-md border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800'}`}><strong className="mb-1 block text-xs opacity-75">{m.role === 'user' ? 'Tú' : 'Ceroa'}</strong>{m.role === 'assistant' && m.functionalStatus && m.functionalStatus !== 'COMPLETE' && <span className="mb-2 block text-xs font-semibold text-amber-700 dark:text-amber-300">{{PARTIAL:'Respuesta parcial',INSUFFICIENT:'Evidencia insuficiente',FAILED:'No se pudo completar la consulta'}[m.functionalStatus]}</span>}{m.audio ? <ChatAudio blob={m.audio} /> : m.text}{!!m.documents?.length && <DocumentReferences documents={m.documents} />}</div>)}
+        {messages.map((m, i) => <div key={i} className={`max-w-[90%] whitespace-pre-wrap rounded-2xl p-3 text-sm shadow-sm ${m.role === 'user' ? 'ml-auto rounded-br-md bg-teal-700 text-white' : 'mr-auto rounded-bl-md border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-800'}`}><strong className="mb-1 block text-xs opacity-75">{m.role === 'user' ? 'Tú' : 'Ceroa'}</strong>{m.role === 'assistant' && m.functionalStatus && m.functionalStatus !== 'COMPLETE' && <span className="mb-2 block text-xs font-semibold text-amber-700 dark:text-amber-300">{{PARTIAL:'Respuesta parcial',INSUFFICIENT:'Evidencia insuficiente',FAILED:'No se pudo completar la consulta'}[m.functionalStatus]}</span>}{m.audio ? <ChatAudio blob={m.audio} /> : m.text}{!!m.documents?.length && <DocumentReferences documents={m.documents} selectedDocumentId={selectedDocument?.id} disabled={busy || recording || startingRecording} onDiscuss={document => discussDocument(document,m.documentQuestion)} />}</div>)}
         {draftCode && <section aria-label="Revisión de correo" className="rounded-xl border border-teal-300 bg-white p-3 text-sm dark:bg-slate-900">
           <button type="button" disabled={busy} onClick={()=>void prepareMailDraft()} className="font-semibold underline">Preparar borrador para revisar</button>
           {mailDraft && <><p className="mt-2">{mailDraft.provider==='SIMULATED'?'Borrador simulado. No se envían correos.':'Borrador pendiente de aprobación.'}</p><p>Para: {mailDraft.recipient}</p><p className="font-semibold">{mailDraft.subject}</p><p className="whitespace-pre-wrap">{mailDraft.message}</p><button type="button" disabled={busy} className="mt-2 rounded-lg bg-teal-700 p-2 text-white" onClick={()=>void send('Confirmar envio '+draftCode)}>Confirmar propuesta</button></>}

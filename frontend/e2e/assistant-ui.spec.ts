@@ -5,6 +5,33 @@ test.beforeEach(async ({ page }) => {
   await page.goto('/assistant-ui-test');
   await page.getByRole('button',{name:'Abrir asistente financiero'}).click();
 });
+test('selects a distinct statement and resumes its question by full ID on mobile', async ({page}) => {
+ await page.setViewportSize({width:375,height:900});
+ const question='¿Qué tasa de interés aparece en el extracto que adjunté?';
+ const documents=[
+  {id:'f4901971-1111-4111-8111-111111111111',periodStart:'2026-10-01',periodEnd:'2026-11-01'},
+  {id:'3235294b-2222-4222-8222-222222222222',periodStart:'2026-09-01',periodEnd:'2026-10-01'},
+ ].map(doc=>({...doc,status:'INDEXED',documentType:'BANK_STATEMENT',financialEntity:'Entidad Académica Horizonte',version:1,uploadedAt:'2026-11-24T15:00:00Z'}));
+ const requests: Record<string,string>[]=[];
+ await page.route('**/api/v1/auth/csrf',route=>route.fulfill({json:{token:'ui-fixture-token'}}));
+ await page.route('**/api/v1/assistant/messages',async route=>{
+  const body=route.request().postDataJSON();requests.push(body);
+  await route.fulfill({json:body.documentId?{answer:'La tasa del extracto seleccionado es 18%.',functionalStatus:'COMPLETE'}:{answer:'Selecciona el extracto que quieres consultar.',functionalStatus:'PARTIAL',documents}});
+ });
+ await page.getByRole('textbox').fill(question);await page.getByRole('button',{name:'Enviar pregunta'}).click();
+ const card=page.getByTestId(`document-card-${documents[1].id}`);
+ await expect(card.getByText('septiembre de 2026',{exact:true})).toBeVisible();
+ await expect(card.getByText('01/09/2026 al 30/09/2026')).toBeVisible();
+ await card.scrollIntoViewIfNeeded();
+ expect(await card.evaluate(el=>el.scrollWidth<=el.clientWidth)).toBe(true);
+ await page.screenshot({path:'test-results/document-selection-mobile.png'});
+ await card.getByRole('button',{name:'Consultar este archivo'}).click();
+ await expect(page.getByText('La tasa del extracto seleccionado es 18%.')).toBeVisible();
+ expect(requests).toEqual([{message:question},{message:question,documentId:documents[1].id}]);
+ await expect(page.getByRole('region',{name:'Archivo seleccionado'})).toHaveAttribute('data-document-id',documents[1].id);
+ await page.getByRole('textbox').fill('¿Y la fecha de corte?');await page.getByRole('button',{name:'Enviar pregunta'}).click();
+ await expect.poll(()=>requests.length).toBe(3);expect(requests[2].documentId).toBe(documents[1].id);
+});
 for (const width of [375,768,1440]) {
  test(`assistant geometry and controls at ${width}`, async ({page}) => {
   await page.setViewportSize({width,height:900});

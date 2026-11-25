@@ -1,9 +1,33 @@
 // @vitest-environment jsdom
 import { afterEach, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { AssistantFab } from './AssistantFab';
 import { apiRequest } from '../../services/api';
 vi.mock('../../services/api', () => ({ apiRequest: vi.fn() }));
+it('resumes the pending question with the chosen full document ID and scopes follow-ups to it', async () => {
+ const question='¿Qué tasa de interés aparece en el extracto que adjunté?';
+ const documents=[
+  {id:'f4901971-1111-4111-8111-111111111111',periodStart:'2026-10-01',periodEnd:'2026-11-01'},
+  {id:'3235294b-2222-4222-8222-222222222222',periodStart:'2026-09-01',periodEnd:'2026-10-01'},
+ ].map(doc=>({...doc,status:'INDEXED',documentType:'BANK_STATEMENT',financialEntity:'Entidad Académica Horizonte',version:1,uploadedAt:'2026-11-24T15:00:00Z'}));
+ vi.mocked(apiRequest).mockResolvedValueOnce({answer:'Selecciona un extracto.',functionalStatus:'PARTIAL',documents})
+  .mockResolvedValueOnce({answer:'Tasa del extracto seleccionado: 18%.'})
+  .mockResolvedValueOnce({answer:'La fecha corresponde al mismo extracto.'});
+ render(<AssistantFab/>);fireEvent.click(screen.getByRole('button',{name:'Abrir asistente financiero'}));
+ fireEvent.change(screen.getByRole('textbox'),{target:{value:question}});fireEvent.click(screen.getByRole('button',{name:'Enviar pregunta'}));
+ const card=await screen.findByTestId(`document-card-${documents[1].id}`);
+ expect(within(card).getByText('septiembre de 2026')).toBeTruthy();
+ expect(within(card).getByText('Referencia 3235294b',{exact:false})).toBeTruthy();
+ fireEvent.click(within(card).getByRole('button',{name:'Consultar este archivo'}));
+ await screen.findByText('Tasa del extracto seleccionado: 18%.');
+ expect(apiRequest).toHaveBeenNthCalledWith(2,'/assistant/messages',{method:'POST',body:JSON.stringify({message:question,documentId:documents[1].id})});
+ expect(screen.getAllByText(question)).toHaveLength(1);
+ expect(screen.getByRole('region',{name:'Archivo seleccionado'}).getAttribute('data-document-id')).toBe(documents[1].id);
+ expect(within(card).getByRole('button',{name:'Archivo seleccionado'})).toHaveProperty('disabled',true);
+ fireEvent.change(screen.getByRole('textbox'),{target:{value:'¿Cuál es su fecha de corte?'}});fireEvent.click(screen.getByRole('button',{name:'Enviar pregunta'}));
+ await screen.findByText('La fecha corresponde al mismo extracto.');
+ expect(JSON.parse(vi.mocked(apiRequest).mock.calls[2][1]!.body as string).documentId).toBe(documents[1].id);
+});
 it('keeps a rate-limited question and shows the retry message in the conversation without resending',async()=>{
  const question='¿Tengo suficiente capacidad financiera para cubrir mis cuotas?';
  const message='Gemini tiene un límite temporal de solicitudes. Espera 60 segundos y vuelve a enviar tu pregunta.';
@@ -119,7 +143,7 @@ it('keeps follow-up questions scoped to a selected indexed document', async () =
   fireEvent.click(screen.getByRole('button',{name:'Abrir asistente financiero'}));
   fireEvent.click(screen.getByRole('button',{name:'Consultar archivos'}));
   fireEvent.click(screen.getByRole('button',{name:'Ver mis documentos'}));
-  fireEvent.click(await screen.findByRole('button',{name:'Continuar conversación con este archivo'}));
+  fireEvent.click(await screen.findByRole('button',{name:'Consultar este archivo'}));
   expect(screen.getByText('Conversación enfocada en este archivo')).toBeTruthy();
   fireEvent.change(screen.getByRole('textbox',{name:'Pregunta al asistente'}),{target:{value:'¿Qué movimientos contiene?'}});
   fireEvent.click(screen.getByRole('button',{name:'Enviar pregunta'}));

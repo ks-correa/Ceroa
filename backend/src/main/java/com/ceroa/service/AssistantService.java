@@ -119,11 +119,11 @@ public class AssistantService {
         if (hasText==hasAudio || (hasText && message.length()>2000)) throw new IllegalArgumentException();
         if (hasAudio) validateAudio(audio,mime);
         if(hasText&&selectedDocumentId==null&&message.toLowerCase(Locale.ROOT).matches("(?su).*(?:extracto|documento|archivo)\\s+(?:que\\s+(?:adjunté|adjunte|subí|subi|cargué|cargue)|adjunto).*")){
-            var candidates=library.query(new com.ceroa.api.dto.DocumentContracts.Query(com.ceroa.api.dto.DocumentContracts.Intent.METADATA_SEARCH,"",com.ceroa.api.dto.DocumentContracts.Filters.empty(),0,2));
+            var candidates=library.query(new com.ceroa.api.dto.DocumentContracts.Query(com.ceroa.api.dto.DocumentContracts.Intent.METADATA_SEARCH,"",com.ceroa.api.dto.DocumentContracts.Filters.empty(),0,10));
             if(candidates.documents().size()==1&&"INDEXED".equals(candidates.documents().get(0).status())){
                 selectedDocumentId=candidates.documents().get(0).id();
                 audience=new Audience(userId,channel,selectedDocumentId);
-            }else return new Reply(candidates.documents().isEmpty()?"No encuentro un archivo para esa consulta. Carga tu extracto y espera a que esté indexado antes de preguntarme por su contenido.":"Tengo varios archivos posibles o alguno sigue procesándose. Selecciona el extracto en Consultar archivos y vuelve a preguntar por la tasa; así consultaré únicamente ese documento.","analysis",candidates.documents(),candidates.traceId(),"PARTIAL");
+            }else return new Reply(candidates.documents().isEmpty()?"No encuentro un archivo para esa consulta. Carga tu extracto y espera a que esté indexado antes de preguntarme por su contenido.":"Selecciona el extracto que quieres consultar con el botón Consultar este archivo. Continuaré tu pregunta sobre ese documento. Puedes distinguirlos por período, fecha de carga y referencia; en Consultar archivos puedes buscar otros.","analysis",candidates.documents(),candidates.traceId(),"PARTIAL");
         }
         com.ceroa.api.dto.DocumentContracts.Document selected=null;
         if(selectedDocumentId!=null){

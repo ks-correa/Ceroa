@@ -100,9 +100,9 @@ describe('Document library', () => {
     fireEvent.click(screen.getByText('Ver mis documentos'));
     const firstCard = await screen.findByTestId('document-card-doc11111-aaaa');
     const secondCard = await screen.findByTestId('document-card-doc22222-bbbb');
-    expect(firstCard.textContent).toContain('v2 · ID doc11111');
+    expect(firstCard.textContent).toContain('v2 · Referencia doc11111');
     expect(firstCard.textContent).toContain('Corregir metadatos');
-    expect(secondCard.textContent).toContain('v1 · ID doc22222');
+    expect(secondCard.textContent).toContain('v1 · Referencia doc22222');
     expect(secondCard.textContent).toContain('Reprocesar');
   });
 });
