@@ -6,11 +6,11 @@ const temp=stage(),stopped=[];const handoff=args.includes('--handoff');let compl
 try{
  const ids=run('docker',['ps','-aq','--filter','label=com.docker.compose.project='+project]).trim().split(/\r?\n/).filter(Boolean);const containers=ids.length?JSON.parse(run('docker',['inspect',...ids])):[];
  // Compatibility with the prior manually started backend; new installs use Compose labels.
- if(project==='ceroa'){try{const c=JSON.parse(run('docker',['inspect','ceroa-backend']))[0];if(!containers.some(x=>x.Id===c.Id)){c.Config.Labels={...c.Config.Labels,'com.docker.compose.service':'backend'};containers.push(c);}}catch{}}
+ if(project==='ceroa'){try{const c=JSON.parse(run('docker',['container','inspect','ceroa-backend']))[0];if(!containers.some(x=>x.Id===c.Id)){c.Config.Labels={...c.Config.Labels,'com.docker.compose.service':'backend'};containers.push(c);}}catch{}}
  const n8n=containers.find(c=>c.Config.Labels['com.docker.compose.service']==='n8n');if(!n8n)throw Error('n8n project not found');
  const image=JSON.parse(run('docker',['image','inspect',n8n.Image]))[0].RepoDigests.find(x=>x.startsWith('docker.n8n.io/n8nio/n8n@sha256:'));if(!image)throw Error('Pinned image required');
  const n8nVolume=n8n.Mounts.find(m=>m.Destination==='/home/node/.n8n'&&m.Type==='volume')?.Name;if(!n8nVolume)throw Error('Persistent n8n volume required');
- for(const c of containers.filter(c=>c.State.Running&&['backend','n8n','workspace-provider','telegram-proxy','telegram-tunnel'].includes(c.Config.Labels['com.docker.compose.service']))){run('docker',['stop',c.Id]);stopped.push(c.Id);}
+ for(const c of containers.filter(c=>c.State?.Running&&['backend','n8n','workspace-provider','telegram-proxy','telegram-tunnel'].includes(c.Config.Labels['com.docker.compose.service']))){run('docker',['stop',c.Id]);stopped.push(c.Id);}
  fs.copyFileSync(path.join(repo,'.env'),path.join(temp,'.env'));
  const privateFiles=['.env.rag-admin'].filter(file=>fs.existsSync(path.join(repo,file)));for(const file of privateFiles)fs.copyFileSync(path.join(repo,file),path.join(temp,file));
  // Official entity export excludes execution history by default; preserve the encryption key verbatim.
